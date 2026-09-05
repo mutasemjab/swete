@@ -110,6 +110,11 @@
                             <td class="px-5 py-4 text-sm text-slate-600">{{ $approval->approver?->name }}</td>
                             <td class="px-5 py-4">
                                 @include('components.approval-badge', ['status' => $approval->status])
+                                @if($approval->approvable instanceof \App\Models\PendingAction && $approval->approvable->status === 'failed')
+                                    <span class="badge bg-rose-100 text-rose-700 ms-1" title="{{ $approval->approvable->error_message }}">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> {{ __('approvals.action_failed') }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-5 py-4 text-sm text-slate-500 hidden md:table-cell">{{ $approval->decision_note ?? '—' }}</td>
                             <td class="px-5 py-4 text-sm text-slate-500">{{ $approval->created_at->diffForHumans() }}</td>

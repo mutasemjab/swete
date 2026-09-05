@@ -30,9 +30,7 @@ return [
                 'label' => 'accounting.section_operations',
                 'items' => [
                     ['label' => 'accounting.nav_invoices',   'route' => 'accounting.invoices.index', 'icon' => 'file-invoice-dollar'],
-                    ['label' => 'accounting.nav_journal',    'route' => '#', 'icon' => 'book-open'],
-                    ['label' => 'accounting.nav_payments',   'route' => '#', 'icon' => 'money-bill-transfer'],
-                    ['label' => 'accounting.nav_cash',       'route' => '#', 'icon' => 'money-bill'],
+                  
                 ],
             ],
             [
@@ -49,8 +47,7 @@ return [
                 'label' => 'accounting.section_reports',
                 'items' => [
                     ['label' => 'accounting.nav_balance',    'route' => '#', 'icon' => 'scale-balanced'],
-                    ['label' => 'accounting.nav_pnl',        'route' => '#', 'icon' => 'chart-line'],
-                    ['label' => 'accounting.nav_tax',        'route' => '#', 'icon' => 'percent'],
+               
                 ],
             ],
         ],
@@ -232,7 +229,8 @@ return [
             [
                 'label' => 'settings.section_access',
                 'items' => [
-                    ['label' => 'settings.nav_activity_log', 'route' => 'settings.activity-log.index', 'icon' => 'clock-rotate-left'],
+                    ['label' => 'settings.nav_activity_log',   'route' => 'settings.activity-log.index',   'icon' => 'clock-rotate-left'],
+                    ['label' => 'settings.nav_approval_rules', 'route' => 'settings.approval-rules.index', 'icon' => 'user-shield'],
                 ],
             ],
         ],

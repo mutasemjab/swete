@@ -19,6 +19,7 @@ return [
     'nav_branches'          => 'الفروع',
     'nav_currencies'        => 'العملات',
     'nav_activity_log'      => 'سجل الأنشطة',
+    'nav_approval_rules'    => 'قواعد الموافقات',
 
     // ── Users ─────────────────────────────────────────────────────────────────
     'users'                 => 'المستخدمون',
@@ -166,5 +167,17 @@ return [
     'event_approval_requested' => 'طلب موافقة',
     'event_approval_approved'  => 'اعتماد',
     'event_approval_rejected'  => 'رفض',
+
+    // ── Approval Rules ───────────────────────────────────────────────────────
+    'approval_rules'                   => 'قواعد الموافقات',
+    'approval_rules_list'              => 'قواعد الموافقات',
+    'approval_rules_subtitle'          => 'حدد أي شاشة إضافة/تعديل/حذف بالنظام بدها موافقة، ومين بيوافق عليها',
+    'active_approval_rules'            => 'قواعد مفعّلة',
+    'approval_rule_route'              => 'الإجراء',
+    'approval_rule_label'              => 'اسم توضيحي',
+    'approval_rule_label_placeholder'  => 'اختياري',
+    'approval_rule_approvers'          => 'يوافق عليه',
+    'approval_rule_enabled'            => 'مفعّل',
+    'approval_rule_saved'              => 'تم حفظ قاعدة الموافقة بنجاح.',
 
 ];

@@ -18,10 +18,18 @@ class ApprovalController extends Controller
             ->latest()
             ->get();
 
+        // A rule-triggered request can fan out into one Approval row per eligible
+        // approver (OR logic) — collapse those back into a single summarizing row
+        // per logical request, preferring a real decision over a cancelled sibling.
+        $statusPriority = ['approved' => 0, 'rejected' => 1, 'pending' => 2, 'cancelled' => 3];
+
         $submittedByMe = Approval::with(['approvable', 'approver'])
             ->where('requested_by', auth()->id())
-            ->latest()
-            ->get();
+            ->get()
+            ->groupBy(fn ($a) => "{$a->approvable_type}#{$a->approvable_id}#{$a->action}")
+            ->map(fn ($group) => $group->sortBy(fn ($a) => $statusPriority[$a->status] ?? 9)->first())
+            ->sortByDesc('created_at')
+            ->values();
 
         $currentModule       = 'approvals';
         $currentModuleConfig = [

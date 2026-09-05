@@ -22,6 +22,7 @@ use App\Http\Controllers\Accounting\PartyController;
 use App\Http\Controllers\Accounting\InvoiceTypeController;
 use App\Http\Controllers\Accounting\InvoiceController;
 use App\Http\Controllers\Tenders\TenderController;
+use App\Http\Controllers\Settings\ApprovalRuleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,7 +50,7 @@ Route::get('/lang/{locale}', function (string $locale) {
 | ERP Application Routes  (authenticated users)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('branches',    BranchController::class)->except(['show']);
         Route::resource('currencies',  CurrencyController::class)->except(['show']);
         Route::resource('activity-log', ActivityLogController::class)->only(['index']);
+        Route::resource('approval-rules', ApprovalRuleController::class)->only(['index', 'store']);
 
     });
 

@@ -33,4 +33,11 @@ return [
     'no_pending_for_me'     => 'No requests are waiting on your approval right now',
     'no_submitted_by_me'    => 'You haven\'t submitted any approval request yet',
 
+    // ── Rule-triggered pending actions ──────────────────────────────────────
+    'action_pending'        => 'This action requires approval — it has been sent and is awaiting the assigned approver.',
+    'action_verb_create'    => 'Create',
+    'action_verb_update'    => 'Update',
+    'action_verb_delete'    => 'Delete',
+    'action_failed'         => 'Approved, but an error occurred while actually carrying it out.',
+
 ];

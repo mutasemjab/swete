@@ -19,6 +19,7 @@ return [
     'nav_branches'          => 'Branches',
     'nav_currencies'        => 'Currencies',
     'nav_activity_log'      => 'Activity Log',
+    'nav_approval_rules'    => 'Approval Rules',
 
     // ── Users ─────────────────────────────────────────────────────────────────
     'users'                 => 'Users',
@@ -166,5 +167,17 @@ return [
     'event_approval_requested' => 'Approval requested',
     'event_approval_approved'  => 'Approved',
     'event_approval_rejected'  => 'Rejected',
+
+    // ── Approval Rules ───────────────────────────────────────────────────────
+    'approval_rules'                   => 'Approval Rules',
+    'approval_rules_list'              => 'Approval Rules',
+    'approval_rules_subtitle'          => 'Choose which create/edit/delete screens require approval, and who approves them',
+    'active_approval_rules'            => 'Active Rules',
+    'approval_rule_route'              => 'Action',
+    'approval_rule_label'              => 'Friendly Label',
+    'approval_rule_label_placeholder'  => 'Optional',
+    'approval_rule_approvers'          => 'Approved by',
+    'approval_rule_enabled'            => 'Enabled',
+    'approval_rule_saved'              => 'Approval rule saved successfully.',
 
 ];

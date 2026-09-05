@@ -33,4 +33,11 @@ return [
     'no_pending_for_me'     => 'لا توجد طلبات بانتظار موافقتك حالياً',
     'no_submitted_by_me'    => 'لم ترفع أي طلب موافقة بعد',
 
+    // ── Rule-triggered pending actions ──────────────────────────────────────
+    'action_pending'        => 'هذا الإجراء يحتاج موافقة، تم إرساله وينتظر اعتماد المسؤول عنه.',
+    'action_verb_create'    => 'إضافة',
+    'action_verb_update'    => 'تعديل',
+    'action_verb_delete'    => 'حذف',
+    'action_failed'         => 'تمت الموافقة، لكن حدث خطأ أثناء التنفيذ الفعلي.',
+
 ];
