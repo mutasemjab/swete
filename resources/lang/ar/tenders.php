@@ -44,6 +44,7 @@ return [
     'tender_governorate'    => 'المحافظة',
     'tender_description'    => 'وصف العطاء',
     'tender_win_probability'=> 'فرصة الفوز بالعطاء',
+    'service_win_probability'=> 'فرصة الفوز بالخدمة',
     'tender_submission_deadline' => 'آخر موعد للتقديم',
     'tender_status'         => 'الحالة',
     'tender_notes'          => 'ملاحظات',

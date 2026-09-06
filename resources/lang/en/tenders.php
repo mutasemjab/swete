@@ -66,6 +66,7 @@ return [
     'service_governorate'         => 'Service Governorate',
     'service_submission_deadline' => 'Service Submission Deadline',
     'service_description'         => 'Service Description',
-   
+    'service_win_probability'=> 'Service Win Probability',
+
 
 ];
