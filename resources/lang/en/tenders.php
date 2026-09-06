@@ -60,5 +60,12 @@ return [
     'total_tenders'         => 'Total Tenders',
     'open_tenders'          => 'Open Tenders',
     'all_statuses_tender'   => 'All Statuses',
+    'service_title'               => 'Service Title',
+    'service_entity_name'         => 'Service Entity Name',
+    'service_customer'            => 'Service Customer',
+    'service_governorate'         => 'Service Governorate',
+    'service_submission_deadline' => 'Service Submission Deadline',
+    'service_description'         => 'Service Description',
+   
 
 ];

@@ -60,5 +60,11 @@ return [
     'total_tenders'         => 'إجمالي العطاءات',
     'open_tenders'          => 'العطاءات المفتوحة',
     'all_statuses_tender'   => 'جميع الحالات',
+    'service_title'               => 'عنوان الخدمة',
+    'service_entity_name'         => 'اسم جهة الخدمة',
+    'service_customer'            => 'عميل الخدمة',
+    'service_governorate'         => 'محافظة الخدمة',
+    'service_submission_deadline' => 'موعد تسليم الخدمة',
+    'service_description'         => 'وصف الخدمة',
 
 ];

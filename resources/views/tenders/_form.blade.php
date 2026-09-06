@@ -1,14 +1,20 @@
-@php $tender = $tender ?? null; @endphp
+@php
+    $tender = $tender ?? null;
+    $isService = $type === 'service_call';
+@endphp
 <div class="card mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">
-            <i class="fa-solid fa-gavel text-orange-500 text-sm"></i>
+            <i class="fa-solid {{ $isService ? 'fa-headset' : 'fa-gavel' }} text-orange-500 text-sm"></i>
             {{ __('tenders.type_' . $type) }}
         </h3>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-            <label class="form-label">{{ __('tenders.tender_title') }} <span class="text-rose-500">*</span></label>
+            <label class="form-label">
+                {{ $isService ? __('tenders.service_title') : __('tenders.tender_title') }}
+                <span class="text-rose-500">*</span>
+            </label>
             <input type="text" name="title" value="{{ old('title', $tender?->title) }}"
                    class="form-input @error('title') is-invalid @enderror">
             @error('title')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -22,7 +28,10 @@
         </div>
 
         <div>
-            <label class="form-label">{{ __('tenders.tender_entity_name') }} <span class="text-rose-500">*</span></label>
+            <label class="form-label">
+                {{ $isService ? __('tenders.service_entity_name') : __('tenders.tender_entity_name') }}
+                <span class="text-rose-500">*</span>
+            </label>
             <input type="text" name="entity_name" value="{{ old('entity_name', $tender?->entity_name) }}"
                    class="form-input @error('entity_name') is-invalid @enderror">
             @error('entity_name')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -36,7 +45,9 @@
         </div>
 
         <div class="sm:col-span-2">
-            <label class="form-label">{{ __('tenders.tender_customer') }}</label>
+            <label class="form-label">
+                {{ $isService ? __('tenders.service_customer') : __('tenders.tender_customer') }}
+            </label>
             <div class="flex items-start gap-2">
                 <div class="flex-1">
                     <select id="tender_party_id" name="party_id" class="js-select2 form-select @error('party_id') is-invalid @enderror">
@@ -69,7 +80,7 @@
 
             <div x-show="scope === 'inside_jordan'">
                 <label class="form-label">
-                    {{ __('tenders.tender_governorate') }}
+                    {{ $isService ? __('tenders.service_governorate') : __('tenders.tender_governorate') }}
                     <span class="text-rose-500">*</span>
                 </label>
                 <select name="governorate" class="js-select2 form-select @error('governorate') is-invalid @enderror">
@@ -93,7 +104,10 @@
         </div>
 
         <div>
-            <label class="form-label">{{ __('tenders.tender_submission_deadline') }} <span class="text-rose-500">*</span></label>
+            <label class="form-label">
+                {{ $isService ? __('tenders.service_submission_deadline') : __('tenders.tender_submission_deadline') }}
+                <span class="text-rose-500">*</span>
+            </label>
             <input type="date" name="submission_deadline" value="{{ old('submission_deadline', $tender?->submission_deadline?->toDateString()) }}"
                    class="form-input @error('submission_deadline') is-invalid @enderror">
             @error('submission_deadline')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -110,7 +124,9 @@
         </div>
 
         <div class="sm:col-span-2">
-            <label class="form-label">{{ __('tenders.tender_description') }}</label>
+            <label class="form-label">
+                {{ $isService ? __('tenders.service_description') : __('tenders.tender_description') }}
+            </label>
             <textarea name="description" rows="3" class="form-input @error('description') is-invalid @enderror">{{ old('description', $tender?->description) }}</textarea>
             @error('description')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
