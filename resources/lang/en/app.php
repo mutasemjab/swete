@@ -47,6 +47,8 @@ return [
     'description'        => 'Description',
     'required'           => 'Required field',
     'select'             => 'Select',
+    'yes'                => 'Yes',
+    'no'                 => 'No',
 
     // ── Status values ────────────────────────────────────────────────────────
     'active'             => 'Active',

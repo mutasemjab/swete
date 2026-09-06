@@ -24,6 +24,8 @@ use App\Http\Controllers\Accounting\SupplierGroupController;
 use App\Http\Controllers\Accounting\InvoiceTypeController;
 use App\Http\Controllers\Accounting\InvoiceController;
 use App\Http\Controllers\Tenders\TenderController;
+use App\Http\Controllers\Tenders\TenderStatusController;
+use App\Http\Controllers\Tenders\PriceQuoteController;
 use App\Http\Controllers\Settings\ApprovalRuleController;
 
 /*
@@ -114,17 +116,10 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     });
 
-    // Tenders & Service Calls share one controller/table, differing only by the
-    // `type` route default — see Warehouse\StockVoucherController for the same pattern.
-    foreach (['tender' => 'tenders', 'service_call' => 'service-calls'] as $type => $uri) {
-        Route::prefix($uri)->name("{$uri}.")->group(function () use ($type) {
-            Route::get('/',             [TenderController::class, 'index'])->name('index')->defaults('type', $type);
-            Route::get('create',        [TenderController::class, 'create'])->name('create')->defaults('type', $type);
-            Route::post('/',            [TenderController::class, 'store'])->name('store')->defaults('type', $type);
-            Route::get('{tender}/edit', [TenderController::class, 'edit'])->name('edit')->defaults('type', $type);
-            Route::put('{tender}',      [TenderController::class, 'update'])->name('update')->defaults('type', $type);
-            Route::delete('{tender}',   [TenderController::class, 'destroy'])->name('destroy')->defaults('type', $type);
-        });
-    }
+    Route::resource('tenders', TenderController::class);
+    Route::post('tenders/{tender}/attach-quote', [TenderController::class, 'attachPriceQuote'])->name('tenders.attach-quote');
+
+    Route::resource('tender-statuses', TenderStatusController::class)->except(['show']);
+    Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show']);
 
 });

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -27,9 +28,12 @@ class Tender extends Model
         'aqaba'    => ['ar' => 'العقبة',    'en' => 'Aqaba'],
     ];
 
+    public const DELIVERY_TERMS = ['site', 'cfr', 'exwork'];
+
+    public const COVERAGE_OPTIONS = ['supply', 'supply_execution', 'design', 'design_execution', 'design_supply_execution'];
+
     protected $fillable = [
         'number',
-        'type',
         'party_id',
         'title',
         'title_en',
@@ -37,10 +41,17 @@ class Tender extends Model
         'entity_name_en',
         'location_scope',
         'governorate',
+        'country',
+        'tax_exempt',
+        'customs_exempt',
+        'delivery_terms',
+        'coverage',
         'description',
         'win_probability',
         'submission_deadline',
-        'status',
+        'status_id',
+        'documents_url',
+        'design_documents_url',
         'notes',
         'created_by',
     ];
@@ -48,6 +59,8 @@ class Tender extends Model
     protected $casts = [
         'submission_deadline' => 'date',
         'win_probability'     => 'integer',
+        'tax_exempt'          => 'boolean',
+        'customs_exempt'      => 'boolean',
     ];
 
     public function creator(): BelongsTo
@@ -60,9 +73,14 @@ class Tender extends Model
         return $this->belongsTo(Customer::class, 'party_id');
     }
 
-    public function scopeOfType($query, string $type)
+    public function statusRef(): BelongsTo
     {
-        return $query->where('type', $type);
+        return $this->belongsTo(TenderStatus::class, 'status_id');
+    }
+
+    public function priceQuotes(): HasMany
+    {
+        return $this->hasMany(PriceQuote::class);
     }
 
     public function getLocalizedTitleAttribute(): string
@@ -88,13 +106,12 @@ class Tender extends Model
         return self::JORDAN_GOVERNORATES[$this->governorate][app()->isLocale('en') ? 'en' : 'ar'];
     }
 
-    public static function nextNumber(string $type): string
+    public static function nextNumber(): string
     {
-        $prefix = $type === 'service_call' ? 'SRV' : 'TND';
-        $year   = now()->format('Y');
-        $count  = static::ofType($type)->whereYear('created_at', $year)->count() + 1;
+        $year  = now()->format('Y');
+        $count = static::whereYear('created_at', $year)->count() + 1;
 
-        return sprintf('%s-%s-%05d', $prefix, $year, $count);
+        return sprintf('TND-%s-%05d', $year, $count);
     }
 
     public function getActivitylogOptions(): LogOptions

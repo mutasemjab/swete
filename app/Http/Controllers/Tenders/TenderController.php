@@ -4,19 +4,21 @@ namespace App\Http\Controllers\Tenders;
 
 use App\Http\Controllers\ModuleController;
 use App\Models\Customer;
+use App\Models\PriceQuote;
 use App\Models\Tender;
+use App\Models\TenderStatus;
 use Illuminate\Http\Request;
 
 class TenderController extends ModuleController
 {
     protected string $module = 'tenders';
 
-    public function index(Request $request, string $type)
+    public function index(Request $request)
     {
-        $query = Tender::ofType($type);
+        $query = Tender::query();
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+        if ($request->filled('status_id')) {
+            $query->where('status_id', $request->input('status_id'));
         }
 
         if ($request->filled('search')) {
@@ -26,65 +28,82 @@ class TenderController extends ModuleController
                 ->orWhere('number', 'like', "%{$search}%"));
         }
 
-        $tenders = $query->with('party')->orderByDesc('submission_deadline')->paginate(20)->withQueryString();
+        $tenders = $query->with(['party', 'statusRef'])->orderByDesc('submission_deadline')->paginate(20)->withQueryString();
+        $statuses = TenderStatus::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.index', compact('tenders', 'type'));
+        return $this->moduleView('tenders.index', compact('tenders', 'statuses'));
     }
 
-    public function create(string $type)
+    public function create()
     {
         $customers = Customer::where('status', true)->orderBy('name')->get();
+        $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.create', compact('type', 'customers'));
+        return $this->moduleView('tenders.create', compact('customers', 'statuses'));
     }
 
-    public function store(Request $request, string $type)
+    public function store(Request $request)
     {
-        $validated = $this->validated($request, $type);
+        $validated = $this->validated($request);
 
-        Tender::create([
+        $tender = Tender::create([
             ...$validated,
-            'type'       => $type,
-            'number'     => Tender::nextNumber($type),
-            'status'     => $validated['status'] ?? 'open',
+            'number'     => Tender::nextNumber(),
             'created_by' => $request->user()->id,
         ]);
 
-        return redirect()->route("{$this->routePrefix($type)}.index")
+        return redirect()->route('tenders.show', $tender)
             ->with('success', __('tenders.tender_added'));
     }
 
-    public function edit(Tender $tender, string $type)
+    public function show(Tender $tender)
     {
-        $customers = Customer::where('status', true)->orderBy('name')->get();
+        $tender->load(['party', 'statusRef', 'creator', 'priceQuotes.customer']);
+        $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 
-        return $this->moduleView('tenders.edit', compact('type', 'tender', 'customers'));
+        return $this->moduleView('tenders.show', compact('tender', 'unlinkedQuotes'));
     }
 
-    public function update(Request $request, Tender $tender, string $type)
+    public function edit(Tender $tender)
     {
-        $validated = $this->validated($request, $type);
+        $customers = Customer::where('status', true)->orderBy('name')->get();
+        $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
+
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses'));
+    }
+
+    public function update(Request $request, Tender $tender)
+    {
+        $validated = $this->validated($request);
 
         $tender->update($validated);
 
-        return redirect()->route("{$this->routePrefix($type)}.index")
+        return redirect()->route('tenders.show', $tender)
             ->with('success', __('tenders.tender_updated'));
     }
 
-    public function destroy(Tender $tender, string $type)
+    public function destroy(Tender $tender)
     {
         $tender->delete();
 
-        return redirect()->route("{$this->routePrefix($type)}.index")
+        return redirect()->route('tenders.index')
             ->with('success', __('tenders.tender_deleted'));
     }
 
-    private function routePrefix(string $type): string
+    /** Link an existing, not-yet-attached price quote to this tender. */
+    public function attachPriceQuote(Request $request, Tender $tender)
     {
-        return $type === 'service_call' ? 'service-calls' : 'tenders';
+        $validated = $request->validate([
+            'price_quote_id' => ['required', 'exists:price_quotes,id'],
+        ]);
+
+        PriceQuote::whereNull('tender_id')->findOrFail($validated['price_quote_id'])
+            ->update(['tender_id' => $tender->id]);
+
+        return back()->with('success', __('tenders.quote_attached'));
     }
 
-    private function validated(Request $request, string $type): array
+    private function validated(Request $request): array
     {
         $rules = [
             'party_id'             => ['nullable', 'exists:customers,id'],
@@ -92,26 +111,31 @@ class TenderController extends ModuleController
             'title_en'             => ['nullable', 'string', 'max:255'],
             'entity_name'          => ['required', 'string', 'max:255'],
             'entity_name_en'       => ['nullable', 'string', 'max:255'],
+            'location_scope'       => ['required', 'in:inside_jordan,outside_jordan'],
+            'governorate'          => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
+            'country'              => ['required_if:location_scope,outside_jordan', 'nullable', 'string', 'max:150'],
+            'tax_exempt'           => ['boolean'],
+            'customs_exempt'       => ['boolean'],
+            'delivery_terms'       => ['nullable', 'in:' . implode(',', Tender::DELIVERY_TERMS)],
+            'coverage'             => ['nullable', 'in:' . implode(',', Tender::COVERAGE_OPTIONS)],
             'description'          => ['nullable', 'string'],
             'win_probability'      => ['nullable', 'integer', 'min:0', 'max:100'],
             'submission_deadline'  => ['required', 'date'],
-            'status'               => ['nullable', 'in:open,closed,won,lost'],
+            'status_id'            => ['required', 'exists:tender_statuses,id'],
+            'documents_url'        => ['nullable', 'string', 'max:255'],
+            'design_documents_url' => ['nullable', 'string', 'max:255'],
             'notes'                => ['nullable', 'string'],
         ];
 
-        if ($type === 'service_call') {
-            $rules['governorate'] = ['required', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))];
-        } else {
-            $rules['location_scope'] = ['required', 'in:inside_jordan,outside_jordan'];
-            $rules['governorate']    = ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))];
-        }
-
         $validated = $request->validate($rules);
 
-        if ($type === 'service_call') {
-            $validated['location_scope'] = 'inside_jordan';
-        } elseif ($validated['location_scope'] === 'outside_jordan') {
+        $validated['tax_exempt']     = $request->boolean('tax_exempt');
+        $validated['customs_exempt'] = $request->boolean('customs_exempt');
+
+        if ($validated['location_scope'] === 'outside_jordan') {
             $validated['governorate'] = null;
+        } else {
+            $validated['country'] = null;
         }
 
         return $validated;

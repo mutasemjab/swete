@@ -197,10 +197,16 @@ return [
                 ],
             ],
             [
-                'label' => 'tenders.section_service_calls',
+                'label' => 'tenders.section_price_quotes',
                 'items' => [
-                    ['label' => 'tenders.nav_service_calls_list', 'route' => 'service-calls.index',  'icon' => 'headset'],
-                    ['label' => 'tenders.nav_service_calls_add',  'route' => 'service-calls.create', 'icon' => 'plus'],
+                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice'],
+                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
+                'label' => 'tenders.section_settings',
+                'items' => [
+                    ['label' => 'tenders.nav_statuses', 'route' => 'tender-statuses.index', 'icon' => 'list-check'],
                 ],
             ],
         ],
