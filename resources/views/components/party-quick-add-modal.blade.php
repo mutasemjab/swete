@@ -14,6 +14,8 @@
         saving: false,
         error: '',
         name: '',
+        phone: '',
+        address: '',
         submit() {
             this.saving = true;
             this.error = '';
@@ -24,7 +26,11 @@
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                 },
-                body: JSON.stringify({ name: this.name }),
+                body: JSON.stringify({
+                    name: this.name,
+                    phone: this.phone,
+                    address: this.address,
+                }),
             })
                 .then(async (res) => {
                     if (!res.ok) throw await res.json();
@@ -37,6 +43,8 @@
                     $(select).trigger('change');
                     this.open = false;
                     this.name = '';
+                    this.phone = '';
+                    this.address = '';
                 })
                 .catch((err) => { this.error = err.message || '{{ __('app.error_occurred') }}'; })
                 .finally(() => { this.saving = false; });
@@ -53,8 +61,16 @@
          @keydown.escape.window="open = false">
         <div @click.outside="open = false" class="bg-white rounded-3xl shadow-2xl shadow-slate-900/20 p-6 max-w-sm w-full">
             <h3 class="text-lg font-black text-slate-800 mb-4">{{ $label }}</h3>
+
             <label class="form-label">{{ __('accounting.party_name') }}</label>
-            <input type="text" x-model="name" @keydown.enter.prevent="submit()" class="form-input">
+            <input type="text" x-model="name" @keydown.enter.prevent="submit()" class="form-input mb-3">
+
+            <label class="form-label">{{ __('accounting.party_phone') }}</label>
+            <input type="text" x-model="phone" @keydown.enter.prevent="submit()" class="form-input mb-3">
+
+            <label class="form-label">{{ __('accounting.party_address') }}</label>
+            <input type="text" x-model="address" @keydown.enter.prevent="submit()" class="form-input">
+
             <p class="form-error" x-show="error" x-text="error"></p>
             <div class="flex gap-3 mt-5">
                 <button type="button" @click="open = false" class="btn-secondary flex-1">{{ __('app.cancel') }}</button>
