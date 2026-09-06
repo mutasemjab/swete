@@ -14,6 +14,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'invoice_type_id',
+        'party_type',
         'party_id',
         'number',
         'date',
@@ -40,9 +41,16 @@ class Invoice extends Model
         return $this->belongsTo(InvoiceType::class);
     }
 
+    /**
+     * `party_type` ('customer'|'supplier') says which table `party_id` points into —
+     * customers and suppliers are separate tables, not a shared/polymorphic one, so
+     * this picks the right concrete relation rather than using a real morphTo.
+     */
     public function party(): BelongsTo
     {
-        return $this->belongsTo(Party::class);
+        return $this->party_type === 'supplier'
+            ? $this->belongsTo(Supplier::class, 'party_id')
+            : $this->belongsTo(Customer::class, 'party_id');
     }
 
     public function currency(): BelongsTo

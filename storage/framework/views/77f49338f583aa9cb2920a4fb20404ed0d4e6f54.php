@@ -20,6 +20,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
 
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+
     <style type="text/tailwindcss">
         * { font-family: 'Cairo', sans-serif; }
 
@@ -49,6 +54,29 @@
         .page-header   { @apply flex items-start justify-between mb-6; }
         .page-title    { @apply text-2xl font-black text-slate-800 leading-tight; }
         .page-subtitle { @apply text-slate-500 text-sm mt-1; }
+    </style>
+
+    
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 44px; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+            display: flex; align-items: center; padding: 0 0.75rem;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #818cf8; box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2);
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            padding: 0; font-size: 0.875rem; color: #1e293b; line-height: 1.25rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #94a3b8; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 42px; }
+        [dir="rtl"] .select2-container--default .select2-selection--single .select2-selection__arrow { left: 0.5rem; right: auto; }
+        .select2-dropdown { border-radius: 0.75rem; border-color: #e2e8f0; overflow: hidden; }
+        .select2-search--dropdown .select2-search__field {
+            border-radius: 0.5rem; border-color: #e2e8f0; padding: 0.4rem 0.6rem; outline: none;
+        }
+        .select2-results__option--highlighted[aria-selected] { background-color: #4f46e5 !important; }
     </style>
 
     <?php echo $__env->yieldPushContent('styles'); ?>
@@ -413,6 +441,23 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    window.initSelect2 = function (context) {
+        (context ? $(context) : $(document)).find('.js-select2').each(function () {
+            const $el = $(this);
+            if ($el.hasClass('select2-hidden-accessible')) return;
+            $el.select2({
+                dir: '<?php echo e($isRtl ? "rtl" : "ltr"); ?>',
+                width: '100%',
+                placeholder: $el.data('placeholder') || $el.find('option[value=""]').first().text() || '',
+                allowClear: $el.find('option[value=""]').length > 0 && !$el.prop('required'),
+            });
+        });
+    };
+    document.addEventListener('DOMContentLoaded', () => window.initSelect2());
+</script>
 
 <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>

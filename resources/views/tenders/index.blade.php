@@ -1,17 +1,18 @@
+@php $routePrefix = $type === 'service_call' ? 'service-calls' : 'tenders'; @endphp
 @extends('layouts.app')
 
-@section('title', __('tenders.tenders_list'))
-@section('breadcrumb', __('tenders.tenders'))
+@section('title', __('tenders.list_' . $type))
+@section('breadcrumb', __('tenders.type_' . $type . '_plural'))
 
 @section('content')
 <div class="page-header">
     <div>
-        <h1 class="page-title">{{ __('tenders.tenders_list') }}</h1>
+        <h1 class="page-title">{{ __('tenders.list_' . $type) }}</h1>
         <p class="page-subtitle">{{ __('tenders.tenders_subtitle') }}</p>
     </div>
-    <a href="{{ route('tenders.create') }}" class="btn-primary">
+    <a href="{{ route("{$routePrefix}.create") }}" class="btn-primary">
         <i class="fa-solid fa-plus"></i>
-        {{ __('tenders.add_tender') }}
+        {{ __('tenders.add_' . $type) }}
     </a>
 </div>
 
@@ -27,7 +28,7 @@
     </div>
 </div>
 
-<form method="GET" action="{{ route('tenders.index') }}" class="card px-5 py-4 mb-4 flex flex-wrap gap-3">
+<form method="GET" action="{{ route("{$routePrefix}.index") }}" class="card px-5 py-4 mb-4 flex flex-wrap gap-3">
     <div class="flex-1 min-w-48">
         <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -47,7 +48,7 @@
         {{ __('app.search') }}
     </button>
     @if(request()->hasAny(['search','status']))
-        <a href="{{ route('tenders.index') }}" class="btn-secondary">
+        <a href="{{ route("{$routePrefix}.index") }}" class="btn-secondary">
             <i class="fa-solid fa-xmark"></i>
             {{ __('app.clear_filters') }}
         </a>
@@ -64,7 +65,7 @@
                 {{ request()->hasAny(['search','status']) ? __('tenders.no_tenders_search') : __('tenders.no_tenders') }}
             </p>
             @if(!request()->hasAny(['search','status']))
-                <a href="{{ route('tenders.create') }}" class="btn-primary mt-5">
+                <a href="{{ route("{$routePrefix}.create") }}" class="btn-primary mt-5">
                     <i class="fa-solid fa-plus"></i>
                     {{ __('tenders.add_first_tender') }}
                 </a>
@@ -78,6 +79,7 @@
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.tender_number') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.tender_title') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('tenders.tender_entity_name') }}</th>
+                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('tenders.tender_customer') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.tender_submission_deadline') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.tender_status') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
@@ -99,18 +101,19 @@
                         </td>
                         <td class="px-5 py-4"><p class="font-bold text-slate-800">{{ $tender->localized_title }}</p></td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">{{ $tender->localized_entity_name }}</td>
+                        <td class="px-5 py-4 hidden lg:table-cell text-sm text-slate-600">{{ $tender->party?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $tender->submission_deadline->format('Y-m-d') }}</td>
                         <td class="px-5 py-4">
                             <span class="badge {{ $statusStyles[$tender->status] }}">{{ __('tenders.tender_status_' . $tender->status) }}</span>
                         </td>
                         <td class="px-5 py-4">
                             <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <a href="{{ route('tenders.edit', $tender) }}"
+                                <a href="{{ route("{$routePrefix}.edit", $tender) }}"
                                    class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="{{ __('app.edit') }}">
                                     <i class="fa-solid fa-pen text-sm"></i>
                                 </a>
                                 <button type="button" title="{{ __('app.delete') }}"
-                                        @click="$dispatch('delete-confirm', { action: '{{ route('tenders.destroy', $tender) }}', message: '{{ __('app.delete_confirm_msg') }}' })"
+                                        @click="$dispatch('delete-confirm', { action: '{{ route("{$routePrefix}.destroy", $tender) }}', message: '{{ __('app.delete_confirm_msg') }}' })"
                                         class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
                                     <i class="fa-solid fa-trash text-sm"></i>
                                 </button>

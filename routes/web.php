@@ -17,8 +17,10 @@ use App\Http\Controllers\Warehouse\MaterialController;
 use App\Http\Controllers\Warehouse\StockVoucherController;
 use App\Http\Controllers\Warehouse\MaterialRequestController;
 use App\Http\Controllers\Warehouse\WarehouseReportController;
-use App\Http\Controllers\Accounting\PartyGroupController;
-use App\Http\Controllers\Accounting\PartyController;
+use App\Http\Controllers\Accounting\CustomerController;
+use App\Http\Controllers\Accounting\CustomerGroupController;
+use App\Http\Controllers\Accounting\SupplierController;
+use App\Http\Controllers\Accounting\SupplierGroupController;
 use App\Http\Controllers\Accounting\InvoiceTypeController;
 use App\Http\Controllers\Accounting\InvoiceController;
 use App\Http\Controllers\Tenders\TenderController;
@@ -100,34 +102,29 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     Route::prefix('accounting')->name('accounting.')->group(function () {
 
-        // Customers & suppliers share one controller pair, differing only by the
-        // `type` route default — see Warehouse\StockVoucherController for the same pattern.
-        foreach (['customer' => 'customers', 'supplier' => 'suppliers'] as $type => $uri) {
-
-            Route::prefix($uri)->name("{$uri}.")->group(function () use ($type) {
-                Route::get('/',            [PartyController::class, 'index'])->name('index')->defaults('type', $type);
-                Route::get('create',       [PartyController::class, 'create'])->name('create')->defaults('type', $type);
-                Route::post('/',           [PartyController::class, 'store'])->name('store')->defaults('type', $type);
-                Route::get('{party}/edit', [PartyController::class, 'edit'])->name('edit')->defaults('type', $type);
-                Route::put('{party}',      [PartyController::class, 'update'])->name('update')->defaults('type', $type);
-                Route::delete('{party}',   [PartyController::class, 'destroy'])->name('destroy')->defaults('type', $type);
-            });
-
-            Route::prefix("{$type}-groups")->name("{$type}-groups.")->group(function () use ($type) {
-                Route::get('/',            [PartyGroupController::class, 'index'])->name('index')->defaults('type', $type);
-                Route::get('create',       [PartyGroupController::class, 'create'])->name('create')->defaults('type', $type);
-                Route::post('/',           [PartyGroupController::class, 'store'])->name('store')->defaults('type', $type);
-                Route::get('{group}/edit', [PartyGroupController::class, 'edit'])->name('edit')->defaults('type', $type);
-                Route::put('{group}',      [PartyGroupController::class, 'update'])->name('update')->defaults('type', $type);
-                Route::delete('{group}',   [PartyGroupController::class, 'destroy'])->name('destroy')->defaults('type', $type);
-            });
-        }
+        // Customers and suppliers are separate tables/models/controllers — each
+        // is its own domain, not a shared "party" concept.
+        Route::resource('customers',        CustomerController::class)->except(['show']);
+        Route::resource('customer-groups',  CustomerGroupController::class)->except(['show']);
+        Route::resource('suppliers',        SupplierController::class)->except(['show']);
+        Route::resource('supplier-groups',  SupplierGroupController::class)->except(['show']);
 
         Route::resource('invoice-types', InvoiceTypeController::class)->except(['show']);
         Route::resource('invoices',      InvoiceController::class)->only(['index', 'create', 'store', 'show']);
 
     });
 
-    Route::resource('tenders', TenderController::class)->except(['show']);
+    // Tenders & Service Calls share one controller/table, differing only by the
+    // `type` route default — see Warehouse\StockVoucherController for the same pattern.
+    foreach (['tender' => 'tenders', 'service_call' => 'service-calls'] as $type => $uri) {
+        Route::prefix($uri)->name("{$uri}.")->group(function () use ($type) {
+            Route::get('/',             [TenderController::class, 'index'])->name('index')->defaults('type', $type);
+            Route::get('create',        [TenderController::class, 'create'])->name('create')->defaults('type', $type);
+            Route::post('/',            [TenderController::class, 'store'])->name('store')->defaults('type', $type);
+            Route::get('{tender}/edit', [TenderController::class, 'edit'])->name('edit')->defaults('type', $type);
+            Route::put('{tender}',      [TenderController::class, 'update'])->name('update')->defaults('type', $type);
+            Route::delete('{tender}',   [TenderController::class, 'destroy'])->name('destroy')->defaults('type', $type);
+        });
+    }
 
 });

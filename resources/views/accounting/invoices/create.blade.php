@@ -51,16 +51,16 @@
                 <select name="party_id" x-show="partyType === 'customer'" :disabled="partyType !== 'customer'"
                         class="form-select @error('party_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
-                    @foreach($parties->where('type', 'customer') as $party)
-                        <option value="{{ $party->id }}" @selected(old('party_id') == $party->id)>{{ $party->localized_name }} ({{ $party->code }})</option>
+                    @foreach($customers as $customer)
+                        <option value="{{ $customer->id }}" @selected(old('party_id') == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
                     @endforeach
                 </select>
 
                 <select name="party_id" x-show="partyType === 'supplier'" :disabled="partyType !== 'supplier'"
                         class="form-select @error('party_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
-                    @foreach($parties->where('type', 'supplier') as $party)
-                        <option value="{{ $party->id }}" @selected(old('party_id') == $party->id)>{{ $party->localized_name }} ({{ $party->code }})</option>
+                    @foreach($suppliers as $supplier)
+                        <option value="{{ $supplier->id }}" @selected(old('party_id') == $supplier->id)>{{ $supplier->localized_name }} ({{ $supplier->code }})</option>
                     @endforeach
                 </select>
 

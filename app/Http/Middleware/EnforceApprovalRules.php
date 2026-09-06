@@ -45,6 +45,10 @@ class EnforceApprovalRules
 
         app(ApprovalService::class)->requestToMany($pendingAction, $rule->approvers, 'default');
 
+        if ($request->wantsJson()) {
+            return response()->json(['pending' => true, 'message' => __('approvals.action_pending')], 202);
+        }
+
         return redirect()->back()->with('success', __('approvals.action_pending'));
     }
 }

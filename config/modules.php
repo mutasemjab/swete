@@ -196,6 +196,13 @@ return [
                     ['label' => 'tenders.nav_add',  'route' => 'tenders.create', 'icon' => 'plus'],
                 ],
             ],
+            [
+                'label' => 'tenders.section_service_calls',
+                'items' => [
+                    ['label' => 'tenders.nav_service_calls_list', 'route' => 'service-calls.index',  'icon' => 'headset'],
+                    ['label' => 'tenders.nav_service_calls_add',  'route' => 'service-calls.create', 'icon' => 'plus'],
+                ],
+            ],
         ],
     ],
 
