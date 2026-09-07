@@ -51,20 +51,91 @@
                 @error('phone')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
+            <div>
+                <label class="form-label">{{ __('app.fax') }}</label>
+                <input type="text" name="fax" value="{{ old('fax') }}" dir="ltr"
+                       class="form-input @error('fax') is-invalid @enderror"
+                       placeholder="+962 X XXXX XXXX">
+                @error('fax')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-indigo-500 text-sm"></i>
+                {{ __('settings.branch_address') }}
+            </h3>
+        </div>
+        <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+
             <div class="sm:col-span-2">
-                <label class="form-label">{{ __('settings.branch_address') }}</label>
-                <input type="text" name="address" value="{{ old('address') }}"
-                       class="form-input @error('address') is-invalid @enderror">
-                @error('address')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                <label class="form-label">{{ __('app.address_line1') }}</label>
+                <input type="text" name="address_line1" value="{{ old('address_line1') }}"
+                       class="form-input @error('address_line1') is-invalid @enderror">
+                @error('address_line1')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             <div class="sm:col-span-2">
-                <label class="form-label">{{ __('app.address_en') }}</label>
-                <input type="text" name="address_en" value="{{ old('address_en') }}" dir="ltr"
-                       class="form-input @error('address_en') is-invalid @enderror">
-                @error('address_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                <label class="form-label">{{ __('app.address_line1_en') }}</label>
+                <input type="text" name="address_line1_en" value="{{ old('address_line1_en') }}" dir="ltr"
+                       class="form-input @error('address_line1_en') is-invalid @enderror">
+                @error('address_line1_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
+            <div>
+                <label class="form-label">{{ __('app.po_box') }}</label>
+                <input type="text" name="po_box" value="{{ old('po_box') }}" dir="ltr"
+                       class="form-input @error('po_box') is-invalid @enderror">
+                @error('po_box')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('app.postal_code') }}</label>
+                <input type="text" name="postal_code" value="{{ old('postal_code') }}" dir="ltr"
+                       class="form-input @error('postal_code') is-invalid @enderror">
+                @error('postal_code')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('app.city') }}</label>
+                <input type="text" name="city" value="{{ old('city') }}"
+                       class="form-input @error('city') is-invalid @enderror">
+                @error('city')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('app.city_en') }}</label>
+                <input type="text" name="city_en" value="{{ old('city_en') }}" dir="ltr"
+                       class="form-input @error('city_en') is-invalid @enderror">
+                @error('city_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('app.country') }}</label>
+                <input type="text" name="country" value="{{ old('country') }}"
+                       class="form-input @error('country') is-invalid @enderror">
+                @error('country')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('app.country_en') }}</label>
+                <input type="text" name="country_en" value="{{ old('country_en') }}" dir="ltr"
+                       class="form-input @error('country_en') is-invalid @enderror">
+                @error('country_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-toggle-on text-indigo-500 text-sm"></i>
+                {{ __('app.status') }}
+            </h3>
+        </div>
+        <div class="px-6 py-5">
             <div class="flex items-center gap-6">
                 <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
                     <input type="hidden" name="is_main" value="0">

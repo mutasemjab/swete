@@ -19,11 +19,11 @@
       x-data="{
         linkType: '{{ old('link_type', $project ? 'project' : ($serviceCall ? 'service_call' : 'stock')) }}',
         scope: '{{ old('location_scope', 'inside_jordan') }}',
-        branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'address' => $b->localized_address])->values()->toJson() }},
+        branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'addressLines' => $b->localized_address_lines])->values()->toJson() }},
         branchId: '{{ old('branch_id') }}',
-        get branchAddress() {
+        get branchAddressLines() {
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
-            return b ? b.address : '';
+            return b ? b.addressLines : [];
         },
         items: [{ material_id: '', quantity: '', unit_price: '' }],
         addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '' }); this.$nextTick(() => window.initSelect2()); },
@@ -114,14 +114,74 @@
 
             <div>
                 <label class="form-label">{{ __('external_purchases.request_address') }}</label>
-                <p class="form-input bg-slate-50 text-slate-600" x-text="branchAddress || '—'"></p>
+                <div class="form-input bg-slate-50 text-slate-600 h-auto py-2.5 leading-6">
+                    <template x-for="line in branchAddressLines" :key="line">
+                        <p x-text="line"></p>
+                    </template>
+                    <p x-show="branchAddressLines.length === 0">—</p>
+                </div>
             </div>
 
-            <div class="sm:col-span-2">
-                <label class="form-label">{{ __('external_purchases.request_shipping_address') }}</label>
-                <input type="text" name="shipping_address" value="{{ old('shipping_address') }}"
-                       class="form-input @error('shipping_address') is-invalid @enderror">
-                @error('shipping_address')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="sm:col-span-2">
+                    <label class="form-label">{{ __('external_purchases.request_shipping_address') }}</label>
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.address_line1') }}</label>
+                    <input type="text" name="shipping_address_line1" value="{{ old('shipping_address_line1') }}"
+                           class="form-input @error('shipping_address_line1') is-invalid @enderror">
+                    @error('shipping_address_line1')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.address_line1_en') }}</label>
+                    <input type="text" name="shipping_address_line1_en" value="{{ old('shipping_address_line1_en') }}" dir="ltr"
+                           class="form-input @error('shipping_address_line1_en') is-invalid @enderror">
+                    @error('shipping_address_line1_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.po_box') }}</label>
+                    <input type="text" name="shipping_po_box" value="{{ old('shipping_po_box') }}" dir="ltr"
+                           class="form-input @error('shipping_po_box') is-invalid @enderror">
+                    @error('shipping_po_box')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.postal_code') }}</label>
+                    <input type="text" name="shipping_postal_code" value="{{ old('shipping_postal_code') }}" dir="ltr"
+                           class="form-input @error('shipping_postal_code') is-invalid @enderror">
+                    @error('shipping_postal_code')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.city') }}</label>
+                    <input type="text" name="shipping_city" value="{{ old('shipping_city') }}"
+                           class="form-input @error('shipping_city') is-invalid @enderror">
+                    @error('shipping_city')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.city_en') }}</label>
+                    <input type="text" name="shipping_city_en" value="{{ old('shipping_city_en') }}" dir="ltr"
+                           class="form-input @error('shipping_city_en') is-invalid @enderror">
+                    @error('shipping_city_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.country') }}</label>
+                    <input type="text" name="shipping_country" value="{{ old('shipping_country') }}"
+                           class="form-input @error('shipping_country') is-invalid @enderror">
+                    @error('shipping_country')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('app.country_en') }}</label>
+                    <input type="text" name="shipping_country_en" value="{{ old('shipping_country_en') }}" dir="ltr"
+                           class="form-input @error('shipping_country_en') is-invalid @enderror">
+                    @error('shipping_country_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
             </div>
 
             <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FormatsAddressLines;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class PurchaseRequest extends Model
 {
-    use LogsActivity;
+    use LogsActivity, FormatsAddressLines;
 
     protected $fillable = [
         'number',
@@ -19,7 +20,14 @@ class PurchaseRequest extends Model
         'date',
         'supplier_id',
         'branch_id',
-        'shipping_address',
+        'shipping_address_line1',
+        'shipping_address_line1_en',
+        'shipping_po_box',
+        'shipping_postal_code',
+        'shipping_city',
+        'shipping_city_en',
+        'shipping_country',
+        'shipping_country_en',
         'location_scope',
         'governorate',
         'country_id',
@@ -76,10 +84,21 @@ class PurchaseRequest extends Model
         return $this->hasMany(PurchaseRequestItem::class);
     }
 
-    /** inside_jordan/outside_jordan derives the address; the branch is only the source, not stored here. */
-    public function getLocalizedRequestAddressAttribute(): ?string
+    /** Stacked, locale-aware request address — derived live from the branch, not duplicated here. */
+    public function getRequestAddressLinesAttribute(): array
     {
-        return $this->branch?->localized_address;
+        return $this->branch?->localized_address_lines ?? [];
+    }
+
+    /** Stacked, locale-aware shipping address — where the goods actually go (may differ from the branch). */
+    public function getShippingAddressLinesAttribute(): array
+    {
+        return $this->addressLines(
+            $this->shipping_address_line1, $this->shipping_address_line1_en,
+            $this->shipping_po_box, $this->shipping_postal_code,
+            $this->shipping_city, $this->shipping_city_en,
+            $this->shipping_country, $this->shipping_country_en,
+        );
     }
 
     public function getLocalizedGovernorateAttribute(): ?string

@@ -84,7 +84,7 @@
                             <span class="text-sm text-slate-600" dir="ltr">{{ $branch->phone ?? '—' }}</span>
                         </td>
                         <td class="px-5 py-4 hidden lg:table-cell">
-                            <span class="text-sm text-slate-600 line-clamp-1">{{ $branch->address ?? '—' }}</span>
+                            <span class="text-sm text-slate-600 line-clamp-1">{{ empty($branch->localized_address_lines) ? '—' : implode(' — ', $branch->localized_address_lines) }}</span>
                         </td>
                         <td class="px-5 py-4">
                             @if($branch->status)

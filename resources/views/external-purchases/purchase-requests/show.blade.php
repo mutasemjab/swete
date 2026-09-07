@@ -44,11 +44,23 @@
         </div>
         <div>
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('external_purchases.request_address') }}</dt>
-            <dd class="font-bold text-slate-800">{{ $purchaseRequest->localized_request_address ?? '—' }}</dd>
+            <dd class="font-bold text-slate-800">
+                @forelse($purchaseRequest->request_address_lines as $line)
+                    <p>{{ $line }}</p>
+                @empty
+                    —
+                @endforelse
+            </dd>
         </div>
         <div>
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('external_purchases.request_shipping_address') }}</dt>
-            <dd class="font-bold text-slate-800">{{ $purchaseRequest->shipping_address ?? '—' }}</dd>
+            <dd class="font-bold text-slate-800">
+                @forelse($purchaseRequest->shipping_address_lines as $line)
+                    <p>{{ $line }}</p>
+                @empty
+                    —
+                @endforelse
+            </dd>
         </div>
         <div>
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.tender_location_scope') }}</dt>

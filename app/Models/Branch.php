@@ -2,16 +2,26 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FormatsAddressLines;
 use Illuminate\Database\Eloquent\Model;
 
 class Branch extends Model
 {
+    use FormatsAddressLines;
+
     protected $fillable = [
         'name',
         'name_en',
         'phone',
-        'address',
-        'address_en',
+        'fax',
+        'address_line1',
+        'address_line1_en',
+        'po_box',
+        'postal_code',
+        'city',
+        'city_en',
+        'country',
+        'country_en',
         'is_main',
         'status',
     ];
@@ -28,10 +38,14 @@ class Branch extends Model
             : $this->name;
     }
 
-    public function getLocalizedAddressAttribute(): ?string
+    /** Stacked, locale-aware address lines — e.g. for a purchase request document. */
+    public function getLocalizedAddressLinesAttribute(): array
     {
-        return app()->isLocale('en') && $this->address_en
-            ? $this->address_en
-            : $this->address;
+        return $this->addressLines(
+            $this->address_line1, $this->address_line1_en,
+            $this->po_box, $this->postal_code,
+            $this->city, $this->city_en,
+            $this->country, $this->country_en,
+        );
     }
 }

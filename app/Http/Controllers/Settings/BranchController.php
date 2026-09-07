@@ -23,15 +23,7 @@ class BranchController extends ModuleController
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'       => ['required', 'string', 'max:100'],
-            'name_en'    => ['nullable', 'string', 'max:100'],
-            'phone'      => ['nullable', 'string', 'max:30'],
-            'address'    => ['nullable', 'string', 'max:255'],
-            'address_en' => ['nullable', 'string', 'max:255'],
-            'is_main'    => ['boolean'],
-            'status'     => ['boolean'],
-        ]);
+        $validated = $this->validated($request);
 
         if ($request->boolean('is_main')) {
             Branch::where('is_main', true)->update(['is_main' => false]);
@@ -54,15 +46,7 @@ class BranchController extends ModuleController
 
     public function update(Request $request, Branch $branch)
     {
-        $validated = $request->validate([
-            'name'       => ['required', 'string', 'max:100'],
-            'name_en'    => ['nullable', 'string', 'max:100'],
-            'phone'      => ['nullable', 'string', 'max:30'],
-            'address'    => ['nullable', 'string', 'max:255'],
-            'address_en' => ['nullable', 'string', 'max:255'],
-            'is_main'    => ['boolean'],
-            'status'     => ['boolean'],
-        ]);
+        $validated = $this->validated($request);
 
         if ($request->boolean('is_main') && ! $branch->is_main) {
             Branch::where('is_main', true)->update(['is_main' => false]);
@@ -84,5 +68,25 @@ class BranchController extends ModuleController
 
         return redirect()->route('settings.branches.index')
             ->with('success', __('settings.branch_deleted'));
+    }
+
+    private function validated(Request $request): array
+    {
+        return $request->validate([
+            'name'              => ['required', 'string', 'max:100'],
+            'name_en'           => ['nullable', 'string', 'max:100'],
+            'phone'             => ['nullable', 'string', 'max:30'],
+            'fax'               => ['nullable', 'string', 'max:30'],
+            'address_line1'     => ['nullable', 'string', 'max:255'],
+            'address_line1_en'  => ['nullable', 'string', 'max:255'],
+            'po_box'            => ['nullable', 'string', 'max:30'],
+            'postal_code'       => ['nullable', 'string', 'max:30'],
+            'city'              => ['nullable', 'string', 'max:100'],
+            'city_en'           => ['nullable', 'string', 'max:100'],
+            'country'           => ['nullable', 'string', 'max:100'],
+            'country_en'        => ['nullable', 'string', 'max:100'],
+            'is_main'           => ['boolean'],
+            'status'            => ['boolean'],
+        ]);
     }
 }

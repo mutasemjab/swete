@@ -45,11 +45,23 @@
         </div>
         <div>
             <dt class="text-slate-400 font-medium mb-0.5"><?php echo e(__('external_purchases.request_address')); ?></dt>
-            <dd class="font-bold text-slate-800"><?php echo e($purchaseRequest->localized_request_address ?? '—'); ?></dd>
+            <dd class="font-bold text-slate-800">
+                <?php $__empty_1 = true; $__currentLoopData = $purchaseRequest->request_address_lines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $line): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <p><?php echo e($line); ?></p>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    —
+                <?php endif; ?>
+            </dd>
         </div>
         <div>
             <dt class="text-slate-400 font-medium mb-0.5"><?php echo e(__('external_purchases.request_shipping_address')); ?></dt>
-            <dd class="font-bold text-slate-800"><?php echo e($purchaseRequest->shipping_address ?? '—'); ?></dd>
+            <dd class="font-bold text-slate-800">
+                <?php $__empty_1 = true; $__currentLoopData = $purchaseRequest->shipping_address_lines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $line): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <p><?php echo e($line); ?></p>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    —
+                <?php endif; ?>
+            </dd>
         </div>
         <div>
             <dt class="text-slate-400 font-medium mb-0.5"><?php echo e(__('tenders.tender_location_scope')); ?></dt>

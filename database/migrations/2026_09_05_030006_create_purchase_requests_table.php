@@ -16,9 +16,17 @@ return new class extends Migration
             $table->foreignId('service_call_id')->nullable()->constrained('service_calls')->nullOnDelete();
             $table->date('date');
             $table->foreignId('supplier_id')->constrained('suppliers')->restrictOnDelete();
-            // Address is derived from the branch (Branch::localized_address), not duplicated here.
+            // Request address is derived from the branch (Branch::localized_address_lines), not duplicated here.
             $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
-            $table->string('shipping_address')->nullable();
+            // Shipping address — where the goods actually go, independent of the branch (e.g. a job site).
+            $table->string('shipping_address_line1')->nullable();
+            $table->string('shipping_address_line1_en')->nullable();
+            $table->string('shipping_po_box')->nullable();
+            $table->string('shipping_postal_code')->nullable();
+            $table->string('shipping_city')->nullable();
+            $table->string('shipping_city_en')->nullable();
+            $table->string('shipping_country')->nullable();
+            $table->string('shipping_country_en')->nullable();
             $table->enum('location_scope', ['inside_jordan', 'outside_jordan'])->nullable();
             $table->string('governorate')->nullable();
             $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();

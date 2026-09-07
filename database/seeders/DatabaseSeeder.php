@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             BranchSeeder::class,
             CurrencySeeder::class,
+            CountrySeeder::class,
             InvoiceTypeSeeder::class,
             PartySeeder::class,
             TenderStatusSeeder::class,

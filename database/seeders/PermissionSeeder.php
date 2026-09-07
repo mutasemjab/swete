@@ -21,6 +21,9 @@ class PermissionSeeder extends Seeder
             'settings.permissions.view',
             'settings.branches.view',  'settings.branches.create',  'settings.branches.edit',  'settings.branches.delete',
             'settings.currencies.view','settings.currencies.create','settings.currencies.edit','settings.currencies.delete',
+            'settings.countries.view', 'settings.countries.create', 'settings.countries.edit', 'settings.countries.delete',
+            'settings.activity_log.view',
+            'settings.approval_rules.view', 'settings.approval_rules.edit',
 
             // Accounting
             'accounting.view',
@@ -43,20 +46,17 @@ class PermissionSeeder extends Seeder
             'warehouse.material_requests.create', 'warehouse.material_requests.approve', 'warehouse.material_requests.fulfill',
             'warehouse.reports.view',
 
-            // Sales (future)
-            'sales.view', 'sales.orders.create', 'sales.orders.edit', 'sales.orders.delete',
-            'sales.customers.create', 'sales.customers.edit',
-
-            // Purchases (future)
-            'purchases.view', 'purchases.orders.create', 'purchases.orders.edit',
-            'purchases.vendors.create', 'purchases.vendors.edit',
-
-            // HR (future)
-            'hr.view', 'hr.employees.create', 'hr.employees.edit', 'hr.employees.delete',
-            'hr.payroll.view', 'hr.payroll.run',
-
             // Tenders
             'tenders.view', 'tenders.create', 'tenders.edit', 'tenders.delete',
+            'tenders.price_quotes.create',
+            'tenders.tender_statuses.create', 'tenders.tender_statuses.edit', 'tenders.tender_statuses.delete',
+            'tenders.projects.view', 'tenders.projects.convert', 'tenders.projects.edit', 'tenders.projects.delete',
+
+            // External Purchases
+            'external_purchases.view', 'external_purchases.purchase_requests.create',
+
+            // Maintenance (future — module not built yet, permission reserved)
+            'maintenance.view',
         ];
 
         foreach ($permissions as $permission) {
@@ -71,7 +71,7 @@ class PermissionSeeder extends Seeder
         $branchManager = Role::firstOrCreate(['name' => 'branch_manager', 'guard_name' => 'web']);
         $branchManager->syncPermissions([
             'settings.users.view', 'settings.branches.view', 'settings.currencies.view',
-            'warehouse.view', 'sales.view', 'purchases.view',
+            'warehouse.view',
         ]);
 
         $accountant = Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
