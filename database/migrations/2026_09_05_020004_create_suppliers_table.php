@@ -19,6 +19,11 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('tax_number')->nullable();
             $table->decimal('opening_balance', 14, 3)->default(0);
+
+            $table->enum('location_scope', ['inside_jordan', 'outside_jordan'])->nullable();
+            $table->string('governorate')->nullable();
+            $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
+
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

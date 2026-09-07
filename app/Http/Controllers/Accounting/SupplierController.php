@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Accounting;
 
 use App\Http\Controllers\ModuleController;
+use App\Models\Country;
 use App\Models\Supplier;
 use App\Models\SupplierGroup;
+use App\Models\Tender;
 use Illuminate\Http\Request;
 
 class SupplierController extends ModuleController
@@ -29,8 +31,9 @@ class SupplierController extends ModuleController
 
     public function create()
     {
-        $groups = SupplierGroup::orderBy('name')->get();
-        return $this->moduleView('accounting.suppliers.create', compact('groups'));
+        $groups    = SupplierGroup::orderBy('name')->get();
+        $countries = Country::where('status', true)->orderBy('name')->get();
+        return $this->moduleView('accounting.suppliers.create', compact('groups', 'countries'));
     }
 
     public function store(Request $request)
@@ -53,8 +56,9 @@ class SupplierController extends ModuleController
 
     public function edit(Supplier $supplier)
     {
-        $groups = SupplierGroup::orderBy('name')->get();
-        return $this->moduleView('accounting.suppliers.edit', compact('supplier', 'groups'));
+        $groups    = SupplierGroup::orderBy('name')->get();
+        $countries = Country::where('status', true)->orderBy('name')->get();
+        return $this->moduleView('accounting.suppliers.edit', compact('supplier', 'groups', 'countries'));
     }
 
     public function update(Request $request, Supplier $supplier)
@@ -80,7 +84,7 @@ class SupplierController extends ModuleController
 
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'supplier_group_id' => ['nullable', 'exists:supplier_groups,id'],
             'name'              => ['required', 'string', 'max:150'],
             'name_en'           => ['nullable', 'string', 'max:150'],
@@ -89,7 +93,18 @@ class SupplierController extends ModuleController
             'address'           => ['nullable', 'string', 'max:255'],
             'tax_number'        => ['nullable', 'string', 'max:50'],
             'opening_balance'   => ['nullable', 'numeric'],
+            'location_scope'    => ['nullable', 'in:inside_jordan,outside_jordan'],
+            'governorate'       => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
+            'country_id'        => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
             'status'            => ['boolean'],
         ]);
+
+        if (($validated['location_scope'] ?? null) === 'outside_jordan') {
+            $validated['governorate'] = null;
+        } elseif (($validated['location_scope'] ?? null) === 'inside_jordan') {
+            $validated['country_id'] = null;
+        }
+
+        return $validated;
     }
 }

@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->enum('location_scope', ['inside_jordan', 'outside_jordan'])->nullable();
             $table->string('governorate')->nullable();
-            $table->string('country')->nullable();
+            $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
 
             $table->boolean('tax_exempt')->default(false);
             $table->boolean('customs_exempt')->default(false);

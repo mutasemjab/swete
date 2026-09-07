@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Tenders;
 
 use App\Http\Controllers\ModuleController;
+use App\Models\Country;
 use App\Models\Customer;
 use App\Models\PriceQuote;
+use App\Models\Project;
 use App\Models\Tender;
 use App\Models\TenderStatus;
 use Illuminate\Http\Request;
@@ -38,8 +40,9 @@ class TenderController extends ModuleController
     {
         $customers = Customer::where('status', true)->orderBy('name')->get();
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
+        $countries = Country::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.create', compact('customers', 'statuses'));
+        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries'));
     }
 
     public function store(Request $request)
@@ -58,7 +61,7 @@ class TenderController extends ModuleController
 
     public function show(Tender $tender)
     {
-        $tender->load(['party', 'statusRef', 'creator', 'priceQuotes.customer']);
+        $tender->load(['party', 'statusRef', 'country', 'creator', 'priceQuotes.customer', 'projects']);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 
         return $this->moduleView('tenders.show', compact('tender', 'unlinkedQuotes'));
@@ -68,8 +71,9 @@ class TenderController extends ModuleController
     {
         $customers = Customer::where('status', true)->orderBy('name')->get();
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
+        $countries = Country::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses'));
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries'));
     }
 
     public function update(Request $request, Tender $tender)
@@ -103,6 +107,23 @@ class TenderController extends ModuleController
         return back()->with('success', __('tenders.quote_attached'));
     }
 
+    /** Turn a won tender into a project, copying over its title and customer. */
+    public function convertToProject(Request $request, Tender $tender)
+    {
+        $project = Project::create([
+            'number'      => Project::nextNumber(),
+            'tender_id'   => $tender->id,
+            'customer_id' => $tender->party_id,
+            'title'       => $tender->title,
+            'title_en'    => $tender->title_en,
+            'status'      => 'active',
+            'created_by'  => $request->user()->id,
+        ]);
+
+        return redirect()->route('projects.show', $project)
+            ->with('success', __('tenders.project_created'));
+    }
+
     private function validated(Request $request): array
     {
         $rules = [
@@ -113,7 +134,7 @@ class TenderController extends ModuleController
             'entity_name_en'       => ['nullable', 'string', 'max:255'],
             'location_scope'       => ['required', 'in:inside_jordan,outside_jordan'],
             'governorate'          => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
-            'country'              => ['required_if:location_scope,outside_jordan', 'nullable', 'string', 'max:150'],
+            'country_id'           => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
             'tax_exempt'           => ['boolean'],
             'customs_exempt'       => ['boolean'],
             'delivery_terms'       => ['nullable', 'in:' . implode(',', Tender::DELIVERY_TERMS)],
@@ -135,7 +156,7 @@ class TenderController extends ModuleController
         if ($validated['location_scope'] === 'outside_jordan') {
             $validated['governorate'] = null;
         } else {
-            $validated['country'] = null;
+            $validated['country_id'] = null;
         }
 
         return $validated;

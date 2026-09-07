@@ -13,6 +13,14 @@
         <p class="page-subtitle">{{ $tender->localized_title }}</p>
     </div>
     <div class="flex items-center gap-2">
+        <form action="{{ route('tenders.convert-to-project', $tender) }}" method="POST"
+              @submit="if (! confirm('{{ __('tenders.convert_to_project_confirm') }}')) $event.preventDefault()">
+            @csrf
+            <button type="submit" class="btn-primary">
+                <i class="fa-solid fa-diagram-project"></i>
+                {{ __('tenders.convert_to_project') }}
+            </button>
+        </form>
         <a href="{{ route('tenders.edit', $tender) }}" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
@@ -42,7 +50,7 @@
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.tender_location_scope') }}</dt>
             <dd class="font-bold text-slate-800">
                 @if($tender->location_scope === 'outside_jordan')
-                    {{ __('tenders.location_outside_jordan') }} — {{ $tender->country }}
+                    {{ __('tenders.location_outside_jordan') }} — {{ $tender->country?->localized_name }}
                 @else
                     {{ __('tenders.location_inside_jordan') }} — {{ $tender->localized_governorate }}
                 @endif
@@ -161,4 +169,36 @@
     </form>
     @endif
 </div>
+
+@if($tender->projects->isNotEmpty())
+<div class="card overflow-hidden mt-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.projects') }}</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.project_number') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.project_title') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.project_status') }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @foreach($tender->projects as $project)
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-5 py-3">
+                        <a href="{{ route('projects.show', $project) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $project->number }}</a>
+                    </td>
+                    <td class="px-5 py-3 font-bold text-slate-800">{{ $project->localized_title }}</td>
+                    <td class="px-5 py-3">
+                        <span class="badge bg-emerald-100 text-emerald-700">{{ __('tenders.project_status_' . $project->status) }}</span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 @endsection

@@ -18,6 +18,7 @@ return [
     'nav_permissions'       => 'Permissions',
     'nav_branches'          => 'Branches',
     'nav_currencies'        => 'Currencies',
+    'nav_countries'         => 'Countries',
     'nav_activity_log'      => 'Activity Log',
     'nav_approval_rules'    => 'Approval Rules',
 
@@ -167,6 +168,19 @@ return [
     'event_approval_requested' => 'Approval requested',
     'event_approval_approved'  => 'Approved',
     'event_approval_rejected'  => 'Rejected',
+
+    // ── Countries ────────────────────────────────────────────────────────────
+    'countries'            => 'Countries',
+    'countries_list'       => 'Countries List',
+    'countries_subtitle'   => 'Countries used across tenders, purchase requests, and suppliers',
+    'add_country'          => 'Add Country',
+    'edit_country'         => 'Edit Country',
+    'country_name'         => 'Country Name',
+    'no_countries'         => 'No countries yet',
+    'add_first_country'    => 'Add First Country',
+    'country_added'        => 'Country added successfully.',
+    'country_updated'      => 'Country updated successfully.',
+    'country_deleted'      => 'Country deleted successfully.',
 
     // ── Approval Rules ───────────────────────────────────────────────────────
     'approval_rules'                   => 'Approval Rules',

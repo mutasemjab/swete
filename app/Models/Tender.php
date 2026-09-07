@@ -41,7 +41,7 @@ class Tender extends Model
         'entity_name_en',
         'location_scope',
         'governorate',
-        'country',
+        'country_id',
         'tax_exempt',
         'customs_exempt',
         'delivery_terms',
@@ -81,6 +81,16 @@ class Tender extends Model
     public function priceQuotes(): HasMany
     {
         return $this->hasMany(PriceQuote::class);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
     }
 
     public function getLocalizedTitleAttribute(): string

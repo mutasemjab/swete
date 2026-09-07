@@ -9,6 +9,7 @@ return [
     // ── Sidebar sections ─────────────────────────────────────────────────────
     'section_management'    => 'Tenders',
     'section_price_quotes'  => 'Price Quotes',
+    'section_projects'      => 'Projects',
     'section_settings'      => 'Tender Settings',
 
     // ── Sidebar items ────────────────────────────────────────────────────────
@@ -16,6 +17,7 @@ return [
     'nav_add'           => 'Add Tender',
     'nav_quotes_list'   => 'Price Quotes List',
     'nav_quotes_add'    => 'New Price Quote',
+    'nav_projects_list' => 'Projects List',
     'nav_statuses'      => 'Tender Statuses',
 
     // ── Tenders ──────────────────────────────────────────────────────────────
@@ -102,5 +104,27 @@ return [
     'attach_existing_quote'   => 'Attach an existing quote',
     'attach_quote'            => 'Attach',
     'quote_attached'          => 'Price quote attached to the tender successfully.',
+
+    // ── Projects ──────────────────────────────────────────────────────────────
+    'project'              => 'Project',
+    'projects'             => 'Projects',
+    'projects_list'        => 'Projects List',
+    'projects_subtitle'    => 'Projects created by converting tenders',
+    'edit_project'         => 'Edit Project',
+    'project_number'       => 'Project No.',
+    'project_title'        => 'Project Title',
+    'project_customer'     => 'Customer',
+    'project_tender'       => 'Tender',
+    'project_status'       => 'Project Status',
+    'project_status_active'    => 'Active',
+    'project_status_completed' => 'Completed',
+    'project_status_cancelled' => 'Cancelled',
+    'project_created_by'   => 'Created By',
+    'no_projects'          => 'No projects yet',
+    'project_updated'      => 'Project updated successfully.',
+    'project_deleted'      => 'Project deleted successfully.',
+    'project_created'      => 'Tender converted to a project successfully.',
+    'convert_to_project'         => 'Convert to Project',
+    'convert_to_project_confirm' => 'Are you sure you want to convert this tender into a project?',
 
 ];

@@ -3,22 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
-class Branch extends Model
+class Country extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'name',
         'name_en',
-        'phone',
-        'address',
-        'address_en',
-        'is_main',
         'status',
     ];
 
     protected $casts = [
-        'is_main' => 'boolean',
-        'status'  => 'boolean',
+        'status' => 'boolean',
     ];
 
     public function getLocalizedNameAttribute(): string
@@ -28,10 +27,8 @@ class Branch extends Model
             : $this->name;
     }
 
-    public function getLocalizedAddressAttribute(): ?string
+    public function getActivitylogOptions(): LogOptions
     {
-        return app()->isLocale('en') && $this->address_en
-            ? $this->address_en
-            : $this->address;
+        return LogOptions::defaults()->logOnlyDirty()->logAll();
     }
 }

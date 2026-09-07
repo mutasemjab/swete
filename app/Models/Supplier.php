@@ -22,6 +22,9 @@ class Supplier extends Model
         'address',
         'tax_number',
         'opening_balance',
+        'location_scope',
+        'governorate',
+        'country_id',
         'status',
     ];
 
@@ -33,6 +36,11 @@ class Supplier extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(SupplierGroup::class, 'supplier_group_id');
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 
     public function invoices(): HasMany

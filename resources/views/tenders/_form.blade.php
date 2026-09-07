@@ -78,9 +78,13 @@
 
             <div x-show="scope === 'outside_jordan'">
                 <label class="form-label">{{ __('tenders.tender_country') }} <span class="text-rose-500">*</span></label>
-                <input type="text" name="country" value="{{ old('country', $tender?->country) }}"
-                       class="form-input @error('country') is-invalid @enderror">
-                @error('country')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                <select name="country_id" class="js-select2 form-select @error('country_id') is-invalid @enderror">
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach($countries as $country)
+                        <option value="{{ $country->id }}" @selected(old('country_id', $tender?->country_id) == $country->id)>{{ $country->localized_name }}</option>
+                    @endforeach
+                </select>
+                @error('country_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
         </div>
 

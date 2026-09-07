@@ -16,7 +16,7 @@
 
 <form action="{{ route('accounting.suppliers.store') }}" method="POST">
     @csrf
-    @include('accounting.suppliers._form', ['groups' => $groups])
+    @include('accounting.suppliers._form', ['groups' => $groups, 'countries' => $countries])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

@@ -9,6 +9,7 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\PermissionController;
 use App\Http\Controllers\Settings\BranchController;
 use App\Http\Controllers\Settings\CurrencyController;
+use App\Http\Controllers\Settings\CountryController;
 use App\Http\Controllers\Settings\ActivityLogController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\MaterialCategoryController;
@@ -26,6 +27,8 @@ use App\Http\Controllers\Accounting\InvoiceController;
 use App\Http\Controllers\Tenders\TenderController;
 use App\Http\Controllers\Tenders\TenderStatusController;
 use App\Http\Controllers\Tenders\PriceQuoteController;
+use App\Http\Controllers\Tenders\ProjectController;
+use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\Settings\ApprovalRuleController;
 
 /*
@@ -71,6 +74,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('permissions', PermissionController::class)->only(['index']);
         Route::resource('branches',    BranchController::class)->except(['show']);
         Route::resource('currencies',  CurrencyController::class)->except(['show']);
+        Route::resource('countries',   CountryController::class)->except(['show']);
         Route::resource('activity-log', ActivityLogController::class)->only(['index']);
         Route::resource('approval-rules', ApprovalRuleController::class)->only(['index', 'store']);
 
@@ -118,8 +122,12 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     Route::resource('tenders', TenderController::class);
     Route::post('tenders/{tender}/attach-quote', [TenderController::class, 'attachPriceQuote'])->name('tenders.attach-quote');
+    Route::post('tenders/{tender}/convert-to-project', [TenderController::class, 'convertToProject'])->name('tenders.convert-to-project');
 
     Route::resource('tender-statuses', TenderStatusController::class)->except(['show']);
     Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
+
+    Route::resource('purchase-requests', PurchaseRequestController::class)->only(['index', 'create', 'store', 'show']);
 
 });

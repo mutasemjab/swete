@@ -204,9 +204,56 @@ return [
                 ],
             ],
             [
+                'label' => 'tenders.section_projects',
+                'items' => [
+                    ['label' => 'tenders.nav_projects_list', 'route' => 'projects.index', 'icon' => 'diagram-project'],
+                ],
+            ],
+            [
                 'label' => 'tenders.section_settings',
                 'items' => [
                     ['label' => 'tenders.nav_statuses', 'route' => 'tender-statuses.index', 'icon' => 'list-check'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // EXTERNAL PURCHASES MODULE
+    // ──────────────────────────────────────────────────────────────────────────
+    'external_purchases' => [
+        'name'        => 'external_purchases.module_name',
+        'description' => 'external_purchases.module_desc',
+        'icon'        => 'truck-ramp-box',
+        'color'       => 'cyan',
+        'route'       => 'purchase-requests.index',
+        'gradient'    => 'from-cyan-500 to-cyan-700',
+        'sections'    => [
+            [
+                'label' => 'external_purchases.section_purchase_requests',
+                'items' => [
+                    ['label' => 'external_purchases.nav_requests_list', 'route' => 'purchase-requests.index',  'icon' => 'list'],
+                    ['label' => 'external_purchases.nav_requests_add',  'route' => 'purchase-requests.create', 'icon' => 'plus'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // MAINTENANCE MODULE  ← placeholder, service_calls table exists, UI later
+    // ──────────────────────────────────────────────────────────────────────────
+    'maintenance' => [
+        'name'        => 'maintenance.module_name',
+        'description' => 'maintenance.module_desc',
+        'icon'        => 'screwdriver-wrench',
+        'color'       => 'teal',
+        'route'       => '#',
+        'gradient'    => 'from-teal-500 to-teal-700',
+        'sections'    => [
+            [
+                'label' => 'maintenance.section_service_calls',
+                'items' => [
+                    ['label' => 'maintenance.nav_service_calls', 'route' => '#', 'icon' => 'screwdriver-wrench'],
                 ],
             ],
         ],
@@ -237,6 +284,7 @@ return [
                 'items' => [
                     ['label' => 'settings.nav_branches',     'route' => 'settings.branches.index',    'icon' => 'code-branch'],
                     ['label' => 'settings.nav_currencies',   'route' => 'settings.currencies.index',  'icon' => 'coins'],
+                    ['label' => 'settings.nav_countries',    'route' => 'settings.countries.index',   'icon' => 'earth-americas'],
                 ],
             ],
             [

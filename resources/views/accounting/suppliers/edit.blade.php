@@ -18,7 +18,7 @@
 <form action="{{ route('accounting.suppliers.update', $supplier) }}" method="POST">
     @csrf
     @method('PUT')
-    @include('accounting.suppliers._form', ['groups' => $groups, 'supplier' => $supplier])
+    @include('accounting.suppliers._form', ['groups' => $groups, 'supplier' => $supplier, 'countries' => $countries])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

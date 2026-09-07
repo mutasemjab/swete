@@ -18,6 +18,7 @@ return [
     'nav_permissions'       => 'الصلاحيات',
     'nav_branches'          => 'الفروع',
     'nav_currencies'        => 'العملات',
+    'nav_countries'         => 'الدول',
     'nav_activity_log'      => 'سجل الأنشطة',
     'nav_approval_rules'    => 'قواعد الموافقات',
 
@@ -167,6 +168,19 @@ return [
     'event_approval_requested' => 'طلب موافقة',
     'event_approval_approved'  => 'اعتماد',
     'event_approval_rejected'  => 'رفض',
+
+    // ── Countries ────────────────────────────────────────────────────────────
+    'countries'            => 'الدول',
+    'countries_list'       => 'قائمة الدول',
+    'countries_subtitle'   => 'الدول المستخدمة بالعطاءات وطلبات الشراء والموردين',
+    'add_country'          => 'إضافة دولة',
+    'edit_country'         => 'تعديل دولة',
+    'country_name'         => 'اسم الدولة',
+    'no_countries'         => 'لا توجد دول بعد',
+    'add_first_country'    => 'إضافة أول دولة',
+    'country_added'        => 'تم إضافة الدولة بنجاح.',
+    'country_updated'      => 'تم تحديث الدولة بنجاح.',
+    'country_deleted'      => 'تم حذف الدولة بنجاح.',
 
     // ── Approval Rules ───────────────────────────────────────────────────────
     'approval_rules'                   => 'قواعد الموافقات',

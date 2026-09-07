@@ -59,6 +59,39 @@
             @error('address')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div x-data="{ scope: '{{ old('location_scope', $supplier?->location_scope ?? 'inside_jordan') }}' }" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+                <label class="form-label">{{ __('tenders.tender_location_scope') }}</label>
+                <select name="location_scope" x-model="scope" class="form-select @error('location_scope') is-invalid @enderror">
+                    <option value="inside_jordan">{{ __('tenders.location_inside_jordan') }}</option>
+                    <option value="outside_jordan">{{ __('tenders.location_outside_jordan') }}</option>
+                </select>
+                @error('location_scope')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div x-show="scope === 'inside_jordan'">
+                <label class="form-label">{{ __('tenders.tender_governorate') }}</label>
+                <select name="governorate" class="js-select2 form-select @error('governorate') is-invalid @enderror">
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach(\App\Models\Tender::JORDAN_GOVERNORATES as $key => $names)
+                        <option value="{{ $key }}" @selected(old('governorate', $supplier?->governorate) === $key)>{{ $names[app()->getLocale() === 'en' ? 'en' : 'ar'] }}</option>
+                    @endforeach
+                </select>
+                @error('governorate')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div x-show="scope === 'outside_jordan'">
+                <label class="form-label">{{ __('tenders.tender_country') }}</label>
+                <select name="country_id" class="js-select2 form-select @error('country_id') is-invalid @enderror">
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach($countries as $country)
+                        <option value="{{ $country->id }}" @selected(old('country_id', $supplier?->country_id) == $country->id)>{{ $country->localized_name }}</option>
+                    @endforeach
+                </select>
+                @error('country_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+        </div>
+
         <div>
             <label class="form-label">{{ __('accounting.party_opening_balance') }}</label>
             <input type="number" name="opening_balance" value="{{ old('opening_balance', $supplier?->opening_balance ?? 0) }}"

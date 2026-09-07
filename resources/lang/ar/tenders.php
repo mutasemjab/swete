@@ -9,6 +9,7 @@ return [
     // ── Sidebar sections ─────────────────────────────────────────────────────
     'section_management'    => 'العطاءات',
     'section_price_quotes'  => 'عروض الأسعار',
+    'section_projects'      => 'المشاريع',
     'section_settings'      => 'إعدادات العطاءات',
 
     // ── Sidebar items ────────────────────────────────────────────────────────
@@ -16,6 +17,7 @@ return [
     'nav_add'           => 'إضافة عطاء',
     'nav_quotes_list'   => 'قائمة عروض الأسعار',
     'nav_quotes_add'    => 'عرض سعر جديد',
+    'nav_projects_list' => 'قائمة المشاريع',
     'nav_statuses'      => 'حالات العطاء',
 
     // ── Tenders ──────────────────────────────────────────────────────────────
@@ -102,5 +104,27 @@ return [
     'attach_existing_quote'   => 'إرفاق عرض سعر موجود',
     'attach_quote'            => 'إرفاق',
     'quote_attached'          => 'تم إرفاق عرض السعر بالعطاء بنجاح.',
+
+    // ── Projects ──────────────────────────────────────────────────────────────
+    'project'              => 'مشروع',
+    'projects'             => 'المشاريع',
+    'projects_list'        => 'قائمة المشاريع',
+    'projects_subtitle'    => 'المشاريع الناتجة عن تحويل العطاءات',
+    'edit_project'         => 'تعديل مشروع',
+    'project_number'       => 'رقم المشروع',
+    'project_title'        => 'عنوان المشروع',
+    'project_customer'     => 'العميل',
+    'project_tender'       => 'العطاء',
+    'project_status'       => 'حالة المشروع',
+    'project_status_active'    => 'نشط',
+    'project_status_completed' => 'منتهي',
+    'project_status_cancelled' => 'ملغي',
+    'project_created_by'   => 'أنشئ بواسطة',
+    'no_projects'          => 'لا توجد مشاريع بعد',
+    'project_updated'      => 'تم تحديث المشروع بنجاح.',
+    'project_deleted'      => 'تم حذف المشروع بنجاح.',
+    'project_created'      => 'تم تحويل العطاء إلى مشروع بنجاح.',
+    'convert_to_project'         => 'تحويل إلى مشروع',
+    'convert_to_project_confirm' => 'هل أنت متأكد من تحويل هذا العطاء إلى مشروع؟',
 
 ];
