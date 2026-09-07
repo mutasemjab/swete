@@ -56,6 +56,7 @@ return [
     'add_supplier'        => 'Add Supplier',
     'edit_customer'      => 'Edit Customer',
     'edit_supplier'       => 'Edit Supplier',
+    'supplier_location_scope' => 'Supplier Location',
     'party_code'          => 'Code',
     'party_name'          => 'Name',
     'party_group'         => 'Group',

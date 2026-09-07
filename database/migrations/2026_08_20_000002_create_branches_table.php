@@ -22,6 +22,9 @@ return new class extends Migration
             $table->string('city_en')->nullable();
             $table->string('country')->nullable();
             $table->string('country_en')->nullable();
+            // Letterhead logos for printed documents (e.g. purchase order PDFs).
+            $table->string('logo_path')->nullable();
+            $table->string('logo_secondary_path')->nullable();
             $table->boolean('is_main')->default(false);
             $table->boolean('status')->default(true);
             $table->timestamps();

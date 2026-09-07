@@ -22,6 +22,8 @@ class Branch extends Model
         'city_en',
         'country',
         'country_en',
+        'logo_path',
+        'logo_secondary_path',
         'is_main',
         'status',
     ];
@@ -47,5 +49,15 @@ class Branch extends Model
             $this->city, $this->city_en,
             $this->country, $this->country_en,
         );
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo_path ? asset($this->logo_path) : null;
+    }
+
+    public function getLogoSecondaryUrlAttribute(): ?string
+    {
+        return $this->logo_secondary_path ? asset($this->logo_secondary_path) : null;
     }
 }

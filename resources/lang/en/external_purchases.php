@@ -18,9 +18,11 @@ return [
     'requests_subtitle'        => 'View purchase requests and add a new one',
     'add_purchase_request'     => 'New Purchase Request',
     'add_purchase_request_subtitle' => 'Enter the new purchase request details',
+    'edit_purchase_request'    => 'Edit Purchase Request',
 
     'request_number'           => 'Request No.',
     'request_date'             => 'Request Date',
+    'request_location_scope'   => 'Request Location',
     'request_linked_to'        => 'Linked To',
     'request_link_type'        => 'Link Type',
     'link_type_project'        => 'Project',
@@ -41,6 +43,19 @@ return [
     'no_requests_search'        => 'No results match your search.',
     'add_first_request'         => 'Add First Purchase Request',
     'request_added'             => 'Purchase request added successfully.',
+    'request_updated'           => 'Purchase request updated successfully.',
+    'request_deleted'           => 'Purchase request deleted successfully.',
     'total_requests'            => 'Total Requests',
+
+    // ── Print document ───────────────────────────────────────────────────────
+    'print'                  => 'Print',
+    'po_invoice_address'     => 'Invoice Address',
+    'po_project'             => 'Project No.',
+    'po_subtotal'            => 'Subtotal',
+    'po_authorized_by'       => 'Authorized By',
+    'po_signature'           => 'Signature',
+    'po_item_no'             => 'No.',
+    'po_item_description'    => 'Item Description',
+    'logo_placeholder'       => 'Logo',
 
 ];

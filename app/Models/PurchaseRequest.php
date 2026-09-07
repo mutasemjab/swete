@@ -120,7 +120,9 @@ class PurchaseRequest extends Model
 
     public function recalculateTotals(): void
     {
-        $subtotal = $this->items->sum(fn ($item) => $item->quantity * $item->unit_price);
+        // Query fresh rather than trust a possibly stale cached `items` relation
+        // (e.g. right after syncing a new set of items on an already-loaded model).
+        $subtotal = $this->items()->get()->sum(fn ($item) => $item->quantity * $item->unit_price);
 
         $this->update([
             'subtotal' => $subtotal,

@@ -18,9 +18,11 @@ return [
     'requests_subtitle'        => 'عرض طلبات الشراء وإضافة طلب جديد',
     'add_purchase_request'     => 'طلب شراء جديد',
     'add_purchase_request_subtitle' => 'أدخل بيانات طلب الشراء الجديد',
+    'edit_purchase_request'    => 'تعديل طلب شراء',
 
     'request_number'           => 'رقم الطلب',
     'request_date'             => 'تاريخ الطلب',
+    'request_location_scope'   => 'موقع الطلب',
     'request_linked_to'        => 'مرتبط بـ',
     'request_link_type'        => 'نوع الارتباط',
     'link_type_project'        => 'مشروع',
@@ -41,6 +43,19 @@ return [
     'no_requests_search'        => 'لا توجد نتائج تطابق بحثك.',
     'add_first_request'         => 'إضافة أول طلب شراء',
     'request_added'             => 'تم إضافة طلب الشراء بنجاح.',
+    'request_updated'           => 'تم تحديث طلب الشراء بنجاح.',
+    'request_deleted'           => 'تم حذف طلب الشراء بنجاح.',
     'total_requests'            => 'إجمالي الطلبات',
+
+    // ── Print document ───────────────────────────────────────────────────────
+    'print'                  => 'طباعة',
+    'po_invoice_address'     => 'عنوان الفاتورة',
+    'po_project'             => 'رقم المشروع',
+    'po_subtotal'            => 'المجموع الفرعي',
+    'po_authorized_by'       => 'معتمد من',
+    'po_signature'           => 'التوقيع',
+    'po_item_no'             => 'م',
+    'po_item_description'    => 'وصف الصنف',
+    'logo_placeholder'       => 'الشعار',
 
 ];

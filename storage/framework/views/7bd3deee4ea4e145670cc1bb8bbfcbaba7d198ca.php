@@ -14,7 +14,7 @@
     </a>
 </div>
 
-<form action="<?php echo e(route('settings.branches.store')); ?>" method="POST">
+<form action="<?php echo e(route('settings.branches.store')); ?>" method="POST" enctype="multipart/form-data">
     <?php echo csrf_field(); ?>
 
     <div class="card mb-5">
@@ -293,6 +293,62 @@ $message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-image text-indigo-500 text-sm"></i>
+                <?php echo e(__('settings.branch_logo')); ?> / <?php echo e(__('settings.branch_logo_secondary')); ?>
+
+            </h3>
+        </div>
+        <div class="px-6 py-5">
+            <p class="text-xs text-slate-400 mb-4"><?php echo e(__('settings.branch_logos_hint')); ?></p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label"><?php echo e(__('settings.branch_logo')); ?></label>
+                    <input type="file" name="logo" accept="image/*"
+                           class="form-input <?php $__errorArgs = ['logo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                    <?php $__errorArgs = ['logo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
+
+                <div>
+                    <label class="form-label"><?php echo e(__('settings.branch_logo_secondary')); ?></label>
+                    <input type="file" name="logo_secondary" accept="image/*"
+                           class="form-input <?php $__errorArgs = ['logo_secondary'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                    <?php $__errorArgs = ['logo_secondary'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                </div>
             </div>
         </div>
     </div>

@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             InvoiceTypeSeeder::class,
             PartySeeder::class,
             TenderStatusSeeder::class,
+            UnitSeeder::class,
+            MaterialSeeder::class,
         ]);
     }
 }

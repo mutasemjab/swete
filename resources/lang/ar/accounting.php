@@ -56,6 +56,7 @@ return [
     'add_supplier'        => 'إضافة مورد',
     'edit_customer'      => 'تعديل عميل',
     'edit_supplier'       => 'تعديل مورد',
+    'supplier_location_scope' => 'موقع المورد',
     'party_code'          => 'الرمز',
     'party_name'          => 'الاسم',
     'party_group'         => 'المجموعة',

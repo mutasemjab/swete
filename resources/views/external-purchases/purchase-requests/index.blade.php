@@ -74,11 +74,12 @@
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_supplier') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('external_purchases.request_linked_to') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_total') }}</th>
+                        <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($purchaseRequests as $pr)
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    <tr class="hover:bg-slate-50/50 transition-colors group">
                         <td class="px-5 py-4">
                             <a href="{{ route('purchase-requests.show', $pr) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors">{{ $pr->number }}</a>
                         </td>
@@ -94,6 +95,23 @@
                             @endif
                         </td>
                         <td class="px-5 py-4 font-bold text-slate-800">{{ number_format($pr->total, 3) }}</td>
+                        <td class="px-5 py-4">
+                            <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{{ route('purchase-requests.show', $pr) }}"
+                                   class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="{{ __('app.view') }}">
+                                    <i class="fa-solid fa-eye text-sm"></i>
+                                </a>
+                                <a href="{{ route('purchase-requests.edit', $pr) }}"
+                                   class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="{{ __('app.edit') }}">
+                                    <i class="fa-solid fa-pen text-sm"></i>
+                                </a>
+                                <button type="button" title="{{ __('app.delete') }}"
+                                        @click="$dispatch('delete-confirm', { action: '{{ route('purchase-requests.destroy', $pr) }}', message: '{{ __('app.delete_confirm_msg') }}' })"
+                                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                    <i class="fa-solid fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

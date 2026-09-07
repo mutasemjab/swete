@@ -61,7 +61,7 @@
 
         <div x-data="{ scope: '{{ old('location_scope', $supplier?->location_scope ?? 'inside_jordan') }}' }" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-                <label class="form-label">{{ __('tenders.tender_location_scope') }}</label>
+                <label class="form-label">{{ __('accounting.supplier_location_scope') }}</label>
                 <select name="location_scope" x-model="scope" class="form-select @error('location_scope') is-invalid @enderror">
                     <option value="inside_jordan">{{ __('tenders.location_inside_jordan') }}</option>
                     <option value="outside_jordan">{{ __('tenders.location_outside_jordan') }}</option>

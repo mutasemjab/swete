@@ -128,6 +128,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
 
-    Route::resource('purchase-requests', PurchaseRequestController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('purchase-requests', PurchaseRequestController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    Route::get('purchase-requests/{purchaseRequest}/print', [PurchaseRequestController::class, 'printDocument'])->name('purchase-requests.print');
 
 });

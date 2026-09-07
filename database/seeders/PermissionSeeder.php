@@ -54,6 +54,7 @@ class PermissionSeeder extends Seeder
 
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',
+            'external_purchases.purchase_requests.edit', 'external_purchases.purchase_requests.delete',
 
             // Maintenance (future — module not built yet, permission reserved)
             'maintenance.view',

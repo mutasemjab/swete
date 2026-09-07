@@ -160,7 +160,7 @@ unset($__errorArgs, $__bag); ?>
 
         <div x-data="{ scope: '<?php echo e(old('location_scope', $supplier?->location_scope ?? 'inside_jordan')); ?>' }" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-                <label class="form-label"><?php echo e(__('tenders.tender_location_scope')); ?></label>
+                <label class="form-label"><?php echo e(__('accounting.supplier_location_scope')); ?></label>
                 <select name="location_scope" x-model="scope" class="form-select <?php $__errorArgs = ['location_scope'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :

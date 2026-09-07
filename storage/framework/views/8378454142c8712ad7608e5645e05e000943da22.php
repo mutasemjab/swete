@@ -7,11 +7,18 @@
         <h1 class="page-title"><?php echo e($purchaseRequest->number); ?></h1>
         <p class="page-subtitle"><?php echo e(__('external_purchases.purchase_request')); ?></p>
     </div>
-    <a href="<?php echo e(route('purchase-requests.index')); ?>" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        <?php echo e(__('app.back_to_list')); ?>
+    <div class="flex items-center gap-2">
+        <a href="<?php echo e(route('purchase-requests.print', $purchaseRequest)); ?>" target="_blank" class="btn-primary">
+            <i class="fa-solid fa-print"></i>
+            <?php echo e(__('external_purchases.print')); ?>
 
-    </a>
+        </a>
+        <a href="<?php echo e(route('purchase-requests.index')); ?>" class="btn-secondary">
+            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
+            <?php echo e(__('app.back_to_list')); ?>
+
+        </a>
+    </div>
 </div>
 
 <div class="card px-6 py-5 mb-5">
@@ -64,7 +71,7 @@
             </dd>
         </div>
         <div>
-            <dt class="text-slate-400 font-medium mb-0.5"><?php echo e(__('tenders.tender_location_scope')); ?></dt>
+            <dt class="text-slate-400 font-medium mb-0.5"><?php echo e(__('external_purchases.request_location_scope')); ?></dt>
             <dd class="font-bold text-slate-800">
                 <?php if($purchaseRequest->location_scope === 'outside_jordan'): ?>
                     <?php echo e(__('tenders.location_outside_jordan')); ?> — <?php echo e($purchaseRequest->country?->localized_name); ?>

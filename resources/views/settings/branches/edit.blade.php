@@ -15,7 +15,7 @@
     </a>
 </div>
 
-<form action="{{ route('settings.branches.update', $branch) }}" method="POST">
+<form action="{{ route('settings.branches.update', $branch) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
 
@@ -121,6 +121,45 @@
                 <input type="text" name="country_en" value="{{ old('country_en', $branch->country_en) }}" dir="ltr"
                        class="form-input @error('country_en') is-invalid @enderror">
                 @error('country_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-image text-indigo-500 text-sm"></i>
+                {{ __('settings.branch_logo') }} / {{ __('settings.branch_logo_secondary') }}
+            </h3>
+        </div>
+        <div class="px-6 py-5">
+            <p class="text-xs text-slate-400 mb-4">{{ __('settings.branch_logos_hint') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label">{{ __('settings.branch_logo') }}</label>
+                    @if($branch->logo_url)
+                        <div class="mb-2 flex items-center gap-2">
+                            <img src="{{ $branch->logo_url }}" alt="" class="h-12 w-auto rounded border border-slate-200 bg-white p-1">
+                            <span class="text-xs text-slate-400">{{ __('settings.current_logo') }}</span>
+                        </div>
+                    @endif
+                    <input type="file" name="logo" accept="image/*"
+                           class="form-input @error('logo') is-invalid @enderror">
+                    @error('logo')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="form-label">{{ __('settings.branch_logo_secondary') }}</label>
+                    @if($branch->logo_secondary_url)
+                        <div class="mb-2 flex items-center gap-2">
+                            <img src="{{ $branch->logo_secondary_url }}" alt="" class="h-12 w-auto rounded border border-slate-200 bg-white p-1">
+                            <span class="text-xs text-slate-400">{{ __('settings.current_logo') }}</span>
+                        </div>
+                    @endif
+                    <input type="file" name="logo_secondary" accept="image/*"
+                           class="form-input @error('logo_secondary') is-invalid @enderror">
+                    @error('logo_secondary')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
             </div>
         </div>
     </div>

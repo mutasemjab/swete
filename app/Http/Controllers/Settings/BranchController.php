@@ -30,9 +30,11 @@ class BranchController extends ModuleController
         }
 
         Branch::create([
-            ...$validated,
-            'is_main' => $request->boolean('is_main'),
-            'status'  => $request->boolean('status', true),
+            ...collect($validated)->except(['logo', 'logo_secondary'])->all(),
+            'logo_path'           => $this->storeLogo($request, 'logo'),
+            'logo_secondary_path' => $this->storeLogo($request, 'logo_secondary'),
+            'is_main'             => $request->boolean('is_main'),
+            'status'              => $request->boolean('status', true),
         ]);
 
         return redirect()->route('settings.branches.index')
@@ -52,8 +54,20 @@ class BranchController extends ModuleController
             Branch::where('is_main', true)->update(['is_main' => false]);
         }
 
+        $data = collect($validated)->except(['logo', 'logo_secondary'])->all();
+
+        if ($logoPath = $this->storeLogo($request, 'logo')) {
+            $this->deleteLogoFile($branch->logo_path);
+            $data['logo_path'] = $logoPath;
+        }
+
+        if ($logoSecondaryPath = $this->storeLogo($request, 'logo_secondary')) {
+            $this->deleteLogoFile($branch->logo_secondary_path);
+            $data['logo_secondary_path'] = $logoSecondaryPath;
+        }
+
         $branch->update([
-            ...$validated,
+            ...$data,
             'is_main' => $request->boolean('is_main'),
             'status'  => $request->boolean('status'),
         ]);
@@ -85,8 +99,28 @@ class BranchController extends ModuleController
             'city_en'           => ['nullable', 'string', 'max:100'],
             'country'           => ['nullable', 'string', 'max:100'],
             'country_en'        => ['nullable', 'string', 'max:100'],
+            'logo'              => ['nullable', 'image', 'max:2048'],
+            'logo_secondary'    => ['nullable', 'image', 'max:2048'],
             'is_main'           => ['boolean'],
             'status'            => ['boolean'],
         ]);
+    }
+
+    private function storeLogo(Request $request, string $field): ?string
+    {
+        if (! $request->hasFile($field)) {
+            return null;
+        }
+
+        $filename = uploadImage('assets/uploads/branches', $request->file($field));
+
+        return 'assets/uploads/branches/' . $filename;
+    }
+
+    private function deleteLogoFile(?string $path): void
+    {
+        if ($path && file_exists(base_path($path))) {
+            @unlink(base_path($path));
+        }
     }
 }

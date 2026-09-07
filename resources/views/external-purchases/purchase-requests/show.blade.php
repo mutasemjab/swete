@@ -9,10 +9,20 @@
         <h1 class="page-title">{{ $purchaseRequest->number }}</h1>
         <p class="page-subtitle">{{ __('external_purchases.purchase_request') }}</p>
     </div>
-    <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('purchase-requests.print', $purchaseRequest) }}" target="_blank" class="btn-primary">
+            <i class="fa-solid fa-print"></i>
+            {{ __('external_purchases.print') }}
+        </a>
+        <a href="{{ route('purchase-requests.edit', $purchaseRequest) }}" class="btn-secondary">
+            <i class="fa-solid fa-pen"></i>
+            {{ __('app.edit') }}
+        </a>
+        <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
+            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
+            {{ __('app.back_to_list') }}
+        </a>
+    </div>
 </div>
 
 <div class="card px-6 py-5 mb-5">
@@ -63,7 +73,7 @@
             </dd>
         </div>
         <div>
-            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.tender_location_scope') }}</dt>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('external_purchases.request_location_scope') }}</dt>
             <dd class="font-bold text-slate-800">
                 @if($purchaseRequest->location_scope === 'outside_jordan')
                     {{ __('tenders.location_outside_jordan') }} — {{ $purchaseRequest->country?->localized_name }}

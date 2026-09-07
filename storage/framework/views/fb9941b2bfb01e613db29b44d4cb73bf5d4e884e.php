@@ -1,35 +1,18 @@
-<?php $__env->startSection('title', __('external_purchases.add_purchase_request')); ?>
-<?php $__env->startSection('breadcrumb', __('external_purchases.add_purchase_request')); ?>
-
-<?php $__env->startSection('content'); ?>
-<div class="page-header">
-    <div>
-        <h1 class="page-title"><?php echo e(__('external_purchases.add_purchase_request')); ?></h1>
-        <p class="page-subtitle"><?php echo e(__('external_purchases.add_purchase_request_subtitle')); ?></p>
-    </div>
-    <a href="<?php echo e($project ? route('projects.show', $project) : route('purchase-requests.index')); ?>" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        <?php echo e(__('app.back_to_list')); ?>
-
-    </a>
-</div>
-
-<form action="<?php echo e(route('purchase-requests.store')); ?>" method="POST"
-      x-data="{
+<?php $purchaseRequest = $purchaseRequest ?? null; ?>
+<div x-data="{
         linkType: '<?php echo e(old('link_type', $project ? 'project' : ($serviceCall ? 'service_call' : 'stock'))); ?>',
-        scope: '<?php echo e(old('location_scope', 'inside_jordan')); ?>',
+        scope: '<?php echo e(old('location_scope', $purchaseRequest?->location_scope ?? 'inside_jordan')); ?>',
         branches: <?php echo e($branches->map(fn ($b) => ['id' => $b->id, 'addressLines' => $b->localized_address_lines])->values()->toJson()); ?>,
-        branchId: '<?php echo e(old('branch_id', $branches->first()?->id)); ?>',
+        branchId: '<?php echo e(old('branch_id', $purchaseRequest?->branch_id ?? $branches->first()?->id)); ?>',
         get branchAddressLines() {
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             return b ? b.addressLines : [];
         },
-        items: [{ material_id: '', quantity: '', unit_price: '' }],
+        items: <?php echo e(($purchaseRequest?->items->map(fn ($i) => ['material_id' => $i->material_id, 'quantity' => (float) $i->quantity, 'unit_price' => (float) $i->unit_price])->values() ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '']]))->toJson()); ?>,
         addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '' }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
       }"
       x-init="$nextTick(() => window.initSelect2())">
-    <?php echo csrf_field(); ?>
 
     <div class="card mb-5">
         <div class="card-header">
@@ -102,7 +85,7 @@ unset($__errorArgs, $__bag); ?>
 
             <div>
                 <label class="form-label"><?php echo e(__('external_purchases.request_date')); ?> <span class="text-rose-500">*</span></label>
-                <input type="date" name="date" value="<?php echo e(old('date', now()->toDateString())); ?>"
+                <input type="date" name="date" value="<?php echo e(old('date', $purchaseRequest?->date?->toDateString() ?? now()->toDateString())); ?>"
                        class="form-input <?php $__errorArgs = ['date'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -133,7 +116,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                     <option value=""><?php echo e(__('app.select')); ?></option>
                     <?php $__currentLoopData = $suppliers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $supplier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($supplier->id); ?>" <?php if(old('supplier_id') == $supplier->id): echo 'selected'; endif; ?>><?php echo e($supplier->localized_name); ?></option>
+                        <option value="<?php echo e($supplier->id); ?>" <?php if(old('supplier_id', $purchaseRequest?->supplier_id) == $supplier->id): echo 'selected'; endif; ?>><?php echo e($supplier->localized_name); ?></option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 <?php $__errorArgs = ['supplier_id'];
@@ -158,7 +141,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                     <option value=""><?php echo e(__('app.select')); ?></option>
                     <?php $__currentLoopData = $currencies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $currency): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($currency->id); ?>" <?php if(old('currency_id') == $currency->id): echo 'selected'; endif; ?>><?php echo e($currency->localized_name); ?> (<?php echo e($currency->code); ?>)</option>
+                        <option value="<?php echo e($currency->id); ?>" <?php if(old('currency_id', $purchaseRequest?->currency_id) == $currency->id): echo 'selected'; endif; ?>><?php echo e($currency->localized_name); ?> (<?php echo e($currency->code); ?>)</option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 <?php $__errorArgs = ['currency_id'];
@@ -182,7 +165,7 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
                     <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($branch->id); ?>" <?php if(old('branch_id', $branches->first()?->id) == $branch->id): echo 'selected'; endif; ?>><?php echo e($branch->localized_name); ?></option>
+                        <option value="<?php echo e($branch->id); ?>" <?php if(old('branch_id', $purchaseRequest?->branch_id ?? $branches->first()?->id) == $branch->id): echo 'selected'; endif; ?>><?php echo e($branch->localized_name); ?></option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 <?php $__errorArgs = ['branch_id'];
@@ -212,7 +195,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.address_line1')); ?></label>
-                    <input type="text" name="shipping_address_line1" value="<?php echo e(old('shipping_address_line1')); ?>"
+                    <input type="text" name="shipping_address_line1" value="<?php echo e(old('shipping_address_line1', $purchaseRequest?->shipping_address_line1)); ?>"
                            class="form-input <?php $__errorArgs = ['shipping_address_line1'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -233,7 +216,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.address_line1_en')); ?></label>
-                    <input type="text" name="shipping_address_line1_en" value="<?php echo e(old('shipping_address_line1_en')); ?>" dir="ltr"
+                    <input type="text" name="shipping_address_line1_en" value="<?php echo e(old('shipping_address_line1_en', $purchaseRequest?->shipping_address_line1_en)); ?>" dir="ltr"
                            class="form-input <?php $__errorArgs = ['shipping_address_line1_en'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -254,7 +237,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.po_box')); ?></label>
-                    <input type="text" name="shipping_po_box" value="<?php echo e(old('shipping_po_box')); ?>" dir="ltr"
+                    <input type="text" name="shipping_po_box" value="<?php echo e(old('shipping_po_box', $purchaseRequest?->shipping_po_box)); ?>" dir="ltr"
                            class="form-input <?php $__errorArgs = ['shipping_po_box'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -275,7 +258,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.postal_code')); ?></label>
-                    <input type="text" name="shipping_postal_code" value="<?php echo e(old('shipping_postal_code')); ?>" dir="ltr"
+                    <input type="text" name="shipping_postal_code" value="<?php echo e(old('shipping_postal_code', $purchaseRequest?->shipping_postal_code)); ?>" dir="ltr"
                            class="form-input <?php $__errorArgs = ['shipping_postal_code'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -296,7 +279,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.city')); ?></label>
-                    <input type="text" name="shipping_city" value="<?php echo e(old('shipping_city')); ?>"
+                    <input type="text" name="shipping_city" value="<?php echo e(old('shipping_city', $purchaseRequest?->shipping_city)); ?>"
                            class="form-input <?php $__errorArgs = ['shipping_city'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -317,7 +300,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.city_en')); ?></label>
-                    <input type="text" name="shipping_city_en" value="<?php echo e(old('shipping_city_en')); ?>" dir="ltr"
+                    <input type="text" name="shipping_city_en" value="<?php echo e(old('shipping_city_en', $purchaseRequest?->shipping_city_en)); ?>" dir="ltr"
                            class="form-input <?php $__errorArgs = ['shipping_city_en'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -338,7 +321,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.country')); ?></label>
-                    <input type="text" name="shipping_country" value="<?php echo e(old('shipping_country')); ?>"
+                    <input type="text" name="shipping_country" value="<?php echo e(old('shipping_country', $purchaseRequest?->shipping_country)); ?>"
                            class="form-input <?php $__errorArgs = ['shipping_country'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -359,7 +342,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div>
                     <label class="form-label"><?php echo e(__('app.country_en')); ?></label>
-                    <input type="text" name="shipping_country_en" value="<?php echo e(old('shipping_country_en')); ?>" dir="ltr"
+                    <input type="text" name="shipping_country_en" value="<?php echo e(old('shipping_country_en', $purchaseRequest?->shipping_country_en)); ?>" dir="ltr"
                            class="form-input <?php $__errorArgs = ['shipping_country_en'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -415,7 +398,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                         <option value=""><?php echo e(__('app.select')); ?></option>
                         <?php $__currentLoopData = \App\Models\Tender::JORDAN_GOVERNORATES; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $names): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($key); ?>" <?php if(old('governorate') === $key): echo 'selected'; endif; ?>><?php echo e($names[app()->getLocale() === 'en' ? 'en' : 'ar']); ?></option>
+                            <option value="<?php echo e($key); ?>" <?php if(old('governorate', $purchaseRequest?->governorate) === $key): echo 'selected'; endif; ?>><?php echo e($names[app()->getLocale() === 'en' ? 'en' : 'ar']); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <?php $__errorArgs = ['governorate'];
@@ -440,7 +423,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                         <option value=""><?php echo e(__('app.select')); ?></option>
                         <?php $__currentLoopData = $countries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $country): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($country->id); ?>" <?php if(old('country_id') == $country->id): echo 'selected'; endif; ?>><?php echo e($country->localized_name); ?></option>
+                            <option value="<?php echo e($country->id); ?>" <?php if(old('country_id', $purchaseRequest?->country_id) == $country->id): echo 'selected'; endif; ?>><?php echo e($country->localized_name); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <?php $__errorArgs = ['country_id'];
@@ -463,7 +446,7 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>"><?php echo e(old('notes')); ?></textarea>
+unset($__errorArgs, $__bag); ?>"><?php echo e(old('notes', $purchaseRequest?->notes)); ?></textarea>
                 <?php $__errorArgs = ['notes'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -538,16 +521,5 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
     </div>
-
-    <div class="flex items-center gap-3">
-        <button type="submit" class="btn-primary">
-            <i class="fa-solid fa-floppy-disk"></i>
-            <?php echo e(__('external_purchases.add_purchase_request')); ?>
-
-        </button>
-        <a href="<?php echo e($project ? route('projects.show', $project) : route('purchase-requests.index')); ?>" class="btn-secondary"><?php echo e(__('app.cancel')); ?></a>
-    </div>
-</form>
-<?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\swete\resources\views/external-purchases/purchase-requests/create.blade.php ENDPATH**/ ?>
+</div>
+<?php /**PATH C:\xampp\htdocs\swete\resources\views/external-purchases/purchase-requests/_form.blade.php ENDPATH**/ ?>
