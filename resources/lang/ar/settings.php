@@ -21,6 +21,7 @@ return [
     'nav_countries'         => 'الدول',
     'nav_activity_log'      => 'سجل الأنشطة',
     'nav_approval_rules'    => 'قواعد الموافقات',
+    'nav_purchase_request_approvers' => 'معتمدو طلبات الشراء',
 
     // ── Users ─────────────────────────────────────────────────────────────────
     'users'                 => 'المستخدمون',
@@ -197,5 +198,11 @@ return [
     'approval_rule_approvers'          => 'يوافق عليه',
     'approval_rule_enabled'            => 'مفعّل',
     'approval_rule_saved'              => 'تم حفظ قاعدة الموافقة بنجاح.',
+
+    // ── Purchase Request Approvers ───────────────────────────────────────────
+    'purchase_request_approvers'         => 'معتمدو طلبات الشراء',
+    'purchase_request_approvers_subtitle' => 'حدد المستخدمين الذين يجب أن يوافقوا جميعًا على أي طلب شراء جديد',
+    'purchase_request_approvers_hint'    => 'يجب أن يوافق كل من تحدده هنا على طلب الشراء قبل أن تتحول حالته إلى "تمت الموافقة". إذا رفض أحدهم يتحول الطلب إلى "مرفوض" بعد رد الجميع.',
+    'purchase_request_approvers_saved'   => 'تم حفظ قائمة المعتمدين بنجاح.',
 
 ];

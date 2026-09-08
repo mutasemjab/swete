@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PurchaseRequestItem extends Model
 {
@@ -11,6 +12,7 @@ class PurchaseRequestItem extends Model
         'purchase_request_id',
         'material_id',
         'quantity',
+        'ercd',
         'unit_price',
         'total',
     ];
@@ -29,5 +31,10 @@ class PurchaseRequestItem extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function features(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestItemFeature::class);
     }
 }

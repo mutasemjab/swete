@@ -24,6 +24,7 @@ class PermissionSeeder extends Seeder
             'settings.countries.view', 'settings.countries.create', 'settings.countries.edit', 'settings.countries.delete',
             'settings.activity_log.view',
             'settings.approval_rules.view', 'settings.approval_rules.edit',
+            'settings.purchase_request_approvers.edit',
 
             // Accounting
             'accounting.view',
@@ -55,6 +56,9 @@ class PermissionSeeder extends Seeder
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',
             'external_purchases.purchase_requests.edit', 'external_purchases.purchase_requests.delete',
+            'external_purchases.purchase_requests.approve', 'external_purchases.purchase_requests.ship',
+            'external_purchases.shipping_companies.create', 'external_purchases.shipping_companies.edit', 'external_purchases.shipping_companies.delete',
+            'external_purchases.shipments.create', 'external_purchases.shipments.edit', 'external_purchases.shipments.delete',
 
             // Maintenance (future — module not built yet, permission reserved)
             'maintenance.view',

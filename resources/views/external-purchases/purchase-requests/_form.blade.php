@@ -8,8 +8,17 @@
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             return b ? b.addressLines : [];
         },
-        items: {{ ($purchaseRequest?->items->map(fn ($i) => ['material_id' => $i->material_id, 'quantity' => (float) $i->quantity, 'unit_price' => (float) $i->unit_price])->values() ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '']]))->toJson() }},
-        addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '' }); this.$nextTick(() => window.initSelect2()); },
+        items: {{ (
+            $purchaseRequest?->items->map(fn ($i) => [
+                'material_id' => $i->material_id,
+                'quantity'    => (float) $i->quantity,
+                'ercd'        => $i->ercd,
+                'unit_price'  => (float) $i->unit_price,
+                'features'    => $i->features->pluck('value')->values()->isNotEmpty() ? $i->features->pluck('value')->values() : [''],
+            ])->values()
+            ?? collect([['material_id' => '', 'quantity' => '', 'ercd' => '', 'unit_price' => '', 'features' => ['']]])
+        )->toJson() }},
+        addItem() { this.items.push({ material_id: '', quantity: '', ercd: '', unit_price: '', features: [''] }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
       }"
       x-init="$nextTick(() => window.initSelect2())">
@@ -222,8 +231,10 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.material') }}</th>
-                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('warehouse.voucher_item_quantity') }}</th>
-                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('accounting.invoice_item_unit_price') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('warehouse.voucher_item_quantity') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('external_purchases.item_ercd') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('accounting.invoice_item_unit_price') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-56">{{ __('external_purchases.item_features') }}</th>
                         <th class="px-5 py-3 w-10"></th>
                     </tr>
                 </thead>
@@ -243,8 +254,29 @@
                                        step="0.001" min="0.001" dir="ltr" class="form-input" required>
                             </td>
                             <td class="px-5 py-2.5">
+                                <input type="text" :name="`items[${index}][ercd]`" x-model="item.ercd" dir="ltr" class="form-input">
+                            </td>
+                            <td class="px-5 py-2.5">
                                 <input type="number" :name="`items[${index}][unit_price]`" x-model="item.unit_price"
                                        step="0.001" min="0" dir="ltr" class="form-input" required>
+                            </td>
+                            <td class="px-5 py-2.5">
+                                <div class="space-y-1">
+                                    <template x-for="(feature, fIndex) in item.features" :key="fIndex">
+                                        <div class="flex items-center gap-1">
+                                            <input type="text" :name="`items[${index}][features][${fIndex}]`" x-model="item.features[fIndex]"
+                                                   class="form-input !py-1 !text-xs" placeholder="{{ __('external_purchases.item_feature_placeholder') }}">
+                                            <button type="button" @click="item.features.splice(fIndex, 1)"
+                                                    class="p-1 text-slate-300 hover:text-rose-600 flex-shrink-0">
+                                                <i class="fa-solid fa-xmark text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <button type="button" @click="item.features.push('')"
+                                            class="text-xs font-semibold text-indigo-600 hover:underline">
+                                        <i class="fa-solid fa-plus"></i> {{ __('external_purchases.add_feature') }}
+                                    </button>
+                                </div>
                             </td>
                             <td class="px-5 py-2.5 text-center">
                                 <button type="button" @click="removeItem(index)" title="{{ __('accounting.invoice_remove_item') }}"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ExternalPurchases;
 
 use App\Http\Controllers\ModuleController;
+use App\Mail\ShippingQuoteRequestMail;
 use App\Models\Branch;
 use App\Models\Country;
 use App\Models\Currency;
@@ -10,9 +11,11 @@ use App\Models\Material;
 use App\Models\Project;
 use App\Models\PurchaseRequest;
 use App\Models\ServiceCall;
+use App\Models\ShippingCompany;
 use App\Models\Supplier;
 use App\Models\Tender;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class PurchaseRequestController extends ModuleController
 {
@@ -56,6 +59,7 @@ class PurchaseRequestController extends ModuleController
         ]);
 
         $this->syncItems($purchaseRequest, $validated['items']);
+        $purchaseRequest->seedApprovals();
 
         return redirect()->route('purchase-requests.show', $purchaseRequest)
             ->with('success', __('external_purchases.request_added'));
@@ -63,14 +67,18 @@ class PurchaseRequestController extends ModuleController
 
     public function show(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator', 'items.material.unit']);
+        $purchaseRequest->load([
+            'supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator',
+            'items.material.unit', 'items.features',
+            'approvals.user', 'attachments.creator',
+        ]);
 
         return $this->moduleView('external-purchases.purchase-requests.show', compact('purchaseRequest'));
     }
 
     public function edit(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load('items');
+        $purchaseRequest->load('items.features');
 
         return $this->moduleView('external-purchases.purchase-requests.edit', [
             ...$this->formOptions(),
@@ -145,7 +153,10 @@ class PurchaseRequestController extends ModuleController
             'items'                      => ['required', 'array', 'min:1'],
             'items.*.material_id'        => ['required', 'exists:materials,id'],
             'items.*.quantity'           => ['required', 'numeric', 'min:0.001'],
+            'items.*.ercd'               => ['nullable', 'string', 'max:150'],
             'items.*.unit_price'         => ['required', 'numeric', 'min:0'],
+            'items.*.features'           => ['array'],
+            'items.*.features.*'         => ['nullable', 'string', 'max:255'],
         ]);
 
         if (($validated['location_scope'] ?? null) === 'outside_jordan') {
@@ -162,12 +173,118 @@ class PurchaseRequestController extends ModuleController
         $purchaseRequest->items()->delete();
 
         foreach ($items as $item) {
-            $purchaseRequest->items()->create([
+            $features = $item['features'] ?? [];
+            unset($item['features']);
+
+            $createdItem = $purchaseRequest->items()->create([
                 ...$item,
                 'total' => $item['quantity'] * $item['unit_price'],
             ]);
+
+            foreach (array_filter($features, fn ($value) => filled($value)) as $value) {
+                $createdItem->features()->create(['value' => $value]);
+            }
         }
 
         $purchaseRequest->recalculateTotals();
+    }
+
+    /** Approve/reject as the current user, if they have a still-pending approval row. */
+    public function approve(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $purchaseRequest->recordDecision($request->user(), 'approved');
+
+        return back()->with('success', __('external_purchases.approval_recorded'));
+    }
+
+    public function reject(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $validated = $request->validate(['note' => ['nullable', 'string', 'max:500']]);
+
+        $purchaseRequest->recordDecision($request->user(), 'rejected', $validated['note'] ?? null);
+
+        return back()->with('success', __('external_purchases.approval_recorded'));
+    }
+
+    public function markSent(PurchaseRequest $purchaseRequest)
+    {
+        if (! $purchaseRequest->markSent()) {
+            return back()->with('error', __('external_purchases.mark_sent_invalid'));
+        }
+
+        return back()->with('success', __('external_purchases.request_marked_sent'));
+    }
+
+    public function updateManufacturing(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $validated = $request->validate([
+            'so_number'  => ['required', 'string', 'max:100'],
+            'ready_date' => ['required', 'date'],
+        ]);
+
+        $purchaseRequest->updateManufacturingInfo($validated['so_number'], $validated['ready_date']);
+
+        return back()->with('success', __('external_purchases.manufacturing_updated'));
+    }
+
+    /** Eligible = still in manufacturing — once shipped, status moves on and it drops off this list. */
+    public function shipmentForm(Request $request)
+    {
+        $eligiblePurchaseRequests = PurchaseRequest::where('status', 'manufacturing')
+            ->with('supplier')->orderByDesc('date')->get();
+
+        $selectedIds = collect($request->query('purchase_request_ids', []))->map(fn ($id) => (int) $id);
+
+        $shippingCompanies = ShippingCompany::where('status', true)->orderBy('name')->get();
+
+        return $this->moduleView('external-purchases.purchase-requests.ship', compact(
+            'eligiblePurchaseRequests', 'selectedIds', 'shippingCompanies'
+        ));
+    }
+
+    public function sendToShippingCompanies(Request $request)
+    {
+        $validated = $request->validate([
+            'purchase_request_ids'   => ['required', 'array', 'min:1'],
+            'purchase_request_ids.*' => ['exists:purchase_requests,id'],
+            'shipping_company_ids'   => ['required', 'array', 'min:1'],
+            'shipping_company_ids.*' => ['exists:shipping_companies,id'],
+            'message'                => ['nullable', 'string', 'max:2000'],
+            'attachments'            => ['nullable', 'array'],
+            'attachments.*'          => ['file', 'max:10240'],
+        ]);
+
+        // Re-filter by status defensively — a stale form shouldn't ship a PR that's since moved on.
+        $purchaseRequests = PurchaseRequest::whereIn('id', $validated['purchase_request_ids'])
+            ->where('status', 'manufacturing')->get();
+        $companies = ShippingCompany::whereIn('id', $validated['shipping_company_ids'])->get();
+        $files     = $request->file('attachments', []);
+
+        foreach ($companies as $company) {
+            Mail::to($company->email)->send(new ShippingQuoteRequestMail(
+                $purchaseRequests, $company, $validated['message'] ?? null, $files
+            ));
+
+            foreach ($purchaseRequests as $purchaseRequest) {
+                $purchaseRequest->shippingRequests()->create([
+                    'shipping_company_id' => $company->id,
+                    'sent_by'             => $request->user()->id,
+                    'sent_at'             => now(),
+                ]);
+            }
+        }
+
+        foreach ($purchaseRequests as $purchaseRequest) {
+            activity()
+                ->performedOn($purchaseRequest)
+                ->causedBy($request->user())
+                ->withProperties(['shipping_companies' => $companies->pluck('name')])
+                ->log('shipping_rfq_sent');
+
+            $purchaseRequest->markAwaitingPriceQuotes();
+        }
+
+        return redirect()->route('purchase-requests.index')
+            ->with('success', __('external_purchases.shipping_rfq_sent'));
     }
 }

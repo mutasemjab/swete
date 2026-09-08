@@ -21,6 +21,7 @@ return [
     'nav_countries'         => 'Countries',
     'nav_activity_log'      => 'Activity Log',
     'nav_approval_rules'    => 'Approval Rules',
+    'nav_purchase_request_approvers' => 'Purchase Request Approvers',
 
     // ── Users ─────────────────────────────────────────────────────────────────
     'users'                 => 'Users',
@@ -197,5 +198,11 @@ return [
     'approval_rule_approvers'          => 'Approved by',
     'approval_rule_enabled'            => 'Enabled',
     'approval_rule_saved'              => 'Approval rule saved successfully.',
+
+    // ── Purchase Request Approvers ───────────────────────────────────────────
+    'purchase_request_approvers'         => 'Purchase Request Approvers',
+    'purchase_request_approvers_subtitle' => 'Choose the users who must all approve any new purchase request',
+    'purchase_request_approvers_hint'    => 'Everyone selected here must approve a purchase request before its status becomes "Approved". If any one rejects, the request becomes "Rejected" once everyone has responded.',
+    'purchase_request_approvers_saved'   => 'Approver list saved successfully.',
 
 ];

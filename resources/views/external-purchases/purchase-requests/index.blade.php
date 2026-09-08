@@ -9,10 +9,16 @@
         <h1 class="page-title">{{ __('external_purchases.requests_list') }}</h1>
         <p class="page-subtitle">{{ __('external_purchases.requests_subtitle') }}</p>
     </div>
-    <a href="{{ route('purchase-requests.create') }}" class="btn-primary">
-        <i class="fa-solid fa-plus"></i>
-        {{ __('external_purchases.add_purchase_request') }}
-    </a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('purchase-requests.ship') }}" class="btn-secondary">
+            <i class="fa-solid fa-ship"></i>
+            {{ __('external_purchases.send_to_shipping_companies') }}
+        </a>
+        <a href="{{ route('purchase-requests.create') }}" class="btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            {{ __('external_purchases.add_purchase_request') }}
+        </a>
+    </div>
 </div>
 
 <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

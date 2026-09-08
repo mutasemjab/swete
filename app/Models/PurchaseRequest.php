@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\FormatsAddressLines;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -35,14 +36,35 @@ class PurchaseRequest extends Model
         'subtotal',
         'total',
         'notes',
+        'status',
+        'so_number',
+        'ready_date',
         'created_by',
     ];
 
     protected $casts = [
-        'date'     => 'date',
-        'subtotal' => 'decimal:3',
-        'total'    => 'decimal:3',
+        'date'       => 'date',
+        'ready_date' => 'date',
+        'subtotal'   => 'decimal:3',
+        'total'      => 'decimal:3',
     ];
+
+    public const STATUSES = ['pending_approval', 'approved', 'rejected', 'sent', 'manufacturing', 'awaiting_price_quotes', 'shipped'];
+
+    public const STATUS_COLORS = [
+        'pending_approval'      => 'amber',
+        'approved'              => 'emerald',
+        'rejected'              => 'rose',
+        'sent'                  => 'indigo',
+        'manufacturing'         => 'cyan',
+        'awaiting_price_quotes' => 'violet',
+        'shipped'               => 'teal',
+    ];
+
+    public function getStatusColorAttribute(): string
+    {
+        return self::STATUS_COLORS[$this->status] ?? 'slate';
+    }
 
     public function project(): BelongsTo
     {
@@ -82,6 +104,26 @@ class PurchaseRequest extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseRequestItem::class);
+    }
+
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestApproval::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestAttachment::class);
+    }
+
+    public function shippingRequests(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestShippingRequest::class);
+    }
+
+    public function shipments(): BelongsToMany
+    {
+        return $this->belongsToMany(Shipment::class);
     }
 
     /** Stacked, locale-aware request address — derived live from the branch, not duplicated here. */
@@ -128,6 +170,73 @@ class PurchaseRequest extends Model
             'subtotal' => $subtotal,
             'total'    => $subtotal,
         ]);
+    }
+
+    /** Snapshot the current PurchaseRequestApprover pool into per-PR approval rows. Called once, right after creation. */
+    public function seedApprovals(): void
+    {
+        foreach (PurchaseRequestApprover::pluck('user_id') as $userId) {
+            $this->approvals()->create(['user_id' => $userId]);
+        }
+    }
+
+    /** Record one approver's decision, then re-evaluate the PR's overall status if everyone has now responded. */
+    public function recordDecision(User $user, string $decision, ?string $note = null): void
+    {
+        $approval = $this->approvals()->where('user_id', $user->id)->where('decision', 'pending')->first();
+
+        if (! $approval) {
+            return;
+        }
+
+        $approval->update(['decision' => $decision, 'decided_at' => now(), 'note' => $note]);
+
+        $this->resolveApprovalStatus();
+    }
+
+    private function resolveApprovalStatus(): void
+    {
+        if ($this->approvals()->where('decision', 'pending')->exists()) {
+            return;
+        }
+
+        $this->update([
+            'status' => $this->approvals()->where('decision', 'rejected')->exists() ? 'rejected' : 'approved',
+        ]);
+    }
+
+    public function markSent(): bool
+    {
+        if ($this->status !== 'approved') {
+            return false;
+        }
+
+        $this->update(['status' => 'sent']);
+
+        return true;
+    }
+
+    /** Setting both SO number and ready date advances a sent PR into manufacturing. */
+    public function updateManufacturingInfo(string $soNumber, string $readyDate): void
+    {
+        $this->update([
+            'so_number'  => $soNumber,
+            'ready_date' => $readyDate,
+        ]);
+
+        if ($this->status === 'sent') {
+            $this->update(['status' => 'manufacturing']);
+        }
+    }
+
+    public function markAwaitingPriceQuotes(): void
+    {
+        $this->update(['status' => 'awaiting_price_quotes']);
+    }
+
+    public function markShipped(): void
+    {
+        $this->update(['status' => 'shipped']);
     }
 
     public function getActivitylogOptions(): LogOptions

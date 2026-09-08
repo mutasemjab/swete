@@ -150,6 +150,20 @@ return [
                     ['label' => 'external_purchases.nav_requests_add',  'route' => 'purchase-requests.create', 'icon' => 'plus'],
                 ],
             ],
+            [
+                'label' => 'external_purchases.section_shipments',
+                'items' => [
+                    ['label' => 'external_purchases.nav_shipments_list', 'route' => 'shipments.index',  'icon' => 'anchor'],
+                    ['label' => 'external_purchases.nav_shipments_add',  'route' => 'shipments.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
+                'label' => 'external_purchases.section_shipping_companies',
+                'items' => [
+                    ['label' => 'external_purchases.nav_shipping_companies_list', 'route' => 'shipping-companies.index',  'icon' => 'ship'],
+                    ['label' => 'external_purchases.nav_shipping_companies_add',  'route' => 'shipping-companies.create', 'icon' => 'plus'],
+                ],
+            ],
         ],
     ],
 
@@ -206,6 +220,7 @@ return [
                 'items' => [
                     ['label' => 'settings.nav_activity_log',   'route' => 'settings.activity-log.index',   'icon' => 'clock-rotate-left'],
                     ['label' => 'settings.nav_approval_rules', 'route' => 'settings.approval-rules.index', 'icon' => 'user-shield'],
+                    ['label' => 'settings.nav_purchase_request_approvers', 'route' => 'settings.purchase-request-approvers.index', 'icon' => 'user-check'],
                 ],
             ],
         ],

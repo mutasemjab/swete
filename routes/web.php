@@ -29,7 +29,11 @@ use App\Http\Controllers\Tenders\TenderStatusController;
 use App\Http\Controllers\Tenders\PriceQuoteController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
+use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
+use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
+use App\Http\Controllers\ExternalPurchases\ShipmentController;
 use App\Http\Controllers\Settings\ApprovalRuleController;
+use App\Http\Controllers\Settings\PurchaseRequestApproverController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,6 +81,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('countries',   CountryController::class)->except(['show']);
         Route::resource('activity-log', ActivityLogController::class)->only(['index']);
         Route::resource('approval-rules', ApprovalRuleController::class)->only(['index', 'store']);
+        Route::get('purchase-request-approvers',  [PurchaseRequestApproverController::class, 'index'])->name('purchase-request-approvers.index');
+        Route::put('purchase-request-approvers',  [PurchaseRequestApproverController::class, 'update'])->name('purchase-request-approvers.update');
 
     });
 
@@ -128,7 +134,21 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show']);
     Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
 
+    // Must be registered before the {purchase_request} resource routes below, since
+    // "ship" would otherwise be swallowed by the show route's single-segment wildcard.
+    Route::get('purchase-requests/ship', [PurchaseRequestController::class, 'shipmentForm'])->name('purchase-requests.ship');
+    Route::post('purchase-requests/ship', [PurchaseRequestController::class, 'sendToShippingCompanies'])->name('purchase-requests.ship.send');
+
     Route::resource('purchase-requests', PurchaseRequestController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
     Route::get('purchase-requests/{purchaseRequest}/print', [PurchaseRequestController::class, 'printDocument'])->name('purchase-requests.print');
+    Route::post('purchase-requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-requests.approve');
+    Route::post('purchase-requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase-requests.reject');
+    Route::post('purchase-requests/{purchaseRequest}/mark-sent', [PurchaseRequestController::class, 'markSent'])->name('purchase-requests.mark-sent');
+    Route::post('purchase-requests/{purchaseRequest}/manufacturing', [PurchaseRequestController::class, 'updateManufacturing'])->name('purchase-requests.manufacturing');
+    Route::post('purchase-requests/{purchaseRequest}/attachments', [PurchaseRequestAttachmentController::class, 'store'])->name('purchase-requests.attachments.store');
+    Route::delete('purchase-requests/{purchaseRequest}/attachments/{attachment}', [PurchaseRequestAttachmentController::class, 'destroy'])->name('purchase-requests.attachments.destroy');
+
+    Route::resource('shipping-companies', ShippingCompanyController::class)->except(['show']);
+    Route::resource('shipments', ShipmentController::class);
 
 });
