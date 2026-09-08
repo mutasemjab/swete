@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approval;
+use App\Models\PurchaseRequestApproval;
 use App\Services\ApprovalService;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,15 @@ class ApprovalController extends Controller
         $pendingForMe = Approval::with(['approvable', 'requester'])
             ->where('approver_id', auth()->id())
             ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        // Purchase requests use their own unanimous-approval mechanism (not the
+        // generic Approval model — see PurchaseRequest::seedApprovals()), so they
+        // need to be surfaced here separately for the approver to actually find them.
+        $pendingPurchaseRequestApprovals = PurchaseRequestApproval::with(['purchaseRequest.creator'])
+            ->where('user_id', auth()->id())
+            ->where('decision', 'pending')
             ->latest()
             ->get();
 
@@ -41,7 +51,7 @@ class ApprovalController extends Controller
             'sections' => [],
         ];
 
-        return view('approvals.index', compact('tab', 'pendingForMe', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
+        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
     }
 
     public function approve(Request $request, Approval $approval, ApprovalService $approvals)

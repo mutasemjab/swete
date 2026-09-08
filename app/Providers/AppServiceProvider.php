@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Approval;
+use App\Models\PurchaseRequestApproval;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -14,9 +15,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('layouts.app', function ($view) {
-            $view->with('pendingApprovalsCount', Auth::check()
-                ? Approval::where('approver_id', Auth::id())->where('status', 'pending')->count()
-                : 0);
+            $count = 0;
+
+            if (Auth::check()) {
+                $count = Approval::where('approver_id', Auth::id())->where('status', 'pending')->count()
+                    + PurchaseRequestApproval::where('user_id', Auth::id())->where('decision', 'pending')->count();
+            }
+
+            $view->with('pendingApprovalsCount', $count);
         });
     }
 }

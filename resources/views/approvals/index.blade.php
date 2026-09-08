@@ -19,8 +19,9 @@
                 class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all"
                 :class="tab === 'for_me' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'">
             {{ __('approvals.tab_for_me') }}
-            @if($pendingForMe->count())
-                <span class="ms-1.5 px-1.5 py-0.5 rounded-md text-[11px]" :class="tab === 'for_me' ? 'bg-white/20' : 'bg-rose-100 text-rose-600'">{{ $pendingForMe->count() }}</span>
+            @php $forMeTotal = $pendingForMe->count() + $pendingPurchaseRequestApprovals->count(); @endphp
+            @if($forMeTotal)
+                <span class="ms-1.5 px-1.5 py-0.5 rounded-md text-[11px]" :class="tab === 'for_me' ? 'bg-white/20' : 'bg-rose-100 text-rose-600'">{{ $forMeTotal }}</span>
             @endif
         </button>
         <button type="button" @click="tab = 'by_me'"
@@ -31,7 +32,57 @@
     </div>
 
     {{-- Pending for me --}}
-    <div x-show="tab === 'for_me'" class="card overflow-hidden">
+    <div x-show="tab === 'for_me'">
+
+        @if($pendingPurchaseRequestApprovals->isNotEmpty())
+        <div class="card overflow-hidden mb-5">
+            <div class="card-header">
+                <h3 class="font-bold text-slate-700">{{ __('approvals.pending_purchase_requests') }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('approvals.item') }}</th>
+                            <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('approvals.requested_by') }}</th>
+                            <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('approvals.requested_at') }}</th>
+                            <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($pendingPurchaseRequestApprovals as $prApproval)
+                        @php $pr = $prApproval->purchaseRequest; @endphp
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-5 py-4 font-bold text-slate-800">
+                                <a href="{{ route('purchase-requests.show', $pr) }}" class="hover:text-indigo-600 hover:underline">{{ $pr->number }}</a>
+                            </td>
+                            <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->creator?->name }}</td>
+                            <td class="px-5 py-4 text-sm text-slate-500">{{ $prApproval->created_at->diffForHumans() }}</td>
+                            <td class="px-5 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <form action="{{ route('purchase-requests.approve', $pr) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-primary btn-sm">
+                                            <i class="fa-solid fa-check"></i> {{ __('approvals.approve') }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('purchase-requests.reject', $pr) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-danger btn-sm">
+                                            <i class="fa-solid fa-xmark"></i> {{ __('approvals.reject') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+    <div class="card overflow-hidden">
         @if($pendingForMe->isEmpty())
             <div class="flex flex-col items-center justify-center py-20 text-center">
                 <div class="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mb-5">
@@ -80,6 +131,8 @@
                 </table>
             </div>
         @endif
+    </div>
+
     </div>
 
     {{-- Submitted by me --}}

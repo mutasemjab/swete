@@ -31,6 +31,7 @@ return [
     'approval_note'         => 'ملاحظة (اختياري)',
     'pending_approval_from' => 'بانتظار موافقة',
     'no_pending_for_me'     => 'لا توجد طلبات بانتظار موافقتك حالياً',
+    'pending_purchase_requests' => 'طلبات شراء بانتظار موافقتك',
     'no_submitted_by_me'    => 'لم ترفع أي طلب موافقة بعد',
 
     // ── Rule-triggered pending actions ──────────────────────────────────────
