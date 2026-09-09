@@ -119,6 +119,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         // is its own domain, not a shared "party" concept.
         Route::resource('customers',        CustomerController::class)->except(['show']);
         Route::resource('customer-groups',  CustomerGroupController::class)->except(['show']);
+        Route::post('suppliers/shipping-instruction-image', [SupplierController::class, 'uploadShippingInstructionImage'])->name('suppliers.shipping-instruction-image');
         Route::resource('suppliers',        SupplierController::class)->except(['show']);
         Route::resource('supplier-groups',  SupplierGroupController::class)->except(['show']);
 

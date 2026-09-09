@@ -40,6 +40,7 @@ return [
     'request_branch'           => 'Branch',
     'request_address'          => 'Request Address',
     'request_shipping_address' => 'Shipping Address',
+    'request_shipping_address_hint' => "Auto-filled from the customer's default address once a project or service call belonging to them is selected.",
     'request_currency'         => 'Currency',
     'request_notes'            => 'Notes',
     'request_items'            => 'Request Items',

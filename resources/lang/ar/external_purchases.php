@@ -40,6 +40,7 @@ return [
     'request_branch'           => 'الفرع',
     'request_address'          => 'عنوان الطلب',
     'request_shipping_address' => 'عنوان الشحن',
+    'request_shipping_address_hint' => 'يُعبأ تلقائيًا من العنوان الافتراضي للعميل عند اختيار مشروع أو طلب صيانة تابع له.',
     'request_currency'         => 'العملة',
     'request_notes'            => 'ملاحظات',
     'request_items'            => 'بنود الطلب',

@@ -457,6 +457,21 @@
         });
     };
     document.addEventListener('DOMContentLoaded', () => window.initSelect2());
+
+    
+    window.initRichText = function (overrides = {}) {
+        if (typeof tinymce === 'undefined') return;
+        tinymce.init({
+            selector: '.js-richtext',
+            directionality: '<?php echo e($isRtl ? "rtl" : "ltr"); ?>',
+            height: 420,
+            menubar: false,
+            plugins: 'lists link image table code',
+            toolbar: 'undo redo | blocks | bold italic underline forecolor backcolor | '
+                + 'alignleft aligncenter alignright | bullist numlist | table image link | removeformat code',
+            ...overrides,
+        });
+    };
 </script>
 
 <?php echo $__env->yieldPushContent('scripts'); ?>

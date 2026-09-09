@@ -8,18 +8,19 @@
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             return b ? b.addressLines : [];
         },
-        suppliers: {{ $suppliers->map(fn ($s) => [
-            'id' => $s->id,
-            'shipping_address_line1' => $s->shipping_address_line1,
-            'shipping_address_line1_en' => $s->shipping_address_line1_en,
-            'shipping_po_box' => $s->shipping_po_box,
-            'shipping_postal_code' => $s->shipping_postal_code,
-            'shipping_city' => $s->shipping_city,
-            'shipping_city_en' => $s->shipping_city_en,
-            'shipping_country' => $s->shipping_country,
-            'shipping_country_en' => $s->shipping_country_en,
+        projectCustomers: {{ $projects->pluck('customer_id', 'id')->toJson() }},
+        serviceCallCustomers: {{ $serviceCalls->pluck('customer_id', 'id')->toJson() }},
+        customers: {{ $customers->map(fn ($c) => [
+            'id' => $c->id,
+            'shipping_address_line1' => $c->shipping_address_line1,
+            'shipping_address_line1_en' => $c->shipping_address_line1_en,
+            'shipping_po_box' => $c->shipping_po_box,
+            'shipping_postal_code' => $c->shipping_postal_code,
+            'shipping_city' => $c->shipping_city,
+            'shipping_city_en' => $c->shipping_city_en,
+            'shipping_country' => $c->shipping_country,
+            'shipping_country_en' => $c->shipping_country_en,
         ])->values()->toJson() }},
-        supplierId: '{{ old('supplier_id', $purchaseRequest?->supplier_id) }}',
         shipping: {
             address_line1: '{{ old('shipping_address_line1', $purchaseRequest?->shipping_address_line1) }}',
             address_line1_en: '{{ old('shipping_address_line1_en', $purchaseRequest?->shipping_address_line1_en) }}',
@@ -30,17 +31,25 @@
             country: '{{ old('shipping_country', $purchaseRequest?->shipping_country) }}',
             country_en: '{{ old('shipping_country_en', $purchaseRequest?->shipping_country_en) }}',
         },
-        fillShippingFromSupplier() {
-            const s = this.suppliers.find(x => String(x.id) === String(this.supplierId));
-            if (!s) return;
-            this.shipping.address_line1 = s.shipping_address_line1 || '';
-            this.shipping.address_line1_en = s.shipping_address_line1_en || '';
-            this.shipping.po_box = s.shipping_po_box || '';
-            this.shipping.postal_code = s.shipping_postal_code || '';
-            this.shipping.city = s.shipping_city || '';
-            this.shipping.city_en = s.shipping_city_en || '';
-            this.shipping.country = s.shipping_country || '';
-            this.shipping.country_en = s.shipping_country_en || '';
+        fillShippingFromCustomer(customerId) {
+            const c = this.customers.find(x => String(x.id) === String(customerId));
+            if (!c) return;
+            this.shipping.address_line1 = c.shipping_address_line1 || '';
+            this.shipping.address_line1_en = c.shipping_address_line1_en || '';
+            this.shipping.po_box = c.shipping_po_box || '';
+            this.shipping.postal_code = c.shipping_postal_code || '';
+            this.shipping.city = c.shipping_city || '';
+            this.shipping.city_en = c.shipping_city_en || '';
+            this.shipping.country = c.shipping_country || '';
+            this.shipping.country_en = c.shipping_country_en || '';
+        },
+        onProjectChange(projectId) {
+            const customerId = this.projectCustomers[projectId];
+            if (customerId) this.fillShippingFromCustomer(customerId);
+        },
+        onServiceCallChange(serviceCallId) {
+            const customerId = this.serviceCallCustomers[serviceCallId];
+            if (customerId) this.fillShippingFromCustomer(customerId);
         },
         additionalNotes: {{ (
             $purchaseRequest?->additionalNotes->map(fn ($n) => ['label' => $n->label, 'value' => $n->value])->values()
@@ -81,7 +90,7 @@
 
             <div x-show="linkType === 'project'">
                 <label class="form-label">{{ __('external_purchases.request_project') }}</label>
-                <select name="project_id" class="js-select2 form-select @error('project_id') is-invalid @enderror">
+                <select name="project_id" @change="onProjectChange($event.target.value)" class="js-select2 form-select @error('project_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($projects as $p)
                         <option value="{{ $p->id }}" @selected(old('project_id', $project?->id) == $p->id)>{{ $p->number }} — {{ $p->localized_title }}</option>
@@ -92,7 +101,7 @@
 
             <div x-show="linkType === 'service_call'">
                 <label class="form-label">{{ __('external_purchases.request_service_call') }}</label>
-                <select name="service_call_id" class="js-select2 form-select @error('service_call_id') is-invalid @enderror">
+                <select name="service_call_id" @change="onServiceCallChange($event.target.value)" class="js-select2 form-select @error('service_call_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($serviceCalls as $sc)
                         <option value="{{ $sc->id }}" @selected(old('service_call_id', $serviceCall?->id) == $sc->id)>{{ $sc->number }} — {{ $sc->title }}</option>
@@ -110,7 +119,7 @@
 
             <div>
                 <label class="form-label">{{ __('external_purchases.request_supplier') }} <span class="text-rose-500">*</span></label>
-                <select name="supplier_id" x-model="supplierId" @change="fillShippingFromSupplier()" class="js-select2 form-select @error('supplier_id') is-invalid @enderror">
+                <select name="supplier_id" class="js-select2 form-select @error('supplier_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($suppliers as $supplier)
                         <option value="{{ $supplier->id }}" @selected(old('supplier_id', $purchaseRequest?->supplier_id) == $supplier->id)>{{ $supplier->localized_name }}</option>
@@ -153,6 +162,7 @@
             <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div class="sm:col-span-2">
                     <label class="form-label">{{ __('external_purchases.request_shipping_address') }}</label>
+                    <p class="text-xs text-slate-400 -mt-1 mb-1">{{ __('external_purchases.request_shipping_address_hint') }}</p>
                 </div>
 
                 <div>

@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use App\Models\SupplierGroup;
 use App\Models\Tender;
 use Illuminate\Http\Request;
+use Mews\Purifier\Facades\Purifier;
 
 class SupplierController extends ModuleController
 {
@@ -82,6 +83,18 @@ class SupplierController extends ModuleController
             ->with('success', __('accounting.party_deleted'));
     }
 
+    /** Image upload target for the shipping-instruction rich-text editor — stored the same way branch logos are (no public disk symlink in this app). */
+    public function uploadShippingInstructionImage(Request $request)
+    {
+        $request->validate(['file' => ['required', 'image', 'max:4096']]);
+
+        $filename = uploadImage('assets/uploads/suppliers/shipping-instructions', $request->file('file'));
+
+        return response()->json([
+            'location' => asset('assets/uploads/suppliers/shipping-instructions/' . $filename),
+        ]);
+    }
+
     private function validated(Request $request): array
     {
         $validated = $request->validate([
@@ -96,15 +109,7 @@ class SupplierController extends ModuleController
             'location_scope'    => ['nullable', 'in:inside_jordan,outside_jordan'],
             'governorate'       => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
             'country_id'        => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
-            'shipping_address_line1'    => ['nullable', 'string', 'max:255'],
-            'shipping_address_line1_en' => ['nullable', 'string', 'max:255'],
-            'shipping_po_box'           => ['nullable', 'string', 'max:30'],
-            'shipping_postal_code'      => ['nullable', 'string', 'max:30'],
-            'shipping_city'             => ['nullable', 'string', 'max:100'],
-            'shipping_city_en'          => ['nullable', 'string', 'max:100'],
-            'shipping_country'          => ['nullable', 'string', 'max:100'],
-            'shipping_country_en'       => ['nullable', 'string', 'max:100'],
-            'shipping_instruction'      => ['nullable', 'string'],
+            'shipping_instruction' => ['nullable', 'string'],
             'status'            => ['boolean'],
         ]);
 
@@ -112,6 +117,10 @@ class SupplierController extends ModuleController
             $validated['governorate'] = null;
         } elseif (($validated['location_scope'] ?? null) === 'inside_jordan') {
             $validated['country_id'] = null;
+        }
+
+        if (! empty($validated['shipping_instruction'])) {
+            $validated['shipping_instruction'] = Purifier::clean($validated['shipping_instruction'], 'rich_text');
         }
 
         return $validated;

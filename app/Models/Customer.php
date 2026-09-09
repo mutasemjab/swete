@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FormatsAddressLines;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Customer extends Model
 {
-    use LogsActivity;
+    use LogsActivity, FormatsAddressLines;
 
     protected $fillable = [
         'customer_group_id',
@@ -22,6 +23,14 @@ class Customer extends Model
         'address',
         'tax_number',
         'opening_balance',
+        'shipping_address_line1',
+        'shipping_address_line1_en',
+        'shipping_po_box',
+        'shipping_postal_code',
+        'shipping_city',
+        'shipping_city_en',
+        'shipping_country',
+        'shipping_country_en',
         'status',
     ];
 
@@ -50,6 +59,17 @@ class Customer extends Model
         return app()->isLocale('en') && $this->name_en
             ? $this->name_en
             : $this->name;
+    }
+
+    /** Stacked, locale-aware default shipping address — used to auto-fill a purchase request's shipping fields once a linked project/service call resolves this customer. */
+    public function getLocalizedShippingAddressLinesAttribute(): array
+    {
+        return $this->addressLines(
+            $this->shipping_address_line1, $this->shipping_address_line1_en,
+            $this->shipping_po_box, $this->shipping_postal_code,
+            $this->shipping_city, $this->shipping_city_en,
+            $this->shipping_country, $this->shipping_country_en,
+        );
     }
 
     public static function nextCode(): string

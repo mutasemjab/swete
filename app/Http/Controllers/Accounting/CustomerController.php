@@ -89,6 +89,14 @@ class CustomerController extends ModuleController
             'address'           => ['nullable', 'string', 'max:255'],
             'tax_number'        => ['nullable', 'string', 'max:50'],
             'opening_balance'   => ['nullable', 'numeric'],
+            'shipping_address_line1'    => ['nullable', 'string', 'max:255'],
+            'shipping_address_line1_en' => ['nullable', 'string', 'max:255'],
+            'shipping_po_box'           => ['nullable', 'string', 'max:30'],
+            'shipping_postal_code'      => ['nullable', 'string', 'max:30'],
+            'shipping_city'             => ['nullable', 'string', 'max:100'],
+            'shipping_city_en'          => ['nullable', 'string', 'max:100'],
+            'shipping_country'          => ['nullable', 'string', 'max:100'],
+            'shipping_country_en'       => ['nullable', 'string', 'max:100'],
             'status'            => ['boolean'],
         ]);
     }

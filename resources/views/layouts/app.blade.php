@@ -457,6 +457,24 @@
         });
     };
     document.addEventListener('DOMContentLoaded', () => window.initSelect2());
+
+    {{-- Rich text editor (tables, colors, images): the TinyMCE library itself is NOT loaded here —
+         only pages with a .js-richtext field should pay for it. Load tinymce via CDN in that page's
+         own @push('scripts'), then call window.initRichText(overrides) — `overrides` is where a page
+         plugs in its own images_upload_handler, since the upload endpoint differs per model/field. --}}
+    window.initRichText = function (overrides = {}) {
+        if (typeof tinymce === 'undefined') return;
+        tinymce.init({
+            selector: '.js-richtext',
+            directionality: '{{ $isRtl ? "rtl" : "ltr" }}',
+            height: 420,
+            menubar: false,
+            plugins: 'lists link image table code',
+            toolbar: 'undo redo | blocks | bold italic underline forecolor backcolor | '
+                + 'alignleft aligncenter alignright | bullist numlist | table image link | removeformat code',
+            ...overrides,
+        });
+    };
 </script>
 
 @stack('scripts')

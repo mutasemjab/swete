@@ -81,3 +81,71 @@
         </div>
     </div>
 </div>
+
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-truck-ramp-box text-blue-500 text-sm"></i>
+            {{ __('accounting.customer_default_shipping_address') }}
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <p class="text-xs text-slate-400 sm:col-span-2">{{ __('accounting.customer_default_shipping_address_hint') }}</p>
+
+        <div>
+            <label class="form-label">{{ __('app.address_line1') }}</label>
+            <input type="text" name="shipping_address_line1" value="{{ old('shipping_address_line1', $customer?->shipping_address_line1) }}"
+                   class="form-input @error('shipping_address_line1') is-invalid @enderror">
+            @error('shipping_address_line1')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.address_line1_en') }}</label>
+            <input type="text" name="shipping_address_line1_en" value="{{ old('shipping_address_line1_en', $customer?->shipping_address_line1_en) }}" dir="ltr"
+                   class="form-input @error('shipping_address_line1_en') is-invalid @enderror">
+            @error('shipping_address_line1_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.po_box') }}</label>
+            <input type="text" name="shipping_po_box" value="{{ old('shipping_po_box', $customer?->shipping_po_box) }}" dir="ltr"
+                   class="form-input @error('shipping_po_box') is-invalid @enderror">
+            @error('shipping_po_box')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.postal_code') }}</label>
+            <input type="text" name="shipping_postal_code" value="{{ old('shipping_postal_code', $customer?->shipping_postal_code) }}" dir="ltr"
+                   class="form-input @error('shipping_postal_code') is-invalid @enderror">
+            @error('shipping_postal_code')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.city') }}</label>
+            <input type="text" name="shipping_city" value="{{ old('shipping_city', $customer?->shipping_city) }}"
+                   class="form-input @error('shipping_city') is-invalid @enderror">
+            @error('shipping_city')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.city_en') }}</label>
+            <input type="text" name="shipping_city_en" value="{{ old('shipping_city_en', $customer?->shipping_city_en) }}" dir="ltr"
+                   class="form-input @error('shipping_city_en') is-invalid @enderror">
+            @error('shipping_city_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.country') }}</label>
+            <input type="text" name="shipping_country" value="{{ old('shipping_country', $customer?->shipping_country) }}"
+                   class="form-input @error('shipping_country') is-invalid @enderror">
+            @error('shipping_country')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('app.country_en') }}</label>
+            <input type="text" name="shipping_country_en" value="{{ old('shipping_country_en', $customer?->shipping_country_en) }}" dir="ltr"
+                   class="form-input @error('shipping_country_en') is-invalid @enderror">
+            @error('shipping_country_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+    </div>
+</div>

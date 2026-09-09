@@ -150,9 +150,25 @@
         body { background: #fff; }
         .po-toolbar { display: none !important; }
         .po-page { box-shadow: none; margin: 0; width: auto; min-height: 0; }
+        .instruction-page { page-break-before: always; }
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
+
+    .instruction-page-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        border-bottom: 2px solid var(--po-red);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+    .instruction-title { font-size: 16px; font-weight: 800; color: var(--po-red); margin: 0; }
+    .instruction-subtitle { font-size: 12px; color: #555; margin: 0; }
+    .instruction-content { font-size: 12px; line-height: 1.65; }
+    .instruction-content table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+    .instruction-content table td, .instruction-content table th { border: 1px solid #ccc; padding: 5px 8px; }
+    .instruction-content img { max-width: 100%; }
 </style>
 </head>
 <body>
@@ -298,6 +314,18 @@
     </div>
 
 </div>
+
+@if($purchaseRequest->supplier?->shipping_instruction)
+<div class="po-page instruction-page">
+    <div class="instruction-page-header">
+        <p class="instruction-title">{{ __('accounting.supplier_shipping_instruction') }}</p>
+        <p class="instruction-subtitle">{{ $purchaseRequest->supplier->localized_name }} — {{ $purchaseRequest->number }}</p>
+    </div>
+    <div class="instruction-content">
+        {!! $purchaseRequest->supplier->shipping_instruction !!}
+    </div>
+</div>
+@endif
 
 </body>
 </html>

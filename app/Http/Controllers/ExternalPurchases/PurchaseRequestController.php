@@ -163,6 +163,7 @@ class PurchaseRequestController extends ModuleController
             'projects'     => Project::where('status', 'active')->orderByDesc('created_at')->get(),
             'serviceCalls' => ServiceCall::orderByDesc('created_at')->get(),
             'suppliers'    => Supplier::where('status', true)->orderBy('name')->get(),
+            'customers'    => Customer::where('status', true)->orderBy('name')->get(),
             'branches'     => Branch::where('status', true)->orderBy('name')->get(),
             'currencies'   => Currency::where('status', true)->orderBy('name')->get(),
             'countries'    => Country::where('status', true)->orderBy('name')->get(),
