@@ -37,8 +37,8 @@
     $filterKeys = ['search', 'status', 'supplier_id', 'customer_id', 'date_from', 'date_to'];
 ?>
 
-<form method="GET" action="<?php echo e(route('purchase-requests.index')); ?>" class="card px-5 py-4 mb-4 flex flex-wrap gap-3 items-center">
-    <div class="flex-1 min-w-48">
+<form method="GET" action="<?php echo e(route('purchase-requests.index')); ?>" class="card px-5 py-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div>
         <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
             <input type="text" name="search" value="<?php echo e(request('search')); ?>"
@@ -46,38 +46,50 @@
                    class="form-input ps-10">
         </div>
     </div>
-    <select name="status" class="form-select w-48">
-        <option value=""><?php echo e(__('app.all_statuses')); ?></option>
-        <?php $__currentLoopData = \App\Models\PurchaseRequest::STATUSES; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusOption): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($statusOption); ?>" <?php if(request('status') === $statusOption): echo 'selected'; endif; ?>><?php echo e(__('external_purchases.status_' . $statusOption)); ?></option>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </select>
-    <select name="supplier_id" class="js-select2 form-select w-56">
-        <option value=""><?php echo e(__('external_purchases.request_supplier')); ?></option>
-        <?php $__currentLoopData = $suppliers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $supplier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($supplier->id); ?>" <?php if(request('supplier_id') == $supplier->id): echo 'selected'; endif; ?>><?php echo e($supplier->localized_name); ?></option>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </select>
-    <select name="customer_id" class="js-select2 form-select w-56">
-        <option value=""><?php echo e(__('tenders.tender_customer')); ?></option>
-        <?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($customer->id); ?>" <?php if(request('customer_id') == $customer->id): echo 'selected'; endif; ?>><?php echo e($customer->localized_name); ?></option>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </select>
-    <input type="date" name="date_from" value="<?php echo e(request('date_from')); ?>" class="form-input w-40" title="<?php echo e(__('app.from')); ?>">
-    <input type="date" name="date_to" value="<?php echo e(request('date_to')); ?>" class="form-input w-40" title="<?php echo e(__('app.to')); ?>">
-    <button type="submit" class="btn-primary">
-        <i class="fa-solid fa-filter"></i>
-        <?php echo e(__('app.search')); ?>
+    <div>
+        <select name="status" class="form-select w-full">
+            <option value=""><?php echo e(__('app.all_statuses')); ?></option>
+            <?php $__currentLoopData = \App\Models\PurchaseRequest::STATUSES; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusOption): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($statusOption); ?>" <?php if(request('status') === $statusOption): echo 'selected'; endif; ?>><?php echo e(__('external_purchases.status_' . $statusOption)); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+    </div>
+    <div>
+        <select name="supplier_id" class="js-select2 form-select w-full">
+            <option value=""><?php echo e(__('external_purchases.request_supplier')); ?></option>
+            <?php $__currentLoopData = $suppliers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $supplier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($supplier->id); ?>" <?php if(request('supplier_id') == $supplier->id): echo 'selected'; endif; ?>><?php echo e($supplier->localized_name); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+    </div>
+    <div>
+        <select name="customer_id" class="js-select2 form-select w-full">
+            <option value=""><?php echo e(__('tenders.tender_customer')); ?></option>
+            <?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($customer->id); ?>" <?php if(request('customer_id') == $customer->id): echo 'selected'; endif; ?>><?php echo e($customer->localized_name); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </select>
+    </div>
+    <div>
+        <input type="date" name="date_from" value="<?php echo e(request('date_from')); ?>" class="form-input w-full" title="<?php echo e(__('app.from')); ?>">
+    </div>
+    <div>
+        <input type="date" name="date_to" value="<?php echo e(request('date_to')); ?>" class="form-input w-full" title="<?php echo e(__('app.to')); ?>">
+    </div>
+    <div class="flex items-center gap-2">
+        <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-filter"></i>
+            <?php echo e(__('app.search')); ?>
 
-    </button>
-    <?php if(request()->hasAny($filterKeys)): ?>
-        <a href="<?php echo e(route('purchase-requests.index')); ?>" class="btn-secondary">
-            <i class="fa-solid fa-xmark"></i>
-            <?php echo e(__('app.clear_filters')); ?>
+        </button>
+        <?php if(request()->hasAny($filterKeys)): ?>
+            <a href="<?php echo e(route('purchase-requests.index')); ?>" class="btn-secondary">
+                <i class="fa-solid fa-xmark"></i>
+                <?php echo e(__('app.clear_filters')); ?>
 
-        </a>
-    <?php endif; ?>
+            </a>
+        <?php endif; ?>
+    </div>
 </form>
 
 <div class="card overflow-hidden">

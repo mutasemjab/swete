@@ -37,8 +37,8 @@
     $filterKeys = ['search', 'status', 'supplier_id', 'customer_id', 'date_from', 'date_to'];
 @endphp
 
-<form method="GET" action="{{ route('purchase-requests.index') }}" class="card px-5 py-4 mb-4 flex flex-wrap gap-3 items-center">
-    <div class="flex-1 min-w-48">
+<form method="GET" action="{{ route('purchase-requests.index') }}" class="card px-5 py-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div>
         <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
             <input type="text" name="search" value="{{ request('search') }}"
@@ -46,36 +46,48 @@
                    class="form-input ps-10">
         </div>
     </div>
-    <select name="status" class="form-select w-48">
-        <option value="">{{ __('app.all_statuses') }}</option>
-        @foreach(\App\Models\PurchaseRequest::STATUSES as $statusOption)
-            <option value="{{ $statusOption }}" @selected(request('status') === $statusOption)>{{ __('external_purchases.status_' . $statusOption) }}</option>
-        @endforeach
-    </select>
-    <select name="supplier_id" class="js-select2 form-select w-56">
-        <option value="">{{ __('external_purchases.request_supplier') }}</option>
-        @foreach($suppliers as $supplier)
-            <option value="{{ $supplier->id }}" @selected(request('supplier_id') == $supplier->id)>{{ $supplier->localized_name }}</option>
-        @endforeach
-    </select>
-    <select name="customer_id" class="js-select2 form-select w-56">
-        <option value="">{{ __('tenders.tender_customer') }}</option>
-        @foreach($customers as $customer)
-            <option value="{{ $customer->id }}" @selected(request('customer_id') == $customer->id)>{{ $customer->localized_name }}</option>
-        @endforeach
-    </select>
-    <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-input w-40" title="{{ __('app.from') }}">
-    <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-input w-40" title="{{ __('app.to') }}">
-    <button type="submit" class="btn-primary">
-        <i class="fa-solid fa-filter"></i>
-        {{ __('app.search') }}
-    </button>
-    @if(request()->hasAny($filterKeys))
-        <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
-            <i class="fa-solid fa-xmark"></i>
-            {{ __('app.clear_filters') }}
-        </a>
-    @endif
+    <div>
+        <select name="status" class="form-select w-full">
+            <option value="">{{ __('app.all_statuses') }}</option>
+            @foreach(\App\Models\PurchaseRequest::STATUSES as $statusOption)
+                <option value="{{ $statusOption }}" @selected(request('status') === $statusOption)>{{ __('external_purchases.status_' . $statusOption) }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div>
+        <select name="supplier_id" class="js-select2 form-select w-full">
+            <option value="">{{ __('external_purchases.request_supplier') }}</option>
+            @foreach($suppliers as $supplier)
+                <option value="{{ $supplier->id }}" @selected(request('supplier_id') == $supplier->id)>{{ $supplier->localized_name }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div>
+        <select name="customer_id" class="js-select2 form-select w-full">
+            <option value="">{{ __('tenders.tender_customer') }}</option>
+            @foreach($customers as $customer)
+                <option value="{{ $customer->id }}" @selected(request('customer_id') == $customer->id)>{{ $customer->localized_name }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div>
+        <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-input w-full" title="{{ __('app.from') }}">
+    </div>
+    <div>
+        <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-input w-full" title="{{ __('app.to') }}">
+    </div>
+    <div class="flex items-center gap-2">
+        <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-filter"></i>
+            {{ __('app.search') }}
+        </button>
+        @if(request()->hasAny($filterKeys))
+            <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
+                <i class="fa-solid fa-xmark"></i>
+                {{ __('app.clear_filters') }}
+            </a>
+        @endif
+    </div>
 </form>
 
 <div class="card overflow-hidden">
