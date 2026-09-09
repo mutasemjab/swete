@@ -96,6 +96,15 @@ class SupplierController extends ModuleController
             'location_scope'    => ['nullable', 'in:inside_jordan,outside_jordan'],
             'governorate'       => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
             'country_id'        => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
+            'shipping_address_line1'    => ['nullable', 'string', 'max:255'],
+            'shipping_address_line1_en' => ['nullable', 'string', 'max:255'],
+            'shipping_po_box'           => ['nullable', 'string', 'max:30'],
+            'shipping_postal_code'      => ['nullable', 'string', 'max:30'],
+            'shipping_city'             => ['nullable', 'string', 'max:100'],
+            'shipping_city_en'          => ['nullable', 'string', 'max:100'],
+            'shipping_country'          => ['nullable', 'string', 'max:100'],
+            'shipping_country_en'       => ['nullable', 'string', 'max:100'],
+            'shipping_instruction'      => ['nullable', 'string'],
             'status'            => ['boolean'],
         ]);
 

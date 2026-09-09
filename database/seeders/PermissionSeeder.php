@@ -59,6 +59,7 @@ class PermissionSeeder extends Seeder
             'external_purchases.purchase_requests.approve', 'external_purchases.purchase_requests.ship',
             'external_purchases.shipping_companies.create', 'external_purchases.shipping_companies.edit', 'external_purchases.shipping_companies.delete',
             'external_purchases.shipments.create', 'external_purchases.shipments.edit', 'external_purchases.shipments.delete',
+            'external_purchases.vendor_email_template.edit',
 
             // Maintenance (future — module not built yet, permission reserved)
             'maintenance.view',

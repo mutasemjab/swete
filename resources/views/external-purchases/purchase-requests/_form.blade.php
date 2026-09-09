@@ -8,6 +8,44 @@
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             return b ? b.addressLines : [];
         },
+        suppliers: {{ $suppliers->map(fn ($s) => [
+            'id' => $s->id,
+            'shipping_address_line1' => $s->shipping_address_line1,
+            'shipping_address_line1_en' => $s->shipping_address_line1_en,
+            'shipping_po_box' => $s->shipping_po_box,
+            'shipping_postal_code' => $s->shipping_postal_code,
+            'shipping_city' => $s->shipping_city,
+            'shipping_city_en' => $s->shipping_city_en,
+            'shipping_country' => $s->shipping_country,
+            'shipping_country_en' => $s->shipping_country_en,
+        ])->values()->toJson() }},
+        supplierId: '{{ old('supplier_id', $purchaseRequest?->supplier_id) }}',
+        shipping: {
+            address_line1: '{{ old('shipping_address_line1', $purchaseRequest?->shipping_address_line1) }}',
+            address_line1_en: '{{ old('shipping_address_line1_en', $purchaseRequest?->shipping_address_line1_en) }}',
+            po_box: '{{ old('shipping_po_box', $purchaseRequest?->shipping_po_box) }}',
+            postal_code: '{{ old('shipping_postal_code', $purchaseRequest?->shipping_postal_code) }}',
+            city: '{{ old('shipping_city', $purchaseRequest?->shipping_city) }}',
+            city_en: '{{ old('shipping_city_en', $purchaseRequest?->shipping_city_en) }}',
+            country: '{{ old('shipping_country', $purchaseRequest?->shipping_country) }}',
+            country_en: '{{ old('shipping_country_en', $purchaseRequest?->shipping_country_en) }}',
+        },
+        fillShippingFromSupplier() {
+            const s = this.suppliers.find(x => String(x.id) === String(this.supplierId));
+            if (!s) return;
+            this.shipping.address_line1 = s.shipping_address_line1 || '';
+            this.shipping.address_line1_en = s.shipping_address_line1_en || '';
+            this.shipping.po_box = s.shipping_po_box || '';
+            this.shipping.postal_code = s.shipping_postal_code || '';
+            this.shipping.city = s.shipping_city || '';
+            this.shipping.city_en = s.shipping_city_en || '';
+            this.shipping.country = s.shipping_country || '';
+            this.shipping.country_en = s.shipping_country_en || '';
+        },
+        additionalNotes: {{ (
+            $purchaseRequest?->additionalNotes->map(fn ($n) => ['label' => $n->label, 'value' => $n->value])->values()
+            ?? collect(\App\Models\PurchaseRequest::DEFAULT_NOTE_LABELS)->map(fn ($label) => ['label' => $label, 'value' => ''])
+        )->toJson() }},
         items: {{ (
             $purchaseRequest?->items->map(fn ($i) => [
                 'material_id' => $i->material_id,
@@ -72,7 +110,7 @@
 
             <div>
                 <label class="form-label">{{ __('external_purchases.request_supplier') }} <span class="text-rose-500">*</span></label>
-                <select name="supplier_id" class="js-select2 form-select @error('supplier_id') is-invalid @enderror">
+                <select name="supplier_id" x-model="supplierId" @change="fillShippingFromSupplier()" class="js-select2 form-select @error('supplier_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($suppliers as $supplier)
                         <option value="{{ $supplier->id }}" @selected(old('supplier_id', $purchaseRequest?->supplier_id) == $supplier->id)>{{ $supplier->localized_name }}</option>
@@ -119,56 +157,56 @@
 
                 <div>
                     <label class="form-label">{{ __('app.address_line1') }}</label>
-                    <input type="text" name="shipping_address_line1" value="{{ old('shipping_address_line1', $purchaseRequest?->shipping_address_line1) }}"
+                    <input type="text" name="shipping_address_line1" x-model="shipping.address_line1"
                            class="form-input @error('shipping_address_line1') is-invalid @enderror">
                     @error('shipping_address_line1')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.address_line1_en') }}</label>
-                    <input type="text" name="shipping_address_line1_en" value="{{ old('shipping_address_line1_en', $purchaseRequest?->shipping_address_line1_en) }}" dir="ltr"
+                    <input type="text" name="shipping_address_line1_en" x-model="shipping.address_line1_en" dir="ltr"
                            class="form-input @error('shipping_address_line1_en') is-invalid @enderror">
                     @error('shipping_address_line1_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.po_box') }}</label>
-                    <input type="text" name="shipping_po_box" value="{{ old('shipping_po_box', $purchaseRequest?->shipping_po_box) }}" dir="ltr"
+                    <input type="text" name="shipping_po_box" x-model="shipping.po_box" dir="ltr"
                            class="form-input @error('shipping_po_box') is-invalid @enderror">
                     @error('shipping_po_box')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.postal_code') }}</label>
-                    <input type="text" name="shipping_postal_code" value="{{ old('shipping_postal_code', $purchaseRequest?->shipping_postal_code) }}" dir="ltr"
+                    <input type="text" name="shipping_postal_code" x-model="shipping.postal_code" dir="ltr"
                            class="form-input @error('shipping_postal_code') is-invalid @enderror">
                     @error('shipping_postal_code')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.city') }}</label>
-                    <input type="text" name="shipping_city" value="{{ old('shipping_city', $purchaseRequest?->shipping_city) }}"
+                    <input type="text" name="shipping_city" x-model="shipping.city"
                            class="form-input @error('shipping_city') is-invalid @enderror">
                     @error('shipping_city')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.city_en') }}</label>
-                    <input type="text" name="shipping_city_en" value="{{ old('shipping_city_en', $purchaseRequest?->shipping_city_en) }}" dir="ltr"
+                    <input type="text" name="shipping_city_en" x-model="shipping.city_en" dir="ltr"
                            class="form-input @error('shipping_city_en') is-invalid @enderror">
                     @error('shipping_city_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.country') }}</label>
-                    <input type="text" name="shipping_country" value="{{ old('shipping_country', $purchaseRequest?->shipping_country) }}"
+                    <input type="text" name="shipping_country" x-model="shipping.country"
                            class="form-input @error('shipping_country') is-invalid @enderror">
                     @error('shipping_country')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="form-label">{{ __('app.country_en') }}</label>
-                    <input type="text" name="shipping_country_en" value="{{ old('shipping_country_en', $purchaseRequest?->shipping_country_en) }}" dir="ltr"
+                    <input type="text" name="shipping_country_en" x-model="shipping.country_en" dir="ltr"
                            class="form-input @error('shipping_country_en') is-invalid @enderror">
                     @error('shipping_country_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
                 </div>
@@ -290,5 +328,28 @@
             </table>
         </div>
         @error('items')<p class="form-error px-5 py-3"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-note-sticky text-cyan-500 text-sm"></i>
+                {{ __('external_purchases.additional_notes') }}
+            </h3>
+        </div>
+        <div class="px-6 py-5 space-y-3">
+            <template x-for="(note, nIndex) in additionalNotes" :key="nIndex">
+                <div class="flex items-center gap-3">
+                    <span class="w-56 flex-shrink-0 text-sm font-semibold text-slate-700" x-text="note.label"></span>
+                    <input type="hidden" :name="`additional_notes[${nIndex}][label]`" :value="note.label">
+                    <input type="text" :name="`additional_notes[${nIndex}][value]`" x-model="note.value" dir="ltr" class="form-input">
+                    <button type="button" @click="additionalNotes.splice(nIndex, 1)"
+                            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all flex-shrink-0">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                    </button>
+                </div>
+            </template>
+            <p x-show="additionalNotes.length === 0" class="text-sm text-slate-400">{{ __('external_purchases.no_additional_notes') }}</p>
+        </div>
     </div>
 </div>

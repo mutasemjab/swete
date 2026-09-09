@@ -32,6 +32,7 @@ use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
 use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
 use App\Http\Controllers\ExternalPurchases\ShipmentController;
+use App\Http\Controllers\ExternalPurchases\VendorEmailTemplateController;
 use App\Http\Controllers\Settings\ApprovalRuleController;
 use App\Http\Controllers\Settings\PurchaseRequestApproverController;
 
@@ -150,5 +151,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     Route::resource('shipping-companies', ShippingCompanyController::class)->except(['show']);
     Route::resource('shipments', ShipmentController::class);
+
+    Route::get('vendor-email-template', [VendorEmailTemplateController::class, 'index'])->name('vendor-email-template.index');
+    Route::put('vendor-email-template', [VendorEmailTemplateController::class, 'update'])->name('vendor-email-template.update');
 
 });

@@ -61,6 +61,16 @@ class PurchaseRequest extends Model
         'shipped'               => 'teal',
     ];
 
+    /** Preset labels the "Additional Notes" section starts with on the create form — removable, not a fixed enum. */
+    public const DEFAULT_NOTE_LABELS = [
+        'Incoterm',
+        'Payment Term',
+        'Attached Files',
+        'Language of Documentation',
+        'All Documents Shall be Sent To',
+        'Shipment Desired Date',
+    ];
+
     public function getStatusColorAttribute(): string
     {
         return self::STATUS_COLORS[$this->status] ?? 'slate';
@@ -124,6 +134,17 @@ class PurchaseRequest extends Model
     public function shipments(): BelongsToMany
     {
         return $this->belongsToMany(Shipment::class);
+    }
+
+    public function additionalNotes(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestNote::class);
+    }
+
+    /** Locked once shipped — the request is considered finalized at that point. */
+    public function isEditable(): bool
+    {
+        return $this->status !== 'shipped';
     }
 
     /** Stacked, locale-aware request address — derived live from the branch, not duplicated here. */

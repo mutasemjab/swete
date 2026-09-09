@@ -140,6 +140,24 @@ return [
     'item_feature_placeholder' => 'Type anything...',
     'add_feature'             => 'Add Feature',
 
+    // ── Additional notes ─────────────────────────────────────────────────────
+    'additional_notes'    => 'Additional Notes',
+    'no_additional_notes' => 'No additional notes.',
+
+    // ── Edit lock ─────────────────────────────────────────────────────────────
+    'request_locked' => 'This request can no longer be edited after it has been shipped.',
+
+    // ── Vendor email template ────────────────────────────────────────────────
+    'section_vendor_email_template'          => 'Vendor Email Template',
+    'nav_vendor_email_template'              => 'Vendor Email Template',
+    'vendor_email_template'                  => 'Vendor Email Template',
+    'vendor_email_template_subtitle'         => 'The default email content sent to the vendor when a purchase request is marked as "Sent"',
+    'vendor_email_template_placeholder_hint' => 'You can use :number and it will be replaced with the purchase request number automatically.',
+    'vendor_email_template_saved'            => 'Email template saved successfully.',
+    'email_subject'                          => 'Email Subject',
+    'email_body'                             => 'Email Body',
+    'supplier_email_missing'                 => 'This supplier has no email address on file, so the email cannot be sent.',
+
     // ── Shipments ────────────────────────────────────────────────────────────
     'shipment'                    => 'Shipment',
     'shipments'                   => 'Shipments',

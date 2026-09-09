@@ -24,6 +24,18 @@ return new class extends Migration
             $table->string('governorate')->nullable();
             $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
 
+            // Default shipping address for this supplier — same shape as
+            // purchase_requests.shipping_* so a PR can auto-fill from it on select.
+            $table->string('shipping_address_line1')->nullable();
+            $table->string('shipping_address_line1_en')->nullable();
+            $table->string('shipping_po_box')->nullable();
+            $table->string('shipping_postal_code')->nullable();
+            $table->string('shipping_city')->nullable();
+            $table->string('shipping_city_en')->nullable();
+            $table->string('shipping_country')->nullable();
+            $table->string('shipping_country_en')->nullable();
+            $table->text('shipping_instruction')->nullable();
+
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

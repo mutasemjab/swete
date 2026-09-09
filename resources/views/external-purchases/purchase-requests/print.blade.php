@@ -265,13 +265,14 @@
 
     <div class="po-bottom">
         <div class="po-notes" dir="ltr" style="text-align:left;">
-            <p class="po-notes-title">Additional Notes:</p>
-            <p class="po-notes-body">
-                Incoterm: EXWork<br>
-                Payment Term: 60 Days after Invoice date.<br>
-                Language Of Documentation: English<br>
-                All Documents Shall be sent to: Invoice Address
-            </p>
+            @if($purchaseRequest->additionalNotes->isNotEmpty())
+                <p class="po-notes-title">Additional Notes:</p>
+                <p class="po-notes-body">
+                    @foreach($purchaseRequest->additionalNotes as $note)
+                        {{ $note->label }}: {{ $note->value }}<br>
+                    @endforeach
+                </p>
+            @endif
             @if($purchaseRequest->notes)
                 <p class="po-notes-body">{{ $purchaseRequest->notes }}</p>
             @endif

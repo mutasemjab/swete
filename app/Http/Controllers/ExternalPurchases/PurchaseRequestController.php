@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ExternalPurchases;
 
 use App\Http\Controllers\ModuleController;
 use App\Mail\ShippingQuoteRequestMail;
+use App\Mail\VendorPurchaseOrderMail;
 use App\Models\Branch;
 use App\Models\Country;
 use App\Models\Currency;
@@ -14,6 +15,7 @@ use App\Models\ServiceCall;
 use App\Models\ShippingCompany;
 use App\Models\Supplier;
 use App\Models\Tender;
+use App\Models\VendorEmailTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -59,6 +61,7 @@ class PurchaseRequestController extends ModuleController
         ]);
 
         $this->syncItems($purchaseRequest, $validated['items']);
+        $this->syncAdditionalNotes($purchaseRequest, $validated['additional_notes'] ?? []);
         $purchaseRequest->seedApprovals();
 
         return redirect()->route('purchase-requests.show', $purchaseRequest)
@@ -70,15 +73,21 @@ class PurchaseRequestController extends ModuleController
         $purchaseRequest->load([
             'supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator',
             'items.material.unit', 'items.features',
-            'approvals.user', 'attachments.creator',
+            'approvals.user', 'attachments.creator', 'additionalNotes',
         ]);
 
-        return $this->moduleView('external-purchases.purchase-requests.show', compact('purchaseRequest'));
+        $emailTemplate = $purchaseRequest->status === 'approved'
+            ? VendorEmailTemplate::current()->forNumber($purchaseRequest->number)
+            : null;
+
+        return $this->moduleView('external-purchases.purchase-requests.show', compact('purchaseRequest', 'emailTemplate'));
     }
 
     public function edit(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load('items.features');
+        abort_unless($purchaseRequest->isEditable(), 403, __('external_purchases.request_locked'));
+
+        $purchaseRequest->load('items.features', 'additionalNotes');
 
         return $this->moduleView('external-purchases.purchase-requests.edit', [
             ...$this->formOptions(),
@@ -90,11 +99,14 @@ class PurchaseRequestController extends ModuleController
 
     public function update(Request $request, PurchaseRequest $purchaseRequest)
     {
+        abort_unless($purchaseRequest->isEditable(), 403, __('external_purchases.request_locked'));
+
         $validated = $this->validated($request);
 
         $purchaseRequest->update($validated);
 
         $this->syncItems($purchaseRequest, $validated['items']);
+        $this->syncAdditionalNotes($purchaseRequest, $validated['additional_notes'] ?? []);
 
         return redirect()->route('purchase-requests.show', $purchaseRequest)
             ->with('success', __('external_purchases.request_updated'));
@@ -111,7 +123,7 @@ class PurchaseRequestController extends ModuleController
     /** Standalone, print-optimized A4 document — deliberately not wrapped in the app shell. */
     public function printDocument(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator', 'items.material.unit']);
+        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator', 'items.material.unit', 'additionalNotes']);
 
         return view('external-purchases.purchase-requests.print', compact('purchaseRequest'));
     }
@@ -157,6 +169,9 @@ class PurchaseRequestController extends ModuleController
             'items.*.unit_price'         => ['required', 'numeric', 'min:0'],
             'items.*.features'           => ['array'],
             'items.*.features.*'         => ['nullable', 'string', 'max:255'],
+            'additional_notes'           => ['array'],
+            'additional_notes.*.label'   => ['required_with:additional_notes', 'string', 'max:150'],
+            'additional_notes.*.value'   => ['nullable', 'string', 'max:255'],
         ]);
 
         if (($validated['location_scope'] ?? null) === 'outside_jordan') {
@@ -189,6 +204,18 @@ class PurchaseRequestController extends ModuleController
         $purchaseRequest->recalculateTotals();
     }
 
+    private function syncAdditionalNotes(PurchaseRequest $purchaseRequest, array $rows): void
+    {
+        $purchaseRequest->additionalNotes()->delete();
+
+        foreach ($rows as $row) {
+            $purchaseRequest->additionalNotes()->create([
+                'label' => $row['label'],
+                'value' => $row['value'] ?? null,
+            ]);
+        }
+    }
+
     /** Approve/reject as the current user, if they have a still-pending approval row. */
     public function approve(Request $request, PurchaseRequest $purchaseRequest)
     {
@@ -206,11 +233,25 @@ class PurchaseRequestController extends ModuleController
         return back()->with('success', __('external_purchases.approval_recorded'));
     }
 
-    public function markSent(PurchaseRequest $purchaseRequest)
+    public function markSent(Request $request, PurchaseRequest $purchaseRequest)
     {
-        if (! $purchaseRequest->markSent()) {
+        if ($purchaseRequest->status !== 'approved') {
             return back()->with('error', __('external_purchases.mark_sent_invalid'));
         }
+
+        $validated = $request->validate([
+            'email_subject' => ['required', 'string', 'max:255'],
+            'email_body'    => ['required', 'string'],
+        ]);
+
+        if (! $purchaseRequest->supplier?->email) {
+            return back()->with('error', __('external_purchases.supplier_email_missing'));
+        }
+
+        Mail::to($purchaseRequest->supplier->email)
+            ->send(new VendorPurchaseOrderMail($validated['email_subject'], $validated['email_body']));
+
+        $purchaseRequest->markSent();
 
         return back()->with('success', __('external_purchases.request_marked_sent'));
     }

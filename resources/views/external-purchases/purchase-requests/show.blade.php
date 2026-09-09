@@ -22,10 +22,12 @@
             <i class="fa-solid fa-print"></i>
             {{ __('external_purchases.print') }}
         </a>
+        @if($purchaseRequest->isEditable())
         <a href="{{ route('purchase-requests.edit', $purchaseRequest) }}" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
         </a>
+        @endif
         <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
             <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
             {{ __('app.back_to_list') }}
@@ -79,11 +81,30 @@
 </div>
 
 @if($purchaseRequest->status === 'approved')
-<div class="card px-6 py-5 mb-5 flex items-center justify-between">
-    <p class="text-sm text-slate-600">{{ __('external_purchases.approved_hint') }}</p>
-    <form action="{{ route('purchase-requests.mark-sent', $purchaseRequest) }}" method="POST">
+<div class="card px-6 py-5 mb-5">
+    <p class="text-sm text-slate-600 mb-4">{{ __('external_purchases.approved_hint') }}</p>
+
+    @if(! $purchaseRequest->supplier?->email)
+        <p class="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 mb-4">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ __('external_purchases.supplier_email_missing') }}
+        </p>
+    @endif
+
+    <form action="{{ route('purchase-requests.mark-sent', $purchaseRequest) }}" method="POST" class="space-y-4">
         @csrf
-        <button type="submit" class="btn-primary">
+        <div>
+            <label class="form-label">{{ __('external_purchases.email_subject') }}</label>
+            <input type="text" name="email_subject" value="{{ old('email_subject', $emailTemplate['subject']) }}" dir="ltr"
+                   class="form-input @error('email_subject') is-invalid @enderror">
+            @error('email_subject')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <div>
+            <label class="form-label">{{ __('external_purchases.email_body') }}</label>
+            <textarea name="email_body" rows="6" dir="ltr" class="form-input @error('email_body') is-invalid @enderror">{{ old('email_body', $emailTemplate['body']) }}</textarea>
+            @error('email_body')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <button type="submit" class="btn-primary" @disabled(! $purchaseRequest->supplier?->email)>
             <i class="fa-solid fa-paper-plane"></i>
             {{ __('external_purchases.mark_sent') }}
         </button>
@@ -249,6 +270,20 @@
         @endif
     </dl>
 </div>
+
+@if($purchaseRequest->additionalNotes->isNotEmpty())
+<div class="card px-6 py-5 mb-5">
+    <h3 class="font-bold text-slate-700 mb-3">{{ __('external_purchases.additional_notes') }}</h3>
+    <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        @foreach($purchaseRequest->additionalNotes as $note)
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ $note->label }}</dt>
+            <dd class="font-bold text-slate-800">{{ $note->value ?: '—' }}</dd>
+        </div>
+        @endforeach
+    </dl>
+</div>
+@endif
 
 <div class="card overflow-hidden mb-5">
     <div class="card-header">

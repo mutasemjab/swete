@@ -164,6 +164,12 @@ return [
                     ['label' => 'external_purchases.nav_shipping_companies_add',  'route' => 'shipping-companies.create', 'icon' => 'plus'],
                 ],
             ],
+            [
+                'label' => 'external_purchases.section_vendor_email_template',
+                'items' => [
+                    ['label' => 'external_purchases.nav_vendor_email_template', 'route' => 'vendor-email-template.index', 'icon' => 'envelope-open-text'],
+                ],
+            ],
         ],
     ],
 
