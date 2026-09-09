@@ -55,6 +55,20 @@
             @endforelse
         </div>
 
+        @if($purchaseRequest->canApproveManually())
+        <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
+            <form action="{{ route('purchase-requests.approve-manually', $purchaseRequest) }}" method="POST"
+                  onsubmit="return confirm('{{ __('external_purchases.manual_approve_confirm') }}')">
+                @csrf
+                <button type="submit" class="btn-primary btn-sm">
+                    <i class="fa-solid fa-check-double"></i>
+                    {{ __('external_purchases.manual_approve') }}
+                </button>
+            </form>
+            <p class="text-xs text-slate-400">{{ __('external_purchases.manual_approve_hint') }}</p>
+        </div>
+        @endif
+
         @if($canDecide)
         <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
             <form action="{{ route('purchase-requests.approve', $purchaseRequest) }}" method="POST">

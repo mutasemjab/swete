@@ -144,6 +144,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::get('purchase-requests/{purchaseRequest}/print', [PurchaseRequestController::class, 'printDocument'])->name('purchase-requests.print');
     Route::post('purchase-requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-requests.approve');
     Route::post('purchase-requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase-requests.reject');
+    Route::post('purchase-requests/{purchaseRequest}/approve-manually', [PurchaseRequestController::class, 'approveManually'])->name('purchase-requests.approve-manually');
     Route::post('purchase-requests/{purchaseRequest}/mark-sent', [PurchaseRequestController::class, 'markSent'])->name('purchase-requests.mark-sent');
     Route::post('purchase-requests/{purchaseRequest}/manufacturing', [PurchaseRequestController::class, 'updateManufacturing'])->name('purchase-requests.manufacturing');
     Route::post('purchase-requests/{purchaseRequest}/attachments', [PurchaseRequestAttachmentController::class, 'store'])->name('purchase-requests.attachments.store');

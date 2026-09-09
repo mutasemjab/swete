@@ -83,6 +83,11 @@ return [
     'reject'                     => 'Reject',
     'rejection_note_placeholder' => 'Rejection reason (optional)',
     'approval_recorded'          => 'Your decision has been recorded.',
+    'manual_approve'             => 'Approve Directly',
+    'manual_approve_hint'        => 'No approvers are set on this request, so you can approve it directly.',
+    'manual_approve_confirm'     => 'Are you sure you want to approve this request directly, with no approvers?',
+    'manual_approve_invalid'     => 'Cannot approve manually — the request is not pending approval, or it already has approvers assigned.',
+    'manual_approve_done'        => 'The request has been approved directly.',
 
     // ── Sent / manufacturing ─────────────────────────────────────────────────
     'approved_hint'         => 'Everyone has approved this request. Mark it as sent once it has actually been sent to the vendor.',

@@ -8,6 +8,7 @@ use App\Mail\VendorPurchaseOrderMail;
 use App\Models\Branch;
 use App\Models\Country;
 use App\Models\Currency;
+use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Project;
 use App\Models\PurchaseRequest;
@@ -32,9 +33,37 @@ class PurchaseRequestController extends ModuleController
             $query->where('number', 'like', "%{$search}%");
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->input('supplier_id'));
+        }
+
+        if ($request->filled('customer_id')) {
+            $customerId = $request->input('customer_id');
+            $query->where(function ($q) use ($customerId) {
+                $q->whereHas('project', fn ($p) => $p->where('customer_id', $customerId))
+                    ->orWhereHas('serviceCall', fn ($s) => $s->where('customer_id', $customerId));
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->input('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->input('date_to'));
+        }
+
         $purchaseRequests = $query->latest()->paginate(20)->withQueryString();
 
-        return $this->moduleView('external-purchases.purchase-requests.index', compact('purchaseRequests'));
+        return $this->moduleView('external-purchases.purchase-requests.index', [
+            'purchaseRequests' => $purchaseRequests,
+            'suppliers'        => Supplier::where('status', true)->orderBy('name')->get(),
+            'customers'        => Customer::where('status', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function create(Request $request)
@@ -231,6 +260,16 @@ class PurchaseRequestController extends ModuleController
         $purchaseRequest->recordDecision($request->user(), 'rejected', $validated['note'] ?? null);
 
         return back()->with('success', __('external_purchases.approval_recorded'));
+    }
+
+    /** Manual override for when no approvers were configured — otherwise the request would stay pending_approval forever. */
+    public function approveManually(PurchaseRequest $purchaseRequest)
+    {
+        if (! $purchaseRequest->markApprovedManually()) {
+            return back()->with('error', __('external_purchases.manual_approve_invalid'));
+        }
+
+        return back()->with('success', __('external_purchases.manual_approve_done'));
     }
 
     public function markSent(Request $request, PurchaseRequest $purchaseRequest)

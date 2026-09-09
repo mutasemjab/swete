@@ -73,6 +73,7 @@ return [
 
     // ── Pagination ───────────────────────────────────────────────────────────
     'showing'            => 'Showing',
+    'from'               => 'From',
     'to'                 => 'to',
     'of'                 => 'of',
     'results'            => 'results',

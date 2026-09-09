@@ -226,6 +226,23 @@ class PurchaseRequest extends Model
         ]);
     }
 
+    /** No approvers were configured when this PR was created, so no one can ever approve it through the normal flow. */
+    public function canApproveManually(): bool
+    {
+        return $this->status === 'pending_approval' && $this->approvals()->doesntExist();
+    }
+
+    public function markApprovedManually(): bool
+    {
+        if (! $this->canApproveManually()) {
+            return false;
+        }
+
+        $this->update(['status' => 'approved']);
+
+        return true;
+    }
+
     public function markSent(): bool
     {
         if ($this->status !== 'approved') {

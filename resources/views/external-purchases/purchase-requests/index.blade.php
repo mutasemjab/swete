@@ -33,20 +33,44 @@
     </div>
 </div>
 
-<form method="GET" action="{{ route('purchase-requests.index') }}" class="card px-5 py-4 mb-4 flex flex-wrap gap-3">
+@php
+    $filterKeys = ['search', 'status', 'supplier_id', 'customer_id', 'date_from', 'date_to'];
+@endphp
+
+<form method="GET" action="{{ route('purchase-requests.index') }}" class="card px-5 py-4 mb-4 flex flex-wrap gap-3 items-center">
     <div class="flex-1 min-w-48">
         <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
             <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="{{ __('app.search') }}..."
+                   placeholder="{{ __('external_purchases.request_number') }}..."
                    class="form-input ps-10">
         </div>
     </div>
+    <select name="status" class="form-select w-48">
+        <option value="">{{ __('app.all_statuses') }}</option>
+        @foreach(\App\Models\PurchaseRequest::STATUSES as $statusOption)
+            <option value="{{ $statusOption }}" @selected(request('status') === $statusOption)>{{ __('external_purchases.status_' . $statusOption) }}</option>
+        @endforeach
+    </select>
+    <select name="supplier_id" class="js-select2 form-select w-56">
+        <option value="">{{ __('external_purchases.request_supplier') }}</option>
+        @foreach($suppliers as $supplier)
+            <option value="{{ $supplier->id }}" @selected(request('supplier_id') == $supplier->id)>{{ $supplier->localized_name }}</option>
+        @endforeach
+    </select>
+    <select name="customer_id" class="js-select2 form-select w-56">
+        <option value="">{{ __('tenders.tender_customer') }}</option>
+        @foreach($customers as $customer)
+            <option value="{{ $customer->id }}" @selected(request('customer_id') == $customer->id)>{{ $customer->localized_name }}</option>
+        @endforeach
+    </select>
+    <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-input w-40" title="{{ __('app.from') }}">
+    <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-input w-40" title="{{ __('app.to') }}">
     <button type="submit" class="btn-primary">
         <i class="fa-solid fa-filter"></i>
         {{ __('app.search') }}
     </button>
-    @if(request()->hasAny(['search']))
+    @if(request()->hasAny($filterKeys))
         <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
             <i class="fa-solid fa-xmark"></i>
             {{ __('app.clear_filters') }}
@@ -61,9 +85,9 @@
                 <i class="fa-solid fa-truck-ramp-box text-slate-400 text-3xl"></i>
             </div>
             <p class="text-slate-800 font-bold text-lg">
-                {{ request()->hasAny(['search']) ? __('external_purchases.no_requests_search') : __('external_purchases.no_requests') }}
+                {{ request()->hasAny($filterKeys) ? __('external_purchases.no_requests_search') : __('external_purchases.no_requests') }}
             </p>
-            @if(!request()->hasAny(['search']))
+            @if(!request()->hasAny($filterKeys))
                 <a href="{{ route('purchase-requests.create') }}" class="btn-primary mt-5">
                     <i class="fa-solid fa-plus"></i>
                     {{ __('external_purchases.add_first_request') }}
@@ -80,6 +104,7 @@
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_supplier') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('external_purchases.request_linked_to') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_total') }}</th>
+                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.status') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                     </tr>
                 </thead>
@@ -101,6 +126,9 @@
                             @endif
                         </td>
                         <td class="px-5 py-4 font-bold text-slate-800">{{ number_format($pr->total, 3) }}</td>
+                        <td class="px-5 py-4">
+                            <span class="badge bg-{{ $pr->status_color }}-100 text-{{ $pr->status_color }}-700">{{ __('external_purchases.status_' . $pr->status) }}</span>
+                        </td>
                         <td class="px-5 py-4">
                             <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <a href="{{ route('purchase-requests.show', $pr) }}"
