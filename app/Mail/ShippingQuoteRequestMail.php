@@ -20,7 +20,10 @@ class ShippingQuoteRequestMail extends Mailable
     public function __construct(
         public Collection $purchaseRequests,
         public ShippingCompany $shippingCompany,
-        public ?string $message,
+        // Named "note", not "message" — Laravel's Mailer force-overwrites a $data['message'] key with
+        // its own Illuminate\Mail\Message instance right before rendering the view, so a Mailable
+        // property literally named $message never reaches the Blade view as the value you set here.
+        public ?string $note,
         public array $files,
     ) {
     }

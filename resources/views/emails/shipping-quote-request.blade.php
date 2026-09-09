@@ -18,8 +18,8 @@
         </ul>
     @endif
 
-    @if($message)
-        <p style="white-space: pre-line;">{{ $message }}</p>
+    @if($note)
+        <p style="white-space: pre-line;">{{ $note }}</p>
     @endif
 
     @if(count($files))
