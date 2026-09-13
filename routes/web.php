@@ -27,7 +27,10 @@ use App\Http\Controllers\Accounting\InvoiceController;
 use App\Http\Controllers\Tenders\TenderController;
 use App\Http\Controllers\Tenders\TenderStatusController;
 use App\Http\Controllers\Tenders\PriceQuoteController;
+use App\Http\Controllers\Tenders\QuoteSupplyScopeController;
+use App\Http\Controllers\Tenders\QuoteDeliveryTermController;
 use App\Http\Controllers\Tenders\ProjectController;
+use App\Http\Controllers\Tenders\ProjectAttachmentController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
 use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
@@ -133,8 +136,13 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('tenders/{tender}/convert-to-project', [TenderController::class, 'convertToProject'])->name('tenders.convert-to-project');
 
     Route::resource('tender-statuses', TenderStatusController::class)->except(['show']);
-    Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('quote-supply-scopes', QuoteSupplyScopeController::class)->except(['show']);
+    Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->except(['show']);
+    Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print');
+    Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
+    Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store');
+    Route::delete('projects/{project}/attachments/{attachment}', [ProjectAttachmentController::class, 'destroy'])->name('projects.attachments.destroy');
 
     // Must be registered before the {purchase_request} resource routes below, since
     // "ship" would otherwise be swallowed by the show route's single-segment wildcard.
@@ -148,6 +156,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('purchase-requests/{purchaseRequest}/approve-manually', [PurchaseRequestController::class, 'approveManually'])->name('purchase-requests.approve-manually');
     Route::post('purchase-requests/{purchaseRequest}/mark-sent', [PurchaseRequestController::class, 'markSent'])->name('purchase-requests.mark-sent');
     Route::post('purchase-requests/{purchaseRequest}/manufacturing', [PurchaseRequestController::class, 'updateManufacturing'])->name('purchase-requests.manufacturing');
+    Route::post('purchase-requests/{purchaseRequest}/ready-for-shipping', [PurchaseRequestController::class, 'readyForShipping'])->name('purchase-requests.ready-for-shipping');
     Route::post('purchase-requests/{purchaseRequest}/attachments', [PurchaseRequestAttachmentController::class, 'store'])->name('purchase-requests.attachments.store');
     Route::delete('purchase-requests/{purchaseRequest}/attachments/{attachment}', [PurchaseRequestAttachmentController::class, 'destroy'])->name('purchase-requests.attachments.destroy');
 

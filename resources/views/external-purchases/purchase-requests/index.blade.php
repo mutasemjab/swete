@@ -130,7 +130,7 @@
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->supplier?->localized_name }}</td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                             @if($pr->project)
-                                {{ __('external_purchases.link_type_project') }}: {{ $pr->project->number }}
+                                {{ __('external_purchases.link_type_project') }}: {{ $pr->project->number }} — {{ $pr->project->localized_title }}
                             @elseif($pr->serviceCall)
                                 {{ __('external_purchases.link_type_service_call') }}: {{ $pr->serviceCall->number }}
                             @else

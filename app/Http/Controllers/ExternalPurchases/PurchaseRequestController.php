@@ -102,7 +102,7 @@ class PurchaseRequestController extends ModuleController
         $purchaseRequest->load([
             'supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator',
             'items.material.unit', 'items.features',
-            'approvals.user', 'attachments.creator', 'additionalNotes',
+            'approvals.user', 'attachments.creator', 'additionalNotes', 'shipments.shippingCompany',
         ]);
 
         $emailTemplate = $purchaseRequest->status === 'approved'
@@ -308,10 +308,20 @@ class PurchaseRequestController extends ModuleController
         return back()->with('success', __('external_purchases.manufacturing_updated'));
     }
 
-    /** Eligible = still in manufacturing — once shipped, status moves on and it drops off this list. */
+    /** Manual step: the goods are physically ready, so the RFQ to shipping companies can now be sent. */
+    public function readyForShipping(PurchaseRequest $purchaseRequest)
+    {
+        if (! $purchaseRequest->markReadyForShipping()) {
+            return back()->with('error', __('external_purchases.ready_for_shipping_invalid'));
+        }
+
+        return back()->with('success', __('external_purchases.ready_for_shipping_done'));
+    }
+
+    /** Eligible = ready for shipping — once the RFQ is sent (or shipped), status moves on and it drops off this list. */
     public function shipmentForm(Request $request)
     {
-        $eligiblePurchaseRequests = PurchaseRequest::where('status', 'manufacturing')
+        $eligiblePurchaseRequests = PurchaseRequest::where('status', 'ready_for_shipping')
             ->with('supplier')->orderByDesc('date')->get();
 
         $selectedIds = collect($request->query('purchase_request_ids', []))->map(fn ($id) => (int) $id);
@@ -337,7 +347,7 @@ class PurchaseRequestController extends ModuleController
 
         // Re-filter by status defensively — a stale form shouldn't ship a PR that's since moved on.
         $purchaseRequests = PurchaseRequest::whereIn('id', $validated['purchase_request_ids'])
-            ->where('status', 'manufacturing')->get();
+            ->where('status', 'ready_for_shipping')->get();
         $companies = ShippingCompany::whereIn('id', $validated['shipping_company_ids'])->get();
         $files     = $request->file('attachments', []);
 

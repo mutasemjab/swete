@@ -71,7 +71,8 @@ return [
     'status_rejected'              => 'Rejected',
     'status_sent'                  => 'Sent',
     'status_manufacturing'         => 'Manufacturing',
-    'status_awaiting_price_quotes' => 'Awaiting Price Quotes',
+    'status_ready_for_shipping'    => 'Ready for Shipping',
+    'status_awaiting_price_quotes' => 'Shipping Quotes',
     'status_shipped'               => 'Shipped',
 
     // ── Approvals ────────────────────────────────────────────────────────────
@@ -99,6 +100,13 @@ return [
     'so_number'             => 'SO Number',
     'ready_date'            => 'Ready Date',
     'manufacturing_updated' => 'Manufacturing info saved successfully.',
+
+    // ── Ready for shipping ───────────────────────────────────────────────────
+    'ready_for_shipping_hint'    => 'Once the goods are physically ready, mark the request "Ready for Shipping" so you can send the shipping quote request.',
+    'mark_ready_for_shipping'    => 'Mark Ready for Shipping',
+    'ready_for_shipping_invalid' => 'The request can only be marked "Ready for Shipping" while it is in the manufacturing stage.',
+    'ready_for_shipping_done'    => 'The request has been marked "Ready for Shipping" successfully.',
+    'shipped_with'               => 'Shipped with :company',
 
     // ── Attachments ──────────────────────────────────────────────────────────
     'attachments'         => 'Attachments',

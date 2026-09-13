@@ -24,6 +24,11 @@ class Branch extends Model
         'country_en',
         'logo_path',
         'logo_secondary_path',
+        'quote_header_image1_path',
+        'quote_header_image2_path',
+        'quote_header_image3_path',
+        'quote_body_image1_path',
+        'quote_body_image2_path',
         'is_main',
         'status',
     ];
@@ -59,5 +64,24 @@ class Branch extends Model
     public function getLogoSecondaryUrlAttribute(): ?string
     {
         return $this->logo_secondary_path ? asset($this->logo_secondary_path) : null;
+    }
+
+    /** Up to 3 header images for the price-quote print document — whichever are uploaded, in order, no gaps for missing ones. */
+    public function getQuoteHeaderImagesAttribute(): array
+    {
+        return array_values(array_filter([
+            $this->quote_header_image1_path ? asset($this->quote_header_image1_path) : null,
+            $this->quote_header_image2_path ? asset($this->quote_header_image2_path) : null,
+            $this->quote_header_image3_path ? asset($this->quote_header_image3_path) : null,
+        ]));
+    }
+
+    /** The 2 additional body images shown only on the price-quote print's first page. */
+    public function getQuoteBodyImagesAttribute(): array
+    {
+        return array_values(array_filter([
+            $this->quote_body_image1_path ? asset($this->quote_body_image1_path) : null,
+            $this->quote_body_image2_path ? asset($this->quote_body_image2_path) : null,
+        ]));
     }
 }

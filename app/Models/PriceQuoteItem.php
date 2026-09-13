@@ -13,6 +13,7 @@ class PriceQuoteItem extends Model
         'quantity',
         'unit_price',
         'total',
+        'notes',
     ];
 
     protected $casts = [

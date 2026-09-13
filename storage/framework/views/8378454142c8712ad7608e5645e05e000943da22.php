@@ -37,6 +37,16 @@
     </div>
 </div>
 
+<?php if($purchaseRequest->status === 'shipped' && $purchaseRequest->shipments->isNotEmpty()): ?>
+<div class="card px-6 py-4 mb-5 bg-teal-50 border border-teal-100">
+    <p class="text-sm font-semibold text-teal-700">
+        <i class="fa-solid fa-ship"></i>
+        <?php echo e(__('external_purchases.shipped_with', ['company' => $purchaseRequest->shipments->pluck('shippingCompany.localized_name')->filter()->implode(app()->isLocale('ar') ? '، ' : ', ')])); ?>
+
+    </p>
+</div>
+<?php endif; ?>
+
 <div class="card overflow-hidden mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700"><?php echo e(__('external_purchases.approvals')); ?></h3>
@@ -161,7 +171,7 @@ unset($__errorArgs, $__bag); ?>
 </div>
 <?php endif; ?>
 
-<?php if(in_array($purchaseRequest->status, ['sent', 'manufacturing', 'awaiting_price_quotes'])): ?>
+<?php if(in_array($purchaseRequest->status, ['sent', 'manufacturing', 'ready_for_shipping', 'awaiting_price_quotes'])): ?>
 <div class="card px-6 py-5 mb-5">
     <h3 class="font-bold text-slate-700 mb-4"><?php echo e(__('external_purchases.manufacturing_info')); ?></h3>
     <form action="<?php echo e(route('purchase-requests.manufacturing', $purchaseRequest)); ?>" method="POST" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
@@ -213,7 +223,7 @@ unset($__errorArgs, $__bag); ?>
 </div>
 <?php endif; ?>
 
-<?php if(in_array($purchaseRequest->status, ['manufacturing', 'awaiting_price_quotes'])): ?>
+<?php if(in_array($purchaseRequest->status, ['manufacturing', 'ready_for_shipping', 'awaiting_price_quotes'])): ?>
 <div class="card overflow-hidden mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700"><?php echo e(__('external_purchases.attachments')); ?></h3>
@@ -257,6 +267,21 @@ unset($__errorArgs, $__bag); ?>
     </div>
 </div>
 
+<?php if($purchaseRequest->status === 'manufacturing'): ?>
+<div class="card px-6 py-5 mb-5 flex items-center justify-between">
+    <p class="text-sm text-slate-600"><?php echo e(__('external_purchases.ready_for_shipping_hint')); ?></p>
+    <form action="<?php echo e(route('purchase-requests.ready-for-shipping', $purchaseRequest)); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-box-open"></i>
+            <?php echo e(__('external_purchases.mark_ready_for_shipping')); ?>
+
+        </button>
+    </form>
+</div>
+<?php endif; ?>
+
+<?php if($purchaseRequest->status === 'ready_for_shipping'): ?>
 <div class="card px-6 py-5 mb-5 flex items-center justify-between">
     <p class="text-sm text-slate-600"><?php echo e(__('external_purchases.ship_hint')); ?></p>
     <a href="<?php echo e(route('purchase-requests.ship', ['purchase_request_ids' => [$purchaseRequest->id]])); ?>" class="btn-primary">
@@ -265,6 +290,7 @@ unset($__errorArgs, $__bag); ?>
 
     </a>
 </div>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php if($purchaseRequest->shippingRequests->isNotEmpty()): ?>
@@ -296,6 +322,8 @@ unset($__errorArgs, $__bag); ?>
                 <?php if($purchaseRequest->project): ?>
                     <?php echo e(__('external_purchases.link_type_project')); ?>:
                     <a href="<?php echo e(route('projects.show', $purchaseRequest->project)); ?>" class="text-indigo-600 hover:underline"><?php echo e($purchaseRequest->project->number); ?></a>
+                    — <?php echo e($purchaseRequest->project->localized_title); ?>
+
                 <?php elseif($purchaseRequest->serviceCall): ?>
                     <?php echo e(__('external_purchases.link_type_service_call')); ?>: <?php echo e($purchaseRequest->serviceCall->number); ?>
 

@@ -134,7 +134,7 @@
                         <td class="px-5 py-4 text-sm text-slate-600"><?php echo e($pr->supplier?->localized_name); ?></td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                             <?php if($pr->project): ?>
-                                <?php echo e(__('external_purchases.link_type_project')); ?>: <?php echo e($pr->project->number); ?>
+                                <?php echo e(__('external_purchases.link_type_project')); ?>: <?php echo e($pr->project->number); ?> — <?php echo e($pr->project->localized_title); ?>
 
                             <?php elseif($pr->serviceCall): ?>
                                 <?php echo e(__('external_purchases.link_type_service_call')); ?>: <?php echo e($pr->serviceCall->number); ?>

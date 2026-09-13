@@ -49,7 +49,9 @@ class PermissionSeeder extends Seeder
 
             // Tenders
             'tenders.view', 'tenders.create', 'tenders.edit', 'tenders.delete',
-            'tenders.price_quotes.create',
+            'tenders.price_quotes.create', 'tenders.price_quotes.edit',
+            'tenders.quote_supply_scopes.create', 'tenders.quote_supply_scopes.edit', 'tenders.quote_supply_scopes.delete',
+            'tenders.quote_delivery_terms.create', 'tenders.quote_delivery_terms.edit', 'tenders.quote_delivery_terms.delete',
             'tenders.tender_statuses.create', 'tenders.tender_statuses.edit', 'tenders.tender_statuses.delete',
             'tenders.projects.view', 'tenders.projects.convert', 'tenders.projects.edit', 'tenders.projects.delete',
 

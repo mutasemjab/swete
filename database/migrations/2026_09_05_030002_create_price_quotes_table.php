@@ -19,6 +19,22 @@ return new class extends Migration
             $table->enum('status', ['draft', 'sent', 'accepted', 'rejected'])->default('draft');
             $table->decimal('subtotal', 14, 3)->default(0);
             $table->decimal('total', 14, 3)->default(0);
+
+            // Print-document fields — drives the letterhead/address (branch) and the "Very Important
+            // Notes" clause block (see PriceQuote::getVeryImportantNotesAttribute()).
+            $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
+            $table->foreignId('currency_id')->constrained('currencies')->restrictOnDelete();
+            $table->unsignedSmallInteger('validity_weeks')->nullable();
+            $table->foreignId('supply_scope_id')->nullable()->constrained('quote_supply_scopes')->nullOnDelete();
+            $table->foreignId('delivery_term_id')->nullable()->constrained('quote_delivery_terms')->nullOnDelete();
+            $table->boolean('winching_included')->default(false);
+            $table->boolean('sales_tax_included')->default(false);
+            $table->boolean('customs_fees_included')->default(false);
+            $table->boolean('include_boiler_note')->default(false);
+            // No DB-level default — the controller always supplies this explicitly on create
+            // (defaulting to "all included" if the request omits the key entirely).
+            $table->json('included_work_scopes')->nullable();
+
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->decimal('quantity', 14, 3);
             $table->decimal('unit_price', 14, 3)->default(0);
             $table->decimal('total', 14, 3)->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

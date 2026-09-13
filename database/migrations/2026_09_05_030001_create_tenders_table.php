@@ -25,6 +25,7 @@ return new class extends Migration
             $table->boolean('customs_exempt')->default(false);
             $table->enum('delivery_terms', ['site', 'cfr', 'exwork'])->nullable();
             $table->enum('coverage', ['supply', 'supply_execution', 'design', 'design_execution', 'design_supply_execution'])->nullable();
+            $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
 
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('win_probability')->nullable();

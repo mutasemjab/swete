@@ -27,7 +27,7 @@ class ProjectController extends ModuleController
 
     public function show(Project $project)
     {
-        $project->load(['customer', 'tender', 'creator', 'purchaseRequests.supplier']);
+        $project->load(['customer', 'tender', 'creator', 'purchaseRequests.supplier', 'attachments.creator']);
 
         return $this->moduleView('tenders.projects.show', compact('project'));
     }

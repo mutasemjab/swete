@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenders;
 
 use App\Http\Controllers\ModuleController;
 use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\PriceQuote;
 use App\Models\Project;
@@ -41,8 +42,9 @@ class TenderController extends ModuleController
         $customers = Customer::where('status', true)->orderBy('name')->get();
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
         $countries = Country::where('status', true)->orderBy('name')->get();
+        $currencies = Currency::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries'));
+        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies'));
     }
 
     public function store(Request $request)
@@ -72,8 +74,9 @@ class TenderController extends ModuleController
         $customers = Customer::where('status', true)->orderBy('name')->get();
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
         $countries = Country::where('status', true)->orderBy('name')->get();
+        $currencies = Currency::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries'));
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies'));
     }
 
     public function update(Request $request, Tender $tender)
@@ -139,6 +142,7 @@ class TenderController extends ModuleController
             'customs_exempt'       => ['boolean'],
             'delivery_terms'       => ['nullable', 'in:' . implode(',', Tender::DELIVERY_TERMS)],
             'coverage'             => ['nullable', 'in:' . implode(',', Tender::COVERAGE_OPTIONS)],
+            'currency_id'          => ['nullable', 'exists:currencies,id'],
             'description'          => ['nullable', 'string'],
             'win_probability'      => ['nullable', 'integer', 'min:0', 'max:100'],
             'submission_deadline'  => ['required', 'date'],

@@ -71,7 +71,8 @@ return [
     'status_rejected'              => 'مرفوض',
     'status_sent'                  => 'تم الإرسال',
     'status_manufacturing'         => 'مرحلة التصنيع',
-    'status_awaiting_price_quotes' => 'بانتظار عروض الأسعار',
+    'status_ready_for_shipping'    => 'جاهز للشحن',
+    'status_awaiting_price_quotes' => 'عروض أسعار الشحن',
     'status_shipped'               => 'تم الشحن',
 
     // ── Approvals ────────────────────────────────────────────────────────────
@@ -99,6 +100,13 @@ return [
     'so_number'             => 'رقم أمر البيع (SO Number)',
     'ready_date'            => 'تاريخ التجهيز',
     'manufacturing_updated' => 'تم حفظ بيانات التصنيع بنجاح.',
+
+    // ── Ready for shipping ───────────────────────────────────────────────────
+    'ready_for_shipping_hint'    => 'بعد أن تصبح البضاعة جاهزة فعليًا، حوّل الطلب إلى "جاهز للشحن" لتتمكن من إرسال طلب عروض أسعار الشحن.',
+    'mark_ready_for_shipping'    => 'تحويل إلى جاهز للشحن',
+    'ready_for_shipping_invalid' => 'لا يمكن تحويل الطلب إلى "جاهز للشحن" إلا وهو بمرحلة التصنيع.',
+    'ready_for_shipping_done'    => 'تم تحويل الطلب إلى "جاهز للشحن" بنجاح.',
+    'shipped_with'               => 'تم شحنه مع :company',
 
     // ── Attachments ──────────────────────────────────────────────────────────
     'attachments'         => 'المرفقات',

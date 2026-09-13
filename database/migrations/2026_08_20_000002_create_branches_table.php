@@ -25,6 +25,13 @@ return new class extends Migration
             // Letterhead logos for printed documents (e.g. purchase order PDFs).
             $table->string('logo_path')->nullable();
             $table->string('logo_secondary_path')->nullable();
+            // Letterhead images for the price-quote print document (3-across header repeated on every page,
+            // plus 2 more body images shown only on page 1) — a separate concept from the PO logos above.
+            $table->string('quote_header_image1_path')->nullable();
+            $table->string('quote_header_image2_path')->nullable();
+            $table->string('quote_header_image3_path')->nullable();
+            $table->string('quote_body_image1_path')->nullable();
+            $table->string('quote_body_image2_path')->nullable();
             $table->boolean('is_main')->default(false);
             $table->boolean('status')->default(true);
             $table->timestamps();

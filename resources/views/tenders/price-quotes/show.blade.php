@@ -9,10 +9,20 @@
         <h1 class="page-title">{{ $priceQuote->number }}</h1>
         <p class="page-subtitle">{{ __('tenders.price_quote') }}</p>
     </div>
-    <a href="{{ route('price-quotes.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    <div class="flex items-center gap-2">
+        <a href="{{ route('price-quotes.print', $priceQuote) }}" target="_blank" class="btn-primary">
+            <i class="fa-solid fa-print"></i>
+            {{ __('external_purchases.print') }}
+        </a>
+        <a href="{{ route('price-quotes.edit', $priceQuote) }}" class="btn-secondary">
+            <i class="fa-solid fa-pen"></i>
+            {{ __('app.edit') }}
+        </a>
+        <a href="{{ route('price-quotes.index') }}" class="btn-secondary">
+            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
+            {{ __('app.back_to_list') }}
+        </a>
+    </div>
 </div>
 
 <div class="card px-6 py-5 mb-5">
@@ -34,6 +44,32 @@
         <div>
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_date') }}</dt>
             <dd class="font-bold text-slate-800">{{ $priceQuote->date->format('Y-m-d') }}</dd>
+        </div>
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('external_purchases.request_branch') }}</dt>
+            <dd class="font-bold text-slate-800">{{ $priceQuote->branch?->localized_name }}</dd>
+        </div>
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.tender_currency') }}</dt>
+            <dd class="font-bold text-slate-800">{{ $priceQuote->currency?->localized_name }} ({{ $priceQuote->currency?->code }})</dd>
+        </div>
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_validity_weeks') }}</dt>
+            <dd class="font-bold text-slate-800">{{ $priceQuote->validity_weeks ?? '—' }}</dd>
+        </div>
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_supply_scope') }}</dt>
+            <dd class="font-bold text-slate-800">{{ $priceQuote->supplyScope?->localized_name ?? '—' }}</dd>
+        </div>
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_delivery_term') }}</dt>
+            <dd class="font-bold text-slate-800">{{ $priceQuote->deliveryTerm?->localized_name ?? '—' }}</dd>
+        </div>
+        <div class="sm:col-span-3 flex flex-wrap gap-2">
+            <span class="badge {{ $priceQuote->winching_included ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_winching_included') }}: {{ $priceQuote->winching_included ? __('app.yes') : __('app.no') }}</span>
+            <span class="badge {{ $priceQuote->sales_tax_included ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_sales_tax_included') }}: {{ $priceQuote->sales_tax_included ? __('app.yes') : __('app.no') }}</span>
+            <span class="badge {{ $priceQuote->customs_fees_included ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_customs_fees_included') }}: {{ $priceQuote->customs_fees_included ? __('app.yes') : __('app.no') }}</span>
+            <span class="badge {{ $priceQuote->include_boiler_note ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_include_boiler_note') }}: {{ $priceQuote->include_boiler_note ? __('app.yes') : __('app.no') }}</span>
         </div>
         @if($priceQuote->notes)
         <div class="sm:col-span-3">

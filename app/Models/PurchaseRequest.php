@@ -49,7 +49,7 @@ class PurchaseRequest extends Model
         'total'      => 'decimal:3',
     ];
 
-    public const STATUSES = ['pending_approval', 'approved', 'rejected', 'sent', 'manufacturing', 'awaiting_price_quotes', 'shipped'];
+    public const STATUSES = ['pending_approval', 'approved', 'rejected', 'sent', 'manufacturing', 'ready_for_shipping', 'awaiting_price_quotes', 'shipped'];
 
     public const STATUS_COLORS = [
         'pending_approval'      => 'amber',
@@ -57,6 +57,7 @@ class PurchaseRequest extends Model
         'rejected'              => 'rose',
         'sent'                  => 'indigo',
         'manufacturing'         => 'cyan',
+        'ready_for_shipping'    => 'orange',
         'awaiting_price_quotes' => 'violet',
         'shipped'               => 'teal',
     ];
@@ -265,6 +266,18 @@ class PurchaseRequest extends Model
         if ($this->status === 'sent') {
             $this->update(['status' => 'manufacturing']);
         }
+    }
+
+    /** Manual step between manufacturing and sending the shipping-company RFQ — the goods are physically ready to go out. */
+    public function markReadyForShipping(): bool
+    {
+        if ($this->status !== 'manufacturing') {
+            return false;
+        }
+
+        $this->update(['status' => 'ready_for_shipping']);
+
+        return true;
     }
 
     public function markAwaitingPriceQuotes(): void

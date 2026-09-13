@@ -19,6 +19,8 @@ return [
     'nav_quotes_add'    => 'New Price Quote',
     'nav_projects_list' => 'Projects List',
     'nav_statuses'      => 'Tender Statuses',
+    'nav_quote_supply_scopes'  => 'Quote Supply Scopes',
+    'nav_quote_delivery_terms' => 'Quote Delivery Terms',
 
     // ── Tenders ──────────────────────────────────────────────────────────────
     'tenders'               => 'Tenders',
@@ -54,6 +56,7 @@ return [
     'coverage_design_execution'              => 'Design & Execution',
     'coverage_design_supply_execution'       => 'Design, Supply & Execution',
 
+    'tender_currency'             => 'Currency',
     'tender_description'         => 'Tender Description',
     'tender_win_probability'     => 'Win Probability',
     'tender_submission_deadline' => 'Submission Deadline',
@@ -93,17 +96,84 @@ return [
     'price_quotes_subtitle'   => 'Price quotes linked to customers and tenders',
     'add_quote'               => 'New Price Quote',
     'add_quote_subtitle'      => 'Choose the customer and add the quote lines',
+    'edit_quote'              => 'Edit Price Quote',
     'quote_number'            => 'Quote No.',
     'quote_tender'            => 'Tender',
     'quote_date'              => 'Date',
     'quote_items'             => 'Quote Items',
+    'quote_item_notes'        => 'Item Notes',
     'quote_total'             => 'Total',
     'quote_added'             => 'Price quote created successfully.',
+    'quote_updated'           => 'Price quote updated successfully.',
     'no_quotes'               => 'No price quotes yet',
     'total_quotes'            => 'Total Quotes',
     'attach_existing_quote'   => 'Attach an existing quote',
     'attach_quote'            => 'Attach',
     'quote_attached'          => 'Price quote attached to the tender successfully.',
+
+    // ── Price quote commercial terms ─────────────────────────────────────────
+    'quote_commercial_terms'          => 'Commercial Terms',
+    'quote_validity_weeks'            => 'Quote Validity (weeks)',
+    'quote_supply_scope'              => 'Scope of Supply',
+    'quote_delivery_term'             => 'Delivery Term',
+    'quote_winching_included'         => 'Winching Included',
+    'quote_sales_tax_included'        => 'Sales Tax Included',
+    'quote_customs_fees_included'     => 'Customs Fees Included',
+    'quote_include_boiler_note'       => 'Add Boiler Note',
+    'quote_included_work_scopes'      => 'Work Scope Covered by the Price',
+    'quote_included_work_scopes_hint' => 'Uncheck anything not covered by the price — it will automatically appear as an exclusion on the printed quote.',
+    'quote_work_scope_pipe_work'           => 'Pipe Work',
+    'quote_work_scope_duct_work'           => 'Duct Work',
+    'quote_work_scope_electrical_works'    => 'Electrical Works',
+    'quote_work_scope_power_control_cable' => 'Power and Control Cable',
+    'quote_work_scope_drain_works'         => 'Drain Works',
+    'quote_work_scope_civil_works'         => 'Civil Works',
+
+    // ── Price quote "Very Important Notes" (print) ───────────────────────────
+    'and'                          => 'and',
+    'quote_note_validity'          => 'Validity: :weeks weeks from the date of quotation.',
+    'quote_note_technical_submittal' => 'All technical information as per our approved submittal.',
+    'quote_note_supply_scope'      => 'Prices include :scope.',
+    'quote_note_winching_included' => 'Price Included Winching.',
+    'quote_note_winching_excluded' => 'Price Excluded Winching.',
+    'quote_note_delivery_term'     => 'Price included :term.',
+    'quote_item_sales_tax'         => 'sales tax',
+    'quote_item_customs_fees'      => 'custom fees',
+    'quote_note_prices_include'    => 'Prices include :items.',
+    'quote_note_prices_exclude'    => 'Prices exclude :items.',
+    'quote_note_boiler'            => 'Please note that, in some cases, the boiler may need to operate if there is a requirement to raise the tank water temperature above 55°C or during periods of high hot water demand.',
+    'quote_note_work_exclusions'   => 'Prices exclude :items.',
+    'quote_note_currency'          => 'Prices are in :code.',
+
+    // ── Price quote print document ───────────────────────────────────────────
+    'quote_print_prepared_by'         => 'Submitted / Prepared By',
+    'quote_print_project_title'       => 'Project Title',
+    'quote_print_subject'             => 'Subject',
+    'quote_print_project'             => 'Project',
+    'quote_print_full_price'          => 'Full Price',
+    'quote_print_very_important_notes' => 'Very Important Notes',
+
+    // ── Quote supply scopes (dynamic/manageable list) ────────────────────────
+    'quote_supply_scopes_list'      => 'Supply Scopes',
+    'quote_supply_scopes_subtitle'  => 'Manageable options used on price quotes — add any new one you need',
+    'add_quote_supply_scope'        => 'Add Supply Scope',
+    'edit_quote_supply_scope'       => 'Edit Supply Scope',
+    'no_quote_supply_scopes'        => 'No supply scopes yet',
+    'quote_supply_scope_added'      => 'Supply scope added successfully.',
+    'quote_supply_scope_updated'    => 'Supply scope updated successfully.',
+    'quote_supply_scope_deleted'    => 'Supply scope deleted successfully.',
+    'quote_supply_scope_in_use'     => 'Cannot delete a supply scope used by existing price quotes.',
+
+    // ── Quote delivery terms (dynamic/manageable list) ───────────────────────
+    'quote_delivery_terms_list'     => 'Delivery Terms',
+    'quote_delivery_terms_subtitle' => 'Manageable options used on price quotes — add any new one you need',
+    'add_quote_delivery_term'       => 'Add Delivery Term',
+    'edit_quote_delivery_term'      => 'Edit Delivery Term',
+    'no_quote_delivery_terms'       => 'No delivery terms yet',
+    'quote_delivery_term_added'     => 'Delivery term added successfully.',
+    'quote_delivery_term_updated'   => 'Delivery term updated successfully.',
+    'quote_delivery_term_deleted'   => 'Delivery term deleted successfully.',
+    'quote_delivery_term_in_use'    => 'Cannot delete a delivery term used by existing price quotes.',
 
     // ── Projects ──────────────────────────────────────────────────────────────
     'project'              => 'Project',
@@ -126,5 +196,15 @@ return [
     'project_created'      => 'Tender converted to a project successfully.',
     'convert_to_project'         => 'Convert to Project',
     'convert_to_project_confirm' => 'Are you sure you want to convert this tender into a project?',
+
+    // ── Project attachments ──────────────────────────────────────────────────
+    'project_attachments'         => 'Project Attachments',
+    'no_project_attachments'      => 'No attachments yet.',
+    'project_attachment_name'     => 'Attachment Name',
+    'project_attachment_file'     => 'File',
+    'project_attachment_add_row'  => 'Add Row',
+    'project_attachment_upload'   => 'Upload Attachments',
+    'project_attachment_added'    => 'Attachments uploaded successfully.',
+    'project_attachment_deleted'  => 'Attachment deleted successfully.',
 
 ];

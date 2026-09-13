@@ -38,7 +38,7 @@ return new class extends Migration
             // respond) -> sent (manual) -> manufacturing (auto once so_number+ready_date are set)
             // -> awaiting_price_quotes (auto once a shipping-company RFQ email is sent)
             // -> shipped (auto once the request is attached to a Shipment record).
-            $table->enum('status', ['pending_approval', 'approved', 'rejected', 'sent', 'manufacturing', 'awaiting_price_quotes', 'shipped'])->default('pending_approval');
+            $table->enum('status', ['pending_approval', 'approved', 'rejected', 'sent', 'manufacturing', 'ready_for_shipping', 'awaiting_price_quotes', 'shipped'])->default('pending_approval');
             $table->string('so_number')->nullable();
             $table->date('ready_date')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();

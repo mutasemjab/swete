@@ -46,6 +46,7 @@ class Tender extends Model
         'customs_exempt',
         'delivery_terms',
         'coverage',
+        'currency_id',
         'description',
         'win_probability',
         'submission_deadline',
@@ -86,6 +87,11 @@ class Tender extends Model
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function projects(): HasMany

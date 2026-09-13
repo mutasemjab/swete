@@ -158,6 +158,40 @@
     <div class="card mb-5">
         <div class="card-header">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-images text-indigo-500 text-sm"></i>
+                {{ __('settings.branch_quote_images') }}
+            </h3>
+        </div>
+        <div class="px-6 py-5">
+            <p class="text-xs text-slate-400 mb-4">{{ __('settings.branch_quote_images_hint') }}</p>
+            <p class="text-xs font-semibold text-slate-500 mb-2">{{ __('settings.branch_quote_header_images') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
+                @foreach([1, 2, 3] as $n)
+                <div>
+                    <label class="form-label">{{ __('settings.branch_quote_header_image') }} {{ $n }}</label>
+                    <input type="file" name="quote_header_image{{ $n }}" accept="image/*"
+                           class="form-input @error('quote_header_image' . $n) is-invalid @enderror">
+                    @error('quote_header_image' . $n)<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+                @endforeach
+            </div>
+            <p class="text-xs font-semibold text-slate-500 mb-2">{{ __('settings.branch_quote_body_images') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                @foreach([1, 2] as $n)
+                <div>
+                    <label class="form-label">{{ __('settings.branch_quote_body_image') }} {{ $n }}</label>
+                    <input type="file" name="quote_body_image{{ $n }}" accept="image/*"
+                           class="form-input @error('quote_body_image' . $n) is-invalid @enderror">
+                    @error('quote_body_image' . $n)<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
                 <i class="fa-solid fa-toggle-on text-indigo-500 text-sm"></i>
                 {{ __('app.status') }}
             </h3>

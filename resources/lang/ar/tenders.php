@@ -19,6 +19,8 @@ return [
     'nav_quotes_add'    => 'عرض سعر جديد',
     'nav_projects_list' => 'قائمة المشاريع',
     'nav_statuses'      => 'حالات العطاء',
+    'nav_quote_supply_scopes'  => 'نطاق توريد عروض الأسعار',
+    'nav_quote_delivery_terms' => 'شروط تسليم عروض الأسعار',
 
     // ── Tenders ──────────────────────────────────────────────────────────────
     'tenders'               => 'العطاءات',
@@ -54,6 +56,7 @@ return [
     'coverage_design_execution'              => 'تصميم وتنفيذ',
     'coverage_design_supply_execution'       => 'تصميم وتوريد وتنفيذ',
 
+    'tender_currency'             => 'العملة',
     'tender_description'         => 'وصف العطاء',
     'tender_win_probability'     => 'فرصة الفوز بالعطاء',
     'tender_submission_deadline' => 'آخر موعد للتقديم',
@@ -93,17 +96,84 @@ return [
     'price_quotes_subtitle'   => 'عروض الأسعار المرتبطة بالعملاء والعطاءات',
     'add_quote'               => 'عرض سعر جديد',
     'add_quote_subtitle'      => 'اختر العميل وأضف بنود عرض السعر',
+    'edit_quote'              => 'تعديل عرض سعر',
     'quote_number'            => 'رقم عرض السعر',
     'quote_tender'            => 'العطاء',
     'quote_date'              => 'التاريخ',
     'quote_items'             => 'بنود عرض السعر',
+    'quote_item_notes'        => 'ملاحظات البند',
     'quote_total'             => 'الإجمالي',
     'quote_added'             => 'تم إنشاء عرض السعر بنجاح.',
+    'quote_updated'           => 'تم تحديث عرض السعر بنجاح.',
     'no_quotes'               => 'لا توجد عروض أسعار بعد',
     'total_quotes'            => 'إجمالي العروض',
     'attach_existing_quote'   => 'إرفاق عرض سعر موجود',
     'attach_quote'            => 'إرفاق',
     'quote_attached'          => 'تم إرفاق عرض السعر بالعطاء بنجاح.',
+
+    // ── Price quote commercial terms ─────────────────────────────────────────
+    'quote_commercial_terms'          => 'الشروط التجارية',
+    'quote_validity_weeks'            => 'مدة صلاحية العرض (أسابيع)',
+    'quote_supply_scope'              => 'نطاق التوريد',
+    'quote_delivery_term'             => 'شرط التسليم',
+    'quote_winching_included'         => 'شامل الرفع (Winching)',
+    'quote_sales_tax_included'        => 'شامل ضريبة المبيعات',
+    'quote_customs_fees_included'     => 'شامل الرسوم الجمركية',
+    'quote_include_boiler_note'       => 'إضافة ملاحظة الغلاية (Boiler)',
+    'quote_included_work_scopes'      => 'الأعمال المشمولة بالسعر',
+    'quote_included_work_scopes_hint' => 'ألغِ تحديد أي بند غير مشمول بالسعر — سيظهر تلقائيًا ضمن الاستثناءات عند الطباعة.',
+    'quote_work_scope_pipe_work'           => 'أعمال المواسير',
+    'quote_work_scope_duct_work'           => 'أعمال الدكت',
+    'quote_work_scope_electrical_works'    => 'الأعمال الكهربائية',
+    'quote_work_scope_power_control_cable' => 'كابلات الطاقة والتحكم',
+    'quote_work_scope_drain_works'         => 'أعمال الصرف',
+    'quote_work_scope_civil_works'         => 'الأعمال المدنية',
+
+    // ── Price quote "Very Important Notes" (print) ───────────────────────────
+    'and'                          => 'و',
+    'quote_note_validity'          => 'صلاحية العرض: :weeks أسابيع من تاريخ العرض.',
+    'quote_note_technical_submittal' => 'جميع المعلومات الفنية حسب الـ Submittal المعتمد لدينا.',
+    'quote_note_supply_scope'      => 'الأسعار شاملة :scope.',
+    'quote_note_winching_included' => 'السعر شامل أعمال الرفع (Winching).',
+    'quote_note_winching_excluded' => 'السعر غير شامل أعمال الرفع (Winching).',
+    'quote_note_delivery_term'     => 'السعر شامل :term.',
+    'quote_item_sales_tax'         => 'ضريبة المبيعات',
+    'quote_item_customs_fees'      => 'الرسوم الجمركية',
+    'quote_note_prices_include'    => 'الأسعار شاملة :items.',
+    'quote_note_prices_exclude'    => 'الأسعار غير شاملة :items.',
+    'quote_note_boiler'            => 'يرجى العلم أنه في بعض الحالات قد تحتاج الغلاية (Boiler) للعمل في حال وجود حاجة لرفع درجة حرارة مياه الخزان فوق 55°C أو خلال فترات الطلب العالي على المياه الساخنة.',
+    'quote_note_work_exclusions'   => 'الأسعار غير شاملة :items.',
+    'quote_note_currency'          => 'الأسعار بعملة :code.',
+
+    // ── Price quote print document ───────────────────────────────────────────
+    'quote_print_prepared_by'         => 'مُقدَّم من / أُعِد بواسطة',
+    'quote_print_project_title'       => 'عنوان المشروع',
+    'quote_print_subject'             => 'الموضوع',
+    'quote_print_project'             => 'المشروع',
+    'quote_print_full_price'          => 'السعر الكامل',
+    'quote_print_very_important_notes' => 'ملاحظات هامة جدًا',
+
+    // ── Quote supply scopes (dynamic/manageable list) ────────────────────────
+    'quote_supply_scopes_list'      => 'نطاقات التوريد',
+    'quote_supply_scopes_subtitle'  => 'خيارات قابلة للإدارة تُستخدم في عروض الأسعار — أضف أي خيار جديد تحتاجه',
+    'add_quote_supply_scope'        => 'إضافة نطاق توريد',
+    'edit_quote_supply_scope'       => 'تعديل نطاق توريد',
+    'no_quote_supply_scopes'        => 'لا توجد نطاقات توريد بعد',
+    'quote_supply_scope_added'      => 'تم إضافة نطاق التوريد بنجاح.',
+    'quote_supply_scope_updated'    => 'تم تحديث نطاق التوريد بنجاح.',
+    'quote_supply_scope_deleted'    => 'تم حذف نطاق التوريد بنجاح.',
+    'quote_supply_scope_in_use'     => 'لا يمكن حذف نطاق توريد مستخدم بعروض أسعار موجودة.',
+
+    // ── Quote delivery terms (dynamic/manageable list) ───────────────────────
+    'quote_delivery_terms_list'     => 'شروط التسليم',
+    'quote_delivery_terms_subtitle' => 'خيارات قابلة للإدارة تُستخدم في عروض الأسعار — أضف أي خيار جديد تحتاجه',
+    'add_quote_delivery_term'       => 'إضافة شرط تسليم',
+    'edit_quote_delivery_term'      => 'تعديل شرط تسليم',
+    'no_quote_delivery_terms'       => 'لا توجد شروط تسليم بعد',
+    'quote_delivery_term_added'     => 'تم إضافة شرط التسليم بنجاح.',
+    'quote_delivery_term_updated'   => 'تم تحديث شرط التسليم بنجاح.',
+    'quote_delivery_term_deleted'   => 'تم حذف شرط التسليم بنجاح.',
+    'quote_delivery_term_in_use'    => 'لا يمكن حذف شرط تسليم مستخدم بعروض أسعار موجودة.',
 
     // ── Projects ──────────────────────────────────────────────────────────────
     'project'              => 'مشروع',
@@ -126,5 +196,15 @@ return [
     'project_created'      => 'تم تحويل العطاء إلى مشروع بنجاح.',
     'convert_to_project'         => 'تحويل إلى مشروع',
     'convert_to_project_confirm' => 'هل أنت متأكد من تحويل هذا العطاء إلى مشروع؟',
+
+    // ── Project attachments ──────────────────────────────────────────────────
+    'project_attachments'         => 'مرفقات المشروع',
+    'no_project_attachments'      => 'لا توجد مرفقات بعد.',
+    'project_attachment_name'     => 'اسم المرفق',
+    'project_attachment_file'     => 'الملف',
+    'project_attachment_add_row'  => 'إضافة سطر',
+    'project_attachment_upload'   => 'رفع المرفقات',
+    'project_attachment_added'    => 'تم رفع المرفقات بنجاح.',
+    'project_attachment_deleted'  => 'تم حذف المرفق بنجاح.',
 
 ];

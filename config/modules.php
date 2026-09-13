@@ -127,6 +127,8 @@ return [
                 'label' => 'tenders.section_settings',
                 'items' => [
                     ['label' => 'tenders.nav_statuses', 'route' => 'tender-statuses.index', 'icon' => 'list-check'],
+                    ['label' => 'tenders.nav_quote_supply_scopes', 'route' => 'quote-supply-scopes.index', 'icon' => 'boxes-stacked'],
+                    ['label' => 'tenders.nav_quote_delivery_terms', 'route' => 'quote-delivery-terms.index', 'icon' => 'truck-fast'],
                 ],
             ],
         ],

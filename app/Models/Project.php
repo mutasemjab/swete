@@ -43,6 +43,11 @@ class Project extends Model
         return $this->hasMany(PurchaseRequest::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(ProjectAttachment::class);
+    }
+
     public function getLocalizedTitleAttribute(): string
     {
         return app()->isLocale('en') && $this->title_en

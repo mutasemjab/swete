@@ -10,6 +10,13 @@ class BranchController extends ModuleController
 {
     protected string $module = 'settings';
 
+    /** Every image field this form accepts — the `{field}_path` DB column is derived from each. */
+    private const IMAGE_FIELDS = [
+        'logo', 'logo_secondary',
+        'quote_header_image1', 'quote_header_image2', 'quote_header_image3',
+        'quote_body_image1', 'quote_body_image2',
+    ];
+
     public function index()
     {
         $branches = Branch::orderByDesc('is_main')->orderBy('name')->get();
@@ -29,12 +36,16 @@ class BranchController extends ModuleController
             Branch::where('is_main', true)->update(['is_main' => false]);
         }
 
+        $data = collect($validated)->except(self::IMAGE_FIELDS)->all();
+
+        foreach (self::IMAGE_FIELDS as $field) {
+            $data["{$field}_path"] = $this->storeImage($request, $field);
+        }
+
         Branch::create([
-            ...collect($validated)->except(['logo', 'logo_secondary'])->all(),
-            'logo_path'           => $this->storeLogo($request, 'logo'),
-            'logo_secondary_path' => $this->storeLogo($request, 'logo_secondary'),
-            'is_main'             => $request->boolean('is_main'),
-            'status'              => $request->boolean('status', true),
+            ...$data,
+            'is_main' => $request->boolean('is_main'),
+            'status'  => $request->boolean('status', true),
         ]);
 
         return redirect()->route('settings.branches.index')
@@ -54,16 +65,13 @@ class BranchController extends ModuleController
             Branch::where('is_main', true)->update(['is_main' => false]);
         }
 
-        $data = collect($validated)->except(['logo', 'logo_secondary'])->all();
+        $data = collect($validated)->except(self::IMAGE_FIELDS)->all();
 
-        if ($logoPath = $this->storeLogo($request, 'logo')) {
-            $this->deleteLogoFile($branch->logo_path);
-            $data['logo_path'] = $logoPath;
-        }
-
-        if ($logoSecondaryPath = $this->storeLogo($request, 'logo_secondary')) {
-            $this->deleteLogoFile($branch->logo_secondary_path);
-            $data['logo_secondary_path'] = $logoSecondaryPath;
+        foreach (self::IMAGE_FIELDS as $field) {
+            if ($path = $this->storeImage($request, $field)) {
+                $this->deleteImageFile($branch->{"{$field}_path"});
+                $data["{$field}_path"] = $path;
+            }
         }
 
         $branch->update([
@@ -86,7 +94,7 @@ class BranchController extends ModuleController
 
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $rules = [
             'name'              => ['required', 'string', 'max:100'],
             'name_en'           => ['nullable', 'string', 'max:100'],
             'phone'             => ['nullable', 'string', 'max:30'],
@@ -99,14 +107,18 @@ class BranchController extends ModuleController
             'city_en'           => ['nullable', 'string', 'max:100'],
             'country'           => ['nullable', 'string', 'max:100'],
             'country_en'        => ['nullable', 'string', 'max:100'],
-            'logo'              => ['nullable', 'image', 'max:2048'],
-            'logo_secondary'    => ['nullable', 'image', 'max:2048'],
             'is_main'           => ['boolean'],
             'status'            => ['boolean'],
-        ]);
+        ];
+
+        foreach (self::IMAGE_FIELDS as $field) {
+            $rules[$field] = ['nullable', 'image', 'max:2048'];
+        }
+
+        return $request->validate($rules);
     }
 
-    private function storeLogo(Request $request, string $field): ?string
+    private function storeImage(Request $request, string $field): ?string
     {
         if (! $request->hasFile($field)) {
             return null;
@@ -117,7 +129,7 @@ class BranchController extends ModuleController
         return 'assets/uploads/branches/' . $filename;
     }
 
-    private function deleteLogoFile(?string $path): void
+    private function deleteImageFile(?string $path): void
     {
         if ($path && file_exists(base_path($path))) {
             @unlink(base_path($path));

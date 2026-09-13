@@ -110,6 +110,17 @@
             @error('coverage')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div>
+            <label class="form-label">{{ __('tenders.tender_currency') }}</label>
+            <select name="currency_id" class="js-select2 form-select @error('currency_id') is-invalid @enderror">
+                <option value="">{{ __('app.select') }}</option>
+                @foreach($currencies as $currency)
+                    <option value="{{ $currency->id }}" @selected(old('currency_id', $tender?->currency_id) == $currency->id)>{{ $currency->localized_name }} ({{ $currency->code }})</option>
+                @endforeach
+            </select>
+            @error('currency_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
         <div class="sm:col-span-2 flex flex-wrap items-center gap-6 py-1">
             <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
                 <input type="hidden" name="tax_exempt" value="0">
