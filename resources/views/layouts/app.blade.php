@@ -55,6 +55,11 @@
         .page-header   { @apply flex items-start justify-between mb-6; }
         .page-title    { @apply text-2xl font-black text-slate-800 leading-tight; }
         .page-subtitle { @apply text-slate-500 text-sm mt-1; }
+
+        /* Alpine sets this attribute on x-cloak elements and strips it once it takes over —
+           without this rule, anything gated by x-show="..." starting false (e.g. the delete-confirm
+           modal below) is visible in the raw HTML for a moment before Alpine hides it on init. */
+        [x-cloak] { display: none !important; }
     </style>
 
     {{-- Select2 restyled to match .form-input above --}}
@@ -268,6 +273,7 @@
                     </button>
 
                     <div x-show="open"
+                         x-cloak
                          @click.outside="open = false"
                          x-transition:enter="transition ease-out duration-150"
                          x-transition:enter-start="opacity-0 translate-y-1 scale-95"
@@ -318,6 +324,7 @@
                     </button>
 
                     <div x-show="open"
+                         x-cloak
                          @click.outside="open = false"
                          x-transition:enter="transition ease-out duration-150"
                          x-transition:enter-start="opacity-0 translate-y-1 scale-95"
@@ -402,6 +409,7 @@
      @delete-confirm.window="show = true; action = $event.detail.action; message = $event.detail.message ?? '{{ __('app.delete_confirm_msg') }}'">
 
     <div x-show="show"
+         x-cloak
          x-transition:enter="transition duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"

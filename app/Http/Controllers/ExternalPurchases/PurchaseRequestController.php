@@ -152,7 +152,7 @@ class PurchaseRequestController extends ModuleController
     /** Standalone, print-optimized A4 document — deliberately not wrapped in the app shell. */
     public function printDocument(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator', 'items.material.unit', 'additionalNotes']);
+        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator', 'items.material.unit', 'items.features', 'additionalNotes']);
 
         return view('external-purchases.purchase-requests.print', compact('purchaseRequest'));
     }

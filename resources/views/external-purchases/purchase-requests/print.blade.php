@@ -256,9 +256,11 @@
             <tr>
                 <th class="num">{{ __('external_purchases.po_item_no') }}</th>
                 <th>{{ __('external_purchases.po_item_description') }}</th>
+                <th>{{ __('external_purchases.item_ercd') }}</th>
                 <th class="amount">{{ __('warehouse.voucher_item_quantity') }}</th>
                 <th class="amount">{{ __('accounting.invoice_item_unit_price') }}</th>
                 <th class="amount">{{ __('accounting.invoice_item_total') }}</th>
+                <th>{{ __('external_purchases.item_features') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -271,9 +273,11 @@
                         <span style="color:#777;"> ({{ $item->material->unit->symbol }})</span>
                     @endif
                 </td>
+                <td>{{ $item->ercd }}</td>
                 <td class="amount">{{ number_format($item->quantity, 3) }}</td>
                 <td class="amount">{{ number_format($item->unit_price, 3) }}</td>
                 <td class="amount">{{ number_format($item->total, 3) }}</td>
+                <td>{{ $item->features->pluck('value')->implode(', ') }}</td>
             </tr>
             @endforeach
         </tbody>
