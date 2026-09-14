@@ -17,10 +17,14 @@
 
 <form action="{{ route('purchase-requests.store') }}" method="POST">
     @csrf
+    @if($reminder)
+        <input type="hidden" name="reminder_id" value="{{ $reminder->id }}">
+    @endif
     @include('external-purchases.purchase-requests._form', [
         'projects' => $projects, 'serviceCalls' => $serviceCalls, 'suppliers' => $suppliers,
         'branches' => $branches, 'currencies' => $currencies, 'countries' => $countries,
         'materials' => $materials, 'project' => $project, 'serviceCall' => $serviceCall,
+        'reminder' => $reminder,
     ])
 
     <div class="flex items-center gap-3">

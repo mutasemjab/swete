@@ -10,6 +10,7 @@ return [
     'section_management'    => 'العطاءات',
     'section_price_quotes'  => 'عروض الأسعار',
     'section_projects'      => 'المشاريع',
+    'section_reminders'     => 'طلبات الشراء المطلوبة',
     'section_settings'      => 'إعدادات العطاءات',
 
     // ── Sidebar items ────────────────────────────────────────────────────────
@@ -21,6 +22,8 @@ return [
     'nav_statuses'      => 'حالات العطاء',
     'nav_quote_supply_scopes'  => 'نطاق توريد عروض الأسعار',
     'nav_quote_delivery_terms' => 'شروط تسليم عروض الأسعار',
+    'nav_reminders_list'       => 'قائمة الطلبات',
+    'nav_reminders_add'        => 'طلب جديد',
 
     // ── Tenders ──────────────────────────────────────────────────────────────
     'tenders'               => 'العطاءات',
@@ -206,5 +209,22 @@ return [
     'project_attachment_upload'   => 'رفع المرفقات',
     'project_attachment_added'    => 'تم رفع المرفقات بنجاح.',
     'project_attachment_deleted'  => 'تم حذف المرفق بنجاح.',
+
+    // ── Purchase request reminders ───────────────────────────────────────────
+    'reminder'                  => 'طلب شراء مطلوب',
+    'reminders_list'            => 'طلبات الشراء المطلوبة',
+    'reminders_subtitle'        => 'طلبات من الموظفين لإنشاء طلبات شراء — بانتظار أحد المسؤولين ليكملها',
+    'add_reminder'              => 'طلب جديد',
+    'add_reminder_subtitle'     => 'اختر المشروع والمواد المطلوبة، وأرفق رابط جوجل درايف إن وجد',
+    'no_reminders'              => 'لا توجد طلبات بعد',
+    'reminder_drive_url'        => 'رابط جوجل درايف',
+    'reminder_drive_link_label' => 'رابط جوجل درايف (من طلب الشراء المطلوب)',
+    'reminder_items'            => 'المواد المطلوبة',
+    'reminder_added'            => 'تم إرسال الطلب بنجاح، وسيصل إشعار للمسؤولين عن طلبات الشراء.',
+    'reminder_status_pending'   => 'بانتظار الإنشاء',
+    'reminder_status_fulfilled' => 'تم الإنشاء',
+    'reminder_create_pr'        => 'إنشاء طلب شراء',
+    'reminder_view_pr'          => 'عرض طلب الشراء',
+    'reminder_fulfilled_by'     => 'تم الإنشاء بواسطة',
 
 ];

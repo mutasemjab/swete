@@ -31,6 +31,7 @@ use App\Http\Controllers\Tenders\QuoteSupplyScopeController;
 use App\Http\Controllers\Tenders\QuoteDeliveryTermController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
+use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
 use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
@@ -38,6 +39,7 @@ use App\Http\Controllers\ExternalPurchases\ShipmentController;
 use App\Http\Controllers\ExternalPurchases\VendorEmailTemplateController;
 use App\Http\Controllers\Settings\ApprovalRuleController;
 use App\Http\Controllers\Settings\PurchaseRequestApproverController;
+use App\Http\Controllers\Settings\PurchaseRequestReminderRecipientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +89,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('approval-rules', ApprovalRuleController::class)->only(['index', 'store']);
         Route::get('purchase-request-approvers',  [PurchaseRequestApproverController::class, 'index'])->name('purchase-request-approvers.index');
         Route::put('purchase-request-approvers',  [PurchaseRequestApproverController::class, 'update'])->name('purchase-request-approvers.update');
+        Route::get('purchase-request-reminder-recipients', [PurchaseRequestReminderRecipientController::class, 'index'])->name('purchase-request-reminder-recipients.index');
+        Route::put('purchase-request-reminder-recipients', [PurchaseRequestReminderRecipientController::class, 'update'])->name('purchase-request-reminder-recipients.update');
 
     });
 
@@ -143,6 +147,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store');
     Route::delete('projects/{project}/attachments/{attachment}', [ProjectAttachmentController::class, 'destroy'])->name('projects.attachments.destroy');
+    Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'create', 'store', 'show']);
 
     // Must be registered before the {purchase_request} resource routes below, since
     // "ship" would otherwise be swallowed by the show route's single-segment wildcard.

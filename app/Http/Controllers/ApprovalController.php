@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Approval;
 use App\Models\PurchaseRequestApproval;
+use App\Models\PurchaseRequestReminder;
+use App\Models\PurchaseRequestReminderRecipient;
 use App\Services\ApprovalService;
 use Illuminate\Http\Request;
 
@@ -28,6 +30,13 @@ class ApprovalController extends Controller
             ->latest()
             ->get();
 
+        // Purchase-request reminders notify a shared Settings-managed pool, not a per-user
+        // decision row — any one recipient can pick it up (fulfilling it for everyone).
+        $isReminderRecipient = PurchaseRequestReminderRecipient::where('user_id', auth()->id())->exists();
+        $pendingReminders    = $isReminderRecipient
+            ? PurchaseRequestReminder::with(['project', 'requester'])->where('status', 'pending')->latest()->get()
+            : collect();
+
         // A rule-triggered request can fan out into one Approval row per eligible
         // approver (OR logic) — collapse those back into a single summarizing row
         // per logical request, preferring a real decision over a cancelled sibling.
@@ -51,7 +60,7 @@ class ApprovalController extends Controller
             'sections' => [],
         ];
 
-        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
+        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'pendingReminders', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
     }
 
     public function approve(Request $request, Approval $approval, ApprovalService $approvals)

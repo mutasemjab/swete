@@ -114,7 +114,7 @@
         </p>
     @endif
 
-    <form action="{{ route('purchase-requests.mark-sent', $purchaseRequest) }}" method="POST" class="space-y-4">
+    <form action="{{ route('purchase-requests.mark-sent', $purchaseRequest) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf
         <div>
             <label class="form-label">{{ __('external_purchases.email_subject') }}</label>
@@ -126,6 +126,13 @@
             <label class="form-label">{{ __('external_purchases.email_body') }}</label>
             <textarea name="email_body" rows="6" dir="ltr" class="form-input @error('email_body') is-invalid @enderror">{{ old('email_body', $emailTemplate['body']) }}</textarea>
             @error('email_body')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <div>
+            <label class="form-label">{{ __('external_purchases.ship_attachments') }}</label>
+            <p class="text-xs text-slate-400 mb-2">{{ __('external_purchases.ship_attachments_hint') }}</p>
+            <input type="file" name="attachments[]" multiple class="form-input @error('attachments') is-invalid @enderror @error('attachments.*') is-invalid @enderror">
+            @error('attachments')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            @error('attachments.*')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
         <button type="submit" class="btn-primary" @disabled(! $purchaseRequest->supplier?->email)>
             <i class="fa-solid fa-paper-plane"></i>

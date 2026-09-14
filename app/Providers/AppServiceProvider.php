@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Approval;
 use App\Models\PurchaseRequestApproval;
+use App\Models\PurchaseRequestReminder;
+use App\Models\PurchaseRequestReminderRecipient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
             if (Auth::check()) {
                 $count = Approval::where('approver_id', Auth::id())->where('status', 'pending')->count()
                     + PurchaseRequestApproval::where('user_id', Auth::id())->where('decision', 'pending')->count();
+
+                if (PurchaseRequestReminderRecipient::where('user_id', Auth::id())->exists()) {
+                    $count += PurchaseRequestReminder::where('status', 'pending')->count();
+                }
             }
 
             $view->with('pendingApprovalsCount', $count);

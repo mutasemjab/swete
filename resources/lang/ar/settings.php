@@ -22,6 +22,7 @@ return [
     'nav_activity_log'      => 'سجل الأنشطة',
     'nav_approval_rules'    => 'قواعد الموافقات',
     'nav_purchase_request_approvers' => 'معتمدو طلبات الشراء',
+    'nav_purchase_request_reminder_recipients' => 'المسؤولون عن طلبات الشراء المطلوبة',
 
     // ── Users ─────────────────────────────────────────────────────────────────
     'users'                 => 'المستخدمون',
@@ -210,5 +211,10 @@ return [
     'purchase_request_approvers_subtitle' => 'حدد المستخدمين الذين يجب أن يوافقوا جميعًا على أي طلب شراء جديد',
     'purchase_request_approvers_hint'    => 'يجب أن يوافق كل من تحدده هنا على طلب الشراء قبل أن تتحول حالته إلى "تمت الموافقة". إذا رفض أحدهم يتحول الطلب إلى "مرفوض" بعد رد الجميع.',
     'purchase_request_approvers_saved'   => 'تم حفظ قائمة المعتمدين بنجاح.',
+
+    'purchase_request_reminder_recipients'          => 'المسؤولون عن طلبات الشراء المطلوبة',
+    'purchase_request_reminder_recipients_subtitle' => 'من يستلم إشعارًا عند إرسال موظف لطلب إنشاء طلب شراء',
+    'purchase_request_reminder_recipients_hint'     => 'أي مستخدم تحدده هنا بيوصله إشعار بأي طلب جديد، ويقدر أي واحد منهم ينشئ طلب الشراء الفعلي.',
+    'purchase_request_reminder_recipients_saved'    => 'تم حفظ القائمة بنجاح.',
 
 ];

@@ -32,6 +32,7 @@ return [
     'pending_approval_from' => 'بانتظار موافقة',
     'no_pending_for_me'     => 'لا توجد طلبات بانتظار موافقتك حالياً',
     'pending_purchase_requests' => 'طلبات شراء بانتظار موافقتك',
+    'pending_purchase_request_reminders' => 'طلبات شراء مطلوبة بانتظار الإنشاء',
     'no_submitted_by_me'    => 'لم ترفع أي طلب موافقة بعد',
 
     // ── Rule-triggered pending actions ──────────────────────────────────────

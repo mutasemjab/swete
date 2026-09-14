@@ -124,6 +124,13 @@ return [
                 ],
             ],
             [
+                'label' => 'tenders.section_reminders',
+                'items' => [
+                    ['label' => 'tenders.nav_reminders_list', 'route' => 'purchase-request-reminders.index',  'icon' => 'bell'],
+                    ['label' => 'tenders.nav_reminders_add',  'route' => 'purchase-request-reminders.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
                 'label' => 'tenders.section_settings',
                 'items' => [
                     ['label' => 'tenders.nav_statuses', 'route' => 'tender-statuses.index', 'icon' => 'list-check'],
@@ -229,6 +236,7 @@ return [
                     ['label' => 'settings.nav_activity_log',   'route' => 'settings.activity-log.index',   'icon' => 'clock-rotate-left'],
                     ['label' => 'settings.nav_approval_rules', 'route' => 'settings.approval-rules.index', 'icon' => 'user-shield'],
                     ['label' => 'settings.nav_purchase_request_approvers', 'route' => 'settings.purchase-request-approvers.index', 'icon' => 'user-check'],
+                    ['label' => 'settings.nav_purchase_request_reminder_recipients', 'route' => 'settings.purchase-request-reminder-recipients.index', 'icon' => 'bell'],
                 ],
             ],
         ],

@@ -25,6 +25,7 @@ class PermissionSeeder extends Seeder
             'settings.activity_log.view',
             'settings.approval_rules.view', 'settings.approval_rules.edit',
             'settings.purchase_request_approvers.edit',
+            'settings.purchase_request_reminder_recipients.edit',
 
             // Accounting
             'accounting.view',
@@ -54,6 +55,7 @@ class PermissionSeeder extends Seeder
             'tenders.quote_delivery_terms.create', 'tenders.quote_delivery_terms.edit', 'tenders.quote_delivery_terms.delete',
             'tenders.tender_statuses.create', 'tenders.tender_statuses.edit', 'tenders.tender_statuses.delete',
             'tenders.projects.view', 'tenders.projects.convert', 'tenders.projects.edit', 'tenders.projects.delete',
+            'tenders.purchase_request_reminders.create',
 
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',

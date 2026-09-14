@@ -10,6 +10,7 @@ return [
     'section_management'    => 'Tenders',
     'section_price_quotes'  => 'Price Quotes',
     'section_projects'      => 'Projects',
+    'section_reminders'     => 'Requested Purchases',
     'section_settings'      => 'Tender Settings',
 
     // ── Sidebar items ────────────────────────────────────────────────────────
@@ -21,6 +22,8 @@ return [
     'nav_statuses'      => 'Tender Statuses',
     'nav_quote_supply_scopes'  => 'Quote Supply Scopes',
     'nav_quote_delivery_terms' => 'Quote Delivery Terms',
+    'nav_reminders_list'       => 'Requests List',
+    'nav_reminders_add'        => 'New Request',
 
     // ── Tenders ──────────────────────────────────────────────────────────────
     'tenders'               => 'Tenders',
@@ -206,5 +209,22 @@ return [
     'project_attachment_upload'   => 'Upload Attachments',
     'project_attachment_added'    => 'Attachments uploaded successfully.',
     'project_attachment_deleted'  => 'Attachment deleted successfully.',
+
+    // ── Purchase request reminders ───────────────────────────────────────────
+    'reminder'                  => 'Requested Purchase',
+    'reminders_list'            => 'Requested Purchases',
+    'reminders_subtitle'        => 'Employee requests for a Purchase Request to be raised — waiting for an officer to complete them',
+    'add_reminder'              => 'New Request',
+    'add_reminder_subtitle'     => 'Choose the project and the needed materials, and attach a Google Drive link if any',
+    'no_reminders'              => 'No requests yet',
+    'reminder_drive_url'        => 'Google Drive Link',
+    'reminder_drive_link_label' => 'Google Drive Link (from the requested purchase)',
+    'reminder_items'            => 'Requested Materials',
+    'reminder_added'            => 'Request sent successfully — the purchase request officers will be notified.',
+    'reminder_status_pending'   => 'Awaiting Creation',
+    'reminder_status_fulfilled' => 'Created',
+    'reminder_create_pr'        => 'Create Purchase Request',
+    'reminder_view_pr'          => 'View Purchase Request',
+    'reminder_fulfilled_by'     => 'Created By',
 
 ];

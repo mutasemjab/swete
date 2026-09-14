@@ -12,6 +12,7 @@ use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Project;
 use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestReminder;
 use App\Models\ServiceCall;
 use App\Models\ShippingCompany;
 use App\Models\Supplier;
@@ -68,7 +69,12 @@ class PurchaseRequestController extends ModuleController
 
     public function create(Request $request)
     {
-        $project     = $request->filled('project_id') ? Project::find($request->input('project_id')) : null;
+        $reminder = $request->filled('reminder_id')
+            ? PurchaseRequestReminder::with('items.material')->find($request->input('reminder_id'))
+            : null;
+
+        $project     = $reminder?->project
+            ?? ($request->filled('project_id') ? Project::find($request->input('project_id')) : null);
         $serviceCall = $request->filled('service_call_id') ? ServiceCall::find($request->input('service_call_id')) : null;
 
         return $this->moduleView('external-purchases.purchase-requests.create', [
@@ -76,6 +82,7 @@ class PurchaseRequestController extends ModuleController
             'purchaseRequest' => null,
             'project'         => $project,
             'serviceCall'     => $serviceCall,
+            'reminder'        => $reminder,
         ]);
     }
 
@@ -92,6 +99,11 @@ class PurchaseRequestController extends ModuleController
         $this->syncItems($purchaseRequest, $validated['items']);
         $this->syncAdditionalNotes($purchaseRequest, $validated['additional_notes'] ?? []);
         $purchaseRequest->seedApprovals();
+
+        if ($request->filled('reminder_id')) {
+            $reminder = PurchaseRequestReminder::where('status', 'pending')->find($request->input('reminder_id'));
+            $reminder?->markFulfilled($purchaseRequest, $request->user());
+        }
 
         return redirect()->route('purchase-requests.show', $purchaseRequest)
             ->with('success', __('external_purchases.request_added'));
@@ -280,8 +292,10 @@ class PurchaseRequestController extends ModuleController
         }
 
         $validated = $request->validate([
-            'email_subject' => ['required', 'string', 'max:255'],
-            'email_body'    => ['required', 'string'],
+            'email_subject'  => ['required', 'string', 'max:255'],
+            'email_body'     => ['required', 'string'],
+            'attachments'    => ['nullable', 'array'],
+            'attachments.*'  => ['file', 'max:10240'],
         ]);
 
         if (! $purchaseRequest->supplier?->email) {
@@ -289,7 +303,11 @@ class PurchaseRequestController extends ModuleController
         }
 
         Mail::to($purchaseRequest->supplier->email)
-            ->send(new VendorPurchaseOrderMail($validated['email_subject'], $validated['email_body']));
+            ->send(new VendorPurchaseOrderMail(
+                $validated['email_subject'],
+                $validated['email_body'],
+                $request->file('attachments', [])
+            ));
 
         $purchaseRequest->markSent();
 

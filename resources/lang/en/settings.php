@@ -22,6 +22,7 @@ return [
     'nav_activity_log'      => 'Activity Log',
     'nav_approval_rules'    => 'Approval Rules',
     'nav_purchase_request_approvers' => 'Purchase Request Approvers',
+    'nav_purchase_request_reminder_recipients' => 'Requested-Purchase Officers',
 
     // ── Users ─────────────────────────────────────────────────────────────────
     'users'                 => 'Users',
@@ -210,5 +211,10 @@ return [
     'purchase_request_approvers_subtitle' => 'Choose the users who must all approve any new purchase request',
     'purchase_request_approvers_hint'    => 'Everyone selected here must approve a purchase request before its status becomes "Approved". If any one rejects, the request becomes "Rejected" once everyone has responded.',
     'purchase_request_approvers_saved'   => 'Approver list saved successfully.',
+
+    'purchase_request_reminder_recipients'          => 'Requested-Purchase Officers',
+    'purchase_request_reminder_recipients_subtitle' => 'Who gets notified when an employee submits a request to raise a purchase request',
+    'purchase_request_reminder_recipients_hint'     => 'Everyone selected here is notified of every new request, and any one of them can create the actual purchase request.',
+    'purchase_request_reminder_recipients_saved'    => 'List saved successfully.',
 
 ];

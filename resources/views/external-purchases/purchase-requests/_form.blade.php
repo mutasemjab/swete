@@ -1,4 +1,4 @@
-@php $purchaseRequest = $purchaseRequest ?? null; @endphp
+@php $purchaseRequest = $purchaseRequest ?? null; $reminder = $reminder ?? null; @endphp
 <div x-data="{
         linkType: '{{ old('link_type', $project ? 'project' : ($serviceCall ? 'service_call' : 'stock')) }}',
         scope: '{{ old('location_scope', $purchaseRequest?->location_scope ?? 'inside_jordan') }}',
@@ -62,6 +62,13 @@
                 'ercd'        => $i->ercd,
                 'unit_price'  => (float) $i->unit_price,
                 'features'    => $i->features->pluck('value')->values()->isNotEmpty() ? $i->features->pluck('value')->values() : [''],
+            ])->values()
+            ?? $reminder?->items->map(fn ($i) => [
+                'material_id' => $i->material_id,
+                'quantity'    => (float) $i->quantity,
+                'ercd'        => '',
+                'unit_price'  => 0,
+                'features'    => [''],
             ])->values()
             ?? collect([['material_id' => '', 'quantity' => '', 'ercd' => '', 'unit_price' => '', 'features' => ['']]])
         )->toJson() }},
