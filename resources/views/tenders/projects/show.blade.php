@@ -53,44 +53,7 @@
     </dl>
 </div>
 
-<div class="card overflow-hidden">
-    <div class="card-header">
-        <h3 class="font-bold text-slate-700">{{ __('external_purchases.purchase_requests') }}</h3>
-        <a href="{{ route('purchase-requests.create', ['project_id' => $project->id]) }}" class="btn-primary btn-sm">
-            <i class="fa-solid fa-plus"></i>
-            {{ __('external_purchases.add_purchase_request') }}
-        </a>
-    </div>
 
-    @if($project->purchaseRequests->isNotEmpty())
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_number') }}</th>
-                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_date') }}</th>
-                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_supplier') }}</th>
-                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_total') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @foreach($project->purchaseRequests as $pr)
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-5 py-3">
-                            <a href="{{ route('purchase-requests.show', $pr) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $pr->number }}</a>
-                        </td>
-                        <td class="px-5 py-3 text-slate-600">{{ $pr->date->format('Y-m-d') }}</td>
-                        <td class="px-5 py-3 text-slate-600">{{ $pr->supplier?->localized_name }}</td>
-                        <td class="px-5 py-3 font-bold text-slate-800">{{ number_format($pr->total, 3) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @else
-        <p class="px-6 py-6 text-sm text-slate-400">{{ __('external_purchases.no_requests') }}</p>
-    @endif
-</div>
 
 <div class="card overflow-hidden mt-5">
     <div class="card-header">
