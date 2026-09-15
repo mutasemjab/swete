@@ -30,12 +30,19 @@ class PurchaseRequestReminderController extends ModuleController
 
     public function store(Request $request)
     {
+        // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
+        $request->merge(['google_drive_url' => normalizeUrl($request->input('google_drive_url'))]);
+
         $validated = $request->validate([
             'project_id'              => ['required', 'exists:projects,id'],
-            'google_drive_url'        => ['required', 'string', 'max:500'],
+            'google_drive_url'        => ['required', 'url', 'max:500'],
             'items'                   => ['required', 'array', 'min:1'],
             'items.*.material_id'     => ['required', 'exists:materials,id'],
             'items.*.quantity'        => ['required', 'numeric', 'min:0.001'],
+            'items.*.ercd'            => ['nullable', 'string', 'max:150'],
+            'items.*.unit_price'      => ['nullable', 'numeric', 'min:0'],
+            'items.*.features'        => ['array'],
+            'items.*.features.*'      => ['nullable', 'string', 'max:255'],
         ]);
 
         $reminder = PurchaseRequestReminder::create([
@@ -46,7 +53,16 @@ class PurchaseRequestReminderController extends ModuleController
         ]);
 
         foreach ($validated['items'] as $item) {
-            $reminder->items()->create($item);
+            $features = $item['features'] ?? [];
+            unset($item['features']);
+
+            $item['total'] = filled($item['unit_price'] ?? null) ? $item['quantity'] * $item['unit_price'] : null;
+
+            $createdItem = $reminder->items()->create($item);
+
+            foreach (array_filter($features, fn ($value) => filled($value)) as $value) {
+                $createdItem->features()->create(['value' => $value]);
+            }
         }
 
         return redirect()->route('purchase-request-reminders.show', $reminder)
@@ -55,7 +71,7 @@ class PurchaseRequestReminderController extends ModuleController
 
     public function show(PurchaseRequestReminder $purchaseRequestReminder)
     {
-        $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit']);
+        $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit', 'items.features']);
 
         return $this->moduleView('tenders.purchase-request-reminders.show', ['reminder' => $purchaseRequestReminder]);
     }

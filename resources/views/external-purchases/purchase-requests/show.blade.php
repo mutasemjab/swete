@@ -128,6 +128,13 @@
             @error('email_body')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
         <div>
+            <label class="form-label">{{ __('external_purchases.email_cc') }}</label>
+            <input type="text" name="cc" value="{{ old('cc') }}" dir="ltr"
+                   placeholder="cc1@example.com, cc2@example.com"
+                   class="form-input @error('cc') is-invalid @enderror">
+            @error('cc')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <div>
             <label class="form-label">{{ __('external_purchases.ship_attachments') }}</label>
             <p class="text-xs text-slate-400 mb-2">{{ __('external_purchases.ship_attachments_hint') }}</p>
             <input type="file" name="attachments[]" multiple class="form-input @error('attachments') is-invalid @enderror @error('attachments.*') is-invalid @enderror">

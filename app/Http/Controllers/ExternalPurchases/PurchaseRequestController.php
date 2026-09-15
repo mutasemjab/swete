@@ -70,7 +70,7 @@ class PurchaseRequestController extends ModuleController
     public function create(Request $request)
     {
         $reminder = $request->filled('reminder_id')
-            ? PurchaseRequestReminder::with('items.material')->find($request->input('reminder_id'))
+            ? PurchaseRequestReminder::with('items.features')->find($request->input('reminder_id'))
             : null;
 
         $project     = $reminder?->project
@@ -294,6 +294,7 @@ class PurchaseRequestController extends ModuleController
         $validated = $request->validate([
             'email_subject'  => ['required', 'string', 'max:255'],
             'email_body'     => ['required', 'string'],
+            'cc'             => ['nullable', 'string', 'max:1000', $this->ccListRule()],
             'attachments'    => ['nullable', 'array'],
             'attachments.*'  => ['file', 'max:10240'],
         ]);
@@ -303,6 +304,7 @@ class PurchaseRequestController extends ModuleController
         }
 
         Mail::to($purchaseRequest->supplier->email)
+            ->cc($this->parseCcEmails($validated['cc'] ?? null))
             ->send(new VendorPurchaseOrderMail(
                 $validated['email_subject'],
                 $validated['email_body'],
@@ -359,6 +361,7 @@ class PurchaseRequestController extends ModuleController
             'shipping_company_ids'   => ['required', 'array', 'min:1'],
             'shipping_company_ids.*' => ['exists:shipping_companies,id'],
             'message'                => ['nullable', 'string', 'max:2000'],
+            'cc'                     => ['nullable', 'string', 'max:1000', $this->ccListRule()],
             'attachments'            => ['nullable', 'array'],
             'attachments.*'          => ['file', 'max:10240'],
         ]);
@@ -368,9 +371,10 @@ class PurchaseRequestController extends ModuleController
             ->where('status', 'ready_for_shipping')->get();
         $companies = ShippingCompany::whereIn('id', $validated['shipping_company_ids'])->get();
         $files     = $request->file('attachments', []);
+        $ccEmails  = $this->parseCcEmails($validated['cc'] ?? null);
 
         foreach ($companies as $company) {
-            Mail::to($company->email)->send(new ShippingQuoteRequestMail(
+            Mail::to($company->email)->cc($ccEmails)->send(new ShippingQuoteRequestMail(
                 $purchaseRequests, $company, $validated['message'] ?? null, $files
             ));
 
@@ -395,5 +399,31 @@ class PurchaseRequestController extends ModuleController
 
         return redirect()->route('purchase-requests.index')
             ->with('success', __('external_purchases.shipping_rfq_sent'));
+    }
+
+    /** A comma/semicolon-separated CC field, typed freely — split into a clean array of real addresses for Mail::cc(). */
+    private function parseCcEmails(?string $cc): array
+    {
+        if (blank($cc)) {
+            return [];
+        }
+
+        return collect(preg_split('/[,;]+/', $cc))
+            ->map(fn ($email) => trim($email))
+            ->filter(fn ($email) => $email !== '')
+            ->values()
+            ->all();
+    }
+
+    /** Validates every address in a comma/semicolon-separated CC field, one clear error per bad entry. */
+    private function ccListRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail) {
+            foreach ($this->parseCcEmails($value) as $email) {
+                if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $fail(__('external_purchases.cc_invalid_email', ['email' => $email]));
+                }
+            }
+        };
     }
 }

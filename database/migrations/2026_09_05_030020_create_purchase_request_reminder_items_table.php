@@ -18,6 +18,11 @@ return new class extends Migration
                 ->references('id')->on('purchase_request_reminders')->cascadeOnDelete();
             $table->foreignId('material_id')->constrained('materials')->restrictOnDelete();
             $table->decimal('quantity', 14, 3);
+            // Same fields as purchase_request_items, but all optional — the requester may not know
+            // pricing/ERCD, and the officer who fulfills the reminder fills them in anyway.
+            $table->string('ercd')->nullable();
+            $table->decimal('unit_price', 14, 3)->nullable();
+            $table->decimal('total', 14, 3)->nullable();
             $table->timestamps();
         });
     }

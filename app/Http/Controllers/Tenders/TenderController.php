@@ -129,6 +129,12 @@ class TenderController extends ModuleController
 
     private function validated(Request $request): array
     {
+        // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
+        $request->merge([
+            'documents_url'        => normalizeUrl($request->input('documents_url')),
+            'design_documents_url' => normalizeUrl($request->input('design_documents_url')),
+        ]);
+
         $rules = [
             'party_id'             => ['nullable', 'exists:customers,id'],
             'title'                => ['required', 'string', 'max:255'],
@@ -147,8 +153,8 @@ class TenderController extends ModuleController
             'win_probability'      => ['nullable', 'integer', 'min:0', 'max:100'],
             'submission_deadline'  => ['required', 'date'],
             'status_id'            => ['required', 'exists:tender_statuses,id'],
-            'documents_url'        => ['nullable', 'string', 'max:255'],
-            'design_documents_url' => ['nullable', 'string', 'max:255'],
+            'documents_url'        => ['nullable', 'url', 'max:255'],
+            'design_documents_url' => ['nullable', 'url', 'max:255'],
             'notes'                => ['nullable', 'string'],
         ];
 

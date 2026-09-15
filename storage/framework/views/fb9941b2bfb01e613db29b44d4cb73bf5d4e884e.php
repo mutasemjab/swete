@@ -66,9 +66,9 @@
             ?? $reminder?->items->map(fn ($i) => [
                 'material_id' => $i->material_id,
                 'quantity'    => (float) $i->quantity,
-                'ercd'        => '',
-                'unit_price'  => 0,
-                'features'    => [''],
+                'ercd'        => $i->ercd ?? '',
+                'unit_price'  => (float) ($i->unit_price ?? 0),
+                'features'    => $i->features->pluck('value')->values()->isNotEmpty() ? $i->features->pluck('value')->values() : [''],
             ])->values()
             ?? collect([['material_id' => '', 'quantity' => '', 'ercd' => '', 'unit_price' => '', 'features' => ['']]])
         )->toJson()); ?>,

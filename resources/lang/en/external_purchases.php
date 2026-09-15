@@ -99,6 +99,8 @@ return [
     'manufacturing_info'    => 'SO Number & Ready Date',
     'so_number'             => 'SO Number',
     'ready_date'            => 'Ready Date',
+    'ready_date_today'      => 'Due Today',
+    'ready_date_today_hint' => 'This request\'s ready date is today.',
     'manufacturing_updated' => 'Manufacturing info saved successfully.',
 
     // ── Ready for shipping ───────────────────────────────────────────────────
@@ -170,6 +172,8 @@ return [
     'vendor_email_template_saved'            => 'Email template saved successfully.',
     'email_subject'                          => 'Email Subject',
     'email_body'                             => 'Email Body',
+    'email_cc'                               => 'CC',
+    'cc_invalid_email'                       => 'The email address ":email" is not valid.',
     'supplier_email_missing'                 => 'This supplier has no email address on file, so the email cannot be sent.',
 
     // ── Shipments ────────────────────────────────────────────────────────────

@@ -103,9 +103,18 @@
                 {{ __('external_purchases.ship_message') }}
             </h3>
         </div>
-        <div class="px-6 py-5">
-            <textarea name="message" rows="4" class="form-input @error('message') is-invalid @enderror">{{ old('message') }}</textarea>
-            @error('message')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        <div class="px-6 py-5 space-y-4">
+            <div>
+                <textarea name="message" rows="4" class="form-input @error('message') is-invalid @enderror">{{ old('message') }}</textarea>
+                @error('message')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label class="form-label">{{ __('external_purchases.email_cc') }}</label>
+                <input type="text" name="cc" value="{{ old('cc') }}" dir="ltr"
+                       placeholder="cc1@example.com, cc2@example.com"
+                       class="form-input @error('cc') is-invalid @enderror">
+                @error('cc')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
         </div>
     </div>
 

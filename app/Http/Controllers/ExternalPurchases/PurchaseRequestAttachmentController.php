@@ -11,8 +11,12 @@ class PurchaseRequestAttachmentController extends Controller
 {
     public function store(Request $request, PurchaseRequest $purchaseRequest)
     {
+        // A pasted link with no scheme (e.g. "drive.google.com/xyz") would otherwise render as a
+        // relative href and silently fail to open — normalize before validating as a real URL.
+        $request->merge(['url' => normalizeUrl($request->input('url'))]);
+
         $validated = $request->validate([
-            'url'   => ['required', 'string', 'max:500'],
+            'url'   => ['required', 'url', 'max:500'],
             'label' => ['nullable', 'string', 'max:150'],
         ]);
 

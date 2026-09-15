@@ -79,6 +79,10 @@
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.material') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_quantity') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.item_ercd') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.invoice_item_unit_price') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.invoice_item_total') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.item_features') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -89,6 +93,16 @@
                         <span class="text-xs text-slate-400 ms-1">{{ $item->material?->unit?->symbol }}</span>
                     </td>
                     <td class="px-5 py-3 text-slate-700">{{ number_format($item->quantity, 3) }}</td>
+                    <td class="px-5 py-3 text-slate-700">{{ $item->ercd ?? '—' }}</td>
+                    <td class="px-5 py-3 text-slate-700">{{ $item->unit_price !== null ? number_format($item->unit_price, 3) : '—' }}</td>
+                    <td class="px-5 py-3 font-bold text-slate-800">{{ $item->total !== null ? number_format($item->total, 3) : '—' }}</td>
+                    <td class="px-5 py-3 text-slate-600 text-xs">
+                        @forelse($item->features as $feature)
+                            <span class="badge bg-slate-100 text-slate-600 me-1 mb-1">{{ $feature->value }}</span>
+                        @empty
+                            —
+                        @endforelse
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

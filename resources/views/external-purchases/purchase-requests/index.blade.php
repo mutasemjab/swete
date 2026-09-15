@@ -122,9 +122,16 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($purchaseRequests as $pr)
-                    <tr class="hover:bg-slate-50/50 transition-colors group">
+                    @php $readyDateToday = $pr->ready_date && $pr->ready_date->isToday() && $pr->status !== 'shipped'; @endphp
+                    <tr class="transition-colors group {{ $readyDateToday ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-slate-50/50' }}">
                         <td class="px-5 py-4">
                             <a href="{{ route('purchase-requests.show', $pr) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors">{{ $pr->number }}</a>
+                            @if($readyDateToday)
+                                <span class="badge bg-amber-100 text-amber-700 ms-1" title="{{ __('external_purchases.ready_date_today_hint') }}">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    {{ __('external_purchases.ready_date_today') }}
+                                </span>
+                            @endif
                         </td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->date->format('Y-m-d') }}</td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->supplier?->localized_name }}</td>
