@@ -8,6 +8,7 @@
     <div>
         <h1 class="page-title flex items-center gap-3">
             {{ $shipment->number }}
+            <span class="badge bg-{{ $shipment->status_color }}-100 text-{{ $shipment->status_color }}-700">{{ __('external_purchases.shipment_status_' . $shipment->status) }}</span>
             <span class="badge bg-cyan-100 text-cyan-700">{{ __('external_purchases.transport_mode_' . $shipment->transport_mode) }}</span>
         </h1>
         <p class="page-subtitle">{{ __('external_purchases.shipment') }}</p>

@@ -22,6 +22,10 @@ class ShipmentController extends ModuleController
             $query->where('number', 'like', "%{$search}%");
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
         $shipments = $query->latest()->paginate(20)->withQueryString();
 
         return $this->moduleView('external-purchases.shipments.index', compact('shipments'));
@@ -121,6 +125,7 @@ class ShipmentController extends ModuleController
             'purchase_request_ids'   => ['required', 'array', 'min:1'],
             'purchase_request_ids.*' => ['exists:purchase_requests,id'],
             'shipping_company_id'    => ['required', 'exists:shipping_companies,id'],
+            'status'                  => ['nullable', 'in:' . implode(',', Shipment::STATUSES)],
             'transport_mode'         => ['required', 'in:' . implode(',', Shipment::TRANSPORT_MODES)],
             'sea_service_type'       => ['required_if:transport_mode,sea', 'nullable', 'in:' . implode(',', Shipment::SEA_SERVICE_TYPES)],
             'air_service_type'       => ['required_if:transport_mode,air', 'nullable', 'in:' . implode(',', Shipment::AIR_SERVICE_TYPES)],
@@ -143,6 +148,7 @@ class ShipmentController extends ModuleController
         }
 
         $validated['is_hazardous'] = $request->boolean('is_hazardous');
+        $validated['status']       = $validated['status'] ?? 'pending';
 
         return $validated;
     }

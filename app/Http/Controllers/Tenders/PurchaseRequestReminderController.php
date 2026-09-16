@@ -22,18 +22,89 @@ class PurchaseRequestReminderController extends ModuleController
 
     public function create()
     {
-        $projects  = Project::where('status', 'active')->orderByDesc('created_at')->get();
-        $materials = Material::where('status', true)->orderBy('name')->get();
-
-        return $this->moduleView('tenders.purchase-request-reminders.create', compact('projects', 'materials'));
+        return $this->moduleView('tenders.purchase-request-reminders.create', [
+            ...$this->formOptions(),
+            'reminder' => null,
+        ]);
     }
 
     public function store(Request $request)
     {
+        $validated = $this->validated($request);
+
+        $reminder = PurchaseRequestReminder::create([
+            'project_id'       => $validated['project_id'],
+            'google_drive_url' => $validated['google_drive_url'],
+            'status'           => 'pending',
+            'requested_by'     => $request->user()->id,
+        ]);
+
+        $this->syncItems($reminder, $validated['items']);
+
+        return redirect()->route('purchase-request-reminders.show', $reminder)
+            ->with('success', __('tenders.reminder_added'));
+    }
+
+    public function show(PurchaseRequestReminder $purchaseRequestReminder)
+    {
+        $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit', 'items.features']);
+
+        return $this->moduleView('tenders.purchase-request-reminders.show', ['reminder' => $purchaseRequestReminder]);
+    }
+
+    public function edit(PurchaseRequestReminder $purchaseRequestReminder)
+    {
+        abort_unless($purchaseRequestReminder->isEditable(), 403, __('tenders.reminder_locked'));
+
+        $purchaseRequestReminder->load('items.features');
+
+        return $this->moduleView('tenders.purchase-request-reminders.edit', [
+            ...$this->formOptions(),
+            'reminder' => $purchaseRequestReminder,
+        ]);
+    }
+
+    public function update(Request $request, PurchaseRequestReminder $purchaseRequestReminder)
+    {
+        abort_unless($purchaseRequestReminder->isEditable(), 403, __('tenders.reminder_locked'));
+
+        $validated = $this->validated($request);
+
+        $purchaseRequestReminder->update([
+            'project_id'       => $validated['project_id'],
+            'google_drive_url' => $validated['google_drive_url'],
+        ]);
+
+        $this->syncItems($purchaseRequestReminder, $validated['items']);
+
+        return redirect()->route('purchase-request-reminders.show', $purchaseRequestReminder)
+            ->with('success', __('tenders.reminder_updated'));
+    }
+
+    public function destroy(PurchaseRequestReminder $purchaseRequestReminder)
+    {
+        abort_unless($purchaseRequestReminder->isEditable(), 403, __('tenders.reminder_locked'));
+
+        $purchaseRequestReminder->delete();
+
+        return redirect()->route('purchase-request-reminders.index')
+            ->with('success', __('tenders.reminder_deleted'));
+    }
+
+    private function formOptions(): array
+    {
+        return [
+            'projects'  => Project::where('status', 'active')->orderByDesc('created_at')->get(),
+            'materials' => Material::where('status', true)->orderBy('name')->get(),
+        ];
+    }
+
+    private function validated(Request $request): array
+    {
         // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
         $request->merge(['google_drive_url' => normalizeUrl($request->input('google_drive_url'))]);
 
-        $validated = $request->validate([
+        return $request->validate([
             'project_id'              => ['required', 'exists:projects,id'],
             'google_drive_url'        => ['required', 'url', 'max:500'],
             'items'                   => ['required', 'array', 'min:1'],
@@ -44,15 +115,13 @@ class PurchaseRequestReminderController extends ModuleController
             'items.*.features'        => ['array'],
             'items.*.features.*'      => ['nullable', 'string', 'max:255'],
         ]);
+    }
 
-        $reminder = PurchaseRequestReminder::create([
-            'project_id'       => $validated['project_id'],
-            'google_drive_url' => $validated['google_drive_url'],
-            'status'           => 'pending',
-            'requested_by'     => $request->user()->id,
-        ]);
+    private function syncItems(PurchaseRequestReminder $reminder, array $items): void
+    {
+        $reminder->items()->delete();
 
-        foreach ($validated['items'] as $item) {
+        foreach ($items as $item) {
             $features = $item['features'] ?? [];
             unset($item['features']);
 
@@ -64,15 +133,5 @@ class PurchaseRequestReminderController extends ModuleController
                 $createdItem->features()->create(['value' => $value]);
             }
         }
-
-        return redirect()->route('purchase-request-reminders.show', $reminder)
-            ->with('success', __('tenders.reminder_added'));
-    }
-
-    public function show(PurchaseRequestReminder $purchaseRequestReminder)
-    {
-        $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit', 'items.features']);
-
-        return $this->moduleView('tenders.purchase-request-reminders.show', ['reminder' => $purchaseRequestReminder]);
     }
 }

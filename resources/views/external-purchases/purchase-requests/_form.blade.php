@@ -74,6 +74,11 @@
         )->toJson() }},
         addItem() { this.items.push({ material_id: '', quantity: '', ercd: '', unit_price: '', features: [''] }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
+        attachments: {{ (
+            $purchaseRequest?->attachments->map(fn ($a) => ['url' => $a->url, 'label' => $a->label])->values() ?? collect([])
+        )->toJson() }},
+        addAttachment() { this.attachments.push({ url: '', label: '' }); },
+        removeAttachment(i) { this.attachments.splice(i, 1); },
       }"
       x-init="$nextTick(() => window.initSelect2())">
 
@@ -367,6 +372,39 @@
                 </div>
             </template>
             <p x-show="additionalNotes.length === 0" class="text-sm text-slate-400">{{ __('external_purchases.no_additional_notes') }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-paperclip text-cyan-500 text-sm"></i>
+                {{ __('external_purchases.attachments') }}
+            </h3>
+            <button type="button" @click="addAttachment()" class="btn-secondary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                {{ __('external_purchases.attachment_add') }}
+            </button>
+        </div>
+        <div class="px-6 py-5 space-y-3">
+            <template x-for="(attachment, aIndex) in attachments" :key="aIndex">
+                <div class="flex items-end gap-3 flex-wrap">
+                    <div class="flex-1 min-w-56">
+                        <label class="form-label">{{ __('external_purchases.attachment_url') }}</label>
+                        <input type="text" :name="`attachments[${aIndex}][url]`" x-model="attachment.url"
+                               placeholder="https://..." dir="ltr" class="form-input">
+                    </div>
+                    <div class="flex-1 min-w-40">
+                        <label class="form-label">{{ __('external_purchases.attachment_label') }}</label>
+                        <input type="text" :name="`attachments[${aIndex}][label]`" x-model="attachment.label" class="form-input">
+                    </div>
+                    <button type="button" @click="removeAttachment(aIndex)"
+                            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all flex-shrink-0">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                    </button>
+                </div>
+            </template>
+            <p x-show="attachments.length === 0" class="text-sm text-slate-400">{{ __('external_purchases.no_attachments') }}</p>
         </div>
     </div>
 </div>

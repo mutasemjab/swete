@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('number')->unique();
             $table->foreignId('shipping_company_id')->constrained('shipping_companies')->restrictOnDelete();
+            $table->enum('status', ['pending', 'in_transit', 'arrived', 'delivered'])->default('pending');
             $table->enum('transport_mode', ['sea', 'land', 'air']);
             // Only relevant when transport_mode = sea / air respectively.
             $table->enum('sea_service_type', ['lcl', '20ft', '40ft', '40hc'])->nullable();

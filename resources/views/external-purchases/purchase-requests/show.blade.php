@@ -172,7 +172,6 @@
 </div>
 @endif
 
-@if(in_array($purchaseRequest->status, ['manufacturing', 'ready_for_shipping', 'awaiting_price_quotes']))
 <div class="card overflow-hidden mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700">{{ __('external_purchases.attachments') }}</h3>
@@ -235,7 +234,6 @@
         {{ __('external_purchases.send_to_shipping_companies') }}
     </a>
 </div>
-@endif
 @endif
 
 @if($purchaseRequest->shippingRequests->isNotEmpty())

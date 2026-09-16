@@ -34,6 +34,9 @@ return new class extends Migration
             // No DB-level default — the controller always supplies this explicitly on create
             // (defaulting to "all included" if the request omits the key entirely).
             $table->json('included_work_scopes')->nullable();
+            // Free-text custom points, one per line — appended to the auto-generated "Very Important
+            // Notes" clause block on print, after the fixed toggles/selections above.
+            $table->text('additional_terms')->nullable();
 
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();

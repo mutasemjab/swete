@@ -77,6 +77,12 @@
             <dd class="text-slate-700">{{ $priceQuote->notes }}</dd>
         </div>
         @endif
+        @if($priceQuote->additional_terms)
+        <div class="sm:col-span-3">
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_additional_terms') }}</dt>
+            <dd class="text-slate-700 whitespace-pre-line">{{ $priceQuote->additional_terms }}</dd>
+        </div>
+        @endif
     </dl>
 </div>
 

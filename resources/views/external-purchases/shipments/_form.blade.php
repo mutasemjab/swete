@@ -53,6 +53,16 @@
             </div>
 
             <div>
+                <label class="form-label">{{ __('external_purchases.shipment_status') }}</label>
+                <select name="status" class="form-select @error('status') is-invalid @enderror">
+                    @foreach(\App\Models\Shipment::STATUSES as $statusOption)
+                        <option value="{{ $statusOption }}" @selected(old('status', $shipment?->status ?? 'pending') === $statusOption)>{{ __('external_purchases.shipment_status_' . $statusOption) }}</option>
+                    @endforeach
+                </select>
+                @error('status')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
                 <label class="form-label">{{ __('external_purchases.shipment_transport_mode') }} <span class="text-rose-500">*</span></label>
                 <select name="transport_mode" x-model="mode" class="form-select @error('transport_mode') is-invalid @enderror">
                     <option value="sea">{{ __('external_purchases.transport_mode_sea') }}</option>

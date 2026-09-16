@@ -53,6 +53,12 @@ class PurchaseRequestReminder extends Model
     }
 
     /** The PR was created from this reminder — link them, and carry the drive link over as a real PR attachment. */
+    /** Locked once a purchase request has been created from it — the request is considered finalized at that point. */
+    public function isEditable(): bool
+    {
+        return $this->status !== 'fulfilled';
+    }
+
     public function markFulfilled(PurchaseRequest $purchaseRequest, User $user): void
     {
         $this->update([

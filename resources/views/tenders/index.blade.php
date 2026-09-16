@@ -86,9 +86,16 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($tenders as $tender)
-                    <tr class="hover:bg-slate-50/50 transition-colors group">
+                    @php $deadlineSoon = $tender->submission_deadline && $tender->submission_deadline->between(now()->startOfDay(), now()->startOfDay()->addDays(3)); @endphp
+                    <tr class="transition-colors group {{ $deadlineSoon ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-slate-50/50' }}">
                         <td class="px-5 py-4">
                             <a href="{{ route('tenders.show', $tender) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm">{{ $tender->number }}</a>
+                            @if($deadlineSoon)
+                                <span class="badge bg-amber-100 text-amber-700 ms-1" title="{{ __('tenders.deadline_soon_hint') }}">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    {{ __('tenders.deadline_soon') }}
+                                </span>
+                            @endif
                         </td>
                         <td class="px-5 py-4"><p class="font-bold text-slate-800">{{ $tender->localized_title }}</p></td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">{{ $tender->localized_entity_name }}</td>

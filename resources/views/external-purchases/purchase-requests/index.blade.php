@@ -112,7 +112,7 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_number') }}</th>
-                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_date') }}</th>
+                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.ready_date') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_supplier') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('external_purchases.request_linked_to') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.request_total') }}</th>
@@ -133,7 +133,7 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->date->format('Y-m-d') }}</td>
+                        <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->ready_date?->format('Y-m-d') ?? '—' }}</td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $pr->supplier?->localized_name }}</td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                             @if($pr->project)

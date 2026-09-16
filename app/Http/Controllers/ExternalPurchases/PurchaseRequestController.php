@@ -98,6 +98,7 @@ class PurchaseRequestController extends ModuleController
 
         $this->syncItems($purchaseRequest, $validated['items']);
         $this->syncAdditionalNotes($purchaseRequest, $validated['additional_notes'] ?? []);
+        $this->syncAttachments($purchaseRequest, $validated['attachments'] ?? [], $request->user()->id);
         $purchaseRequest->seedApprovals();
 
         if ($request->filled('reminder_id')) {
@@ -128,7 +129,7 @@ class PurchaseRequestController extends ModuleController
     {
         abort_unless($purchaseRequest->isEditable(), 403, __('external_purchases.request_locked'));
 
-        $purchaseRequest->load('items.features', 'additionalNotes');
+        $purchaseRequest->load('items.features', 'additionalNotes', 'attachments');
 
         return $this->moduleView('external-purchases.purchase-requests.edit', [
             ...$this->formOptions(),
@@ -148,6 +149,7 @@ class PurchaseRequestController extends ModuleController
 
         $this->syncItems($purchaseRequest, $validated['items']);
         $this->syncAdditionalNotes($purchaseRequest, $validated['additional_notes'] ?? []);
+        $this->syncAttachments($purchaseRequest, $validated['attachments'] ?? [], $request->user()->id);
 
         return redirect()->route('purchase-requests.show', $purchaseRequest)
             ->with('success', __('external_purchases.request_updated'));
@@ -185,6 +187,15 @@ class PurchaseRequestController extends ModuleController
 
     private function validated(Request $request): array
     {
+        // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
+        if ($request->has('attachments')) {
+            $request->merge([
+                'attachments' => collect($request->input('attachments', []))
+                    ->map(fn ($row) => ['url' => normalizeUrl($row['url'] ?? null), 'label' => $row['label'] ?? null])
+                    ->all(),
+            ]);
+        }
+
         $validated = $request->validate([
             'project_id'                 => ['nullable', 'exists:projects,id'],
             'service_call_id'            => ['nullable', 'exists:service_calls,id'],
@@ -214,6 +225,9 @@ class PurchaseRequestController extends ModuleController
             'additional_notes'           => ['array'],
             'additional_notes.*.label'   => ['required_with:additional_notes', 'string', 'max:150'],
             'additional_notes.*.value'   => ['nullable', 'string', 'max:255'],
+            'attachments'                => ['array'],
+            'attachments.*.url'          => ['nullable', 'url', 'max:500'],
+            'attachments.*.label'        => ['nullable', 'string', 'max:150'],
         ]);
 
         if (($validated['location_scope'] ?? null) === 'outside_jordan') {
@@ -254,6 +268,23 @@ class PurchaseRequestController extends ModuleController
             $purchaseRequest->additionalNotes()->create([
                 'label' => $row['label'],
                 'value' => $row['value'] ?? null,
+            ]);
+        }
+    }
+
+    private function syncAttachments(PurchaseRequest $purchaseRequest, array $rows, int $userId): void
+    {
+        $purchaseRequest->attachments()->delete();
+
+        foreach ($rows as $row) {
+            if (blank($row['url'] ?? null)) {
+                continue;
+            }
+
+            $purchaseRequest->attachments()->create([
+                'url'        => $row['url'],
+                'label'      => $row['label'] ?? null,
+                'created_by' => $userId,
             ]);
         }
     }

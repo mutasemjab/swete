@@ -12,6 +12,15 @@ class Shipment extends Model
 {
     use LogsActivity;
 
+    public const STATUSES = ['pending', 'in_transit', 'arrived', 'delivered'];
+
+    public const STATUS_COLORS = [
+        'pending'    => 'amber',
+        'in_transit' => 'indigo',
+        'arrived'    => 'cyan',
+        'delivered'  => 'emerald',
+    ];
+
     public const TRANSPORT_MODES = ['sea', 'land', 'air'];
 
     public const SEA_SERVICE_TYPES = ['lcl', '20ft', '40ft', '40hc'];
@@ -24,6 +33,7 @@ class Shipment extends Model
     protected $fillable = [
         'number',
         'shipping_company_id',
+        'status',
         'transport_mode',
         'sea_service_type',
         'air_service_type',
@@ -42,6 +52,11 @@ class Shipment extends Model
         'price'        => 'decimal:3',
         'is_hazardous' => 'boolean',
     ];
+
+    public function getStatusColorAttribute(): string
+    {
+        return self::STATUS_COLORS[$this->status] ?? 'slate';
+    }
 
     public function shippingCompany(): BelongsTo
     {

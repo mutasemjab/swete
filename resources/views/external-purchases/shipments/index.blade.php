@@ -24,11 +24,19 @@
                    class="form-input ps-10">
         </div>
     </div>
+    <div class="w-48">
+        <select name="status" class="form-select w-full">
+            <option value="">{{ __('app.all_statuses') }}</option>
+            @foreach(\App\Models\Shipment::STATUSES as $statusOption)
+                <option value="{{ $statusOption }}" @selected(request('status') === $statusOption)>{{ __('external_purchases.shipment_status_' . $statusOption) }}</option>
+            @endforeach
+        </select>
+    </div>
     <button type="submit" class="btn-primary">
         <i class="fa-solid fa-filter"></i>
         {{ __('app.search') }}
     </button>
-    @if(request()->hasAny(['search']))
+    @if(request()->hasAny(['search', 'status']))
         <a href="{{ route('shipments.index') }}" class="btn-secondary">
             <i class="fa-solid fa-xmark"></i>
             {{ __('app.clear_filters') }}
@@ -56,6 +64,7 @@
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.shipment_number') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.shipment_shipping_company') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.shipment_transport_mode') }}</th>
+                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('external_purchases.shipment_status') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('external_purchases.shipment_purchase_requests') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                     </tr>
@@ -69,6 +78,9 @@
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $shipment->shippingCompany?->localized_name }}</td>
                         <td class="px-5 py-4">
                             <span class="badge bg-cyan-100 text-cyan-700">{{ __('external_purchases.transport_mode_' . $shipment->transport_mode) }}</span>
+                        </td>
+                        <td class="px-5 py-4">
+                            <span class="badge bg-{{ $shipment->status_color }}-100 text-{{ $shipment->status_color }}-700">{{ __('external_purchases.shipment_status_' . $shipment->status) }}</span>
                         </td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">{{ $shipment->purchaseRequests->pluck('number')->implode(', ') }}</td>
                         <td class="px-5 py-4">

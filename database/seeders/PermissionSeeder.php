@@ -56,6 +56,7 @@ class PermissionSeeder extends Seeder
             'tenders.tender_statuses.create', 'tenders.tender_statuses.edit', 'tenders.tender_statuses.delete',
             'tenders.projects.view', 'tenders.projects.convert', 'tenders.projects.edit', 'tenders.projects.delete',
             'tenders.purchase_request_reminders.create',
+            'tenders.purchase_request_reminders.edit', 'tenders.purchase_request_reminders.delete',
 
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',

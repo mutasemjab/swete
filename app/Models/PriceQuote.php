@@ -40,6 +40,7 @@ class PriceQuote extends Model
         'customs_fees_included',
         'include_boiler_note',
         'included_work_scopes',
+        'additional_terms',
         'notes',
         'created_by',
     ];
@@ -145,15 +146,23 @@ class PriceQuote extends Model
             $lines[] = __('tenders.quote_note_boiler');
         }
 
-        if ($excluded = $this->excludedWorkScopeLabels()) {
-            $lines[] = __('tenders.quote_note_work_exclusions', ['items' => implode(', ', $excluded)]);
-        }
+        $lines = array_merge($lines, $this->workScopeNoteLines());
 
         if ($this->currency) {
             $lines[] = __('tenders.quote_note_currency', ['code' => $this->currency->code]);
         }
 
-        return $lines;
+        return array_merge($lines, $this->additionalTermsLines());
+    }
+
+    /** Free-text custom points typed by the user, one per line — appended after the auto-generated lines above. */
+    private function additionalTermsLines(): array
+    {
+        return collect(preg_split('/\r\n|\r|\n/', (string) $this->additional_terms))
+            ->map(fn ($line) => trim($line))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /** Sales tax / customs fees bucket into "included" and "excluded" — a mixed state prints as two lines, a uniform state as one. */
@@ -183,17 +192,34 @@ class PriceQuote extends Model
         return $lines;
     }
 
-    /** Localized labels for whichever of the 6 fixed work-scope items were left unchecked (excluded) on this quote. */
-    private function excludedWorkScopeLabels(): array
+    /** The 6 fixed work-scope items bucket into "included" and "excluded" — both lists are stated explicitly, mirroring the tax/customs lines. */
+    private function workScopeNoteLines(): array
     {
-        $included = $this->included_work_scopes ?? [];
-        $locale   = app()->isLocale('en') ? 'en' : 'ar';
+        $includedKeys = $this->included_work_scopes ?? [];
+        $locale       = app()->isLocale('en') ? 'en' : 'ar';
 
-        return collect(self::WORK_SCOPE_ITEMS)
-            ->reject(fn ($labels, $key) => in_array($key, $included, true))
-            ->map(fn ($labels) => $labels[$locale])
-            ->values()
-            ->all();
+        $included = [];
+        $excluded = [];
+
+        foreach (self::WORK_SCOPE_ITEMS as $key => $labels) {
+            if (in_array($key, $includedKeys, true)) {
+                $included[] = $labels[$locale];
+            } else {
+                $excluded[] = $labels[$locale];
+            }
+        }
+
+        $lines = [];
+
+        if ($included) {
+            $lines[] = __('tenders.quote_note_prices_include', ['items' => implode(', ', $included)]);
+        }
+
+        if ($excluded) {
+            $lines[] = __('tenders.quote_note_prices_exclude', ['items' => implode(', ', $excluded)]);
+        }
+
+        return $lines;
     }
 
     public function getActivitylogOptions(): LogOptions

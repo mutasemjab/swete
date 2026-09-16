@@ -147,7 +147,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store');
     Route::delete('projects/{project}/attachments/{attachment}', [ProjectAttachmentController::class, 'destroy'])->name('projects.attachments.destroy');
-    Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
     // Must be registered before the {purchase_request} resource routes below, since
     // "ship" would otherwise be swallowed by the show route's single-segment wildcard.

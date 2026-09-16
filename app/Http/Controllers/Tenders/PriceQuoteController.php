@@ -132,6 +132,7 @@ class PriceQuoteController extends ModuleController
             'include_boiler_note'       => ['boolean'],
             'included_work_scopes'      => ['nullable', 'array'],
             'included_work_scopes.*'    => ['string', 'in:' . implode(',', array_keys(PriceQuote::WORK_SCOPE_ITEMS))],
+            'additional_terms'          => ['nullable', 'string'],
             'notes'                     => ['nullable', 'string'],
             'items'                     => ['required', 'array', 'min:1'],
             'items.*.material_id'       => ['required', 'exists:materials,id'],

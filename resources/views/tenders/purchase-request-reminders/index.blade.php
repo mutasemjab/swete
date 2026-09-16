@@ -58,6 +58,17 @@
                                    class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="{{ __('app.view') }}">
                                     <i class="fa-solid fa-eye text-sm"></i>
                                 </a>
+                                @if($reminder->status === 'pending')
+                                <a href="{{ route('purchase-request-reminders.edit', $reminder) }}"
+                                   class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="{{ __('app.edit') }}">
+                                    <i class="fa-solid fa-pen text-sm"></i>
+                                </a>
+                                <button type="button" title="{{ __('app.delete') }}"
+                                        @click="$dispatch('delete-confirm', { action: '{{ route('purchase-request-reminders.destroy', $reminder) }}', message: '{{ __('app.delete_confirm_msg') }}' })"
+                                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                    <i class="fa-solid fa-trash text-sm"></i>
+                                </button>
+                                @endif
                             </div>
                         </td>
                     </tr>

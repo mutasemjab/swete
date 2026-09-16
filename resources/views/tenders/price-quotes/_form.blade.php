@@ -175,6 +175,14 @@
                 @endforeach
             </div>
         </div>
+
+        <div class="sm:col-span-2">
+            <label class="form-label">{{ __('tenders.quote_additional_terms') }}</label>
+            <p class="text-xs text-slate-400 mb-2">{{ __('tenders.quote_additional_terms_hint') }}</p>
+            <textarea name="additional_terms" rows="3"
+                      class="form-input @error('additional_terms') is-invalid @enderror">{{ old('additional_terms', $priceQuote?->additional_terms) }}</textarea>
+            @error('additional_terms')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
     </div>
 </div>
 

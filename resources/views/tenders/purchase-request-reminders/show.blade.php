@@ -22,6 +22,16 @@
                 <i class="fa-solid fa-plus"></i>
                 {{ __('tenders.reminder_create_pr') }}
             </a>
+            <a href="{{ route('purchase-request-reminders.edit', $reminder) }}" class="btn-secondary">
+                <i class="fa-solid fa-pen"></i>
+                {{ __('app.edit') }}
+            </a>
+            <button type="button" title="{{ __('app.delete') }}"
+                    @click="$dispatch('delete-confirm', { action: '{{ route('purchase-request-reminders.destroy', $reminder) }}', message: '{{ __('app.delete_confirm_msg') }}' })"
+                    class="btn-secondary !text-rose-600">
+                <i class="fa-solid fa-trash"></i>
+                {{ __('app.delete') }}
+            </button>
         @else
             <a href="{{ route('purchase-requests.show', $reminder->purchase_request_id) }}" class="btn-primary">
                 <i class="fa-solid fa-eye"></i>

@@ -58,6 +58,17 @@
                                    class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="<?php echo e(__('app.view')); ?>">
                                     <i class="fa-solid fa-eye text-sm"></i>
                                 </a>
+                                <?php if($reminder->status === 'pending'): ?>
+                                <a href="<?php echo e(route('purchase-request-reminders.edit', $reminder)); ?>"
+                                   class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="<?php echo e(__('app.edit')); ?>">
+                                    <i class="fa-solid fa-pen text-sm"></i>
+                                </a>
+                                <button type="button" title="<?php echo e(__('app.delete')); ?>"
+                                        @click="$dispatch('delete-confirm', { action: '<?php echo e(route('purchase-request-reminders.destroy', $reminder)); ?>', message: '<?php echo e(__('app.delete_confirm_msg')); ?>' })"
+                                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                    <i class="fa-solid fa-trash text-sm"></i>
+                                </button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
