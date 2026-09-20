@@ -267,23 +267,25 @@
             {{ __('tenders.quote_summary') }}
         </h3>
     </div>
-    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-8">
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
         <div>
             <label class="form-label">{{ __('tenders.quote_discount') }}</label>
-            <div class="flex gap-2">
-                <select name="discount_type" x-model="discountType" class="form-select w-44 flex-shrink-0 @error('discount_type') is-invalid @enderror">
+            <div class="grid grid-cols-3 gap-2">
+                <select name="discount_type" x-model="discountType" class="form-select @error('discount_type') is-invalid @enderror">
                     <option value="amount">{{ __('tenders.quote_discount_amount') }}</option>
                     <option value="percent">{{ __('tenders.quote_discount_percent') }}</option>
                 </select>
                 <input type="number" name="discount_value" x-model="discountValue" step="0.001" min="0" dir="ltr"
                        :max="discountType === 'percent' ? 100 : null"
-                       class="form-input @error('discount_value') is-invalid @enderror">
+                       class="form-input col-span-2 @error('discount_value') is-invalid @enderror">
             </div>
             @error('discount_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             @error('discount_value')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
-        <dl class="space-y-2 text-sm">
+        <div>
+        <div class="hidden sm:block h-[26px]" aria-hidden="true"></div>
+        <dl class="space-y-2 text-sm bg-slate-50 border border-slate-100 rounded-xl px-5 py-4">
             <div class="flex justify-between">
                 <dt class="text-slate-500 font-medium">{{ __('tenders.quote_subtotal') }}</dt>
                 <dd class="font-bold text-slate-800" dir="ltr" x-text="fmt(subtotal)"></dd>
@@ -297,6 +299,7 @@
                 <dd class="font-black text-lg text-orange-700" dir="ltr" x-text="fmt(total)"></dd>
             </div>
         </dl>
+        </div>
     </div>
 </div>
 
