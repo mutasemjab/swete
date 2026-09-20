@@ -12,6 +12,7 @@ use App\Models\QuoteDeliveryTerm;
 use App\Models\QuoteSupplyScope;
 use App\Models\Tender;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class PriceQuoteController extends ModuleController
 {
@@ -138,8 +139,19 @@ class PriceQuoteController extends ModuleController
             'items.*.material_id'       => ['required', 'exists:materials,id'],
             'items.*.quantity'          => ['required', 'numeric', 'min:0.001'],
             'items.*.unit_price'        => ['required', 'numeric', 'min:0'],
-            'items.*.notes'             => ['nullable', 'string'],
+            'items.*.notes'             => ['nullable', 'array'],
+            'items.*.notes.*'           => ['nullable', 'string', 'max:500'],
+            'discount_type'             => ['required', 'in:amount,percent'],
+            'discount_value'            => ['nullable', 'numeric', 'min:0', $request->input('discount_type') === 'percent' ? 'max:100' : 'max:999999999'],
         ]);
+
+        $validated['discount_value'] = (float) ($validated['discount_value'] ?? 0);
+
+        $subtotal = collect($validated['items'])->sum(fn ($item) => $item['quantity'] * $item['unit_price']);
+
+        if ($validated['discount_type'] === 'amount' && $validated['discount_value'] > $subtotal) {
+            throw ValidationException::withMessages(['discount_value' => __('tenders.quote_discount_exceeds')]);
+        }
 
         $validated['winching_included']     = $request->boolean('winching_included');
         $validated['sales_tax_included']    = $request->boolean('sales_tax_included');
@@ -159,8 +171,11 @@ class PriceQuoteController extends ModuleController
         $priceQuote->items()->delete();
 
         foreach ($items as $item) {
+            $notes = array_values(array_filter(array_map(fn ($note) => trim((string) $note), $item['notes'] ?? []), fn ($note) => $note !== ''));
+
             $priceQuote->items()->create([
                 ...$item,
+                'notes' => $notes ?: null,
                 'total' => $item['quantity'] * $item['unit_price'],
             ]);
         }

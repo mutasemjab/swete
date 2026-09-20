@@ -15,7 +15,8 @@ return new class extends Migration
             $table->decimal('quantity', 14, 3);
             $table->decimal('unit_price', 14, 3)->default(0);
             $table->decimal('total', 14, 3)->default(0);
-            $table->text('notes')->nullable();
+            // A JSON array of note strings — the user can enter several per item, all kept in this one column.
+            $table->json('notes')->nullable();
             $table->timestamps();
         });
     }

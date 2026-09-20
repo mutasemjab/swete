@@ -20,6 +20,7 @@ class PriceQuoteItem extends Model
         'quantity'   => 'decimal:3',
         'unit_price' => 'decimal:3',
         'total'      => 'decimal:3',
+        'notes'      => 'array',
     ];
 
     public function priceQuote(): BelongsTo

@@ -29,6 +29,9 @@ class PriceQuote extends Model
         'date',
         'status',
         'subtotal',
+        'discount_type',
+        'discount_value',
+        'discount_amount',
         'total',
         'branch_id',
         'currency_id',
@@ -49,6 +52,8 @@ class PriceQuote extends Model
         'date'                  => 'date',
         'subtotal'              => 'decimal:3',
         'total'                 => 'decimal:3',
+        'discount_value'        => 'decimal:3',
+        'discount_amount'       => 'decimal:3',
         'winching_included'     => 'boolean',
         'sales_tax_included'    => 'boolean',
         'customs_fees_included' => 'boolean',
@@ -108,11 +113,21 @@ class PriceQuote extends Model
     {
         // Query fresh rather than trust a possibly stale cached `items` relation.
         $subtotal = $this->items()->get()->sum(fn ($item) => $item->quantity * $item->unit_price);
+        $discount = static::resolveDiscount($subtotal, $this->discount_type, (float) $this->discount_value);
 
         $this->update([
-            'subtotal' => $subtotal,
-            'total'    => $subtotal,
+            'subtotal'        => $subtotal,
+            'discount_amount' => $discount,
+            'total'           => $subtotal - $discount,
         ]);
+    }
+
+    /** The amount actually deducted: a fixed value, or a percentage of the subtotal — never more than the subtotal. */
+    public static function resolveDiscount(float $subtotal, ?string $type, float $value): float
+    {
+        $amount = $type === 'percent' ? $subtotal * $value / 100 : $value;
+
+        return round(min(max($amount, 0), $subtotal), 3);
     }
 
     /**

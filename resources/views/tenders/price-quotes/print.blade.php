@@ -102,6 +102,12 @@
     table.pq-items th { background: var(--pq-red); color: #fff; font-weight: 700; }
     table.pq-items td.num { text-align: center; width: 34px; }
     table.pq-items td.amount, table.pq-items th.amount { text-align: end; width: 90px; }
+    table.pq-items td ul { margin: 0; padding-inline-start: 14px; }
+
+    table.pq-summary { width: 280px; margin-inline-start: auto; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
+    table.pq-summary td { padding: 5px 8px; border-bottom: 1px solid #ddd; }
+    table.pq-summary td.amount { text-align: end; font-weight: 700; }
+    table.pq-summary tr.total td { border-bottom: 0; background: var(--pq-red); color: #fff; font-weight: 800; font-size: 13px; }
 
     .pq-notes-title { font-size: 13px; font-weight: 800; color: var(--pq-red); margin: 0 0 8px; }
     .pq-notes-list { margin: 0; padding-inline-start: 18px; font-size: 11.5px; line-height: 1.8; }
@@ -202,10 +208,40 @@
                 <td class="amount">{{ number_format($item->quantity, 3) }}</td>
                 <td class="amount">{{ number_format($item->unit_price, 3) }}</td>
                 <td class="amount">{{ number_format($item->total, 3) }}</td>
-                <td>{{ $item->notes }}</td>
+                <td>
+                    @if($item->notes)
+                        <ul>
+                            @foreach($item->notes as $note)
+                                <li>{{ $note }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </td>
             </tr>
             @endforeach
         </tbody>
+    </table>
+
+    <table class="pq-summary">
+        @if($priceQuote->discount_amount > 0)
+        <tr>
+            <td>{{ __('tenders.quote_subtotal') }}</td>
+            <td class="amount">{{ number_format($priceQuote->subtotal, 3) }}</td>
+        </tr>
+        <tr>
+            <td>
+                {{ __('tenders.quote_discount') }}
+                @if($priceQuote->discount_type === 'percent')
+                    ({{ rtrim(rtrim(number_format($priceQuote->discount_value, 3), '0'), '.') }}%)
+                @endif
+            </td>
+            <td class="amount">- {{ number_format($priceQuote->discount_amount, 3) }}</td>
+        </tr>
+        @endif
+        <tr class="total">
+            <td>{{ __('tenders.quote_total') }}</td>
+            <td class="amount">{{ number_format($priceQuote->total, 3) }} {{ $priceQuote->currency?->code }}</td>
+        </tr>
     </table>
 
     <div>

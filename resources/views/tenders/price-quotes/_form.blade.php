@@ -5,12 +5,22 @@
                 'material_id' => $i->material_id,
                 'quantity'    => (float) $i->quantity,
                 'unit_price'  => (float) $i->unit_price,
-                'notes'       => $i->notes,
+                'notes'       => $i->notes ?: [''],
             ])->values()
-            ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => '']])
+            ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
         )->toJson() }},
-        addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: '' }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''] }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
+        discountType: '{{ old('discount_type', $priceQuote?->discount_type ?? 'amount') }}',
+        discountValue: {{ (float) old('discount_value', $priceQuote?->discount_value ?? 0) }},
+        get subtotal() { return this.items.reduce((sum, i) => sum + (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0), 0); },
+        get discountAmount() {
+            const value = parseFloat(this.discountValue) || 0;
+            const amount = this.discountType === 'percent' ? this.subtotal * value / 100 : value;
+            return Math.min(Math.max(amount, 0), this.subtotal);
+        },
+        get total() { return this.subtotal - this.discountAmount; },
+        fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
       }"
       x-init="$nextTick(() => window.initSelect2())">
 
@@ -195,7 +205,7 @@
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.material') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('warehouse.voucher_item_quantity') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('accounting.invoice_item_unit_price') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-56">{{ __('tenders.quote_item_notes') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-72">{{ __('tenders.quote_item_notes') }}</th>
                     <th class="px-5 py-3 w-10"></th>
                 </tr>
             </thead>
@@ -219,7 +229,22 @@
                                    step="0.001" min="0" dir="ltr" class="form-input" required>
                         </td>
                         <td class="px-5 py-2.5">
-                            <input type="text" :name="`items[${index}][notes]`" x-model="item.notes" class="form-input !text-xs">
+                            <div class="space-y-1">
+                                <template x-for="(note, nIndex) in item.notes" :key="nIndex">
+                                    <div class="flex items-center gap-1">
+                                        <input type="text" :name="`items[${index}][notes][${nIndex}]`" x-model="item.notes[nIndex]"
+                                               class="form-input !py-1 !text-xs" placeholder="{{ __('tenders.quote_item_note_placeholder') }}">
+                                        <button type="button" @click="item.notes.splice(nIndex, 1)"
+                                                class="p-1 text-slate-300 hover:text-rose-600 flex-shrink-0">
+                                            <i class="fa-solid fa-xmark text-xs"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                                <button type="button" @click="item.notes.push('')"
+                                        class="text-xs font-semibold text-indigo-600 hover:underline">
+                                    <i class="fa-solid fa-plus"></i> {{ __('tenders.quote_add_item_note') }}
+                                </button>
+                            </div>
                         </td>
                         <td class="px-5 py-2.5 text-center">
                             <button type="button" @click="removeItem(index)" title="{{ __('accounting.invoice_remove_item') }}"
@@ -233,6 +258,46 @@
         </table>
     </div>
     @error('items')<p class="form-error px-5 py-3"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+</div>
+
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-orange-500 text-sm"></i>
+            {{ __('tenders.quote_summary') }}
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div>
+            <label class="form-label">{{ __('tenders.quote_discount') }}</label>
+            <div class="flex gap-2">
+                <select name="discount_type" x-model="discountType" class="form-select w-44 flex-shrink-0 @error('discount_type') is-invalid @enderror">
+                    <option value="amount">{{ __('tenders.quote_discount_amount') }}</option>
+                    <option value="percent">{{ __('tenders.quote_discount_percent') }}</option>
+                </select>
+                <input type="number" name="discount_value" x-model="discountValue" step="0.001" min="0" dir="ltr"
+                       :max="discountType === 'percent' ? 100 : null"
+                       class="form-input @error('discount_value') is-invalid @enderror">
+            </div>
+            @error('discount_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            @error('discount_value')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <dl class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <dt class="text-slate-500 font-medium">{{ __('tenders.quote_subtotal') }}</dt>
+                <dd class="font-bold text-slate-800" dir="ltr" x-text="fmt(subtotal)"></dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-slate-500 font-medium">{{ __('tenders.quote_discount') }}</dt>
+                <dd class="font-bold text-rose-600" dir="ltr" x-text="'- ' + fmt(discountAmount)"></dd>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-200">
+                <dt class="text-slate-700 font-bold">{{ __('tenders.quote_total') }}</dt>
+                <dd class="font-black text-lg text-orange-700" dir="ltr" x-text="fmt(total)"></dd>
+            </div>
+        </dl>
+    </div>
 </div>
 
 </div>

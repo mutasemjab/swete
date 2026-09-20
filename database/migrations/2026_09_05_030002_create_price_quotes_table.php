@@ -18,6 +18,11 @@ return new class extends Migration
             $table->date('date');
             $table->enum('status', ['draft', 'sent', 'accepted', 'rejected'])->default('draft');
             $table->decimal('subtotal', 14, 3)->default(0);
+            // What the user typed (a fixed amount or a percentage of the subtotal), plus the resolved
+            // amount actually deducted — total = subtotal - discount_amount.
+            $table->enum('discount_type', ['amount', 'percent'])->default('amount');
+            $table->decimal('discount_value', 14, 3)->default(0);
+            $table->decimal('discount_amount', 14, 3)->default(0);
             $table->decimal('total', 14, 3)->default(0);
 
             // Print-document fields — drives the letterhead/address (branch) and the "Very Important

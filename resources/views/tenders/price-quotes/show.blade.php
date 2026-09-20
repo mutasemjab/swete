@@ -97,6 +97,7 @@
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_quantity') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.invoice_item_unit_price') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.invoice_item_total') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_item_notes') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -109,6 +110,13 @@
                     <td class="px-5 py-3 text-slate-700">{{ number_format($item->quantity, 3) }}</td>
                     <td class="px-5 py-3 text-slate-700">{{ number_format($item->unit_price, 3) }}</td>
                     <td class="px-5 py-3 font-bold text-slate-800">{{ number_format($item->total, 3) }}</td>
+                    <td class="px-5 py-3 text-xs text-slate-600">
+                        @forelse($item->notes ?? [] as $note)
+                            <p>• {{ $note }}</p>
+                        @empty
+                            —
+                        @endforelse
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -118,10 +126,25 @@
 
 <div class="flex justify-end">
     <div class="card px-6 py-5 w-full sm:w-80">
-        <div class="flex justify-between pt-2">
-            <dt class="text-slate-700 font-bold">{{ __('tenders.quote_total') }}</dt>
-            <dd class="font-black text-lg text-orange-700">{{ number_format($priceQuote->total, 3) }}</dd>
-        </div>
+        <dl class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <dt class="text-slate-500 font-medium">{{ __('tenders.quote_subtotal') }}</dt>
+                <dd class="font-bold text-slate-800">{{ number_format($priceQuote->subtotal, 3) }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-slate-500 font-medium">
+                    {{ __('tenders.quote_discount') }}
+                    @if($priceQuote->discount_type === 'percent' && $priceQuote->discount_amount > 0)
+                        <span class="text-xs text-slate-400" dir="ltr">({{ rtrim(rtrim(number_format($priceQuote->discount_value, 3), '0'), '.') }}%)</span>
+                    @endif
+                </dt>
+                <dd class="font-bold text-rose-600">- {{ number_format($priceQuote->discount_amount, 3) }}</dd>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-200">
+                <dt class="text-slate-700 font-bold">{{ __('tenders.quote_total') }}</dt>
+                <dd class="font-black text-lg text-orange-700">{{ number_format($priceQuote->total, 3) }} {{ $priceQuote->currency?->code }}</dd>
+            </div>
+        </dl>
     </div>
 </div>
 @endsection
