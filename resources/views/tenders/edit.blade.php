@@ -18,7 +18,7 @@
 <form action="{{ route('tenders.update', $tender) }}" method="POST">
     @csrf
     @method('PUT')
-    @include('tenders._form', ['tender' => $tender, 'customers' => $customers, 'statuses' => $statuses, 'countries' => $countries])
+    @include('tenders._form', ['tender' => $tender, 'customers' => $customers, 'statuses' => $statuses, 'countries' => $countries, 'governorates' => $governorates])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

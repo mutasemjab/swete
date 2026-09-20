@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Appointment;
 use App\Models\Approval;
 use App\Models\PurchaseRequestApproval;
 use App\Models\PurchaseRequestReminder;
@@ -18,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('layouts.app', function ($view) {
             $count = 0;
+
+            $view->with('appointmentsDueCount', Auth::check()
+                ? Appointment::assignedTo(Auth::id())->due()->count()
+                : 0);
 
             if (Auth::check()) {
                 $count = Approval::where('approver_id', Auth::id())->where('status', 'pending')->count()

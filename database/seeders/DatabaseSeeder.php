@@ -13,10 +13,12 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             CurrencySeeder::class,
             CountrySeeder::class,
+            GovernorateSeeder::class,
             InvoiceTypeSeeder::class,
             PartySeeder::class,
             TenderStatusSeeder::class,
             QuoteOptionsSeeder::class,
+            AppointmentTypeSeeder::class,
             UnitSeeder::class,
             MaterialSeeder::class,
         ]);

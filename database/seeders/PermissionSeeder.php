@@ -22,6 +22,7 @@ class PermissionSeeder extends Seeder
             'settings.branches.view',  'settings.branches.create',  'settings.branches.edit',  'settings.branches.delete',
             'settings.currencies.view','settings.currencies.create','settings.currencies.edit','settings.currencies.delete',
             'settings.countries.view', 'settings.countries.create', 'settings.countries.edit', 'settings.countries.delete',
+            'settings.governorates.view', 'settings.governorates.create', 'settings.governorates.edit', 'settings.governorates.delete',
             'settings.activity_log.view',
             'settings.approval_rules.view', 'settings.approval_rules.edit',
             'settings.purchase_request_approvers.edit',
@@ -66,6 +67,11 @@ class PermissionSeeder extends Seeder
             'external_purchases.shipments.create', 'external_purchases.shipments.edit', 'external_purchases.shipments.delete',
             'external_purchases.vendor_email_template.edit',
 
+            // CRM
+            'crm.view',
+            'crm.appointments.create', 'crm.appointments.edit', 'crm.appointments.delete',
+            'crm.appointment_types.create', 'crm.appointment_types.edit', 'crm.appointment_types.delete',
+
             // Maintenance (future — module not built yet, permission reserved)
             'maintenance.view',
         ];
@@ -81,7 +87,7 @@ class PermissionSeeder extends Seeder
 
         $branchManager = Role::firstOrCreate(['name' => 'branch_manager', 'guard_name' => 'web']);
         $branchManager->syncPermissions([
-            'settings.users.view', 'settings.branches.view', 'settings.currencies.view',
+            'settings.users.view', 'settings.branches.view', 'settings.currencies.view', 'settings.governorates.view',
             'warehouse.view',
         ]);
 

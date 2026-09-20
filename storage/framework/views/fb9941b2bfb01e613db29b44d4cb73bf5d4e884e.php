@@ -457,7 +457,7 @@ unset($__errorArgs, $__bag); ?>
 
                 <div x-show="scope === 'inside_jordan'">
                     <label class="form-label"><?php echo e(__('tenders.tender_governorate')); ?></label>
-                    <select name="governorate" class="js-select2 form-select <?php $__errorArgs = ['governorate'];
+                    <select name="governorate_id" class="js-select2 form-select <?php $__errorArgs = ['governorate_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -466,11 +466,11 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
                         <option value=""><?php echo e(__('app.select')); ?></option>
-                        <?php $__currentLoopData = \App\Models\Tender::JORDAN_GOVERNORATES; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $names): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($key); ?>" <?php if(old('governorate', $purchaseRequest?->governorate) === $key): echo 'selected'; endif; ?>><?php echo e($names[app()->getLocale() === 'en' ? 'en' : 'ar']); ?></option>
+                        <?php $__currentLoopData = $governorates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $governorate): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($governorate->id); ?>" <?php if(old('governorate_id', $purchaseRequest?->governorate_id) == $governorate->id): echo 'selected'; endif; ?>><?php echo e($governorate->localized_name); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
-                    <?php $__errorArgs = ['governorate'];
+                    <?php $__errorArgs = ['governorate_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }

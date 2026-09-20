@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('opening_balance', 14, 3)->default(0);
 
             $table->enum('location_scope', ['inside_jordan', 'outside_jordan'])->nullable();
-            $table->string('governorate')->nullable();
+            $table->foreignId('governorate_id')->nullable()->constrained('governorates')->restrictOnDelete();
             $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
 
             // Instructions for how this supplier should ship goods to us (their own document/policy) —

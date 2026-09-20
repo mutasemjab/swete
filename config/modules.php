@@ -183,6 +183,33 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
+    // CRM MODULE
+    // ──────────────────────────────────────────────────────────────────────────
+    'crm' => [
+        'name'        => 'crm.module_name',
+        'description' => 'crm.module_desc',
+        'icon'        => 'handshake',
+        'color'       => 'rose',
+        'route'       => 'appointments.index',
+        'gradient'    => 'from-rose-500 to-rose-700',
+        'sections'    => [
+            [
+                'label' => 'crm.section_appointments',
+                'items' => [
+                    ['label' => 'crm.nav_appointments_list', 'route' => 'appointments.index',  'icon' => 'calendar-days'],
+                    ['label' => 'crm.nav_appointments_add',  'route' => 'appointments.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
+                'label' => 'crm.section_settings',
+                'items' => [
+                    ['label' => 'crm.nav_appointment_types', 'route' => 'appointment-types.index', 'icon' => 'tags'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
     // MAINTENANCE MODULE  ← placeholder, service_calls table exists, UI later
     // ──────────────────────────────────────────────────────────────────────────
     'maintenance' => [
@@ -228,6 +255,7 @@ return [
                     ['label' => 'settings.nav_branches',     'route' => 'settings.branches.index',    'icon' => 'code-branch'],
                     ['label' => 'settings.nav_currencies',   'route' => 'settings.currencies.index',  'icon' => 'coins'],
                     ['label' => 'settings.nav_countries',    'route' => 'settings.countries.index',   'icon' => 'earth-americas'],
+                    ['label' => 'settings.nav_governorates', 'route' => 'settings.governorates.index', 'icon' => 'map-location-dot'],
                 ],
             ],
             [

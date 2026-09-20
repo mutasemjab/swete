@@ -19,6 +19,7 @@ return [
     'nav_branches'          => 'Branches',
     'nav_currencies'        => 'Currencies',
     'nav_countries'         => 'Countries',
+    'nav_governorates'      => 'Governorates',
     'nav_activity_log'      => 'Activity Log',
     'nav_approval_rules'    => 'Approval Rules',
     'nav_purchase_request_approvers' => 'Purchase Request Approvers',
@@ -193,6 +194,19 @@ return [
     'country_added'        => 'Country added successfully.',
     'country_updated'      => 'Country updated successfully.',
     'country_deleted'      => 'Country deleted successfully.',
+
+    'governorates'          => 'Governorates',
+    'governorates_list'     => 'Governorates List',
+    'governorates_subtitle' => 'Jordan governorates/regions used across tenders, purchase requests, and suppliers',
+    'add_governorate'       => 'Add Governorate',
+    'edit_governorate'      => 'Edit Governorate',
+    'governorate_name'      => 'Governorate Name',
+    'no_governorates'       => 'No governorates yet',
+    'add_first_governorate' => 'Add First Governorate',
+    'governorate_added'     => 'Governorate added successfully.',
+    'governorate_updated'   => 'Governorate updated successfully.',
+    'governorate_deleted'   => 'Governorate deleted successfully.',
+    'governorate_in_use'    => 'Cannot delete a governorate that is used by existing tenders, suppliers, or purchase requests.',
 
     // ── Approval Rules ───────────────────────────────────────────────────────
     'approval_rules'                   => 'Approval Rules',

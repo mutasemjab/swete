@@ -30,7 +30,7 @@ class PurchaseRequest extends Model
         'shipping_country',
         'shipping_country_en',
         'location_scope',
-        'governorate',
+        'governorate_id',
         'country_id',
         'currency_id',
         'subtotal',
@@ -95,6 +95,11 @@ class PurchaseRequest extends Model
     public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function governorate(): BelongsTo
+    {
+        return $this->belongsTo(Governorate::class);
     }
 
     public function country(): BelongsTo
@@ -167,11 +172,7 @@ class PurchaseRequest extends Model
 
     public function getLocalizedGovernorateAttribute(): ?string
     {
-        if (! $this->governorate || ! isset(Tender::JORDAN_GOVERNORATES[$this->governorate])) {
-            return null;
-        }
-
-        return Tender::JORDAN_GOVERNORATES[$this->governorate][app()->isLocale('en') ? 'en' : 'ar'];
+        return $this->governorate?->localized_name;
     }
 
     public static function nextNumber(): string

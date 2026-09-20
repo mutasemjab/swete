@@ -10,6 +10,7 @@ use App\Http\Controllers\Settings\PermissionController;
 use App\Http\Controllers\Settings\BranchController;
 use App\Http\Controllers\Settings\CurrencyController;
 use App\Http\Controllers\Settings\CountryController;
+use App\Http\Controllers\Settings\GovernorateController;
 use App\Http\Controllers\Settings\ActivityLogController;
 use App\Http\Controllers\Warehouse\WarehouseController;
 use App\Http\Controllers\Warehouse\MaterialCategoryController;
@@ -32,6 +33,8 @@ use App\Http\Controllers\Tenders\QuoteDeliveryTermController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
 use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
+use App\Http\Controllers\Crm\AppointmentController;
+use App\Http\Controllers\Crm\AppointmentTypeController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
 use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
@@ -85,6 +88,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('branches',    BranchController::class)->except(['show']);
         Route::resource('currencies',  CurrencyController::class)->except(['show']);
         Route::resource('countries',   CountryController::class)->except(['show']);
+        Route::resource('governorates', GovernorateController::class)->except(['show']);
         Route::resource('activity-log', ActivityLogController::class)->only(['index']);
         Route::resource('approval-rules', ApprovalRuleController::class)->only(['index', 'store']);
         Route::get('purchase-request-approvers',  [PurchaseRequestApproverController::class, 'index'])->name('purchase-request-approvers.index');
@@ -168,7 +172,11 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('shipping-companies', ShippingCompanyController::class)->except(['show']);
     Route::resource('shipments', ShipmentController::class);
 
-    Route::get('vendor-email-template', [VendorEmailTemplateController::class, 'index'])->name('vendor-email-template.index');
+    Route::resource('appointment-types', AppointmentTypeController::class)->except(['show']);
+    Route::patch('appointments/{appointment}/toggle-complete', [AppointmentController::class, 'toggleComplete'])->name('appointments.toggle-complete');
+    Route::resource('appointments', AppointmentController::class)->except(['show']);
+
+    Route::get('vendor-email-template',[VendorEmailTemplateController::class, 'index'])->name('vendor-email-template.index');
     Route::put('vendor-email-template', [VendorEmailTemplateController::class, 'update'])->name('vendor-email-template.update');
 
 });

@@ -6,6 +6,7 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\Governorate;
 use App\Models\PriceQuote;
 use App\Models\Project;
 use App\Models\Tender;
@@ -44,7 +45,9 @@ class TenderController extends ModuleController
         $countries = Country::where('status', true)->orderBy('name')->get();
         $currencies = Currency::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies'));
+        $governorates = Governorate::selectable();
+
+        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies', 'governorates'));
     }
 
     public function store(Request $request)
@@ -63,7 +66,7 @@ class TenderController extends ModuleController
 
     public function show(Tender $tender)
     {
-        $tender->load(['party', 'statusRef', 'country', 'creator', 'priceQuotes.customer', 'projects']);
+        $tender->load(['party', 'statusRef', 'governorate', 'country', 'creator', 'priceQuotes.customer', 'projects']);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 
         return $this->moduleView('tenders.show', compact('tender', 'unlinkedQuotes'));
@@ -76,7 +79,9 @@ class TenderController extends ModuleController
         $countries = Country::where('status', true)->orderBy('name')->get();
         $currencies = Currency::where('status', true)->orderBy('name')->get();
 
-        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies'));
+        $governorates = Governorate::selectable($tender->governorate_id);
+
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates'));
     }
 
     public function update(Request $request, Tender $tender)
@@ -142,7 +147,7 @@ class TenderController extends ModuleController
             'entity_name'          => ['required', 'string', 'max:255'],
             'entity_name_en'       => ['nullable', 'string', 'max:255'],
             'location_scope'       => ['required', 'in:inside_jordan,outside_jordan'],
-            'governorate'          => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
+            'governorate_id'          => ['required_if:location_scope,inside_jordan', 'nullable', 'exists:governorates,id'],
             'country_id'           => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
             'tax_exempt'           => ['boolean'],
             'customs_exempt'       => ['boolean'],
@@ -164,7 +169,7 @@ class TenderController extends ModuleController
         $validated['customs_exempt'] = $request->boolean('customs_exempt');
 
         if ($validated['location_scope'] === 'outside_jordan') {
-            $validated['governorate'] = null;
+            $validated['governorate_id'] = null;
         } else {
             $validated['country_id'] = null;
         }

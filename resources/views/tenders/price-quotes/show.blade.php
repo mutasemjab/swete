@@ -69,7 +69,6 @@
             <span class="badge {{ $priceQuote->winching_included ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_winching_included') }}: {{ $priceQuote->winching_included ? __('app.yes') : __('app.no') }}</span>
             <span class="badge {{ $priceQuote->sales_tax_included ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_sales_tax_included') }}: {{ $priceQuote->sales_tax_included ? __('app.yes') : __('app.no') }}</span>
             <span class="badge {{ $priceQuote->customs_fees_included ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_customs_fees_included') }}: {{ $priceQuote->customs_fees_included ? __('app.yes') : __('app.no') }}</span>
-            <span class="badge {{ $priceQuote->include_boiler_note ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ __('tenders.quote_include_boiler_note') }}: {{ $priceQuote->include_boiler_note ? __('app.yes') : __('app.no') }}</span>
         </div>
         @if($priceQuote->notes)
         <div class="sm:col-span-3">

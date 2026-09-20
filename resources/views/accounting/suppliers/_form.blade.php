@@ -71,13 +71,13 @@
 
             <div x-show="scope === 'inside_jordan'">
                 <label class="form-label">{{ __('tenders.tender_governorate') }}</label>
-                <select name="governorate" class="js-select2 form-select @error('governorate') is-invalid @enderror">
+                <select name="governorate_id" class="js-select2 form-select @error('governorate_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
-                    @foreach(\App\Models\Tender::JORDAN_GOVERNORATES as $key => $names)
-                        <option value="{{ $key }}" @selected(old('governorate', $supplier?->governorate) === $key)>{{ $names[app()->getLocale() === 'en' ? 'en' : 'ar'] }}</option>
+                    @foreach($governorates as $governorate)
+                        <option value="{{ $governorate->id }}" @selected(old('governorate_id', $supplier?->governorate_id) == $governorate->id)>{{ $governorate->localized_name }}</option>
                     @endforeach
                 </select>
-                @error('governorate')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                @error('governorate_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             <div x-show="scope === 'outside_jordan'">

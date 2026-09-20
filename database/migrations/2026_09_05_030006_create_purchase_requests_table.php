@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('shipping_country')->nullable();
             $table->string('shipping_country_en')->nullable();
             $table->enum('location_scope', ['inside_jordan', 'outside_jordan'])->nullable();
-            $table->string('governorate')->nullable();
+            $table->foreignId('governorate_id')->nullable()->constrained('governorates')->restrictOnDelete();
             $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
             $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
             $table->decimal('subtotal', 14, 3)->default(0);

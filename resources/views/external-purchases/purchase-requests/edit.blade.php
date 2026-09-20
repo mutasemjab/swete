@@ -21,7 +21,7 @@
     @include('external-purchases.purchase-requests._form', [
         'purchaseRequest' => $purchaseRequest,
         'projects' => $projects, 'serviceCalls' => $serviceCalls, 'suppliers' => $suppliers,
-        'branches' => $branches, 'currencies' => $currencies, 'countries' => $countries,
+        'branches' => $branches, 'currencies' => $currencies, 'countries' => $countries, 'governorates' => $governorates,
         'materials' => $materials, 'project' => $project, 'serviceCall' => $serviceCall,
     ])
 

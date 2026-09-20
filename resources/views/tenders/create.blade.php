@@ -17,7 +17,7 @@
 
 <form action="{{ route('tenders.store') }}" method="POST">
     @csrf
-    @include('tenders._form', ['customers' => $customers, 'statuses' => $statuses, 'countries' => $countries])
+    @include('tenders._form', ['customers' => $customers, 'statuses' => $statuses, 'countries' => $countries, 'governorates' => $governorates])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

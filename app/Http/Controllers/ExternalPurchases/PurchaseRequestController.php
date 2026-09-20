@@ -9,6 +9,7 @@ use App\Models\Branch;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\Governorate;
 use App\Models\Material;
 use App\Models\Project;
 use App\Models\PurchaseRequest;
@@ -16,7 +17,6 @@ use App\Models\PurchaseRequestReminder;
 use App\Models\ServiceCall;
 use App\Models\ShippingCompany;
 use App\Models\Supplier;
-use App\Models\Tender;
 use App\Models\VendorEmailTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -113,7 +113,7 @@ class PurchaseRequestController extends ModuleController
     public function show(PurchaseRequest $purchaseRequest)
     {
         $purchaseRequest->load([
-            'supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator',
+            'supplier', 'branch', 'project', 'serviceCall', 'governorate', 'country', 'currency', 'creator',
             'items.material.unit', 'items.features',
             'approvals.user', 'attachments.creator', 'additionalNotes', 'shipments.shippingCompany',
         ]);
@@ -132,7 +132,7 @@ class PurchaseRequestController extends ModuleController
         $purchaseRequest->load('items.features', 'additionalNotes', 'attachments');
 
         return $this->moduleView('external-purchases.purchase-requests.edit', [
-            ...$this->formOptions(),
+            ...$this->formOptions($purchaseRequest->governorate_id),
             'purchaseRequest' => $purchaseRequest,
             'project'         => $purchaseRequest->project,
             'serviceCall'     => $purchaseRequest->serviceCall,
@@ -166,12 +166,12 @@ class PurchaseRequestController extends ModuleController
     /** Standalone, print-optimized A4 document — deliberately not wrapped in the app shell. */
     public function printDocument(PurchaseRequest $purchaseRequest)
     {
-        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'country', 'currency', 'creator', 'items.material.unit', 'items.features', 'additionalNotes']);
+        $purchaseRequest->load(['supplier', 'branch', 'project', 'serviceCall', 'governorate', 'country', 'currency', 'creator', 'items.material.unit', 'items.features', 'additionalNotes']);
 
         return view('external-purchases.purchase-requests.print', compact('purchaseRequest'));
     }
 
-    private function formOptions(): array
+    private function formOptions(?int $currentGovernorateId = null): array
     {
         return [
             'projects'     => Project::where('status', 'active')->orderByDesc('created_at')->get(),
@@ -181,6 +181,7 @@ class PurchaseRequestController extends ModuleController
             'branches'     => Branch::where('status', true)->orderBy('name')->get(),
             'currencies'   => Currency::where('status', true)->orderBy('name')->get(),
             'countries'    => Country::where('status', true)->orderBy('name')->get(),
+            'governorates' => Governorate::selectable($currentGovernorateId),
             'materials'    => Material::where('status', true)->orderBy('name')->get(),
         ];
     }
@@ -211,7 +212,7 @@ class PurchaseRequestController extends ModuleController
             'shipping_country'           => ['nullable', 'string', 'max:100'],
             'shipping_country_en'        => ['nullable', 'string', 'max:100'],
             'location_scope'             => ['nullable', 'in:inside_jordan,outside_jordan'],
-            'governorate'                => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
+            'governorate_id'                => ['required_if:location_scope,inside_jordan', 'nullable', 'exists:governorates,id'],
             'country_id'                 => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
             'currency_id'                => ['nullable', 'exists:currencies,id'],
             'notes'                      => ['nullable', 'string'],
@@ -231,7 +232,7 @@ class PurchaseRequestController extends ModuleController
         ]);
 
         if (($validated['location_scope'] ?? null) === 'outside_jordan') {
-            $validated['governorate'] = null;
+            $validated['governorate_id'] = null;
         } elseif (($validated['location_scope'] ?? null) === 'inside_jordan') {
             $validated['country_id'] = null;
         }

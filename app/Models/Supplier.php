@@ -23,7 +23,7 @@ class Supplier extends Model
         'tax_number',
         'opening_balance',
         'location_scope',
-        'governorate',
+        'governorate_id',
         'country_id',
         'shipping_instruction',
         'status',
@@ -37,6 +37,11 @@ class Supplier extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(SupplierGroup::class, 'supplier_group_id');
+    }
+
+    public function governorate(): BelongsTo
+    {
+        return $this->belongsTo(Governorate::class);
     }
 
     public function country(): BelongsTo

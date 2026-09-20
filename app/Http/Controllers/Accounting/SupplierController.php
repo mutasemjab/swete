@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Accounting;
 
 use App\Http\Controllers\ModuleController;
 use App\Models\Country;
+use App\Models\Governorate;
 use App\Models\Supplier;
 use App\Models\SupplierGroup;
-use App\Models\Tender;
 use Illuminate\Http\Request;
 use Mews\Purifier\Facades\Purifier;
 
@@ -34,7 +34,8 @@ class SupplierController extends ModuleController
     {
         $groups    = SupplierGroup::orderBy('name')->get();
         $countries = Country::where('status', true)->orderBy('name')->get();
-        return $this->moduleView('accounting.suppliers.create', compact('groups', 'countries'));
+        $governorates = Governorate::selectable();
+        return $this->moduleView('accounting.suppliers.create', compact('groups', 'countries', 'governorates'));
     }
 
     public function store(Request $request)
@@ -59,7 +60,8 @@ class SupplierController extends ModuleController
     {
         $groups    = SupplierGroup::orderBy('name')->get();
         $countries = Country::where('status', true)->orderBy('name')->get();
-        return $this->moduleView('accounting.suppliers.edit', compact('supplier', 'groups', 'countries'));
+        $governorates = Governorate::selectable($supplier->governorate_id);
+        return $this->moduleView('accounting.suppliers.edit', compact('supplier', 'groups', 'countries', 'governorates'));
     }
 
     public function update(Request $request, Supplier $supplier)
@@ -107,14 +109,14 @@ class SupplierController extends ModuleController
             'tax_number'        => ['nullable', 'string', 'max:50'],
             'opening_balance'   => ['nullable', 'numeric'],
             'location_scope'    => ['nullable', 'in:inside_jordan,outside_jordan'],
-            'governorate'       => ['required_if:location_scope,inside_jordan', 'nullable', 'in:' . implode(',', array_keys(Tender::JORDAN_GOVERNORATES))],
+            'governorate_id'       => ['required_if:location_scope,inside_jordan', 'nullable', 'exists:governorates,id'],
             'country_id'        => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
             'shipping_instruction' => ['nullable', 'string'],
             'status'            => ['boolean'],
         ]);
 
         if (($validated['location_scope'] ?? null) === 'outside_jordan') {
-            $validated['governorate'] = null;
+            $validated['governorate_id'] = null;
         } elseif (($validated['location_scope'] ?? null) === 'inside_jordan') {
             $validated['country_id'] = null;
         }

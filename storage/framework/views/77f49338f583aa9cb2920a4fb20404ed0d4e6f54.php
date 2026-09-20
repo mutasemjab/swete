@@ -295,6 +295,18 @@
                 </div>
 
                 
+                <a href="<?php echo e(route('appointments.index', ['assigned_to' => Auth::id(), 'status' => 'scheduled'])); ?>" title="<?php echo e(__('crm.my_appointments')); ?>"
+                   class="relative p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
+                    <i class="fa-solid fa-calendar-check text-sm"></i>
+                    <?php if($appointmentsDueCount > 0): ?>
+                        <span class="absolute -top-0.5 -end-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-amber-500 text-white text-[9px] font-black rounded-full border-2 border-white">
+                            <?php echo e($appointmentsDueCount > 9 ? '9+' : $appointmentsDueCount); ?>
+
+                        </span>
+                    <?php endif; ?>
+                </a>
+
+                
                 <a href="<?php echo e(route('approvals.index')); ?>" title="<?php echo e(__('approvals.my_approvals')); ?>"
                    class="relative p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
                     <i class="fa-solid fa-clipboard-check text-sm"></i>

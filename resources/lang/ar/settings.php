@@ -19,6 +19,7 @@ return [
     'nav_branches'          => 'الفروع',
     'nav_currencies'        => 'العملات',
     'nav_countries'         => 'الدول',
+    'nav_governorates'      => 'المحافظات',
     'nav_activity_log'      => 'سجل الأنشطة',
     'nav_approval_rules'    => 'قواعد الموافقات',
     'nav_purchase_request_approvers' => 'معتمدو طلبات الشراء',
@@ -193,6 +194,19 @@ return [
     'country_added'        => 'تم إضافة الدولة بنجاح.',
     'country_updated'      => 'تم تحديث الدولة بنجاح.',
     'country_deleted'      => 'تم حذف الدولة بنجاح.',
+
+    'governorates'          => 'المحافظات',
+    'governorates_list'     => 'قائمة المحافظات',
+    'governorates_subtitle' => 'محافظات/مناطق الأردن المستخدمة بالعطاءات وطلبات الشراء والموردين',
+    'add_governorate'       => 'إضافة محافظة',
+    'edit_governorate'      => 'تعديل محافظة',
+    'governorate_name'      => 'اسم المحافظة',
+    'no_governorates'       => 'لا توجد محافظات بعد',
+    'add_first_governorate' => 'إضافة أول محافظة',
+    'governorate_added'     => 'تم إضافة المحافظة بنجاح.',
+    'governorate_updated'   => 'تم تحديث المحافظة بنجاح.',
+    'governorate_deleted'   => 'تم حذف المحافظة بنجاح.',
+    'governorate_in_use'    => 'لا يمكن حذف محافظة مستخدمة بعطاءات أو موردين أو طلبات شراء موجودة.',
 
     // ── Approval Rules ───────────────────────────────────────────────────────
     'approval_rules'                   => 'قواعد الموافقات',

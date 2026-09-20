@@ -217,6 +217,53 @@
         @endforeach
     </div>
 
+    {{-- My appointments (reminders) --}}
+    @if($myAppointments->isNotEmpty())
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-8 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-calendar-check text-amber-600 text-sm"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-base font-black text-slate-800">{{ __('crm.my_appointments') }}</h3>
+                <p class="text-xs text-slate-500">{{ __('crm.my_appointments_hint') }}</p>
+            </div>
+            <a href="{{ route('appointments.index', ['assigned_to' => Auth::id(), 'status' => 'scheduled']) }}"
+               class="text-xs font-bold text-indigo-600 hover:underline">{{ __('crm.view_all') }}</a>
+        </div>
+        <div class="divide-y divide-slate-100">
+            @foreach($myAppointments as $appt)
+                @php
+                    $overdue = $appt->isOverdue();
+                    $today   = $appt->isDueToday();
+                @endphp
+                <div class="px-6 py-3.5 flex items-center gap-4 flex-wrap {{ $today ? 'bg-amber-50' : ($overdue ? 'bg-rose-50' : '') }}">
+                    <div class="flex-1 min-w-48">
+                        <p class="font-bold text-slate-800 text-sm">{{ $appt->title }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            {{ $appt->type?->localized_name }}
+                            @if($appt->customer) · {{ $appt->customer->localized_name }} @endif
+                        </p>
+                    </div>
+                    <span class="text-sm text-slate-600 font-mono" dir="ltr">{{ $appt->appointment_date->format('Y-m-d') }}</span>
+                    @if($today)
+                        <span class="badge bg-amber-100 text-amber-700"><i class="fa-solid fa-bell"></i> {{ __('crm.due_today') }}</span>
+                    @elseif($overdue)
+                        <span class="badge bg-rose-100 text-rose-700"><i class="fa-solid fa-triangle-exclamation"></i> {{ __('crm.overdue') }}</span>
+                    @endif
+                    <form action="{{ route('appointments.toggle-complete', $appt) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="text-xs font-bold text-emerald-600 hover:underline">
+                            <i class="fa-solid fa-check"></i> {{ __('crm.mark_completed') }}
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Section title --}}
     <div class="flex items-center gap-3 mb-5">
         <h3 class="text-base font-black text-slate-700 uppercase tracking-wider">{{ __('app.system_modules') }}</h3>

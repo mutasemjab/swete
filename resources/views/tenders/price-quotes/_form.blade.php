@@ -148,16 +148,7 @@
                 <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('tenders.quote_customs_fees_included') }}</span>
             </label>
 
-            <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
-                <input type="hidden" name="include_boiler_note" value="0">
-                <input type="checkbox" name="include_boiler_note" value="1" class="sr-only peer" @checked(old('include_boiler_note', $priceQuote?->include_boiler_note))>
-                <div class="w-11 h-6 bg-slate-200 peer-focus:ring-2 peer-focus:ring-indigo-400 rounded-full peer
-                            peer-checked:bg-indigo-600 transition-all
-                            after:content-[''] after:absolute after:top-0.5 after:start-[2px]
-                            after:bg-white after:rounded-full after:h-5 after:w-5
-                            after:transition-all peer-checked:after:translate-x-full"></div>
-                <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('tenders.quote_include_boiler_note') }}</span>
-            </label>
+            
         </div>
 
         <div class="sm:col-span-2">

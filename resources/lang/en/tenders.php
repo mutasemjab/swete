@@ -124,7 +124,6 @@ return [
     'quote_winching_included'         => 'Winching Included',
     'quote_sales_tax_included'        => 'Sales Tax Included',
     'quote_customs_fees_included'     => 'Customs Fees Included',
-    'quote_include_boiler_note'       => 'Add Boiler Note',
     'quote_included_work_scopes'      => 'Work Scope Covered by the Price',
     'quote_included_work_scopes_hint' => 'Uncheck anything not covered by the price — it will automatically appear as an exclusion on the printed quote.',
     'quote_work_scope_pipe_work'           => 'Pipe Work',

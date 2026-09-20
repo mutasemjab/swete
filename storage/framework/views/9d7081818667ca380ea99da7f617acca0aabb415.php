@@ -21,7 +21,7 @@
     <?php endif; ?>
     <?php echo $__env->make('external-purchases.purchase-requests._form', [
         'projects' => $projects, 'serviceCalls' => $serviceCalls, 'suppliers' => $suppliers,
-        'branches' => $branches, 'currencies' => $currencies, 'countries' => $countries,
+        'branches' => $branches, 'currencies' => $currencies, 'countries' => $countries, 'governorates' => $governorates,
         'materials' => $materials, 'project' => $project, 'serviceCall' => $serviceCall,
         'reminder' => $reminder,
     ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>

@@ -124,7 +124,6 @@ return [
     'quote_winching_included'         => 'شامل الرفع (Winching)',
     'quote_sales_tax_included'        => 'شامل ضريبة المبيعات',
     'quote_customs_fees_included'     => 'شامل الرسوم الجمركية',
-    'quote_include_boiler_note'       => 'إضافة ملاحظة الغلاية (Boiler)',
     'quote_included_work_scopes'      => 'الأعمال المشمولة بالسعر',
     'quote_included_work_scopes_hint' => 'ألغِ تحديد أي بند غير مشمول بالسعر — سيظهر تلقائيًا ضمن الاستثناءات عند الطباعة.',
     'quote_work_scope_pipe_work'           => 'أعمال المواسير',

@@ -12,22 +12,6 @@ class Tender extends Model
 {
     use LogsActivity;
 
-    /** Jordan's 12 governorates — a fixed reference list, not admin-managed data. */
-    public const JORDAN_GOVERNORATES = [
-        'amman'    => ['ar' => 'عمّان',    'en' => 'Amman'],
-        'irbid'    => ['ar' => 'إربد',     'en' => 'Irbid'],
-        'zarqa'    => ['ar' => 'الزرقاء',   'en' => 'Zarqa'],
-        'balqa'    => ['ar' => 'البلقاء',   'en' => 'Balqa'],
-        'mafraq'   => ['ar' => 'المفرق',    'en' => 'Mafraq'],
-        'karak'    => ['ar' => 'الكرك',     'en' => 'Karak'],
-        'jerash'   => ['ar' => 'جرش',      'en' => 'Jerash'],
-        'ajloun'   => ['ar' => 'عجلون',    'en' => 'Ajloun'],
-        'madaba'   => ['ar' => 'مادبا',     'en' => 'Madaba'],
-        'tafilah'  => ['ar' => 'الطفيلة',   'en' => 'Tafilah'],
-        'maan'     => ['ar' => 'معان',     'en' => 'Ma\'an'],
-        'aqaba'    => ['ar' => 'العقبة',    'en' => 'Aqaba'],
-    ];
-
     public const DELIVERY_TERMS = ['site', 'cfr', 'exwork'];
 
     public const COVERAGE_OPTIONS = ['supply', 'supply_execution', 'design', 'design_execution', 'design_supply_execution'];
@@ -40,7 +24,7 @@ class Tender extends Model
         'entity_name',
         'entity_name_en',
         'location_scope',
-        'governorate',
+        'governorate_id',
         'country_id',
         'tax_exempt',
         'customs_exempt',
@@ -84,6 +68,11 @@ class Tender extends Model
         return $this->hasMany(PriceQuote::class);
     }
 
+    public function governorate(): BelongsTo
+    {
+        return $this->belongsTo(Governorate::class);
+    }
+
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
@@ -115,11 +104,7 @@ class Tender extends Model
 
     public function getLocalizedGovernorateAttribute(): ?string
     {
-        if (! $this->governorate || ! isset(self::JORDAN_GOVERNORATES[$this->governorate])) {
-            return null;
-        }
-
-        return self::JORDAN_GOVERNORATES[$this->governorate][app()->isLocale('en') ? 'en' : 'ar'];
+        return $this->governorate?->localized_name;
     }
 
     public static function nextNumber(): string
