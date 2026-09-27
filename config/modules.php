@@ -217,7 +217,7 @@ return [
         'description' => 'maintenance.module_desc',
         'icon'        => 'screwdriver-wrench',
         'color'       => 'teal',
-        'route'       => 'price-quotes.index',
+        'route'       => 'maintenance-reports.index',
         'gradient'    => 'from-teal-500 to-teal-700',
         'sections'    => [
             [
