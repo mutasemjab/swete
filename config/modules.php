@@ -210,16 +210,39 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
-    // MAINTENANCE MODULE  ← placeholder, service_calls table exists, UI later
+    // MAINTENANCE MODULE  ← price quotes reuses the Tenders resource as-is; service_calls UI later
     // ──────────────────────────────────────────────────────────────────────────
     'maintenance' => [
         'name'        => 'maintenance.module_name',
         'description' => 'maintenance.module_desc',
         'icon'        => 'screwdriver-wrench',
         'color'       => 'teal',
-        'route'       => '#',
+        'route'       => 'price-quotes.index',
         'gradient'    => 'from-teal-500 to-teal-700',
         'sections'    => [
+            [
+                'label' => 'maintenance.section_price_quotes',
+                'items' => [
+                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice'],
+                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
+                'label' => 'maintenance.section_reports',
+                'items' => [
+                    ['label' => 'maintenance.nav_reports_list',   'route' => 'maintenance-reports.index',  'icon' => 'clipboard-list'],
+                    ['label' => 'maintenance.nav_reports_add',    'route' => 'maintenance-reports.create', 'icon' => 'plus'],
+                    ['label' => 'maintenance.nav_report_templates', 'route' => 'report-templates.index',   'icon' => 'sliders'],
+                ],
+            ],
+            [
+                'label' => 'maintenance.section_contracts',
+                'items' => [
+                    ['label' => 'maintenance.nav_contracts_list',  'route' => 'maintenance-contracts.index',  'icon' => 'file-contract'],
+                    ['label' => 'maintenance.nav_contracts_add',   'route' => 'maintenance-contracts.create', 'icon' => 'plus'],
+                    ['label' => 'maintenance.nav_contract_payments', 'route' => 'contract-payments.index',    'icon' => 'money-check-dollar'],
+                ],
+            ],
             [
                 'label' => 'maintenance.section_service_calls',
                 'items' => [

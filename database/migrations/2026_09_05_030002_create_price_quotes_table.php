@@ -44,6 +44,12 @@ return new class extends Migration
             $table->text('additional_terms')->nullable();
 
             $table->text('notes')->nullable();
+            // The employee this quote was handed to for conversion — set via a bulk "send to
+            // employee" action, cleared to null relationship-wise never (kept for history/audit).
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+            // Set once the assignee converts this quote — non-null means "already invoiced",
+            // used both to hide it from the assignee's pending list and to link to the result.
+            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });

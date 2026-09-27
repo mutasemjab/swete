@@ -52,6 +52,7 @@ class PermissionSeeder extends Seeder
             // Tenders
             'tenders.view', 'tenders.create', 'tenders.edit', 'tenders.delete',
             'tenders.price_quotes.create', 'tenders.price_quotes.edit',
+            'tenders.price_quotes.assign', 'tenders.price_quotes.convert_to_invoice',
             'tenders.quote_supply_scopes.create', 'tenders.quote_supply_scopes.edit', 'tenders.quote_supply_scopes.delete',
             'tenders.quote_delivery_terms.create', 'tenders.quote_delivery_terms.edit', 'tenders.quote_delivery_terms.delete',
             'tenders.tender_statuses.create', 'tenders.tender_statuses.edit', 'tenders.tender_statuses.delete',
@@ -72,8 +73,12 @@ class PermissionSeeder extends Seeder
             'crm.appointments.create', 'crm.appointments.edit', 'crm.appointments.delete',
             'crm.appointment_types.create', 'crm.appointment_types.edit', 'crm.appointment_types.delete',
 
-            // Maintenance (future — module not built yet, permission reserved)
+            // Maintenance
             'maintenance.view',
+            'maintenance.report_templates.create', 'maintenance.report_templates.edit', 'maintenance.report_templates.delete',
+            'maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.reports.delete',
+            'maintenance.contracts.create', 'maintenance.contracts.edit', 'maintenance.contracts.delete',
+            'maintenance.contract_payments.assign', 'maintenance.contract_payments.convert_to_invoice',
         ];
 
         foreach ($permissions as $permission) {

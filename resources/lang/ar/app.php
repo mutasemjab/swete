@@ -23,6 +23,7 @@ return [
     'cancel'             => 'إلغاء',
     'search'             => 'بحث',
     'clear_filters'      => 'مسح الفلاتر',
+    'selected'            => 'محدد',
     'back_to_list'       => 'العودة للقائمة',
     'confirm_delete'     => 'تأكيد الحذف',
     'delete_confirm_msg' => 'هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.',

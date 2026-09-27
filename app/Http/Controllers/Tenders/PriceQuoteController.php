@@ -6,11 +6,16 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Branch;
 use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\InvoiceType;
 use App\Models\Material;
+use App\Models\MaterialStock;
 use App\Models\PriceQuote;
+use App\Models\PriceQuoteItem;
 use App\Models\QuoteDeliveryTerm;
 use App\Models\QuoteSupplyScope;
 use App\Models\Tender;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -20,16 +25,23 @@ class PriceQuoteController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = PriceQuote::with(['customer', 'tender']);
+        $query = PriceQuote::with(['customer', 'tender', 'assignee', 'invoice']);
 
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->input('customer_id'));
         }
 
-        $priceQuotes = $query->latest()->paginate(20)->withQueryString();
-        $customers   = Customer::where('status', true)->orderBy('name')->get();
+        if ($request->filled('assigned_to')) {
+            $query->where('assigned_to', $request->input('assigned_to'));
+        }
 
-        return $this->moduleView('tenders.price-quotes.index', compact('priceQuotes', 'customers'));
+        $priceQuotes = $query->latest()->paginate(20)->withQueryString();
+
+        return $this->moduleView('tenders.price-quotes.index', [
+            'priceQuotes' => $priceQuotes,
+            'customers'   => Customer::where('status', true)->orderBy('name')->get(),
+            'employees'   => User::where('status', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function create(Request $request)
@@ -38,6 +50,7 @@ class PriceQuoteController extends ModuleController
 
         return $this->moduleView('tenders.price-quotes.create', [
             ...$this->formOptions(),
+            ...$this->historyData(),
             'priceQuote' => null,
             'tender'     => $tender,
         ]);
@@ -64,7 +77,7 @@ class PriceQuoteController extends ModuleController
     {
         $priceQuote->load([
             'customer', 'tender', 'creator', 'branch', 'currency', 'supplyScope', 'deliveryTerm',
-            'items.material.unit',
+            'items.material.unit', 'assignee', 'invoice',
         ]);
 
         return $this->moduleView('tenders.price-quotes.show', compact('priceQuote'));
@@ -76,6 +89,7 @@ class PriceQuoteController extends ModuleController
 
         return $this->moduleView('tenders.price-quotes.edit', [
             ...$this->formOptions(),
+            ...$this->historyData($priceQuote),
             'priceQuote' => $priceQuote,
             'tender'     => $priceQuote->tender,
         ]);
@@ -104,6 +118,84 @@ class PriceQuoteController extends ModuleController
         return view('tenders.price-quotes.print', compact('priceQuote'));
     }
 
+    /** Bulk-hand a batch of quotes to one employee, who will see them as pending conversion. */
+    public function assign(Request $request)
+    {
+        $validated = $request->validate([
+            'quote_ids'   => ['required', 'array', 'min:1'],
+            'quote_ids.*' => ['exists:price_quotes,id'],
+            'assigned_to' => ['required', 'exists:users,id'],
+        ]);
+
+        // Defensive re-filter: a stale checkbox selection shouldn't reassign an already-invoiced quote.
+        $updated = PriceQuote::whereIn('id', $validated['quote_ids'])
+            ->whereNull('invoice_id')
+            ->update(['assigned_to' => $validated['assigned_to']]);
+
+        return back()->with('success', __('tenders.quote_sent_to_employee', ['count' => $updated]));
+    }
+
+    /** One-click: turn this quote into a draft sales invoice. Only the employee it was sent to may do this. */
+    public function convertToInvoice(Request $request, PriceQuote $priceQuote)
+    {
+        abort_unless($priceQuote->assigned_to === $request->user()->id, 403, __('tenders.quote_convert_unauthorized'));
+
+        if ($priceQuote->invoice_id) {
+            return back()->with('error', __('tenders.quote_already_converted'));
+        }
+
+        $priceQuote->load('items.material');
+
+        $type = InvoiceType::where('party_type', 'customer')->where('status', true)->first();
+
+        if (! $type) {
+            return back()->with('error', __('tenders.quote_no_invoice_type'));
+        }
+
+        $invoice = Invoice::create([
+            'invoice_type_id' => $type->id,
+            'party_type'      => 'customer',
+            'party_id'        => $priceQuote->customer_id,
+            'number'          => Invoice::nextNumber($type),
+            'date'            => now()->toDateString(),
+            'currency_id'     => $priceQuote->currency_id,
+            'notes'           => __('tenders.quote_convert_invoice_note', ['number' => $priceQuote->number]),
+            'status'          => 'draft',
+            'created_by'      => $request->user()->id,
+        ]);
+
+        foreach ($priceQuote->items as $item) {
+            $description = $item->material?->localized_name ?? '';
+
+            if ($item->notes) {
+                $description .= ' (' . implode(', ', $item->notes) . ')';
+            }
+
+            $invoice->items()->create([
+                'description' => $description,
+                'quantity'    => $item->quantity,
+                'unit_price'  => $item->unit_price,
+                'total'       => $item->quantity * $item->unit_price,
+            ]);
+        }
+
+        if ($priceQuote->discount_amount > 0) {
+            $invoice->items()->create([
+                'description' => __('tenders.quote_discount'),
+                'quantity'    => 1,
+                'unit_price'  => -$priceQuote->discount_amount,
+                'total'       => -$priceQuote->discount_amount,
+            ]);
+        }
+
+        $invoice->recalculateTotals();
+
+        $priceQuote->update(['invoice_id' => $invoice->id]);
+
+        return redirect()->route('accounting.invoices.show', $invoice)
+            ->with('success', __('tenders.quote_converted'));
+    }
+
     private function formOptions(): array
     {
         return [
@@ -113,6 +205,56 @@ class PriceQuoteController extends ModuleController
             'currencies'     => Currency::where('status', true)->orderBy('name')->get(),
             'supplyScopes'   => QuoteSupplyScope::where('status', true)->orderBy('name')->get(),
             'deliveryTerms'  => QuoteDeliveryTerm::where('status', true)->orderBy('name')->get(),
+        ];
+    }
+
+    /**
+     * What the create/edit form needs to answer, live, while the user is picking a customer or a
+     * material: quotes previously sent to this customer, this material's unit price on other
+     * quotes, and how much of it is currently on hand across all warehouses.
+     */
+    private function historyData(?PriceQuote $current = null): array
+    {
+        $quotesQuery = PriceQuote::with('currency')->orderByDesc('date');
+
+        if ($current) {
+            $quotesQuery->where('id', '!=', $current->id);
+        }
+
+        $customerQuoteHistory = $quotesQuery->get(['id', 'customer_id', 'number', 'date', 'total', 'currency_id'])
+            ->groupBy('customer_id')
+            ->map(fn ($quotes) => $quotes->take(8)->map(fn ($quote) => [
+                'number'   => $quote->number,
+                'date'     => $quote->date->format('Y-m-d'),
+                'total'    => (float) $quote->total,
+                'currency' => $quote->currency?->code,
+                'url'      => route('price-quotes.show', $quote->id),
+            ])->values());
+
+        $itemsQuery = PriceQuoteItem::query()->with('priceQuote:id,number,date')->latest('id');
+
+        if ($current) {
+            $itemsQuery->where('price_quote_id', '!=', $current->id);
+        }
+
+        $materialPriceHistory = $itemsQuery->get(['id', 'price_quote_id', 'material_id', 'quantity', 'unit_price'])
+            ->filter(fn ($item) => $item->priceQuote !== null)
+            ->groupBy('material_id')
+            ->map(fn ($items) => $items->sortByDesc(fn ($item) => $item->priceQuote->date)->take(8)->map(fn ($item) => [
+                'number'     => $item->priceQuote->number,
+                'date'       => $item->priceQuote->date->format('Y-m-d'),
+                'quantity'   => (float) $item->quantity,
+                'unit_price' => (float) $item->unit_price,
+            ])->values());
+
+        $materialStock = MaterialStock::selectRaw('material_id, SUM(quantity) as qty')
+            ->groupBy('material_id')
+            ->pluck('qty', 'material_id');
+
+        return [
+            'customerQuoteHistory' => $customerQuoteHistory,
+            'materialPriceHistory' => $materialPriceHistory,
+            'materialStock'        => $materialStock,
         ];
     }
 

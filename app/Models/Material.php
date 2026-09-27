@@ -48,6 +48,11 @@ class Material extends Model
         return $this->hasMany(MaterialStockMovement::class);
     }
 
+    public function reportTemplates(): HasMany
+    {
+        return $this->hasMany(MaintenanceReportTemplate::class);
+    }
+
     public function getLocalizedNameAttribute(): string
     {
         return app()->isLocale('en') && $this->name_en

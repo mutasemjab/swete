@@ -23,6 +23,7 @@ return [
     'cancel'             => 'Cancel',
     'search'             => 'Search',
     'clear_filters'      => 'Clear Filters',
+    'selected'            => 'selected',
     'back_to_list'       => 'Back to List',
     'confirm_delete'     => 'Confirm Delete',
     'delete_confirm_msg' => 'Are you sure you want to delete this item? This action cannot be undone.',

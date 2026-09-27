@@ -1,16 +1,16 @@
-@php
+<?php
     $isRtl   = app()->isLocale('ar');
     $dir     = $isRtl ? 'rtl' : 'ltr';
     $lang    = app()->getLocale();
     $modName = __($currentModuleConfig['name']);
-@endphp
+?>
 <!DOCTYPE html>
-<html lang="{{ $lang }}" dir="{{ $dir }}">
+<html lang="<?php echo e($lang); ?>" dir="<?php echo e($dir); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $modName) | ERP</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo $__env->yieldContent('title', $modName); ?> | ERP</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,8 +20,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
 
-    {{-- Search-and-select everywhere: add class="js-select2" to any <select> and it's upgraded
-         automatically (see the init script near the end of this file). --}}
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
@@ -62,7 +61,7 @@
         [x-cloak] { display: none !important; }
     </style>
 
-    {{-- Select2 restyled to match .form-input above --}}
+    
     <style>
         .select2-container--default .select2-selection--single {
             height: 44px; border: 1px solid #e2e8f0; border-radius: 0.75rem;
@@ -85,18 +84,16 @@
         .select2-results__option--highlighted[aria-selected] { background-color: #4f46e5 !important; }
     </style>
 
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased"
       x-data="{ sidebarOpen: window.innerWidth >= 1024 }">
 
 <div class="flex min-h-screen">
 
-    {{-- ═══════════════════════════════════════════════════════════
-         SIDEBAR
-    ════════════════════════════════════════════════════════════════ --}}
+    
 
-    {{-- Mobile backdrop --}}
+    
     <div x-show="sidebarOpen"
          @click="sidebarOpen = false"
          x-transition:enter="transition duration-200"
@@ -108,41 +105,41 @@
          class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-20 lg:hidden">
     </div>
 
-    {{-- Sidebar panel: positioned at inline-start (right in RTL, left in LTR) --}}
+    
     <aside class="fixed inset-y-0 start-0 z-30 flex flex-col w-64 bg-white border-e border-slate-100 shadow-2xl shadow-slate-900/5
                   transition-transform duration-300 ease-out lg:shadow-none lg:translate-x-0"
-           :class="sidebarOpen ? 'translate-x-0' : '{{ $isRtl ? '-translate-x-full' : 'translate-x-full' }}'">
+           :class="sidebarOpen ? 'translate-x-0' : '<?php echo e($isRtl ? '-translate-x-full' : 'translate-x-full'); ?>'">
 
-        {{-- Module header (gradient) --}}
-        <div class="relative overflow-hidden bg-gradient-to-br {{ $currentModuleConfig['gradient'] }} px-5 py-5 flex-shrink-0">
+        
+        <div class="relative overflow-hidden bg-gradient-to-br <?php echo e($currentModuleConfig['gradient']); ?> px-5 py-5 flex-shrink-0">
             <div class="absolute -top-8 -end-8 w-28 h-28 bg-white/10 rounded-full pointer-events-none"></div>
             <div class="absolute top-4 end-4 w-14 h-14 bg-white/5 rounded-full pointer-events-none"></div>
 
-            <a href="{{ route('dashboard') }}"
+            <a href="<?php echo e(route('dashboard')); ?>"
                class="relative flex items-center gap-2 text-white/70 hover:text-white text-xs font-semibold mb-5 transition-colors w-fit group">
                 <i class="fa-solid fa-grid-2 text-xs group-hover:scale-110 transition-transform"></i>
-                <span>{{ __('app.dashboard') }}</span>
+                <span><?php echo e(__('app.dashboard')); ?></span>
             </a>
 
             <div class="relative flex items-center gap-3">
                 <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-inner flex-shrink-0">
-                    <i class="fa-solid fa-{{ $currentModuleConfig['icon'] }} text-white text-xl"></i>
+                    <i class="fa-solid fa-<?php echo e($currentModuleConfig['icon']); ?> text-white text-xl"></i>
                 </div>
                 <div>
-                    <h2 class="text-white font-black text-base leading-tight">{{ $modName }}</h2>
-                    <p class="text-white/50 text-[11px] mt-0.5 font-medium">{{ __('app.current_section') }}</p>
+                    <h2 class="text-white font-black text-base leading-tight"><?php echo e($modName); ?></h2>
+                    <p class="text-white/50 text-[11px] mt-0.5 font-medium"><?php echo e(__('app.current_section')); ?></p>
                 </div>
             </div>
         </div>
 
-        {{-- Navigation sections --}}
+        
         <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1"
              style="scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent;">
-            @foreach($currentModuleConfig['sections'] as $section)
+            <?php $__currentLoopData = $currentModuleConfig['sections']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $section): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div x-data="{ open: true }">
                     <button @click="open = !open"
                             class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[11px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 hover:bg-slate-50 transition-all">
-                        <span>{{ __($section['label']) }}</span>
+                        <span><?php echo e(__($section['label'])); ?></span>
                         <i class="fa-solid fa-chevron-down text-[9px] transition-transform duration-300"
                            :class="{ 'rotate-180': !open }"></i>
                     </button>
@@ -154,8 +151,8 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-end="opacity-0"
                          class="mt-0.5 space-y-0.5">
-                        @foreach($section['items'] as $item)
-                            @php
+                        <?php $__currentLoopData = $section['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $routeExists = $item['route'] !== '#' && \Illuminate\Support\Facades\Route::has($item['route']);
                                 $color       = $currentModuleConfig['color'];
                                 $params      = $item['params'] ?? [];
@@ -171,103 +168,104 @@
                                 foreach ($params as $paramKey => $paramValue) {
                                     $isActive = $isActive && (string) request()->route($paramKey) === (string) $paramValue;
                                 }
-                            @endphp
+                            ?>
 
-                            @if($routeExists)
-                                <a href="{{ route($item['route'], $params) }}"
-                                   class="sidebar-link {{ $isActive
+                            <?php if($routeExists): ?>
+                                <a href="<?php echo e(route($item['route'], $params)); ?>"
+                                   class="sidebar-link <?php echo e($isActive
                                         ? "active bg-{$color}-50 text-{$color}-700"
-                                        : 'text-slate-600' }}">
-                                    @if($isActive)
-                                        <span class="absolute start-0 inset-y-2 w-1 bg-{{ $color }}-500 rounded-e-full"></span>
-                                    @endif
-                                    <i class="fa-solid fa-{{ $item['icon'] }} w-4 text-center text-sm
-                                              {{ $isActive ? "text-{$color}-600" : 'text-slate-400' }}"></i>
-                                    <span>{{ __($item['label']) }}</span>
+                                        : 'text-slate-600'); ?>">
+                                    <?php if($isActive): ?>
+                                        <span class="absolute start-0 inset-y-2 w-1 bg-<?php echo e($color); ?>-500 rounded-e-full"></span>
+                                    <?php endif; ?>
+                                    <i class="fa-solid fa-<?php echo e($item['icon']); ?> w-4 text-center text-sm
+                                              <?php echo e($isActive ? "text-{$color}-600" : 'text-slate-400'); ?>"></i>
+                                    <span><?php echo e(__($item['label'])); ?></span>
                                 </a>
-                            @else
+                            <?php else: ?>
                                 <div class="sidebar-link text-slate-400 !cursor-not-allowed">
-                                    <i class="fa-solid fa-{{ $item['icon'] }} w-4 text-center text-sm text-slate-300"></i>
-                                    <span class="flex-1 text-slate-400">{{ __($item['label']) }}</span>
-                                    <span class="text-[9px] font-black bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-md uppercase tracking-wider">{{ __('app.coming_soon') }}</span>
+                                    <i class="fa-solid fa-<?php echo e($item['icon']); ?> w-4 text-center text-sm text-slate-300"></i>
+                                    <span class="flex-1 text-slate-400"><?php echo e(__($item['label'])); ?></span>
+                                    <span class="text-[9px] font-black bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-md uppercase tracking-wider"><?php echo e(__('app.coming_soon')); ?></span>
                                 </div>
-                            @endif
-                        @endforeach
+                            <?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </nav>
 
-        {{-- Sidebar footer: user info --}}
+        
         <div class="flex-shrink-0 border-t border-slate-100 p-4">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br {{ Auth::user()->avatar_gradient }}
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br <?php echo e(Auth::user()->avatar_gradient); ?>
+
                             flex items-center justify-center text-white text-sm font-black flex-shrink-0">
-                    {{ Auth::user()->initials }}
+                    <?php echo e(Auth::user()->initials); ?>
+
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-slate-800 truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-slate-400 truncate">{{ Auth::user()->email }}</p>
+                    <p class="text-sm font-bold text-slate-800 truncate"><?php echo e(Auth::user()->name); ?></p>
+                    <p class="text-xs text-slate-400 truncate"><?php echo e(Auth::user()->email); ?></p>
                 </div>
-                <form action="{{ route('auth.logout') }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('auth.logout')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <button type="submit"
-                            title="{{ __('app.logout') }}"
+                            title="<?php echo e(__('app.logout')); ?>"
                             class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
-                        <i class="fa-solid fa-right-from-bracket text-sm {{ $isRtl ? 'fa-flip-horizontal' : '' }}"></i>
+                        <i class="fa-solid fa-right-from-bracket text-sm <?php echo e($isRtl ? 'fa-flip-horizontal' : ''); ?>"></i>
                     </button>
                 </form>
             </div>
         </div>
     </aside>
 
-    {{-- ═══════════════════════════════════════════════════════════
-         MAIN CONTENT  (offset by sidebar width using logical padding)
-    ════════════════════════════════════════════════════════════════ --}}
+    
     <div class="flex-1 flex flex-col min-h-screen lg:ps-64 transition-all duration-300">
 
-        {{-- Top navbar --}}
+        
         <header class="sticky top-0 z-10 h-16 bg-white/95 backdrop-blur border-b border-slate-100
                        flex items-center px-5 gap-4 shadow-sm">
 
-            {{-- Mobile toggle --}}
+            
             <button @click="sidebarOpen = !sidebarOpen"
                     class="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors flex-shrink-0">
                 <i class="fa-solid fa-bars"></i>
             </button>
 
-            {{-- Breadcrumb --}}
+            
             <nav class="flex items-center gap-2 text-sm flex-1 min-w-0" aria-label="breadcrumb">
-                <a href="{{ route('dashboard') }}"
+                <a href="<?php echo e(route('dashboard')); ?>"
                    class="text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1.5 flex-shrink-0">
                     <i class="fa-solid fa-house text-xs"></i>
-                    <span class="hidden sm:inline">{{ __('app.home') }}</span>
+                    <span class="hidden sm:inline"><?php echo e(__('app.home')); ?></span>
                 </a>
-                <i class="fa-solid fa-chevron-{{ $isRtl ? 'left' : 'right' }} text-slate-300 text-[10px] flex-shrink-0"></i>
-                @php
+                <i class="fa-solid fa-chevron-<?php echo e($isRtl ? 'left' : 'right'); ?> text-slate-300 text-[10px] flex-shrink-0"></i>
+                <?php
                     $modRoute     = $currentModuleConfig['route'];
                     $modRouteHref = ($modRoute !== '#' && \Illuminate\Support\Facades\Route::has($modRoute))
                         ? route($modRoute) : '#';
-                @endphp
-                <a href="{{ $modRouteHref }}"
+                ?>
+                <a href="<?php echo e($modRouteHref); ?>"
                    class="text-slate-500 hover:text-slate-800 transition-colors truncate">
-                    {{ $modName }}
+                    <?php echo e($modName); ?>
+
                 </a>
-                @hasSection('breadcrumb')
-                    <i class="fa-solid fa-chevron-{{ $isRtl ? 'left' : 'right' }} text-slate-300 text-[10px] flex-shrink-0"></i>
-                    <span class="text-slate-800 font-bold truncate">@yield('breadcrumb')</span>
-                @endif
+                <?php if (! empty(trim($__env->yieldContent('breadcrumb')))): ?>
+                    <i class="fa-solid fa-chevron-<?php echo e($isRtl ? 'left' : 'right'); ?> text-slate-300 text-[10px] flex-shrink-0"></i>
+                    <span class="text-slate-800 font-bold truncate"><?php echo $__env->yieldContent('breadcrumb'); ?></span>
+                <?php endif; ?>
             </nav>
 
-            {{-- Right actions --}}
+            
             <div class="flex items-center gap-1.5 flex-shrink-0">
 
-                {{-- Language switcher --}}
+                
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"
                             class="flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors text-sm font-semibold">
                         <i class="fa-solid fa-globe text-xs"></i>
-                        <span class="hidden sm:inline">{{ $isRtl ? __('app.arabic') : __('app.english') }}</span>
+                        <span class="hidden sm:inline"><?php echo e($isRtl ? __('app.arabic') : __('app.english')); ?></span>
                         <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 transition-transform duration-200"
                            :class="{ 'rotate-180': open }"></i>
                     </button>
@@ -281,76 +279,82 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-end="opacity-0 scale-95"
                          class="absolute end-0 top-full mt-2 w-40 bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-100 py-2 z-50">
-                        <a href="{{ route('lang.switch', 'ar') }}"
+                        <a href="<?php echo e(route('lang.switch', 'ar')); ?>"
                            class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-slate-50
-                                  {{ $isRtl ? 'text-indigo-600 font-bold' : 'text-slate-700' }}">
-                            @if($isRtl)<i class="fa-solid fa-check text-xs text-indigo-500"></i>@else<span class="w-4"></span>@endif
+                                  <?php echo e($isRtl ? 'text-indigo-600 font-bold' : 'text-slate-700'); ?>">
+                            <?php if($isRtl): ?><i class="fa-solid fa-check text-xs text-indigo-500"></i><?php else: ?><span class="w-4"></span><?php endif; ?>
                             العربية
                         </a>
-                        <a href="{{ route('lang.switch', 'en') }}"
+                        <a href="<?php echo e(route('lang.switch', 'en')); ?>"
                            class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-slate-50
-                                  {{ !$isRtl ? 'text-indigo-600 font-bold' : 'text-slate-700' }}">
-                            @if(!$isRtl)<i class="fa-solid fa-check text-xs text-indigo-500"></i>@else<span class="w-4"></span>@endif
+                                  <?php echo e(!$isRtl ? 'text-indigo-600 font-bold' : 'text-slate-700'); ?>">
+                            <?php if(!$isRtl): ?><i class="fa-solid fa-check text-xs text-indigo-500"></i><?php else: ?><span class="w-4"></span><?php endif; ?>
                             English
                         </a>
                     </div>
                 </div>
 
-                {{-- My appointments: open ones due today or already past --}}
-                <a href="{{ route('appointments.index', ['assigned_to' => Auth::id(), 'status' => 'scheduled']) }}" title="{{ __('crm.my_appointments') }}"
+                
+                <a href="<?php echo e(route('appointments.index', ['assigned_to' => Auth::id(), 'status' => 'scheduled'])); ?>" title="<?php echo e(__('crm.my_appointments')); ?>"
                    class="relative p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
                     <i class="fa-solid fa-calendar-check text-sm"></i>
-                    @if($appointmentsDueCount > 0)
+                    <?php if($appointmentsDueCount > 0): ?>
                         <span class="absolute -top-0.5 -end-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-amber-500 text-white text-[9px] font-black rounded-full border-2 border-white">
-                            {{ $appointmentsDueCount > 9 ? '9+' : $appointmentsDueCount }}
+                            <?php echo e($appointmentsDueCount > 9 ? '9+' : $appointmentsDueCount); ?>
+
                         </span>
-                    @endif
+                    <?php endif; ?>
                 </a>
 
-                {{-- Price quotes sent to me, still waiting to be converted to an invoice --}}
-                <a href="{{ route('price-quotes.index', ['assigned_to' => Auth::id()]) }}" title="{{ __('tenders.quotes_to_invoice') }}"
+                
+                <a href="<?php echo e(route('price-quotes.index', ['assigned_to' => Auth::id()])); ?>" title="<?php echo e(__('tenders.quotes_to_invoice')); ?>"
                    class="relative p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
                     <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
-                    @if($quotesToInvoiceCount > 0)
+                    <?php if($quotesToInvoiceCount > 0): ?>
                         <span class="absolute -top-0.5 -end-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-violet-500 text-white text-[9px] font-black rounded-full border-2 border-white">
-                            {{ $quotesToInvoiceCount > 9 ? '9+' : $quotesToInvoiceCount }}
+                            <?php echo e($quotesToInvoiceCount > 9 ? '9+' : $quotesToInvoiceCount); ?>
+
                         </span>
-                    @endif
+                    <?php endif; ?>
                 </a>
 
-                {{-- Maintenance contract payments sent to me, still waiting to be converted to an invoice --}}
-                <a href="{{ route('contract-payments.index', ['assigned_to' => Auth::id()]) }}" title="{{ __('maintenance.payments_to_invoice') }}"
+                
+                <a href="<?php echo e(route('contract-payments.index', ['assigned_to' => Auth::id()])); ?>" title="<?php echo e(__('maintenance.payments_to_invoice')); ?>"
                    class="relative p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
                     <i class="fa-solid fa-money-check-dollar text-sm"></i>
-                    @if($contractPaymentsToInvoiceCount > 0)
+                    <?php if($contractPaymentsToInvoiceCount > 0): ?>
                         <span class="absolute -top-0.5 -end-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-teal-500 text-white text-[9px] font-black rounded-full border-2 border-white">
-                            {{ $contractPaymentsToInvoiceCount > 9 ? '9+' : $contractPaymentsToInvoiceCount }}
+                            <?php echo e($contractPaymentsToInvoiceCount > 9 ? '9+' : $contractPaymentsToInvoiceCount); ?>
+
                         </span>
-                    @endif
+                    <?php endif; ?>
                 </a>
 
-                {{-- Approvals --}}
-                <a href="{{ route('approvals.index') }}" title="{{ __('approvals.my_approvals') }}"
+                
+                <a href="<?php echo e(route('approvals.index')); ?>" title="<?php echo e(__('approvals.my_approvals')); ?>"
                    class="relative p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors">
                     <i class="fa-solid fa-clipboard-check text-sm"></i>
-                    @if($pendingApprovalsCount > 0)
+                    <?php if($pendingApprovalsCount > 0): ?>
                         <span class="absolute -top-0.5 -end-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-rose-500 text-white text-[9px] font-black rounded-full border-2 border-white">
-                            {{ $pendingApprovalsCount > 9 ? '9+' : $pendingApprovalsCount }}
+                            <?php echo e($pendingApprovalsCount > 9 ? '9+' : $pendingApprovalsCount); ?>
+
                         </span>
-                    @endif
+                    <?php endif; ?>
                 </a>
 
-                {{-- User dropdown --}}
+                
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"
                             class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-50 transition-colors">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br {{ Auth::user()->avatar_gradient }}
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br <?php echo e(Auth::user()->avatar_gradient); ?>
+
                                     flex items-center justify-center text-white text-xs font-black">
-                            {{ Auth::user()->initials }}
+                            <?php echo e(Auth::user()->initials); ?>
+
                         </div>
                         <div class="hidden md:block text-start leading-tight">
-                            <p class="text-sm font-bold text-slate-700">{{ Auth::user()->name }}</p>
-                            <p class="text-[11px] text-slate-400">{{ Auth::user()->role_label }}</p>
+                            <p class="text-sm font-bold text-slate-700"><?php echo e(Auth::user()->name); ?></p>
+                            <p class="text-[11px] text-slate-400"><?php echo e(Auth::user()->role_label); ?></p>
                         </div>
                         <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden md:block transition-transform duration-200"
                            :class="{ 'rotate-180': open }"></i>
@@ -366,21 +370,23 @@
                          x-transition:leave-end="opacity-0 scale-95"
                          class="absolute end-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-100 py-2 z-50">
                         <div class="px-4 py-3 border-b border-slate-100">
-                            <p class="text-sm font-bold text-slate-800">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr">{{ Auth::user()->email }}</p>
+                            <p class="text-sm font-bold text-slate-800"><?php echo e(Auth::user()->name); ?></p>
+                            <p class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr"><?php echo e(Auth::user()->email); ?></p>
                         </div>
-                        <a href="{{ route('settings.users.show', Auth::id()) }}"
+                        <a href="<?php echo e(route('settings.users.show', Auth::id())); ?>"
                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                             <i class="fa-solid fa-user w-4 text-center text-slate-400"></i>
-                            {{ __('app.profile') }}
+                            <?php echo e(__('app.profile')); ?>
+
                         </a>
                         <div class="my-1 border-t border-slate-100"></div>
-                        <form action="{{ route('auth.logout') }}" method="POST">
-                            @csrf
+                        <form action="<?php echo e(route('auth.logout')); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <button type="submit"
                                     class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
-                                <i class="fa-solid fa-right-from-bracket w-4 text-center {{ $isRtl ? 'fa-flip-horizontal' : '' }}"></i>
-                                {{ __('app.logout') }}
+                                <i class="fa-solid fa-right-from-bracket w-4 text-center <?php echo e($isRtl ? 'fa-flip-horizontal' : ''); ?>"></i>
+                                <?php echo e(__('app.logout')); ?>
+
                             </button>
                         </form>
                     </div>
@@ -388,18 +394,16 @@
             </div>
         </header>
 
-        {{-- Page content --}}
+        
         <main class="flex-1 p-6">
-            @yield('content')
+            <?php echo $__env->yieldContent('content'); ?>
         </main>
     </div>
 </div>
 
-{{-- ═══════════════════════════════════════════════════════════
-     GLOBAL TOAST NOTIFICATIONS
-════════════════════════════════════════════════════════════════ --}}
+
 <div class="fixed bottom-6 end-6 z-50 flex flex-col gap-3 pointer-events-none">
-    @if(session('success'))
+    <?php if(session('success')): ?>
         <div class="pointer-events-auto flex items-center gap-3 bg-emerald-500 text-white
                     px-5 py-3.5 rounded-2xl shadow-xl shadow-emerald-500/30 max-w-sm"
              x-data="{ show: true }"
@@ -412,11 +416,11 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-4">
             <i class="fa-solid fa-circle-check text-xl flex-shrink-0"></i>
-            <p class="font-semibold text-sm">{{ session('success') }}</p>
+            <p class="font-semibold text-sm"><?php echo e(session('success')); ?></p>
         </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('error'))
+    <?php if(session('error')): ?>
         <div class="pointer-events-auto flex items-center gap-3 bg-rose-500 text-white
                     px-5 py-3.5 rounded-2xl shadow-xl shadow-rose-500/30 max-w-sm"
              x-data="{ show: true }"
@@ -429,17 +433,14 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-4">
             <i class="fa-solid fa-circle-xmark text-xl flex-shrink-0"></i>
-            <p class="font-semibold text-sm">{{ session('error') }}</p>
+            <p class="font-semibold text-sm"><?php echo e(session('error')); ?></p>
         </div>
-    @endif
+    <?php endif; ?>
 </div>
 
-{{-- ═══════════════════════════════════════════════════════════
-     GLOBAL DELETE CONFIRM MODAL
-     Trigger: $dispatch('delete-confirm', { action, message })
-════════════════════════════════════════════════════════════════ --}}
+
 <div x-data="{ show: false, action: '', message: '' }"
-     @delete-confirm.window="show = true; action = $event.detail.action; message = $event.detail.message ?? '{{ __('app.delete_confirm_msg') }}'">
+     @delete-confirm.window="show = true; action = $event.detail.action; message = $event.detail.message ?? '<?php echo e(__('app.delete_confirm_msg')); ?>'">
 
     <div x-show="show"
          x-cloak
@@ -462,20 +463,22 @@
             <div class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <i class="fa-solid fa-triangle-exclamation text-rose-500 text-3xl"></i>
             </div>
-            <h3 class="text-lg font-black text-slate-800 mb-2">{{ __('app.confirm_delete') }}</h3>
+            <h3 class="text-lg font-black text-slate-800 mb-2"><?php echo e(__('app.confirm_delete')); ?></h3>
             <p class="text-slate-500 text-sm mb-7 leading-relaxed" x-text="message"></p>
 
             <div class="flex gap-3">
                 <button @click="show = false"
                         class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
-                    {{ __('app.cancel') }}
+                    <?php echo e(__('app.cancel')); ?>
+
                 </button>
                 <form :action="action" method="POST" class="flex-1">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit"
                             class="w-full px-4 py-2.5 bg-rose-600 text-white rounded-xl font-bold text-sm hover:bg-rose-700 transition-colors">
-                        {{ __('app.yes_delete') }}
+                        <?php echo e(__('app.yes_delete')); ?>
+
                     </button>
                 </form>
             </div>
@@ -483,14 +486,14 @@
     </div>
 </div>
 
-{{-- Search-and-select: upgrade any <select class="js-select2"> in `context` (default: whole page). --}}
+
 <script>
     window.initSelect2 = function (context) {
         (context ? $(context) : $(document)).find('.js-select2').each(function () {
             const $el = $(this);
             if ($el.hasClass('select2-hidden-accessible')) return;
             $el.select2({
-                dir: '{{ $isRtl ? "rtl" : "ltr" }}',
+                dir: '<?php echo e($isRtl ? "rtl" : "ltr"); ?>',
                 width: '100%',
                 placeholder: $el.data('placeholder') || $el.find('option[value=""]').first().text() || '',
                 allowClear: $el.find('option[value=""]').length > 0 && !$el.prop('required'),
@@ -499,15 +502,12 @@
     };
     document.addEventListener('DOMContentLoaded', () => window.initSelect2());
 
-    {{-- Rich text editor (tables, colors, images): the TinyMCE library itself is NOT loaded here —
-         only pages with a .js-richtext field should pay for it. Load tinymce via CDN in that page's
-         own @push('scripts'), then call window.initRichText(overrides) — `overrides` is where a page
-         plugs in its own images_upload_handler, since the upload endpoint differs per model/field. --}}
+    
     window.initRichText = function (overrides = {}) {
         if (typeof tinymce === 'undefined') return;
         tinymce.init({
             selector: '.js-richtext',
-            directionality: '{{ $isRtl ? "rtl" : "ltr" }}',
+            directionality: '<?php echo e($isRtl ? "rtl" : "ltr"); ?>',
             height: 420,
             menubar: false,
             plugins: 'lists link image table code',
@@ -518,6 +518,7 @@
     };
 </script>
 
-@stack('scripts')
+<?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH C:\xampp\htdocs\swete\resources\views/layouts/app.blade.php ENDPATH**/ ?>

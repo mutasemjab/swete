@@ -10,7 +10,21 @@
         <p class="page-subtitle">{{ __('tenders.price_quote') }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('price-quotes.print', $priceQuote) }}" target="_blank" class="btn-primary">
+        @if($priceQuote->invoice_id)
+            <a href="{{ route('accounting.invoices.show', $priceQuote->invoice_id) }}" class="btn-primary">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                {{ __('tenders.quote_view_invoice') }}
+            </a>
+        @elseif($priceQuote->assigned_to === Auth::id())
+            <form action="{{ route('price-quotes.convert-to-invoice', $priceQuote) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    {{ __('tenders.quote_convert_to_invoice') }}
+                </button>
+            </form>
+        @endif
+        <a href="{{ route('price-quotes.print', $priceQuote) }}" target="_blank" class="btn-secondary">
             <i class="fa-solid fa-print"></i>
             {{ __('external_purchases.print') }}
         </a>
@@ -82,6 +96,19 @@
             <dd class="text-slate-700 whitespace-pre-line">{{ $priceQuote->additional_terms }}</dd>
         </div>
         @endif
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_assigned_to') }}</dt>
+            <dd class="font-bold text-slate-800">
+                @if($priceQuote->invoice_id)
+                    <span class="badge bg-emerald-100 text-emerald-700">{{ __('tenders.quote_status_invoiced') }}</span>
+                @elseif($priceQuote->assignee)
+                    {{ $priceQuote->assignee->name }}
+                    <span class="badge bg-violet-100 text-violet-700 ms-1">{{ __('tenders.quote_status_pending_invoice') }}</span>
+                @else
+                    <span class="text-slate-400 font-normal">{{ __('tenders.quote_unassigned') }}</span>
+                @endif
+            </dd>
+        </div>
     </dl>
 </div>
 

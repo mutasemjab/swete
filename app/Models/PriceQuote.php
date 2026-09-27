@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,6 +46,8 @@ class PriceQuote extends Model
         'included_work_scopes',
         'additional_terms',
         'notes',
+        'assigned_to',
+        'invoice_id',
         'created_by',
     ];
 
@@ -99,6 +102,27 @@ class PriceQuote extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PriceQuoteItem::class);
+    }
+
+    public function assignee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
+    public function scopeAssignedTo(Builder $query, int $userId): Builder
+    {
+        return $query->where('assigned_to', $userId);
+    }
+
+    /** Assigned but not yet turned into an invoice — what the assignee's reminder counts. */
+    public function scopePendingInvoice(Builder $query): Builder
+    {
+        return $query->whereNull('invoice_id');
     }
 
     public static function nextNumber(): string

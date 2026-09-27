@@ -21,6 +21,11 @@
         },
         get total() { return this.subtotal - this.discountAmount; },
         fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
+        customerId: '{{ old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id) }}',
+        customerHistory: {{ $customerQuoteHistory->toJson() }},
+        get customerHistoryList() { return this.customerHistory[this.customerId] || []; },
+        materialHistory: {{ $materialPriceHistory->toJson() }},
+        materialStock: {{ $materialStock->toJson() }},
       }"
       x-init="$nextTick(() => window.initSelect2())">
 
@@ -41,13 +46,34 @@
 
         <div>
             <label class="form-label">{{ __('accounting.customer') }} <span class="text-rose-500">*</span></label>
-            <select name="customer_id" class="js-select2 form-select @error('customer_id') is-invalid @enderror">
+            <select name="customer_id" x-model="customerId" class="js-select2 form-select @error('customer_id') is-invalid @enderror">
                 <option value="">{{ __('app.select') }}</option>
                 @foreach($customers as $customer)
                     <option value="{{ $customer->id }}" @selected(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
                 @endforeach
             </select>
             @error('customer_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div class="sm:col-span-2" x-show="customerId" x-cloak>
+            <div class="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                <p class="text-xs font-bold text-slate-500 mb-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    {{ __('tenders.quote_customer_history') }}
+                </p>
+                <template x-if="customerHistoryList.length === 0">
+                    <p class="text-xs text-slate-400">{{ __('tenders.quote_customer_history_empty') }}</p>
+                </template>
+                <ul class="space-y-1">
+                    <template x-for="q in customerHistoryList" :key="q.number">
+                        <li class="flex items-center justify-between text-xs">
+                            <a :href="q.url" target="_blank" class="text-indigo-600 hover:underline font-mono font-bold" x-text="q.number"></a>
+                            <span class="text-slate-500" dir="ltr" x-text="q.date"></span>
+                            <span class="font-bold text-slate-700" dir="ltr" x-text="fmt(q.total) + ' ' + (q.currency || '')"></span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
         </div>
 
         <div>
@@ -219,6 +245,29 @@
                                     <option value="{{ $material->id }}">{{ $material->localized_name }} ({{ $material->code }})</option>
                                 @endforeach
                             </select>
+                            <template x-if="item.material_id">
+                                <div class="mt-1.5 text-[11px] text-slate-500 space-y-1">
+                                    <p>
+                                        <i class="fa-solid fa-warehouse text-slate-400"></i>
+                                        {{ __('tenders.quote_material_current_stock') }}:
+                                        <span class="font-bold text-slate-700" x-text="fmt(materialStock[item.material_id] || 0)"></span>
+                                    </p>
+                                    <template x-if="(materialHistory[item.material_id] || []).length">
+                                        <details>
+                                            <summary class="text-indigo-600 hover:underline cursor-pointer">
+                                                {{ __('tenders.quote_material_price_history') }}
+                                                (<span x-text="(materialHistory[item.material_id] || []).length"></span>)
+                                            </summary>
+                                            <ul class="mt-1 space-y-0.5 ps-3">
+                                                <template x-for="h in (materialHistory[item.material_id] || [])" :key="h.number">
+                                                    <li dir="ltr" x-text="h.date + ' — ' + h.number + ' — ' + fmt(h.unit_price)"></li>
+                                                </template>
+                                            </ul>
+                                        </details>
+                                    </template>
+                                    <p x-show="!(materialHistory[item.material_id] || []).length" class="text-slate-400">{{ __('tenders.quote_material_no_history') }}</p>
+                                </div>
+                            </template>
                         </td>
                         <td class="px-5 py-2.5">
                             <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"

@@ -35,6 +35,10 @@ use App\Http\Controllers\Tenders\ProjectAttachmentController;
 use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
 use App\Http\Controllers\Crm\AppointmentController;
 use App\Http\Controllers\Crm\AppointmentTypeController;
+use App\Http\Controllers\Maintenance\ReportTemplateController;
+use App\Http\Controllers\Maintenance\ReportController as MaintenanceReportController;
+use App\Http\Controllers\Maintenance\ContractController as MaintenanceContractController;
+use App\Http\Controllers\Maintenance\ContractPaymentController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
 use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
@@ -147,6 +151,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('quote-supply-scopes', QuoteSupplyScopeController::class)->except(['show']);
     Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->except(['show']);
     Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print');
+    Route::post('price-quotes/assign', [PriceQuoteController::class, 'assign'])->name('price-quotes.assign');
+    Route::post('price-quotes/{priceQuote}/convert-to-invoice', [PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice');
     Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::resource('projects', ProjectController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store');
@@ -173,6 +179,15 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('shipments', ShipmentController::class);
 
     Route::resource('appointment-types', AppointmentTypeController::class)->except(['show']);
+
+    Route::resource('report-templates', ReportTemplateController::class)->except(['show']);
+    Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    Route::resource('maintenance-contracts', MaintenanceContractController::class);
+    Route::post('maintenance-contracts/{maintenanceContract}/payments', [ContractPaymentController::class, 'store'])->name('contract-payments.store');
+    Route::delete('maintenance-contracts/{maintenanceContract}/payments/{payment}', [ContractPaymentController::class, 'destroy'])->name('contract-payments.destroy');
+    Route::get('contract-payments', [ContractPaymentController::class, 'index'])->name('contract-payments.index');
+    Route::post('contract-payments/assign', [ContractPaymentController::class, 'assign'])->name('contract-payments.assign');
+    Route::post('contract-payments/{payment}/convert-to-invoice', [ContractPaymentController::class, 'convertToInvoice'])->name('contract-payments.convert-to-invoice');
     Route::patch('appointments/{appointment}/toggle-complete', [AppointmentController::class, 'toggleComplete'])->name('appointments.toggle-complete');
     Route::resource('appointments', AppointmentController::class)->except(['show']);
 

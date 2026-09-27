@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Appointment;
 use App\Models\Approval;
+use App\Models\MaintenanceContractPayment;
+use App\Models\PriceQuote;
 use App\Models\PurchaseRequestApproval;
 use App\Models\PurchaseRequestReminder;
 use App\Models\PurchaseRequestReminderRecipient;
@@ -22,6 +24,14 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with('appointmentsDueCount', Auth::check()
                 ? Appointment::assignedTo(Auth::id())->due()->count()
+                : 0);
+
+            $view->with('quotesToInvoiceCount', Auth::check()
+                ? PriceQuote::assignedTo(Auth::id())->pendingInvoice()->count()
+                : 0);
+
+            $view->with('contractPaymentsToInvoiceCount', Auth::check()
+                ? MaintenanceContractPayment::assignedTo(Auth::id())->pendingInvoice()->count()
                 : 0);
 
             if (Auth::check()) {

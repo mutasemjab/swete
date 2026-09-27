@@ -54,6 +54,21 @@ class Customer extends Model
         return $this->hasMany(Tender::class, 'party_id');
     }
 
+    public function priceQuotes(): HasMany
+    {
+        return $this->hasMany(PriceQuote::class);
+    }
+
+    public function maintenanceReports(): HasMany
+    {
+        return $this->hasMany(MaintenanceReport::class);
+    }
+
+    public function maintenanceContracts(): HasMany
+    {
+        return $this->hasMany(MaintenanceContract::class);
+    }
+
     public function getLocalizedNameAttribute(): string
     {
         return app()->isLocale('en') && $this->name_en
