@@ -64,6 +64,32 @@
     <div class="card mb-5">
         <div class="card-header">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-indigo-500 text-sm"></i>
+                {{ __('settings.branch_ciat_pricing') }}
+            </h3>
+        </div>
+        <div class="px-6 py-5">
+            <p class="text-xs text-slate-400 mb-4">{{ __('settings.branch_ciat_pricing_hint') }}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label">{{ __('settings.branch_ciat_tax_rate') }} <span class="text-rose-500">*</span></label>
+                    <input type="number" step="0.01" min="0" max="100" name="ciat_tax_rate" value="{{ old('ciat_tax_rate', 16) }}" dir="ltr"
+                           class="form-input @error('ciat_tax_rate') is-invalid @enderror">
+                    @error('ciat_tax_rate')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="form-label">{{ __('settings.branch_ciat_jd_rate') }} <span class="text-rose-500">*</span></label>
+                    <input type="number" step="0.0001" min="0" name="ciat_jd_rate" value="{{ old('ciat_jd_rate', 0.82) }}" dir="ltr"
+                           class="form-input @error('ciat_jd_rate') is-invalid @enderror">
+                    @error('ciat_jd_rate')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
                 <i class="fa-solid fa-location-dot text-indigo-500 text-sm"></i>
                 {{ __('settings.branch_address') }}
             </h3>

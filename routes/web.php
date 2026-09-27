@@ -30,6 +30,8 @@ use App\Http\Controllers\Tenders\TenderStatusController;
 use App\Http\Controllers\Tenders\PriceQuoteController;
 use App\Http\Controllers\Tenders\QuoteSupplyScopeController;
 use App\Http\Controllers\Tenders\QuoteDeliveryTermController;
+use App\Http\Controllers\Tenders\CiatDiscountController;
+use App\Http\Controllers\Tenders\PriceAnalysisController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
 use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
@@ -150,6 +152,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('tender-statuses', TenderStatusController::class)->except(['show']);
     Route::resource('quote-supply-scopes', QuoteSupplyScopeController::class)->except(['show']);
     Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->except(['show']);
+    Route::resource('ciat-discounts', CiatDiscountController::class)->except(['show']);
+    Route::resource('price-analyses', PriceAnalysisController::class);
     Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print');
     Route::post('price-quotes/assign', [PriceQuoteController::class, 'assign'])->name('price-quotes.assign');
     Route::post('price-quotes/{priceQuote}/convert-to-invoice', [PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice');

@@ -33,6 +33,10 @@ return new class extends Migration
             $table->string('quote_body_image1_path')->nullable();
             $table->string('quote_body_image2_path')->nullable();
             $table->boolean('is_main')->default(false);
+            // Defaults for the CIAT price-analysis tool (Tenders → Price Analysis) — each analysis
+            // snapshots these at creation time, so a later change here never rewrites old analyses.
+            $table->decimal('ciat_tax_rate', 5, 2)->default(16.00);
+            $table->decimal('ciat_jd_rate', 8, 4)->default(0.8200);
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

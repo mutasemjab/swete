@@ -108,6 +108,8 @@ class BranchController extends ModuleController
             'country'           => ['nullable', 'string', 'max:100'],
             'country_en'        => ['nullable', 'string', 'max:100'],
             'is_main'           => ['boolean'],
+            'ciat_tax_rate'     => ['required', 'numeric', 'min:0', 'max:100'],
+            'ciat_jd_rate'      => ['required', 'numeric', 'min:0'],
             'status'            => ['boolean'],
         ];
 

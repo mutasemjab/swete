@@ -118,6 +118,20 @@ return [
                 ],
             ],
             [
+                'label' => 'tenders.section_ciat_discounts',
+                'items' => [
+                    ['label' => 'tenders.nav_ciat_discounts_list', 'route' => 'ciat-discounts.index',  'icon' => 'percent'],
+                    ['label' => 'tenders.nav_ciat_discounts_add',  'route' => 'ciat-discounts.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
+                'label' => 'tenders.section_price_analysis',
+                'items' => [
+                    ['label' => 'tenders.nav_price_analyses_list', 'route' => 'price-analyses.index',  'icon' => 'chart-line'],
+                    ['label' => 'tenders.nav_price_analyses_add',  'route' => 'price-analyses.create', 'icon' => 'plus'],
+                ],
+            ],
+            [
                 'label' => 'tenders.section_projects',
                 'items' => [
                     ['label' => 'tenders.nav_projects_list', 'route' => 'projects.index', 'icon' => 'diagram-project'],

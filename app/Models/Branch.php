@@ -30,12 +30,16 @@ class Branch extends Model
         'quote_body_image1_path',
         'quote_body_image2_path',
         'is_main',
+        'ciat_tax_rate',
+        'ciat_jd_rate',
         'status',
     ];
 
     protected $casts = [
-        'is_main' => 'boolean',
-        'status'  => 'boolean',
+        'is_main'       => 'boolean',
+        'ciat_tax_rate' => 'decimal:2',
+        'ciat_jd_rate'  => 'decimal:4',
+        'status'        => 'boolean',
     ];
 
     public function getLocalizedNameAttribute(): string

@@ -59,6 +59,8 @@ class PermissionSeeder extends Seeder
             'tenders.projects.view', 'tenders.projects.convert', 'tenders.projects.edit', 'tenders.projects.delete',
             'tenders.purchase_request_reminders.create',
             'tenders.purchase_request_reminders.edit', 'tenders.purchase_request_reminders.delete',
+            'tenders.ciat_discounts.create', 'tenders.ciat_discounts.edit', 'tenders.ciat_discounts.delete',
+            'tenders.price_analyses.create', 'tenders.price_analyses.edit', 'tenders.price_analyses.delete',
 
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',
