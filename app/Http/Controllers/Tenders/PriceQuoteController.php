@@ -10,6 +10,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceType;
 use App\Models\Material;
 use App\Models\MaterialStock;
+use App\Models\PriceAnalysis;
 use App\Models\PriceQuote;
 use App\Models\PriceQuoteItem;
 use App\Models\QuoteDeliveryTerm;
@@ -251,10 +252,29 @@ class PriceQuoteController extends ModuleController
             ->groupBy('material_id')
             ->pluck('qty', 'material_id');
 
+        // So a quote item can be added straight from a saved Price Analysis line: its per-unit price
+        // is the analysis line's final total (To JD + shipping) divided back out over its quantity,
+        // since the analysis only ever multiplies quantity into the profit figure, not the totals.
+        $priceAnalyses = PriceAnalysis::with('items.material')->latest()->take(50)->get()
+            ->map(fn ($analysis) => [
+                'id'     => $analysis->id,
+                'number' => $analysis->number,
+                'items'  => $analysis->items->map(fn ($item) => [
+                    'material_id'   => $item->material_id,
+                    'material_name' => $item->material?->localized_name,
+                    'ciat_model'    => $item->ciat_model,
+                    'quantity'      => (float) $item->quantity,
+                    'unit_price'    => (float) $item->quantity > 0
+                        ? round(((float) $item->to_jd + (float) $item->shipping) / (float) $item->quantity, 3)
+                        : (float) $item->to_jd + (float) $item->shipping,
+                ])->values(),
+            ])->values();
+
         return [
             'customerQuoteHistory' => $customerQuoteHistory,
             'materialPriceHistory' => $materialPriceHistory,
             'materialStock'        => $materialStock,
+            'priceAnalyses'        => $priceAnalyses,
         ];
     }
 

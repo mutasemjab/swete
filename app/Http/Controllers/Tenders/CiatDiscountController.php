@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenders;
 
 use App\Http\Controllers\ModuleController;
 use App\Models\CiatDiscount;
+use App\Models\Material;
 use Illuminate\Http\Request;
 
 /** Dynamic/manageable list of CIAT product discounts — looked up when building a Price Analysis line. */
@@ -13,14 +14,18 @@ class CiatDiscountController extends ModuleController
 
     public function index()
     {
-        $discounts = CiatDiscount::orderBy('ciat_type')->orderBy('ciat_model')->get();
+        $discounts = CiatDiscount::with('material')->get()
+            ->sortBy(fn ($discount) => $discount->material?->localized_name)->values();
 
         return $this->moduleView('tenders.ciat-discounts.index', compact('discounts'));
     }
 
     public function create()
     {
-        return $this->moduleView('tenders.ciat-discounts.create', ['discount' => null]);
+        return $this->moduleView('tenders.ciat-discounts.create', [
+            'discount'  => null,
+            'materials' => Material::where('status', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function store(Request $request)
@@ -39,7 +44,10 @@ class CiatDiscountController extends ModuleController
 
     public function edit(CiatDiscount $ciatDiscount)
     {
-        return $this->moduleView('tenders.ciat-discounts.edit', ['discount' => $ciatDiscount]);
+        return $this->moduleView('tenders.ciat-discounts.edit', [
+            'discount'  => $ciatDiscount,
+            'materials' => Material::where('status', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function update(Request $request, CiatDiscount $ciatDiscount)
@@ -70,9 +78,8 @@ class CiatDiscountController extends ModuleController
     private function validated(Request $request): array
     {
         return $request->validate([
-            'ciat_type'         => ['required', 'string', 'max:100'],
-            'ciat_model'        => ['required', 'string', 'max:100'],
-            'discount_percent'  => ['required', 'numeric', 'min:0', 'max:100'],
+            'material_id'      => ['required', 'exists:materials,id'],
+            'discount_percent' => ['required', 'numeric', 'min:0', 'max:100'],
         ]);
     }
 }

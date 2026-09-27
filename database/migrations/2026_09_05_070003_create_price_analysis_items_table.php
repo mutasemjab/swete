@@ -11,10 +11,13 @@ return new class extends Migration
         Schema::create('price_analysis_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('price_analysis_id')->constrained('price_analyses')->cascadeOnDelete();
-            // Nullable + type/model/discount snapshotted directly below: a later edit or deletion of
-            // the CIAT discount record must never change an already-saved analysis line.
+            // Nullable + material/discount snapshotted directly below: a later edit or deletion of
+            // the CIAT discount record (or the material it points at) must never change an
+            // already-saved analysis line.
             $table->foreignId('ciat_discount_id')->nullable()->constrained('ciat_discounts')->nullOnDelete();
-            $table->string('ciat_type');
+            $table->foreignId('material_id')->nullable()->constrained('materials')->nullOnDelete();
+            // The specific CIAT model — typed per line, not looked up (only the material + its
+            // discount % come from ciat_discounts).
             $table->string('ciat_model');
             $table->decimal('quantity', 14, 3);
             $table->decimal('list_price', 14, 3);

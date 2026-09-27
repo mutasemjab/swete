@@ -56,7 +56,7 @@
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_model') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_quantity') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_list_price') }}</th>
-                    <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_discount') }}</th>
+                    <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_price_percent') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_cost') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_profit') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_total_profit') }}</th>
@@ -69,11 +69,11 @@
             <tbody class="divide-y divide-slate-100">
                 @foreach($analysis->items as $item)
                 <tr>
-                    <td class="px-3 py-3 font-bold text-slate-800">{{ $item->ciat_type }}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800">{{ $item->material?->localized_name }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ $item->ciat_model }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->quantity, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->list_price, 3) }}</td>
-                    <td class="px-3 py-3 text-slate-600" dir="ltr">{{ rtrim(rtrim(number_format($item->discount_percent, 2), '0'), '.') }}%</td>
+                    <td class="px-3 py-3 text-slate-600" dir="ltr">{{ rtrim(rtrim(number_format($item->price_percent, 2), '0'), '.') }}%</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->cost, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->profit, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->total_profit, 3) }}</td>

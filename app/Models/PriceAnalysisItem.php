@@ -10,7 +10,7 @@ class PriceAnalysisItem extends Model
     protected $fillable = [
         'price_analysis_id',
         'ciat_discount_id',
-        'ciat_type',
+        'material_id',
         'ciat_model',
         'quantity',
         'list_price',
@@ -45,9 +45,20 @@ class PriceAnalysisItem extends Model
         return $this->belongsTo(CiatDiscount::class);
     }
 
+    public function material(): BelongsTo
+    {
+        return $this->belongsTo(Material::class);
+    }
+
     public function getSubtotalAttribute(): float
     {
         return (float) ($this->to_jd + $this->shipping);
+    }
+
+    /** The % of list price actually charged, i.e. 100 − the discount % — what the analysis displays (10% discount shows as 90%). */
+    public function getPricePercentAttribute(): float
+    {
+        return round(100 - (float) $this->discount_percent, 2);
     }
 
     /** cost = list price after the CIAT discount; total_profit = per-unit profit × quantity; price = cost + profit. */

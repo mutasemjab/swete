@@ -10,8 +10,9 @@ return new class extends Migration
     {
         Schema::create('ciat_discounts', function (Blueprint $table) {
             $table->id();
-            $table->string('ciat_type');
-            $table->string('ciat_model');
+            // The "CIAT type" is just one of our own warehouse materials — no free-text type/model
+            // here; the specific model is typed per line when building a Price Analysis instead.
+            $table->foreignId('material_id')->constrained('materials')->restrictOnDelete();
             $table->decimal('discount_percent', 5, 2);
             $table->boolean('status')->default(true);
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();

@@ -12,16 +12,17 @@
         },
         items: {{ (
             $analysis?->items->map(fn ($i) => [
-                'ciat_discount_id' => $i->ciat_discount_id, 'quantity' => (float) $i->quantity,
+                'ciat_discount_id' => $i->ciat_discount_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
                 'list_price' => (float) $i->list_price, 'profit' => (float) $i->profit, 'shipping' => (float) $i->shipping,
             ])->values()
-            ?? collect([['ciat_discount_id' => '', 'quantity' => 1, 'list_price' => '', 'profit' => '', 'shipping' => 0]])
+            ?? collect([['ciat_discount_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit' => '', 'shipping' => 0]])
         )->toJson() }},
-        addItem() { this.items.push({ ciat_discount_id: '', quantity: 1, list_price: '', profit: '', shipping: 0 }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ ciat_discount_id: '', ciat_model: '', quantity: 1, list_price: '', profit: '', shipping: 0 }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(id) { const d = this.ciatDiscounts.find(x => String(x.id) === String(id)); return d ? d.discount : 0; },
         calc(item) {
             const discount = this.discountFor(item.ciat_discount_id);
+            const pricePercent = 100 - discount;
             const qty = parseFloat(item.quantity) || 0;
             const listPrice = parseFloat(item.list_price) || 0;
             const profit = parseFloat(item.profit) || 0;
@@ -29,7 +30,7 @@
             const cost = listPrice * (1 - discount / 100);
             const price = cost + profit;
             const toJd = price * this.jdRate;
-            return { discount, cost, totalProfit: profit * qty, price, toJd, subtotal: toJd + shipping };
+            return { discount, pricePercent, cost, totalProfit: profit * qty, price, toJd, subtotal: toJd + shipping };
         },
         get subtotal() { return this.items.reduce((sum, item) => sum + this.calc(item).subtotal, 0); },
         get totalWithTax() { return this.subtotal * (1 + (this.taxRate / 100)); },
@@ -97,9 +98,10 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_product') }}</th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.ciat_model') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_quantity') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.analysis_item_list_price') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-16">{{ __('tenders.analysis_item_discount') }}</th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-16">{{ __('tenders.analysis_item_price_percent') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_cost') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_profit') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_total_profit') }}</th>
@@ -122,6 +124,10 @@
                                 </select>
                             </td>
                             <td class="px-3 py-2.5">
+                                <input type="text" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
+                                       dir="ltr" class="form-input !text-xs" required>
+                            </td>
+                            <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"
                                        step="0.001" min="0.001" dir="ltr" class="form-input !text-xs" required>
                             </td>
@@ -129,7 +135,7 @@
                                 <input type="number" :name="`items[${index}][list_price]`" x-model="item.list_price"
                                        step="0.001" min="0" dir="ltr" class="form-input !text-xs" required>
                             </td>
-                            <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="calc(item).discount + '%'"></td>
+                            <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="calc(item).pricePercent + '%'"></td>
                             <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="fmt(calc(item).cost)"></td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][profit]`" x-model="item.profit"

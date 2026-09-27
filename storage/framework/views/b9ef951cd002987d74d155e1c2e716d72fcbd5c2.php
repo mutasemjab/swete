@@ -26,6 +26,20 @@
         get customerHistoryList() { return this.customerHistory[this.customerId] || []; },
         materialHistory: <?php echo e($materialPriceHistory->toJson()); ?>,
         materialStock: <?php echo e($materialStock->toJson()); ?>,
+        priceAnalyses: <?php echo e($priceAnalyses->toJson()); ?>,
+        selectedAnalysisId: '',
+        showAnalysisPicker: false,
+        get selectedAnalysisItems() {
+            const a = this.priceAnalyses.find(x => String(x.id) === String(this.selectedAnalysisId));
+            return a ? a.items : [];
+        },
+        addFromAnalysis(analysisItem) {
+            this.items.push({
+                material_id: analysisItem.material_id, quantity: analysisItem.quantity,
+                unit_price: analysisItem.unit_price, notes: analysisItem.ciat_model ? [analysisItem.ciat_model] : [''],
+            });
+            this.$nextTick(() => window.initSelect2());
+        },
       }"
       x-init="$nextTick(() => window.initSelect2())">
 
@@ -350,11 +364,18 @@ unset($__errorArgs, $__bag); ?>
             <?php echo e(__('tenders.quote_items')); ?>
 
         </h3>
-        <button type="button" @click="addItem()" class="btn-secondary btn-sm">
-            <i class="fa-solid fa-plus"></i>
-            <?php echo e(__('accounting.invoice_add_item')); ?>
+        <div class="flex items-center gap-2">
+            <button type="button" @click="showAnalysisPicker = true" class="btn-secondary btn-sm">
+                <i class="fa-solid fa-chart-line"></i>
+                <?php echo e(__('tenders.quote_choose_from_analysis')); ?>
 
-        </button>
+            </button>
+            <button type="button" @click="addItem()" class="btn-secondary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                <?php echo e(__('accounting.invoice_add_item')); ?>
+
+            </button>
+        </div>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -518,6 +539,54 @@ unset($__errorArgs, $__bag); ?>
                 <dd class="font-black text-lg text-orange-700" dir="ltr" x-text="fmt(total)"></dd>
             </div>
         </dl>
+        </div>
+    </div>
+</div>
+
+
+<div x-show="showAnalysisPicker" x-cloak
+     class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+    <div @click.outside="showAnalysisPicker = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-bold text-slate-800"><?php echo e(__('tenders.quote_choose_from_analysis')); ?></h3>
+            <button type="button" @click="showAnalysisPicker = false" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="px-6 py-4 border-b border-slate-100">
+            <label class="form-label"><?php echo e(__('tenders.price_analyses_list')); ?></label>
+            <select x-model="selectedAnalysisId" class="form-select">
+                <option value=""><?php echo e(__('app.select')); ?></option>
+                <template x-for="a in priceAnalyses" :key="a.id">
+                    <option :value="a.id" x-text="a.number"></option>
+                </template>
+            </select>
+        </div>
+        <div class="px-6 py-4 overflow-y-auto flex-1">
+            <template x-if="selectedAnalysisId && selectedAnalysisItems.length === 0">
+                <p class="text-sm text-slate-400 text-center py-6"><?php echo e(__('tenders.quote_analysis_no_items')); ?></p>
+            </template>
+            <template x-if="!selectedAnalysisId">
+                <p class="text-sm text-slate-400 text-center py-6"><?php echo e(__('tenders.quote_select_analysis_first')); ?></p>
+            </template>
+            <div class="space-y-2">
+                <template x-for="(analysisItem, aIndex) in selectedAnalysisItems" :key="aIndex">
+                    <div class="flex items-center justify-between gap-3 border border-slate-200 rounded-xl px-4 py-2.5">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm" x-text="analysisItem.material_name"></p>
+                            <p class="text-xs text-slate-400" dir="ltr" x-text="analysisItem.ciat_model + ' — Qty: ' + analysisItem.quantity + ' — ' + fmt(analysisItem.unit_price)"></p>
+                        </div>
+                        <button type="button" @click="addFromAnalysis(analysisItem)" class="btn-secondary btn-sm flex-shrink-0">
+                            <i class="fa-solid fa-plus"></i>
+                            <?php echo e(__('app.add')); ?>
+
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end">
+            <button type="button" @click="showAnalysisPicker = false" class="btn-secondary"><?php echo e(__('app.close')); ?></button>
         </div>
     </div>
 </div>

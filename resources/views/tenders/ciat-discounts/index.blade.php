@@ -33,7 +33,6 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_type') }}</th>
-                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_model') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_discount_percent') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.status') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
@@ -42,8 +41,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach($discounts as $discount)
                     <tr class="hover:bg-slate-50/50 transition-colors group">
-                        <td class="px-5 py-4 font-bold text-slate-800">{{ $discount->ciat_type }}</td>
-                        <td class="px-5 py-4 text-sm text-slate-600" dir="ltr">{{ $discount->ciat_model }}</td>
+                        <td class="px-5 py-4 font-bold text-slate-800">{{ $discount->material?->localized_name }} <span class="text-xs text-slate-400 font-normal">({{ $discount->material?->code }})</span></td>
                         <td class="px-5 py-4 text-sm text-slate-600" dir="ltr">{{ rtrim(rtrim(number_format($discount->discount_percent, 2), '0'), '.') }}%</td>
                         <td class="px-5 py-4">
                             @if($discount->status)

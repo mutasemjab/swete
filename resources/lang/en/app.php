@@ -16,6 +16,7 @@ return [
 
     // ── CRUD actions ────────────────────────────────────────────────────────
     'add'                => 'Add',
+    'close'              => 'Close',
     'edit'               => 'Edit',
     'delete'             => 'Delete',
     'view'               => 'View',

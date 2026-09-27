@@ -58,7 +58,7 @@ class PriceAnalysisController extends ModuleController
 
     public function show(PriceAnalysis $priceAnalysis)
     {
-        $priceAnalysis->load(['branch', 'creator', 'items.ciatDiscount']);
+        $priceAnalysis->load(['branch', 'creator', 'items.ciatDiscount', 'items.material']);
 
         return $this->moduleView('tenders.price-analyses.show', ['analysis' => $priceAnalysis]);
     }
@@ -109,7 +109,8 @@ class PriceAnalysisController extends ModuleController
     {
         return [
             'branches'      => Branch::where('status', true)->orderBy('name')->get(),
-            'ciatDiscounts' => CiatDiscount::where('status', true)->orderBy('ciat_type')->orderBy('ciat_model')->get(),
+            'ciatDiscounts' => CiatDiscount::where('status', true)->with('material')->get()
+                ->sortBy(fn ($discount) => $discount->material?->localized_name)->values(),
         ];
     }
 
@@ -121,6 +122,7 @@ class PriceAnalysisController extends ModuleController
             'notes'                      => ['nullable', 'string'],
             'items'                      => ['required', 'array', 'min:1'],
             'items.*.ciat_discount_id'   => ['required', 'exists:ciat_discounts,id'],
+            'items.*.ciat_model'         => ['required', 'string', 'max:100'],
             'items.*.quantity'           => ['required', 'numeric', 'min:0.001'],
             'items.*.list_price'         => ['required', 'numeric', 'min:0'],
             'items.*.profit'             => ['required', 'numeric'],
@@ -145,8 +147,8 @@ class PriceAnalysisController extends ModuleController
 
             $analysis->items()->create([
                 'ciat_discount_id' => $discount->id,
-                'ciat_type'        => $discount->ciat_type,
-                'ciat_model'       => $discount->ciat_model,
+                'material_id'      => $discount->material_id,
+                'ciat_model'       => $item['ciat_model'],
                 'quantity'         => $item['quantity'],
                 'list_price'       => $item['list_price'],
                 'discount_percent' => $discount->discount_percent,
