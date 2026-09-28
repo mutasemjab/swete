@@ -67,6 +67,7 @@ class PermissionSeeder extends Seeder
             'external_purchases.view', 'external_purchases.purchase_requests.create',
             'external_purchases.purchase_requests.edit', 'external_purchases.purchase_requests.delete',
             'external_purchases.purchase_requests.approve', 'external_purchases.purchase_requests.ship',
+            'external_purchases.purchase_requests.mark_sent',
             'external_purchases.shipping_companies.create', 'external_purchases.shipping_companies.edit', 'external_purchases.shipping_companies.delete',
             'external_purchases.shipments.create', 'external_purchases.shipments.edit', 'external_purchases.shipments.delete',
             'external_purchases.vendor_email_template.edit',
@@ -82,6 +83,7 @@ class PermissionSeeder extends Seeder
             'maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.reports.delete',
             'maintenance.reports.approve_materials', 'maintenance.reports.convert_to_quote',
             'maintenance.contracts.create', 'maintenance.contracts.edit', 'maintenance.contracts.delete',
+            'maintenance.contract_payments.create', 'maintenance.contract_payments.delete',
             'maintenance.contract_payments.assign', 'maintenance.contract_payments.convert_to_invoice',
         ];
 
@@ -121,6 +123,14 @@ class PermissionSeeder extends Seeder
             'warehouse.vouchers.create', 'warehouse.vouchers.post',
             'warehouse.material_requests.create', 'warehouse.material_requests.fulfill',
             'warehouse.reports.view',
+        ]);
+
+        // Scoped to the mobile report-creation portal only — no other maintenance/admin
+        // permission. Note: permissions aren't enforced via route/UI gating anywhere in this
+        // app yet (pre-existing gap), so this role is organizational only for now, not a real restriction.
+        $maintenanceTechnician = Role::firstOrCreate(['name' => 'maintenance_technician', 'guard_name' => 'web']);
+        $maintenanceTechnician->syncPermissions([
+            'maintenance.reports.create',
         ]);
 
         // ── Default Super Admin User ──────────────────────────────────────────────

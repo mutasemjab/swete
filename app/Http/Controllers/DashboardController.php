@@ -8,7 +8,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $modules = config('modules');
+        $modules = collect(config('modules'))
+            ->filter(fn ($mod) => ! isset($mod['permission']) || auth()->user()->can($mod['permission']))
+            ->all();
 
         // The signed-in employee's open appointments: overdue, today, and the coming week.
         $myAppointments = Appointment::with(['type', 'customer'])

@@ -157,6 +157,8 @@
                         @foreach($section['items'] as $item)
                             @php
                                 $routeExists = $item['route'] !== '#' && \Illuminate\Support\Facades\Route::has($item['route']);
+                                $hasPermission = ! isset($item['permission']) || Auth::user()->can($item['permission']);
+                                if (! $hasPermission) { continue; }
                                 $color       = $currentModuleConfig['color'];
                                 $params      = $item['params'] ?? [];
                                 // Index items stay active for show/edit but not create; other items exact-match
