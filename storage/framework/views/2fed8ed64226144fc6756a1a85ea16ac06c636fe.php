@@ -19,6 +19,9 @@
     <?php if($tender): ?>
         <input type="hidden" name="tender_id" value="<?php echo e($tender->id); ?>">
     <?php endif; ?>
+    <?php if($report): ?>
+        <input type="hidden" name="report_id" value="<?php echo e($report->id); ?>">
+    <?php endif; ?>
 
     <?php echo $__env->make('tenders.price-quotes._form', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 

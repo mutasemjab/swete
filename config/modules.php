@@ -246,6 +246,7 @@ return [
                 'items' => [
                     ['label' => 'maintenance.nav_reports_list',   'route' => 'maintenance-reports.index',  'icon' => 'clipboard-list'],
                     ['label' => 'maintenance.nav_reports_add',    'route' => 'maintenance-reports.create', 'icon' => 'plus'],
+                    ['label' => 'maintenance.nav_reports_search', 'route' => 'maintenance-reports.search', 'icon' => 'magnifying-glass'],
                     ['label' => 'maintenance.nav_report_templates', 'route' => 'report-templates.index',   'icon' => 'sliders'],
                 ],
             ],
@@ -302,6 +303,7 @@ return [
                     ['label' => 'settings.nav_approval_rules', 'route' => 'settings.approval-rules.index', 'icon' => 'user-shield'],
                     ['label' => 'settings.nav_purchase_request_approvers', 'route' => 'settings.purchase-request-approvers.index', 'icon' => 'user-check'],
                     ['label' => 'settings.nav_purchase_request_reminder_recipients', 'route' => 'settings.purchase-request-reminder-recipients.index', 'icon' => 'bell'],
+                    ['label' => 'settings.nav_maintenance_report_material_approvers', 'route' => 'settings.maintenance-report-material-approvers.index', 'icon' => 'user-check'],
                 ],
             ],
         ],

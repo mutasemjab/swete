@@ -52,4 +52,20 @@ class MaintenanceContractPayment extends Model
     {
         return $query->whereNull('invoice_id');
     }
+
+    /** Due today or already past, and not yet converted to an invoice — what the payments list highlights. */
+    public function scopeDue(Builder $query): Builder
+    {
+        return $query->pendingInvoice()->whereDate('due_date', '<=', today());
+    }
+
+    public function isDueToday(): bool
+    {
+        return $this->invoice_id === null && $this->due_date->isToday();
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->invoice_id === null && $this->due_date->lt(today());
+    }
 }

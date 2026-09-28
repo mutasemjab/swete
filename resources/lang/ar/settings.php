@@ -23,6 +23,7 @@ return [
     'nav_activity_log'      => 'سجل الأنشطة',
     'nav_approval_rules'    => 'قواعد الموافقات',
     'nav_purchase_request_approvers' => 'معتمدو طلبات الشراء',
+    'nav_maintenance_report_material_approvers' => 'معتمدو مواد تقارير الصيانة',
     'nav_purchase_request_reminder_recipients' => 'المسؤولون عن طلبات الشراء المطلوبة',
 
     // ── Users ─────────────────────────────────────────────────────────────────
@@ -234,5 +235,11 @@ return [
     'purchase_request_reminder_recipients_subtitle' => 'من يستلم إشعارًا عند إرسال موظف لطلب إنشاء طلب شراء',
     'purchase_request_reminder_recipients_hint'     => 'أي مستخدم تحدده هنا بيوصله إشعار بأي طلب جديد، ويقدر أي واحد منهم ينشئ طلب الشراء الفعلي.',
     'purchase_request_reminder_recipients_saved'    => 'تم حفظ القائمة بنجاح.',
+
+    // ── Maintenance Report Material Approvers ────────────────────────────────
+    'maintenance_report_material_approvers'          => 'معتمدو المواد المستخدمة في تقارير الصيانة',
+    'maintenance_report_material_approvers_subtitle' => 'حدد المستخدمين الذين يجب أن يوافقوا جميعًا على المواد المستخدمة في أي تقرير صيانة',
+    'maintenance_report_material_approvers_hint'     => 'يجب أن يوافق كل من تحدده هنا على قائمة المواد المستخدمة في التقرير قبل أن يتم إنشاء سند إخراج تلقائي بالكمية المستخدمة. إذا رفض أحدهم يتحول الطلب إلى "مرفوض".',
+    'maintenance_report_material_approvers_saved'    => 'تم حفظ قائمة المعتمدين بنجاح.',
 
 ];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Approval;
+use App\Models\MaintenanceReportMaterialApproval;
 use App\Models\PurchaseRequestApproval;
 use App\Models\PurchaseRequestReminder;
 use App\Models\PurchaseRequestReminderRecipient;
@@ -37,6 +38,14 @@ class ApprovalController extends Controller
             ? PurchaseRequestReminder::with(['project', 'requester'])->where('status', 'pending')->latest()->get()
             : collect();
 
+        // Maintenance reports' materials-used lines use the same unanimous-approval
+        // mechanism as purchase requests (see MaintenanceReport::seedMaterialApprovals()).
+        $pendingMaterialApprovals = MaintenanceReportMaterialApproval::with(['report.customer'])
+            ->where('user_id', auth()->id())
+            ->where('decision', 'pending')
+            ->latest()
+            ->get();
+
         // A rule-triggered request can fan out into one Approval row per eligible
         // approver (OR logic) — collapse those back into a single summarizing row
         // per logical request, preferring a real decision over a cancelled sibling.
@@ -60,7 +69,7 @@ class ApprovalController extends Controller
             'sections' => [],
         ];
 
-        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'pendingReminders', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
+        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'pendingReminders', 'pendingMaterialApprovals', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
     }
 
     public function approve(Request $request, Approval $approval, ApprovalService $approvals)

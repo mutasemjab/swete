@@ -9,6 +9,12 @@
         <h1 class="page-title">{{ __('maintenance.contract_payments') }}</h1>
         <p class="page-subtitle">{{ __('maintenance.contracts_subtitle') }}</p>
     </div>
+    @if($dueCount > 0)
+        <a href="{{ route('contract-payments.index', ['due' => 1]) }}" class="badge bg-rose-100 text-rose-700 !text-sm !px-4 !py-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ __('maintenance.payments_due_count', ['count' => $dueCount]) }}
+        </a>
+    @endif
 </div>
 
 <form method="GET" action="{{ route('contract-payments.index') }}" class="card px-5 py-4 mb-4 flex flex-wrap gap-3">
@@ -18,11 +24,15 @@
             <option value="{{ $employee->id }}" @selected(request('assigned_to') == $employee->id)>{{ $employee->name }}</option>
         @endforeach
     </select>
+    <label class="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-xl cursor-pointer">
+        <input type="checkbox" name="due" value="1" @checked(request('due'))>
+        <span class="text-sm text-slate-600">{{ __('maintenance.payments_due_only') }}</span>
+    </label>
     <button type="submit" class="btn-primary">
         <i class="fa-solid fa-filter"></i>
         {{ __('app.search') }}
     </button>
-    @if(request()->hasAny(['assigned_to']))
+    @if(request()->hasAny(['assigned_to', 'due']))
         <a href="{{ route('contract-payments.index') }}" class="btn-secondary">
             <i class="fa-solid fa-xmark"></i>
             {{ __('app.clear_filters') }}
@@ -68,7 +78,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($payments as $payment)
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    <tr class="hover:bg-slate-50/50 transition-colors @if($payment->isOverdue()) bg-rose-50/60 @elseif($payment->isDueToday()) bg-amber-50/60 @endif">
                         <td class="px-5 py-4">
                             @if(! $payment->invoice_id)
                                 <input type="checkbox" value="{{ $payment->id }}" x-model.number="selected" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
@@ -78,7 +88,14 @@
                             <a href="{{ route('maintenance-contracts.show', $payment->contract) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors">{{ $payment->contract?->number }}</a>
                         </td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $payment->contract?->customer?->localized_name }}</td>
-                        <td class="px-5 py-4 text-sm text-slate-600" dir="ltr">{{ $payment->due_date->format('Y-m-d') }}</td>
+                        <td class="px-5 py-4 text-sm text-slate-600">
+                            <span dir="ltr">{{ $payment->due_date->format('Y-m-d') }}</span>
+                            @if($payment->isOverdue())
+                                <span class="badge bg-rose-100 text-rose-700 ms-1.5">{{ __('maintenance.payment_overdue') }}</span>
+                            @elseif($payment->isDueToday())
+                                <span class="badge bg-amber-100 text-amber-700 ms-1.5">{{ __('maintenance.payment_due_today') }}</span>
+                            @endif
+                        </td>
                         <td class="px-5 py-4 font-bold text-slate-800" dir="ltr">{{ number_format($payment->amount, 3) }} {{ $payment->currency?->code }}</td>
                         <td class="px-5 py-4">
                             @if($payment->invoice_id)

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Appointment;
 use App\Models\Approval;
 use App\Models\MaintenanceContractPayment;
+use App\Models\MaintenanceReportMaterialApproval;
 use App\Models\PriceQuote;
 use App\Models\PurchaseRequestApproval;
 use App\Models\PurchaseRequestReminder;
@@ -36,7 +37,8 @@ class AppServiceProvider extends ServiceProvider
 
             if (Auth::check()) {
                 $count = Approval::where('approver_id', Auth::id())->where('status', 'pending')->count()
-                    + PurchaseRequestApproval::where('user_id', Auth::id())->where('decision', 'pending')->count();
+                    + PurchaseRequestApproval::where('user_id', Auth::id())->where('decision', 'pending')->count()
+                    + MaintenanceReportMaterialApproval::where('user_id', Auth::id())->where('decision', 'pending')->count();
 
                 if (PurchaseRequestReminderRecipient::where('user_id', Auth::id())->exists()) {
                     $count += PurchaseRequestReminder::where('status', 'pending')->count();

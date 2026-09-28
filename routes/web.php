@@ -49,6 +49,7 @@ use App\Http\Controllers\ExternalPurchases\VendorEmailTemplateController;
 use App\Http\Controllers\Settings\ApprovalRuleController;
 use App\Http\Controllers\Settings\PurchaseRequestApproverController;
 use App\Http\Controllers\Settings\PurchaseRequestReminderRecipientController;
+use App\Http\Controllers\Settings\MaintenanceReportMaterialApproverController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +102,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::put('purchase-request-approvers',  [PurchaseRequestApproverController::class, 'update'])->name('purchase-request-approvers.update');
         Route::get('purchase-request-reminder-recipients', [PurchaseRequestReminderRecipientController::class, 'index'])->name('purchase-request-reminder-recipients.index');
         Route::put('purchase-request-reminder-recipients', [PurchaseRequestReminderRecipientController::class, 'update'])->name('purchase-request-reminder-recipients.update');
+        Route::get('maintenance-report-material-approvers', [MaintenanceReportMaterialApproverController::class, 'index'])->name('maintenance-report-material-approvers.index');
+        Route::put('maintenance-report-material-approvers', [MaintenanceReportMaterialApproverController::class, 'update'])->name('maintenance-report-material-approvers.update');
 
     });
 
@@ -185,7 +188,15 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('appointment-types', AppointmentTypeController::class)->except(['show']);
 
     Route::resource('report-templates', ReportTemplateController::class)->except(['show']);
+    Route::get('maintenance-reports/search', [MaintenanceReportController::class, 'search'])->name('maintenance-reports.search');
     Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    Route::post('maintenance-reports/{maintenanceReport}/approve-materials', [MaintenanceReportController::class, 'approveMaterials'])->name('maintenance-reports.approve-materials');
+    Route::post('maintenance-reports/{maintenanceReport}/reject-materials', [MaintenanceReportController::class, 'rejectMaterials'])->name('maintenance-reports.reject-materials');
+    Route::post('maintenance-reports/{maintenanceReport}/convert-to-quote', [MaintenanceReportController::class, 'convertToQuote'])->name('maintenance-reports.convert-to-quote');
+    Route::prefix('m/maintenance-reports')->name('maintenance-reports.mobile.')->group(function () {
+        Route::get('create', [MaintenanceReportController::class, 'mobileCreate'])->name('create');
+        Route::post('/', [MaintenanceReportController::class, 'store'])->name('store');
+    });
     Route::resource('maintenance-contracts', MaintenanceContractController::class);
     Route::post('maintenance-contracts/{maintenanceContract}/payments', [ContractPaymentController::class, 'store'])->name('contract-payments.store');
     Route::delete('maintenance-contracts/{maintenanceContract}/payments/{payment}', [ContractPaymentController::class, 'destroy'])->name('contract-payments.destroy');

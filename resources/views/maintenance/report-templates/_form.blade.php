@@ -91,6 +91,7 @@
                                 <option value="number">{{ __('maintenance.answer_type_number') }}</option>
                                 <option value="boolean">{{ __('maintenance.answer_type_boolean') }}</option>
                                 <option value="choice">{{ __('maintenance.answer_type_choice') }}</option>
+                                <option value="images">{{ __('maintenance.answer_type_images') }}</option>
                             </select>
                         </div>
                     </div>

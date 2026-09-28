@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceType;
+use App\Models\MaintenanceReport;
 use App\Models\Material;
 use App\Models\MaterialStock;
 use App\Models\PriceAnalysis;
@@ -48,17 +49,23 @@ class PriceQuoteController extends ModuleController
     public function create(Request $request)
     {
         $tender = $request->filled('tender_id') ? Tender::find($request->input('tender_id')) : null;
+        $report = $request->filled('report_id')
+            ? MaintenanceReport::with('materials.material')->find($request->input('report_id'))
+            : null;
 
         return $this->moduleView('tenders.price-quotes.create', [
             ...$this->formOptions(),
             ...$this->historyData(),
             'priceQuote' => null,
             'tender'     => $tender,
+            'report'     => $report,
         ]);
     }
 
     public function store(Request $request)
     {
+        $request->validate(['report_id' => ['nullable', 'exists:maintenance_reports,id']]);
+
         $validated = $this->validated($request);
 
         $priceQuote = PriceQuote::create([
@@ -69,6 +76,10 @@ class PriceQuoteController extends ModuleController
         ]);
 
         $this->syncItems($priceQuote, $validated['items']);
+
+        if ($request->filled('report_id')) {
+            MaintenanceReport::where('id', $request->input('report_id'))->update(['price_quote_id' => $priceQuote->id]);
+        }
 
         return redirect()->route('price-quotes.show', $priceQuote)
             ->with('success', __('tenders.quote_added'));

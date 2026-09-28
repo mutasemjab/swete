@@ -23,10 +23,15 @@ class ContractPaymentController extends ModuleController
             $query->where('assigned_to', $request->input('assigned_to'));
         }
 
+        if ($request->boolean('due')) {
+            $query->due();
+        }
+
         $payments  = $query->orderBy('due_date')->paginate(20)->withQueryString();
         $employees = User::where('status', true)->orderBy('name')->get();
+        $dueCount  = MaintenanceContractPayment::due()->count();
 
-        return $this->moduleView('maintenance.contracts.payments-index', compact('payments', 'employees'));
+        return $this->moduleView('maintenance.contracts.payments-index', compact('payments', 'employees', 'dueCount'));
     }
 
     public function store(Request $request, MaintenanceContract $maintenanceContract)

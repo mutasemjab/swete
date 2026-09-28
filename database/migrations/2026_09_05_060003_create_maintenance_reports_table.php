@@ -18,7 +18,17 @@ return new class extends Migration
             $table->foreignId('material_id')->nullable()->constrained('materials')->nullOnDelete();
             $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
             $table->date('date');
+            // Fixed on every report regardless of its template's own custom questions.
+            $table->text('problem')->nullable();
+            $table->text('solution')->nullable();
             $table->text('notes')->nullable();
+            // 'none' when the report has no materials-used lines at all; 'pending' once the approver
+            // pool is seeded; 'approved'/'rejected' once every approver has decided. Approval triggers
+            // an automatic posted stock-issue voucher — see MaintenanceReport::createIssueVoucher().
+            $table->enum('materials_approval_status', ['none', 'pending', 'approved', 'rejected'])->default('none');
+            $table->foreignId('issue_voucher_id')->nullable()->constrained('stock_vouchers')->nullOnDelete();
+            // Set once this report has been converted into a price quote — see ReportController::convertToQuote().
+            $table->foreignId('price_quote_id')->nullable()->constrained('price_quotes')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });

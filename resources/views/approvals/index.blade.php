@@ -19,7 +19,7 @@
                 class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all"
                 :class="tab === 'for_me' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'">
             {{ __('approvals.tab_for_me') }}
-            @php $forMeTotal = $pendingForMe->count() + $pendingPurchaseRequestApprovals->count() + $pendingReminders->count(); @endphp
+            @php $forMeTotal = $pendingForMe->count() + $pendingPurchaseRequestApprovals->count() + $pendingReminders->count() + $pendingMaterialApprovals->count(); @endphp
             @if($forMeTotal)
                 <span class="ms-1.5 px-1.5 py-0.5 rounded-md text-[11px]" :class="tab === 'for_me' ? 'bg-white/20' : 'bg-rose-100 text-rose-600'">{{ $forMeTotal }}</span>
             @endif
@@ -113,6 +113,54 @@
                                     <a href="{{ route('purchase-requests.create', ['reminder_id' => $reminder->id]) }}" class="btn-primary btn-sm">
                                         <i class="fa-solid fa-plus"></i> {{ __('tenders.reminder_create_pr') }}
                                     </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        @if($pendingMaterialApprovals->isNotEmpty())
+        <div class="card overflow-hidden mb-5">
+            <div class="card-header">
+                <h3 class="font-bold text-slate-700">{{ __('maintenance.pending_material_approvals') }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('maintenance.report_number') }}</th>
+                            <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('maintenance.report_customer') }}</th>
+                            <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('approvals.requested_at') }}</th>
+                            <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($pendingMaterialApprovals as $matApproval)
+                        @php $mr = $matApproval->report; @endphp
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-5 py-4 font-bold text-slate-800">
+                                <a href="{{ route('maintenance-reports.show', $mr) }}" class="hover:text-indigo-600 hover:underline">{{ $mr->number }}</a>
+                            </td>
+                            <td class="px-5 py-4 text-sm text-slate-600">{{ $mr->customer?->localized_name }}</td>
+                            <td class="px-5 py-4 text-sm text-slate-500">{{ $matApproval->created_at->diffForHumans() }}</td>
+                            <td class="px-5 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <form action="{{ route('maintenance-reports.approve-materials', $mr) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-primary btn-sm">
+                                            <i class="fa-solid fa-check"></i> {{ __('approvals.approve') }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('maintenance-reports.reject-materials', $mr) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-danger btn-sm">
+                                            <i class="fa-solid fa-xmark"></i> {{ __('approvals.reject') }}
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

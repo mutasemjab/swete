@@ -27,6 +27,7 @@ class PermissionSeeder extends Seeder
             'settings.approval_rules.view', 'settings.approval_rules.edit',
             'settings.purchase_request_approvers.edit',
             'settings.purchase_request_reminder_recipients.edit',
+            'settings.maintenance_report_material_approvers.edit',
 
             // Accounting
             'accounting.view',
@@ -79,6 +80,7 @@ class PermissionSeeder extends Seeder
             'maintenance.view',
             'maintenance.report_templates.create', 'maintenance.report_templates.edit', 'maintenance.report_templates.delete',
             'maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.reports.delete',
+            'maintenance.reports.approve_materials', 'maintenance.reports.convert_to_quote',
             'maintenance.contracts.create', 'maintenance.contracts.edit', 'maintenance.contracts.delete',
             'maintenance.contract_payments.assign', 'maintenance.contract_payments.convert_to_invoice',
         ];

@@ -24,7 +24,7 @@
         </a>
     </div>
 @else
-<form action="{{ route('maintenance-reports.store') }}" method="POST"
+<form action="{{ route('maintenance-reports.store') }}" method="POST" enctype="multipart/form-data"
       x-data="{
         templates: {{ $templates->map(fn ($t) => [
             'id'      => $t->id,
@@ -36,6 +36,10 @@
         ])->values()->toJson() }},
         templateId: '{{ old('template_id') }}',
         get selectedTemplate() { return this.templates.find(t => String(t.id) === String(this.templateId)) || null; },
+        materials: {{ collect(old('materials', []))->values()->toJson() }},
+        materialStock: {{ $materialStock->toJson() }},
+        addMaterial() { this.materials.push({ material_id: '', quantity: '' }); this.$nextTick(() => window.initSelect2()); },
+        removeMaterial(i) { this.materials.splice(i, 1); },
       }"
       x-init="$nextTick(() => window.initSelect2())">
     @csrf
@@ -75,6 +79,18 @@
                 <input type="date" name="date" value="{{ old('date', now()->toDateString()) }}"
                        class="form-input @error('date') is-invalid @enderror">
                 @error('date')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('maintenance.report_problem') }}</label>
+                <textarea name="problem" rows="2" class="form-input @error('problem') is-invalid @enderror">{{ old('problem') }}</textarea>
+                @error('problem')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('maintenance.report_solution') }}</label>
+                <textarea name="solution" rows="2" class="form-input @error('solution') is-invalid @enderror">{{ old('solution') }}</textarea>
+                @error('solution')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             <div class="sm:col-span-2">
@@ -119,11 +135,64 @@
                                 </template>
                             </select>
                         </template>
+                        <template x-if="field.type === 'images'">
+                            <div>
+                                <input type="file" :name="`answers[${field.id}][]`" multiple accept="image/*" class="form-input">
+                                <p class="text-xs text-slate-400 mt-1">{{ __('maintenance.report_images_hint') }}</p>
+                            </div>
+                        </template>
                     </div>
                 </template>
             </div>
         </div>
     </template>
+
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-boxes-stacked text-teal-500 text-sm"></i>
+                {{ __('maintenance.report_materials_used') }}
+            </h3>
+            <button type="button" @click="addMaterial()" class="btn-secondary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                {{ __('maintenance.report_add_material') }}
+            </button>
+        </div>
+        <div class="px-6 py-5">
+            <p class="text-xs text-slate-400 mb-4">{{ __('maintenance.report_materials_used_hint') }}</p>
+            <template x-if="materials.length === 0">
+                <p class="text-sm text-slate-400">{{ __('maintenance.report_no_materials') }}</p>
+            </template>
+            <div class="space-y-3">
+                <template x-for="(row, index) in materials" :key="index">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1">
+                            <select :name="`materials[${index}][material_id]`" x-model="row.material_id" class="js-select2 form-select" required>
+                                <option value="">{{ __('maintenance.report_material') }}</option>
+                                @foreach($materials as $material)
+                                    <option value="{{ $material->id }}">{{ $material->localized_name }} ({{ $material->code }})</option>
+                                @endforeach
+                            </select>
+                            <template x-if="row.material_id">
+                                <p class="mt-1 text-[11px] text-slate-500">
+                                    <i class="fa-solid fa-warehouse text-slate-400"></i>
+                                    {{ __('maintenance.report_current_stock') }}:
+                                    <span class="font-bold text-slate-700" x-text="materialStock[row.material_id] || 0"></span>
+                                </p>
+                            </template>
+                        </div>
+                        <div class="w-32">
+                            <input type="number" :name="`materials[${index}][quantity]`" x-model="row.quantity"
+                                   step="0.001" min="0.001" dir="ltr" class="form-input" placeholder="{{ __('maintenance.report_quantity') }}" required>
+                        </div>
+                        <button type="button" @click="removeMaterial(index)" class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                            <i class="fa-solid fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

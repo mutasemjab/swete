@@ -1,4 +1,4 @@
-@php $priceQuote = $priceQuote ?? null; @endphp
+@php $priceQuote = $priceQuote ?? null; $report = $report ?? null; @endphp
 <div x-data="{
         items: {{ (
             $priceQuote?->items->map(fn ($i) => [
@@ -7,6 +7,12 @@
                 'unit_price'  => (float) $i->unit_price,
                 'notes'       => $i->notes ?: [''],
             ])->values()
+            ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
+                'material_id' => $m->material_id,
+                'quantity'    => (float) $m->quantity,
+                'unit_price'  => 0,
+                'notes'       => [''],
+            ])->values() : null)
             ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
         )->toJson() }},
         addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''] }); this.$nextTick(() => window.initSelect2()); },
@@ -21,7 +27,7 @@
         },
         get total() { return this.subtotal - this.discountAmount; },
         fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
-        customerId: '{{ old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id) }}',
+        customerId: '{{ old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id ?? $report?->customer_id) }}',
         customerHistory: {{ $customerQuoteHistory->toJson() }},
         get customerHistoryList() { return this.customerHistory[this.customerId] || []; },
         materialHistory: {{ $materialPriceHistory->toJson() }},
@@ -63,7 +69,7 @@
             <select name="customer_id" x-model="customerId" class="js-select2 form-select @error('customer_id') is-invalid @enderror">
                 <option value="">{{ __('app.select') }}</option>
                 @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" @selected(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
+                    <option value="{{ $customer->id }}" @selected(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id ?? $report?->customer_id) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
                 @endforeach
             </select>
             @error('customer_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror

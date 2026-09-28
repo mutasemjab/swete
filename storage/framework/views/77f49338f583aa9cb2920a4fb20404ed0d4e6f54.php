@@ -498,6 +498,13 @@
                 placeholder: $el.data('placeholder') || $el.find('option[value=""]').first().text() || '',
                 allowClear: $el.find('option[value=""]').length > 0 && !$el.prop('required'),
             });
+            // Belt-and-suspenders for pages that bind x-model to a .js-select2 element: select2
+            // already fires a native 'change' on the underlying <select> when the selection changes,
+            // but re-dispatch explicitly on its own events too so Alpine's reactive state can never
+            // silently fall out of sync with what's actually selected.
+            $el.on('select2:select select2:unselect select2:clear', function () {
+                this.dispatchEvent(new Event('change'));
+            });
         });
     };
     document.addEventListener('DOMContentLoaded', () => window.initSelect2());

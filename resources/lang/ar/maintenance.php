@@ -14,6 +14,7 @@ return [
     'nav_service_calls'      => 'طلبات الصيانة',
     'nav_reports_list'       => 'قائمة التقارير',
     'nav_reports_add'        => 'تقرير جديد',
+    'nav_reports_search'     => 'البحث في مشاكل مشابهة',
     'nav_report_templates'   => 'قوالب التقارير',
     'nav_contracts_list'     => 'قائمة العقود',
     'nav_contracts_add'      => 'عقد جديد',
@@ -45,6 +46,7 @@ return [
     'answer_type_text'               => 'نص',
     'answer_type_boolean'            => 'نعم / لا',
     'answer_type_choice'             => 'خيارات',
+    'answer_type_images'             => 'صور',
 
     // ── تقارير الصيانة (معبّاة من قالب — نسخة مستقلة تماماً) ──────────────────────────────
     'reports_list'              => 'تقارير الصيانة',
@@ -72,6 +74,60 @@ return [
     'answer_invalid_boolean'      => 'يجب أن تكون الإجابة نعم أو لا.',
     'answer_invalid_choice'       => 'يجب أن تكون الإجابة أحد الخيارات المتاحة.',
     'answer_not_answered'         => 'لم تتم الإجابة',
+    'report_problem'              => 'المشكلة',
+    'report_solution'             => 'الحل',
+    'report_images_upload'        => 'رفع صور',
+    'report_images_hint'          => 'يمكن رفع صورة واحدة أو أكثر.',
+    'report_no_images'            => 'لا توجد صور مرفوعة',
+    'report_existing_images_hint' => 'اترك الحقل فارغاً للاحتفاظ بالصور الحالية، أو اختر صوراً جديدة لاستبدالها.',
+
+    // ── المواد المستخدمة في التقرير ──────────────────────────────────────────
+    'report_materials_used'       => 'المواد المستخدمة',
+    'report_materials_used_hint'  => 'المواد التي استُخدمت خلال هذا التقرير — بعد موافقة المعتمدين عليها، يتم إنشاء سند إخراج تلقائي بالكمية المستخدمة.',
+    'report_add_material'         => 'إضافة مادة',
+    'report_material'             => 'المادة',
+    'report_quantity'             => 'الكمية',
+    'report_current_stock'        => 'المتوفر حالياً بالمستودع',
+    'report_no_materials'         => 'لا توجد مواد مستخدمة في هذا التقرير',
+    'report_materials_locked_hint' => 'لا يمكن تعديل المواد المستخدمة بعد إرسالها للموافقة.',
+    'materials_approval_status_none'     => '—',
+    'materials_approval_status_pending'  => 'بانتظار الموافقة',
+    'materials_approval_status_approved' => 'تمت الموافقة',
+    'materials_approval_status_rejected' => 'مرفوضة',
+    'materials_approvers'         => 'المعتمدون',
+    'approve_materials'           => 'موافقة',
+    'reject_materials'            => 'رفض',
+    'reject_materials_note'       => 'سبب الرفض (اختياري)',
+    'material_decision_recorded'  => 'تم تسجيل قرارك بنجاح.',
+    'issue_voucher_note'          => 'مواد مستخدمة في تقرير الصيانة :number',
+    'issue_voucher_created'       => 'تم إنشاء سند إخراج بالكمية المستخدمة.',
+    'view_issue_voucher'          => 'عرض سند الإخراج',
+    'pending_material_approvals'  => 'تقارير صيانة بانتظار الموافقة على موادها المستخدمة',
+
+    // ── تحويل التقرير لعرض سعر ───────────────────────────────────────────────
+    'convert_to_quote'            => 'تحويل لعرض سعر',
+    'convert_to_quote_hint'       => 'ينشئ عرض سعر جديد مبدئي مربوط بهذا التقرير وعميله.',
+
+    // ── البحث في مشاكل مشابهة ────────────────────────────────────────────────
+    'search_similar_problems'     => 'البحث في مشاكل مشابهة',
+    'search_similar_problems_subtitle' => 'اكتب كلمة من وصف المشكلة، وشوف التقارير السابقة اللي واجهت نفس المشكلة وشو كان الحل',
+    'search_placeholder'          => 'اكتب كلمة من وصف المشكلة...',
+    'search_no_query'             => 'اكتب كلمة للبحث في المشاكل السابقة.',
+    'search_no_results'           => 'لا توجد تقارير تحتوي على هذه الكلمة في خانة المشكلة.',
+
+    // ── صفحة الموظف على الموبايل (إنشاء تقرير فقط) ───────────────────────────
+    'mobile_new_report_title'     => 'تقرير صيانة جديد',
+    'mobile_choose_template_step' => 'اختر نوع التقرير',
+    'mobile_choose_customer_step' => 'اختر العميل',
+    'mobile_submit_report'        => 'إرسال التقرير',
+    'mobile_report_sent'          => 'تم إرسال التقرير بنجاح.',
+    'mobile_add_another'          => 'إضافة تقرير آخر',
+
+    // ── تنبيهات الدفعات المستحقة ─────────────────────────────────────────────
+    'payment_due_today'           => 'مستحقة اليوم',
+    'payment_overdue'             => 'متأخرة',
+    'payments_due_count'          => ':count دفعة مستحقة الآن',
+    'payments_due_only'           => 'الدفعات المستحقة فقط',
 
     // ── عقود الصيانة ─────────────────────────────────────────────────────────
     'contracts_list'             => 'عقود الصيانة',

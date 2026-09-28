@@ -20,6 +20,9 @@
     @if($tender)
         <input type="hidden" name="tender_id" value="{{ $tender->id }}">
     @endif
+    @if($report)
+        <input type="hidden" name="report_id" value="{{ $report->id }}">
+    @endif
 
     @include('tenders.price-quotes._form')
 

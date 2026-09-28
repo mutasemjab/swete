@@ -1,4 +1,4 @@
-<?php $priceQuote = $priceQuote ?? null; ?>
+<?php $priceQuote = $priceQuote ?? null; $report = $report ?? null; ?>
 <div x-data="{
         items: <?php echo e((
             $priceQuote?->items->map(fn ($i) => [
@@ -7,6 +7,12 @@
                 'unit_price'  => (float) $i->unit_price,
                 'notes'       => $i->notes ?: [''],
             ])->values()
+            ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
+                'material_id' => $m->material_id,
+                'quantity'    => (float) $m->quantity,
+                'unit_price'  => 0,
+                'notes'       => [''],
+            ])->values() : null)
             ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
         )->toJson()); ?>,
         addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''] }); this.$nextTick(() => window.initSelect2()); },
@@ -21,7 +27,7 @@
         },
         get total() { return this.subtotal - this.discountAmount; },
         fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
-        customerId: '<?php echo e(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id)); ?>',
+        customerId: '<?php echo e(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id ?? $report?->customer_id)); ?>',
         customerHistory: <?php echo e($customerQuoteHistory->toJson()); ?>,
         get customerHistoryList() { return this.customerHistory[this.customerId] || []; },
         materialHistory: <?php echo e($materialPriceHistory->toJson()); ?>,
@@ -71,7 +77,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                 <option value=""><?php echo e(__('app.select')); ?></option>
                 <?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <option value="<?php echo e($customer->id); ?>" <?php if(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id) == $customer->id): echo 'selected'; endif; ?>><?php echo e($customer->localized_name); ?> (<?php echo e($customer->code); ?>)</option>
+                    <option value="<?php echo e($customer->id); ?>" <?php if(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id ?? $report?->customer_id) == $customer->id): echo 'selected'; endif; ?>><?php echo e($customer->localized_name); ?> (<?php echo e($customer->code); ?>)</option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
             <?php $__errorArgs = ['customer_id'];

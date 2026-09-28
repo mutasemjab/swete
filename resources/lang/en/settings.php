@@ -23,6 +23,7 @@ return [
     'nav_activity_log'      => 'Activity Log',
     'nav_approval_rules'    => 'Approval Rules',
     'nav_purchase_request_approvers' => 'Purchase Request Approvers',
+    'nav_maintenance_report_material_approvers' => 'Maintenance Report Material Approvers',
     'nav_purchase_request_reminder_recipients' => 'Requested-Purchase Officers',
 
     // ── Users ─────────────────────────────────────────────────────────────────
@@ -234,5 +235,11 @@ return [
     'purchase_request_reminder_recipients_subtitle' => 'Who gets notified when an employee submits a request to raise a purchase request',
     'purchase_request_reminder_recipients_hint'     => 'Everyone selected here is notified of every new request, and any one of them can create the actual purchase request.',
     'purchase_request_reminder_recipients_saved'    => 'List saved successfully.',
+
+    // ── Maintenance Report Material Approvers ────────────────────────────────
+    'maintenance_report_material_approvers'          => 'Maintenance Report Material Approvers',
+    'maintenance_report_material_approvers_subtitle' => 'Choose the users who must all approve the materials used in any maintenance report',
+    'maintenance_report_material_approvers_hint'     => 'Everyone selected here must approve a report\'s materials-used list before an automatic stock-issue voucher is created for the used quantity. If any one rejects, the request becomes "Rejected".',
+    'maintenance_report_material_approvers_saved'    => 'Approver list saved successfully.',
 
 ];

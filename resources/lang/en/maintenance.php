@@ -14,6 +14,7 @@ return [
     'nav_service_calls'      => 'Service Calls',
     'nav_reports_list'       => 'Reports List',
     'nav_reports_add'        => 'New Report',
+    'nav_reports_search'     => 'Search Similar Problems',
     'nav_report_templates'   => 'Report Templates',
     'nav_contracts_list'     => 'Contracts List',
     'nav_contracts_add'      => 'New Contract',
@@ -45,6 +46,7 @@ return [
     'answer_type_text'               => 'Text',
     'answer_type_boolean'            => 'Yes / No',
     'answer_type_choice'             => 'Options',
+    'answer_type_images'             => 'Images',
 
     // ── Maintenance reports (filled from a template — permanently self-contained) ────────────────
     'reports_list'              => 'Maintenance Reports',
@@ -72,6 +74,60 @@ return [
     'answer_invalid_boolean'      => 'The answer must be Yes or No.',
     'answer_invalid_choice'       => 'The answer must be one of the listed options.',
     'answer_not_answered'         => 'Not answered',
+    'report_problem'              => 'Problem',
+    'report_solution'             => 'Solution',
+    'report_images_upload'        => 'Upload Images',
+    'report_images_hint'          => 'You can upload one or more photos.',
+    'report_no_images'            => 'No images uploaded',
+    'report_existing_images_hint' => 'Leave empty to keep the current images, or choose new ones to replace them.',
+
+    // ── Materials used in the report ──────────────────────────────────────────
+    'report_materials_used'       => 'Materials Used',
+    'report_materials_used_hint'  => 'Materials actually used during this report — once approved, a stock-issue voucher is created automatically for the used quantity.',
+    'report_add_material'         => 'Add Material',
+    'report_material'             => 'Material',
+    'report_quantity'             => 'Quantity',
+    'report_current_stock'        => 'Currently in Warehouse',
+    'report_no_materials'         => 'No materials used on this report',
+    'report_materials_locked_hint' => 'Materials used can no longer be edited once sent for approval.',
+    'materials_approval_status_none'     => '—',
+    'materials_approval_status_pending'  => 'Pending Approval',
+    'materials_approval_status_approved' => 'Approved',
+    'materials_approval_status_rejected' => 'Rejected',
+    'materials_approvers'         => 'Approvers',
+    'approve_materials'           => 'Approve',
+    'reject_materials'            => 'Reject',
+    'reject_materials_note'       => 'Rejection reason (optional)',
+    'material_decision_recorded'  => 'Your decision was recorded successfully.',
+    'issue_voucher_note'          => 'Materials used in maintenance report :number',
+    'issue_voucher_created'       => 'A stock-issue voucher was created for the used quantity.',
+    'view_issue_voucher'          => 'View Issue Voucher',
+    'pending_material_approvals'  => 'Maintenance Reports Awaiting Materials Approval',
+
+    // ── Convert report to price quote ──────────────────────────────────────────
+    'convert_to_quote'            => 'Convert to Price Quote',
+    'convert_to_quote_hint'       => 'Creates a new draft price quote linked to this report and its customer.',
+
+    // ── Search Similar Problems ─────────────────────────────────────────────────
+    'search_similar_problems'     => 'Search Similar Problems',
+    'search_similar_problems_subtitle' => 'Type a keyword from the problem description to find earlier reports that faced the same issue and how it was solved',
+    'search_placeholder'          => 'Type a keyword from the problem description...',
+    'search_no_query'             => 'Type a keyword to search past problems.',
+    'search_no_results'           => 'No reports contain this keyword in their problem field.',
+
+    // ── Mobile technician portal (report creation only) ─────────────────────────
+    'mobile_new_report_title'     => 'New Maintenance Report',
+    'mobile_choose_template_step' => 'Choose Report Type',
+    'mobile_choose_customer_step' => 'Choose Customer',
+    'mobile_submit_report'        => 'Submit Report',
+    'mobile_report_sent'          => 'Report submitted successfully.',
+    'mobile_add_another'          => 'Add Another Report',
+
+    // ── Due-payment alerts ───────────────────────────────────────────────────────
+    'payment_due_today'           => 'Due Today',
+    'payment_overdue'             => 'Overdue',
+    'payments_due_count'          => ':count payment(s) due now',
+    'payments_due_only'           => 'Due payments only',
 
     // ── Maintenance contracts ─────────────────────────────────────────────────
     'contracts_list'             => 'Maintenance Contracts',

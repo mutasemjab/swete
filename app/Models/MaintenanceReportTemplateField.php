@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MaintenanceReportTemplateField extends Model
 {
-    public const TYPES = ['number', 'text', 'boolean', 'choice'];
+    public const TYPES = ['number', 'text', 'boolean', 'choice', 'images'];
 
     protected $fillable = [
         'template_id',

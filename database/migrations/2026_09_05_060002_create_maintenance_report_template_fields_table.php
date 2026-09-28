@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('template_id')->constrained('maintenance_report_templates')->cascadeOnDelete();
             $table->string('question');
             $table->string('question_en')->nullable();
-            $table->enum('type', ['number', 'text', 'boolean', 'choice']);
+            $table->enum('type', ['number', 'text', 'boolean', 'choice', 'images']);
             // Only meaningful when type = 'choice' — the fixed list of selectable answers.
             $table->json('options')->nullable();
             $table->unsignedInteger('order')->default(0);

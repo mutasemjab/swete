@@ -16,9 +16,11 @@ return new class extends Migration
             $table->foreignId('report_id')->constrained('maintenance_reports')->cascadeOnDelete();
             $table->string('question');
             $table->string('question_en')->nullable();
-            $table->enum('type', ['number', 'text', 'boolean', 'choice']);
+            $table->enum('type', ['number', 'text', 'boolean', 'choice', 'images']);
             $table->json('options')->nullable();
             $table->unsignedInteger('order')->default(0);
+            // For every type except 'images' this is the plain typed/chosen value. For 'images' it's a
+            // JSON array of uploaded file paths (same "one flexible column" convention as the other types).
             $table->text('answer')->nullable();
             $table->timestamps();
         });
