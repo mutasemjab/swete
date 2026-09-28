@@ -27,15 +27,15 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(Gate $gate)
     {
-        $gate->before(function ($user, $ability) {
-            if ($user instanceof \App\Models\Admin && $user->is_super) {
+        // super-admin bypasses every permission check outright — it doesn't need every
+        // permission synced onto it to stay fully open; a brand-new permission added later
+        // is automatically covered too, with no PermissionSeeder re-run required.
+        $gate->before(function (?\App\Models\User $user, string $ability) {
+            if ($user?->hasRole('super-admin')) {
                 return true;
             }
         });
 
         $this->registerPolicies();
-
-
-        //
     }
 }

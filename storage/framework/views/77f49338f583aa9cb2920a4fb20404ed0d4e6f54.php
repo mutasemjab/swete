@@ -154,6 +154,8 @@
                         <?php $__currentLoopData = $section['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
                                 $routeExists = $item['route'] !== '#' && \Illuminate\Support\Facades\Route::has($item['route']);
+                                $hasPermission = ! isset($item['permission']) || Auth::user()->can($item['permission']);
+                                if (! $hasPermission) { continue; }
                                 $color       = $currentModuleConfig['color'];
                                 $params      = $item['params'] ?? [];
                                 // Index items stay active for show/edit but not create; other items exact-match
