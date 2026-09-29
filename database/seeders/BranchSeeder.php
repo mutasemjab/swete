@@ -10,7 +10,7 @@ class BranchSeeder extends Seeder
     public function run(): void
     {
         Branch::firstOrCreate(
-            ['name' => 'الفرع الرئيسي'],
+            ['name' => 'مؤسسة علاء الدين السويطي الهندسية'],
             [
                 'name_en'          => 'Main Branch',
                 'phone'            => '+962-6-5855959',

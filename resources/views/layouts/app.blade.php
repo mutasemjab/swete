@@ -109,21 +109,31 @@
          class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-20 lg:hidden">
     </div>
 
-    {{-- Sidebar panel: positioned at inline-start (right in RTL, left in LTR). x-cloak keeps it
-         hidden until Alpine hydrates and evaluates sidebarOpen — without it, a slow-loading
-         Alpine script briefly left the full-width, untranslated panel sitting on top of the
-         page content on first paint (most visible on mobile, where it should start hidden). --}}
-    {{-- start-0 docks this at the RIGHT edge in RTL, LEFT edge in LTR (a logical property, resolved
-         by the browser from the <html dir="..."> attribute). translate-x-full/-translate-x-full are
-         PHYSICAL, not logical, so they don't auto-flip for RTL — the "closed" direction must move
-         the panel further toward whichever edge it's already docked at (positive X off the right
-         edge in RTL, negative X off the left edge in LTR), or it lands mid-viewport instead of
-         off-screen. This was previously inverted, which is exactly what put the panel on top of
-         page content instead of hiding it. --}}
-    <aside x-cloak
-           class="fixed inset-y-0 start-0 z-30 flex flex-col w-64 bg-white border-e border-slate-100 shadow-2xl shadow-slate-900/5
-                  transition-transform duration-300 ease-out lg:shadow-none lg:translate-x-0"
-           :class="sidebarOpen ? 'translate-x-0' : '{{ $isRtl ? 'translate-x-full' : '-translate-x-full' }}'">
+    {{-- Sidebar panel. User confirmed the deciding fact: identical on English (LTR) pages, broken
+         only on Arabic (RTL) ones — the one thing that differs between them on this element is
+         `start-0`/`border-e`, LOGICAL properties whose physical direction (right vs left) is
+         resolved by the browser from <html dir="...">, not chosen explicitly. That's the real bug:
+         WebKit on the user's iPhone (both Safari and Chrome-for-iOS, same engine) evidently doesn't
+         reliably resolve inset-inline-start/border-inline-end for a `position: fixed` element in
+         RTL, which is exactly what stayed broken through two earlier fixes that both correctly
+         reasoned about the LOGICAL direction but never addressed that the logical properties
+         themselves weren't resolving on this device. Fixed by using explicit PHYSICAL left/right
+         classes chosen server-side instead of logical ones — no browser-side logical-property
+         resolution left for this element at all, for either the position or the border. Also
+         switched off a translate-x slide to a plain x-show display:none toggle (see the "sidebar"
+         entries in memory for that part of the trail) — sidebarOpen already starts true on desktop
+         (window.innerWidth >= 1024, <body>'s x-data above) and nothing on desktop ever sets it
+         false — the mobile-only hamburger toggle that flips it is itself lg:hidden — so this needs
+         no separate lg: override to force it always-visible on desktop. --}}
+    <aside x-show="sidebarOpen"
+           x-cloak
+           x-transition:enter="transition duration-200 ease-out"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100"
+           x-transition:leave="transition duration-150 ease-in"
+           x-transition:leave-start="opacity-100"
+           x-transition:leave-end="opacity-0"
+           class="fixed inset-y-0 {{ $isRtl ? 'right-0 border-l' : 'left-0 border-r' }} z-30 flex flex-col w-64 bg-white border-slate-100 shadow-2xl shadow-slate-900/5 lg:shadow-none">
 
         {{-- Module header (gradient) --}}
         <div class="relative overflow-hidden bg-gradient-to-br {{ $currentModuleConfig['gradient'] }} px-5 py-5 flex-shrink-0">

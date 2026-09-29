@@ -107,11 +107,15 @@
     </div>
 
     
-    
-    <aside x-cloak
-           class="fixed inset-y-0 start-0 z-30 flex flex-col w-64 bg-white border-e border-slate-100 shadow-2xl shadow-slate-900/5
-                  transition-transform duration-300 ease-out lg:shadow-none lg:translate-x-0"
-           :class="sidebarOpen ? 'translate-x-0' : '<?php echo e($isRtl ? 'translate-x-full' : '-translate-x-full'); ?>'">
+    <aside x-show="sidebarOpen"
+           x-cloak
+           x-transition:enter="transition duration-200 ease-out"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100"
+           x-transition:leave="transition duration-150 ease-in"
+           x-transition:leave-start="opacity-100"
+           x-transition:leave-end="opacity-0"
+           class="fixed inset-y-0 <?php echo e($isRtl ? 'right-0 border-l' : 'left-0 border-r'); ?> z-30 flex flex-col w-64 bg-white border-slate-100 shadow-2xl shadow-slate-900/5 lg:shadow-none">
 
         
         <div class="relative overflow-hidden bg-gradient-to-br <?php echo e($currentModuleConfig['gradient']); ?> px-5 py-5 flex-shrink-0">

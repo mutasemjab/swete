@@ -19,6 +19,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
 
+    {{-- Search-and-select for every picker on this page, touch-tuned — same upgrade mechanism as
+         the main app's layout (add class="js-select2" to any <select>), reimplemented standalone
+         here since this page intentionally doesn't extend layouts.app. --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+
     <style type="text/tailwindcss">
         * { font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #f1f5f9; overscroll-behavior-y: contain; }
@@ -33,6 +40,35 @@
         .m-btn-primary { @apply w-full flex items-center justify-center gap-2 px-4 py-4 rounded-2xl font-bold text-base bg-indigo-600 text-white active:bg-indigo-800 shadow-lg shadow-indigo-500/30 disabled:opacity-40 transition-all; }
         .m-btn-outline { @apply flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-bold text-sm bg-white text-slate-700 border-2 border-slate-200 active:bg-slate-100 transition-all; }
         .m-chip { @apply w-9 h-9 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0; }
+    </style>
+
+    {{-- Select2, restyled to match .m-input/.m-input-sm and sized for a comfortable thumb tap target. --}}
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 52px; border: 1px solid #e2e8f0; border-radius: 1rem;
+            display: flex; align-items: center; padding: 0 1rem; background: #f8fafc;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #818cf8; box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2);
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            padding: 0; font-size: 1rem; color: #1e293b; line-height: 1.25rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #94a3b8; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 50px; }
+        [dir="rtl"] .select2-container--default .select2-selection--single .select2-selection__arrow { left: 0.75rem; right: auto; }
+        .select2-dropdown { border-radius: 1rem; border-color: #e2e8f0; overflow: hidden; }
+        .select2-search--dropdown { padding: 0.5rem; }
+        .select2-search--dropdown .select2-search__field {
+            border-radius: 0.75rem; border-color: #e2e8f0; padding: 0.6rem 0.75rem; outline: none; font-size: 1rem;
+        }
+        .select2-results__option { padding: 0.65rem 0.75rem; font-size: 0.95rem; }
+        .select2-results__option--highlighted[aria-selected] { background-color: #4f46e5 !important; }
+        /* Compact variant for the 3-per-row template fields */
+        .m-select2-sm .select2-selection--single { height: 40px !important; border-radius: 0.75rem !important; padding: 0 0.5rem !important; }
+        .m-select2-sm .select2-selection__rendered { font-size: 12.5px !important; }
+        .m-select2-sm .select2-selection__arrow { height: 38px !important; }
     </style>
 </head>
 <body class="min-h-screen pb-32">
@@ -63,9 +99,31 @@
             get selectedTemplate() { return this.templates.find(t => String(t.id) === String(this.templateId)) || null; },
             materials: [],
             materialStock: {{ $materialStock->toJson() }},
-            addMaterial() { this.materials.push({ material_id: '', quantity: '' }); },
+            addMaterial() { this.materials.push({ material_id: '', quantity: '' }); this.$nextTick(() => window.initSelect2()); },
             removeMaterial(i) { this.materials.splice(i, 1); },
-         }">
+            imageFiles: {},
+            onImagesSelected(fieldId, event) {
+                if (! this.imageFiles[fieldId]) this.imageFiles[fieldId] = [];
+                Array.from(event.target.files).forEach(f => this.imageFiles[fieldId].push({ file: f, url: URL.createObjectURL(f) }));
+                this.syncImagesInput(fieldId);
+            },
+            removeImage(fieldId, idx) {
+                URL.revokeObjectURL(this.imageFiles[fieldId][idx].url);
+                this.imageFiles[fieldId].splice(idx, 1);
+                this.syncImagesInput(fieldId);
+            },
+            syncImagesInput(fieldId) {
+                const input = document.getElementById('images-input-' + fieldId);
+                if (! input) return;
+                const dt = new DataTransfer();
+                (this.imageFiles[fieldId] || []).forEach(item => dt.items.add(item.file));
+                input.files = dt.files;
+            },
+         }"
+         x-init="
+            $nextTick(() => window.initSelect2());
+            $watch('templateId', () => $nextTick(() => window.initSelect2()));
+         ">
 
         <template x-if="success">
             <div class="m-card !bg-emerald-50 !border-emerald-200 text-center py-8" x-cloak>
@@ -88,7 +146,7 @@
                     <span class="m-chip bg-indigo-600 text-white">1</span>
                     <p class="font-black text-slate-800">{{ __('maintenance.mobile_choose_template_step') }}</p>
                 </div>
-                <select name="template_id" x-model="templateId" class="m-input" required>
+                <select name="template_id" x-model="templateId" class="js-select2 m-input" required>
                     <option value="">{{ __('maintenance.report_select_template') }}</option>
                     @foreach($templates as $template)
                         <option value="{{ $template->id }}">{{ $template->localized_name }} — {{ $template->material?->localized_name }}</option>
@@ -102,7 +160,7 @@
                     <span class="m-chip bg-indigo-600 text-white">2</span>
                     <p class="font-black text-slate-800">{{ __('maintenance.mobile_choose_customer_step') }}</p>
                 </div>
-                <select name="customer_id" x-model="customerId" class="m-input mb-3" required>
+                <select name="customer_id" x-model="customerId" class="js-select2 m-input mb-3" required>
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($customers as $customer)
                         <option value="{{ $customer->id }}">{{ $customer->localized_name }} ({{ $customer->code }})</option>
@@ -129,14 +187,14 @@
                                     <input type="number" step="0.001" inputmode="decimal" :name="`answers[${field.id}]`" dir="ltr" class="m-input-sm">
                                 </template>
                                 <template x-if="field.type === 'boolean'">
-                                    <select :name="`answers[${field.id}]`" class="m-input-sm">
+                                    <select :name="`answers[${field.id}]`" class="js-select2 m-select2-sm">
                                         <option value="">{{ __('app.select') }}</option>
                                         <option value="1">{{ __('app.yes') }}</option>
                                         <option value="0">{{ __('app.no') }}</option>
                                     </select>
                                 </template>
                                 <template x-if="field.type === 'choice'">
-                                    <select :name="`answers[${field.id}]`" class="m-input-sm">
+                                    <select :name="`answers[${field.id}]`" class="js-select2 m-select2-sm">
                                         <option value="">{{ __('app.select') }}</option>
                                         <template x-for="opt in field.options" :key="opt">
                                             <option :value="opt" x-text="opt"></option>
@@ -144,7 +202,22 @@
                                     </select>
                                 </template>
                                 <template x-if="field.type === 'images'">
-                                    <input type="file" :name="`answers[${field.id}][]`" multiple accept="image/*" capture="environment" class="m-input-sm">
+                                    <div>
+                                        <input type="file" :id="'images-input-' + field.id" :name="`answers[${field.id}][]`"
+                                               multiple accept="image/*" class="m-input-sm" @change="onImagesSelected(field.id, $event)">
+                                        <p class="text-[10px] text-slate-400 mt-1">{{ __('maintenance.report_images_hint') }}</p>
+                                        <div class="flex flex-wrap gap-2 mt-2" x-show="(imageFiles[field.id] || []).length > 0">
+                                            <template x-for="(img, idx) in (imageFiles[field.id] || [])" :key="idx">
+                                                <div class="relative w-16 h-16 flex-shrink-0">
+                                                    <img :src="img.url" class="w-16 h-16 object-cover rounded-lg border border-slate-200">
+                                                    <button type="button" @click="removeImage(field.id, idx)"
+                                                            class="absolute -top-1.5 -end-1.5 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px] shadow">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
                         </template>
@@ -173,7 +246,7 @@
                 <div class="space-y-3">
                     <template x-for="(row, index) in materials" :key="index">
                         <div class="border border-slate-200 rounded-2xl p-3">
-                            <select :name="`materials[${index}][material_id]`" x-model="row.material_id" class="m-input mb-2" required>
+                            <select :name="`materials[${index}][material_id]`" x-model="row.material_id" class="js-select2 m-input mb-2" required>
                                 <option value="">{{ __('maintenance.report_material') }}</option>
                                 @foreach($materials as $material)
                                     <option value="{{ $material->id }}">{{ $material->localized_name }} ({{ $material->code }})</option>
@@ -207,5 +280,27 @@
             </div>
         </form>
     </div>
+
+    <script>
+        window.initSelect2 = function (context) {
+            (context ? $(context) : $(document)).find('.js-select2').each(function () {
+                const $el = $(this);
+                if ($el.hasClass('select2-hidden-accessible')) return;
+                $el.select2({
+                    dir: '{{ $isRtl ? "rtl" : "ltr" }}',
+                    width: '100%',
+                    dropdownAutoWidth: false,
+                    placeholder: $el.data('placeholder') || $el.find('option[value=""]').first().text() || '',
+                    allowClear: $el.find('option[value=""]').length > 0 && !$el.prop('required'),
+                });
+                // See layouts/app.blade.php for why this bridge exists: select2's own change
+                // events don't always reliably reach a vanilla-listener framework like Alpine.
+                $el.on('select2:select select2:unselect select2:clear', function () {
+                    this.dispatchEvent(new Event('change'));
+                });
+            });
+        };
+        document.addEventListener('DOMContentLoaded', () => window.initSelect2());
+    </script>
 </body>
 </html>
