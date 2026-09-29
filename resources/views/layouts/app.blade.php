@@ -113,10 +113,17 @@
          hidden until Alpine hydrates and evaluates sidebarOpen — without it, a slow-loading
          Alpine script briefly left the full-width, untranslated panel sitting on top of the
          page content on first paint (most visible on mobile, where it should start hidden). --}}
+    {{-- start-0 docks this at the RIGHT edge in RTL, LEFT edge in LTR (a logical property, resolved
+         by the browser from the <html dir="..."> attribute). translate-x-full/-translate-x-full are
+         PHYSICAL, not logical, so they don't auto-flip for RTL — the "closed" direction must move
+         the panel further toward whichever edge it's already docked at (positive X off the right
+         edge in RTL, negative X off the left edge in LTR), or it lands mid-viewport instead of
+         off-screen. This was previously inverted, which is exactly what put the panel on top of
+         page content instead of hiding it. --}}
     <aside x-cloak
            class="fixed inset-y-0 start-0 z-30 flex flex-col w-64 bg-white border-e border-slate-100 shadow-2xl shadow-slate-900/5
                   transition-transform duration-300 ease-out lg:shadow-none lg:translate-x-0"
-           :class="sidebarOpen ? 'translate-x-0' : '{{ $isRtl ? '-translate-x-full' : 'translate-x-full' }}'">
+           :class="sidebarOpen ? 'translate-x-0' : '{{ $isRtl ? 'translate-x-full' : '-translate-x-full' }}'">
 
         {{-- Module header (gradient) --}}
         <div class="relative overflow-hidden bg-gradient-to-br {{ $currentModuleConfig['gradient'] }} px-5 py-5 flex-shrink-0">
