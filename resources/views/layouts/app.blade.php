@@ -98,6 +98,7 @@
 
     {{-- Mobile backdrop --}}
     <div x-show="sidebarOpen"
+         x-cloak
          @click="sidebarOpen = false"
          x-transition:enter="transition duration-200"
          x-transition:enter-start="opacity-0"
@@ -108,8 +109,12 @@
          class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-20 lg:hidden">
     </div>
 
-    {{-- Sidebar panel: positioned at inline-start (right in RTL, left in LTR) --}}
-    <aside class="fixed inset-y-0 start-0 z-30 flex flex-col w-64 bg-white border-e border-slate-100 shadow-2xl shadow-slate-900/5
+    {{-- Sidebar panel: positioned at inline-start (right in RTL, left in LTR). x-cloak keeps it
+         hidden until Alpine hydrates and evaluates sidebarOpen — without it, a slow-loading
+         Alpine script briefly left the full-width, untranslated panel sitting on top of the
+         page content on first paint (most visible on mobile, where it should start hidden). --}}
+    <aside x-cloak
+           class="fixed inset-y-0 start-0 z-30 flex flex-col w-64 bg-white border-e border-slate-100 shadow-2xl shadow-slate-900/5
                   transition-transform duration-300 ease-out lg:shadow-none lg:translate-x-0"
            :class="sidebarOpen ? 'translate-x-0' : '{{ $isRtl ? '-translate-x-full' : 'translate-x-full' }}'">
 

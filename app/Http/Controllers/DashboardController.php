@@ -8,6 +8,12 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Same rationale as the login redirect in AuthController — this role's entire
+        // experience is the standalone mobile portal, never the normal dashboard.
+        if (auth()->user()->hasRole('maintenance_technician')) {
+            return redirect()->route('maintenance-reports.mobile.create');
+        }
+
         $modules = collect(config('modules'))
             ->filter(fn ($mod) => ! isset($mod['permission']) || auth()->user()->can($mod['permission']))
             ->all();

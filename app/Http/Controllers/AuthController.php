@@ -22,7 +22,15 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            Auth::user()->update(['last_login_at' => now()]);
+            $user = Auth::user();
+            $user->update(['last_login_at' => now()]);
+
+            // Maintenance technicians get their own standalone mobile portal as their entire
+            // experience — never the normal dashboard/sidebar. See DashboardController::index()
+            // for the matching safety-net redirect if they ever navigate back to "/" directly.
+            if ($user->hasRole('maintenance_technician')) {
+                return redirect()->intended(route('maintenance-reports.mobile.create'));
+            }
 
             return redirect()->intended(route('dashboard'));
         }
