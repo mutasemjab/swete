@@ -32,7 +32,7 @@ class StockVoucherController extends ModuleController
         $this->assertType($type);
 
         $warehouses = Warehouse::where('status', true)->orderBy('name')->get();
-        $materials  = Material::where('status', true)->orderBy('name')->get();
+        $materials  = Material::confirmed()->where('status', true)->orderBy('name')->get();
 
         return $this->moduleView('warehouse.vouchers.create', compact('type', 'warehouses', 'materials'));
     }

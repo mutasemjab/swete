@@ -93,6 +93,8 @@ return [
     'material_category'     => 'Category',
     'material_unit'         => 'Unit of Measure',
     'material_description'  => 'Description',
+    'material_photo'        => 'Material Photo',
+    'material_photo_hint'   => 'The first two quote items\' own photos show on the price quote print\'s first page instead of the fixed branch images.',
     'min_stock_level'       => 'Minimum Stock Level',
     'min_stock_level_hint'  => 'Used to flag low stock once quantity falls below this level',
     'stock_by_warehouse'    => 'Balance by Warehouse',
@@ -102,6 +104,18 @@ return [
     'material_added'        => 'Material added successfully.',
     'material_updated'      => 'Material updated successfully.',
     'material_deleted'      => 'Material deleted successfully.',
+
+    // ── Quick-add + draft materials (quick-added from Price Quote / CIAT Discount screens
+    // before a tender is won — hidden from the real catalog until then) ──────────────────
+    'add_material_quick'      => 'Add New Material',
+    'add_material_quick_hint' => 'Saved as a draft until your tender is won — won\'t show in the normal materials catalog until then.',
+    'nav_draft_materials'     => 'Draft Materials',
+    'draft_materials'         => 'Draft Materials',
+    'draft_materials_subtitle' => 'Materials added from price quotes or discounts before a project was won — automatically become real materials once it is, or delete them here manually if no longer needed.',
+    'no_draft_materials'      => 'No draft materials right now.',
+    'delete_selected_drafts'  => 'Delete Selected',
+    'drafts_deleted'          => ':count draft material(s) deleted successfully.',
+    'drafts_delete_blocked'   => ':count could not be deleted because they\'re used on a saved price quote.',
     'total_materials'       => 'Total Materials',
     'all_categories'        => 'All Categories',
     'total_stock'           => 'Total Balance',

@@ -125,7 +125,7 @@ class PriceAnalysisController extends ModuleController
             'items.*.ciat_model'         => ['required', 'string', 'max:100'],
             'items.*.quantity'           => ['required', 'numeric', 'min:0.001'],
             'items.*.list_price'         => ['required', 'numeric', 'min:0'],
-            'items.*.profit'             => ['required', 'numeric'],
+            'items.*.profit_percent'     => ['required', 'numeric'],
             'items.*.shipping'           => ['nullable', 'numeric', 'min:0'],
         ]);
     }
@@ -140,7 +140,7 @@ class PriceAnalysisController extends ModuleController
             $computed = PriceAnalysisItem::calculate(
                 (float) $item['list_price'],
                 (float) $discount->discount_percent,
-                (float) $item['profit'],
+                (float) $item['profit_percent'],
                 (float) $item['quantity'],
                 $jdRate,
             );
@@ -152,7 +152,7 @@ class PriceAnalysisController extends ModuleController
                 'quantity'         => $item['quantity'],
                 'list_price'       => $item['list_price'],
                 'discount_percent' => $discount->discount_percent,
-                'profit'           => $item['profit'],
+                'profit_percent'   => $item['profit_percent'],
                 'shipping'         => $item['shipping'] ?? 0,
                 ...$computed,
             ]);

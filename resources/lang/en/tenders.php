@@ -66,6 +66,7 @@ return [
     'coverage_design_supply_execution'       => 'Design, Supply & Execution',
 
     'tender_currency'             => 'Currency',
+    'tender_sales_rep'            => 'Sales Representative',
     'tender_description'         => 'Tender Description',
     'tender_win_probability'     => 'Win Probability',
     'tender_submission_deadline' => 'Submission Deadline',
@@ -310,7 +311,9 @@ return [
     'quote_select_analysis_first' => 'Choose a price analysis first.',
     'quote_analysis_no_items'   => 'This analysis has no product lines.',
     'analysis_item_cost'        => 'Cost',
+    'analysis_item_profit_percent' => 'Profit %',
     'analysis_item_profit'      => 'Profit',
+    'analysis_jd_rate'           => 'Exchange Rate (To JD)',
     'analysis_item_total_profit' => 'Total Profit',
     'analysis_item_price'       => 'Price',
     'analysis_item_to_jd'       => 'To JD',

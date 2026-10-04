@@ -28,7 +28,7 @@ class ReportTemplateController extends ModuleController
     {
         return $this->moduleView('maintenance.report-templates.create', [
             'template'  => null,
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -56,7 +56,7 @@ class ReportTemplateController extends ModuleController
 
         return $this->moduleView('maintenance.report-templates.edit', [
             'template'  => $reportTemplate,
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
         ]);
     }
 

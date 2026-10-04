@@ -201,17 +201,6 @@
                 </div>
                 @endforeach
             </div>
-            <p class="text-xs font-semibold text-slate-500 mb-2">{{ __('settings.branch_quote_body_images') }}</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                @foreach([1, 2] as $n)
-                <div>
-                    <label class="form-label">{{ __('settings.branch_quote_body_image') }} {{ $n }}</label>
-                    <input type="file" name="quote_body_image{{ $n }}" accept="image/*"
-                           class="form-input @error('quote_body_image' . $n) is-invalid @enderror">
-                    @error('quote_body_image' . $n)<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-                </div>
-                @endforeach
-            </div>
         </div>
     </div>
 

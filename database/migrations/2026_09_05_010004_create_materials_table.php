@@ -16,8 +16,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('name_en')->nullable();
             $table->text('description')->nullable();
+            $table->string('photo_path')->nullable();
             $table->decimal('min_stock_level', 14, 3)->nullable();
             $table->boolean('status')->default(true);
+            // A material quick-added from a Price Quote or CIAT Discount screen before its project
+            // is actually won — see App\Models\Material::scopeConfirmed() and
+            // Tenders\TenderController::convertToProject() (where promotion happens).
+            $table->boolean('is_draft')->default(false);
             $table->timestamps();
         });
     }

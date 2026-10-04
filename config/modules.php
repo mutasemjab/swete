@@ -86,6 +86,7 @@ return [
                 'label' => 'warehouse.section_management',
                 'items' => [
                     ['label' => 'warehouse.nav_materials',   'route' => 'warehouse.materials.index',   'icon' => 'cube',      'permission' => 'warehouse.view'],
+                    ['label' => 'warehouse.nav_draft_materials', 'route' => 'warehouse.materials.drafts', 'icon' => 'hourglass-half', 'permission' => 'warehouse.view'],
                     ['label' => 'warehouse.nav_categories',  'route' => 'warehouse.categories.index',  'icon' => 'layer-group', 'permission' => 'warehouse.view'],
                     ['label' => 'warehouse.nav_units',       'route' => 'warehouse.units.index',       'icon' => 'ruler',     'permission' => 'warehouse.view'],
                     ['label' => 'warehouse.nav_warehouses',  'route' => 'warehouse.warehouses.index',  'icon' => 'warehouse', 'permission' => 'warehouse.view'],
@@ -308,6 +309,7 @@ return [
                     ['label' => 'settings.nav_currencies',   'route' => 'settings.currencies.index',  'icon' => 'coins',              'permission' => 'settings.currencies.view'],
                     ['label' => 'settings.nav_countries',    'route' => 'settings.countries.index',   'icon' => 'earth-americas',     'permission' => 'settings.countries.view'],
                     ['label' => 'settings.nav_governorates', 'route' => 'settings.governorates.index', 'icon' => 'map-location-dot',  'permission' => 'settings.governorates.view'],
+                    ['label' => 'settings.nav_sales_representatives', 'route' => 'settings.sales-representatives.index', 'icon' => 'user-tie', 'permission' => 'settings.sales_representatives.view'],
                 ],
             ],
             [

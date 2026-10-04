@@ -28,6 +28,8 @@ class PermissionSeeder extends Seeder
             'settings.purchase_request_approvers.edit',
             'settings.purchase_request_reminder_recipients.edit',
             'settings.maintenance_report_material_approvers.edit',
+            'settings.sales_representatives.view', 'settings.sales_representatives.create',
+            'settings.sales_representatives.edit', 'settings.sales_representatives.delete',
 
             // Accounting
             'accounting.view',

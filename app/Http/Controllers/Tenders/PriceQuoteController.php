@@ -10,6 +10,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceType;
 use App\Models\MaintenanceReport;
 use App\Models\Material;
+use App\Models\MaterialCategory;
 use App\Models\MaterialStock;
 use App\Models\PriceAnalysis;
 use App\Models\PriceQuote;
@@ -17,6 +18,7 @@ use App\Models\PriceQuoteItem;
 use App\Models\QuoteDeliveryTerm;
 use App\Models\QuoteSupplyScope;
 use App\Models\Tender;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -212,11 +214,16 @@ class PriceQuoteController extends ModuleController
     {
         return [
             'customers'      => Customer::where('status', true)->orderBy('name')->get(),
+            // Deliberately NOT ->confirmed() here — a quote must still show its own draft
+            // materials (quick-added before the tender was won) in the picker.
             'materials'      => Material::where('status', true)->orderBy('name')->get(),
             'branches'       => Branch::where('status', true)->orderBy('name')->get(),
             'currencies'     => Currency::where('status', true)->orderBy('name')->get(),
             'supplyScopes'   => QuoteSupplyScope::where('status', true)->orderBy('name')->get(),
             'deliveryTerms'  => QuoteDeliveryTerm::where('status', true)->orderBy('name')->get(),
+            // For the "quick add material" modal on the items table.
+            'materialCategories' => MaterialCategory::orderBy('name')->get(),
+            'units'              => Unit::where('status', true)->orderBy('name')->get(),
         ];
     }
 

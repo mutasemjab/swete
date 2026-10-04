@@ -12,7 +12,8 @@ class MaterialSeeder extends Seeder
     public function run(): void
     {
         // Units are seeded by UnitSeeder (runs first) — just look them up.
-        $piece = Unit::where('symbol', 'قطعة')->firstOrFail();
+        // 'قطعة' was consolidated into 'حبة' (both mean "piece/item") — use that instead.
+        $piece = Unit::where('symbol', 'حبة')->firstOrFail();
         $lm    = Unit::where('symbol', 'م.ط')->firstOrFail();
         $sqm   = Unit::where('symbol', 'م2')->firstOrFail();
         $kg    = Unit::where('symbol', 'كغم')->firstOrFail();

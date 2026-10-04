@@ -20,6 +20,7 @@ return [
     'nav_currencies'        => 'العملات',
     'nav_countries'         => 'الدول',
     'nav_governorates'      => 'المحافظات',
+    'nav_sales_representatives' => 'مندوبو المبيعات',
     'nav_activity_log'      => 'سجل الأنشطة',
     'nav_approval_rules'    => 'قواعد الموافقات',
     'nav_purchase_request_approvers' => 'معتمدو طلبات الشراء',
@@ -241,5 +242,22 @@ return [
     'maintenance_report_material_approvers_subtitle' => 'حدد المستخدمين الذين يجب أن يوافقوا جميعًا على المواد المستخدمة في أي تقرير صيانة',
     'maintenance_report_material_approvers_hint'     => 'يجب أن يوافق كل من تحدده هنا على قائمة المواد المستخدمة في التقرير قبل أن يتم إنشاء سند إخراج تلقائي بالكمية المستخدمة. إذا رفض أحدهم يتحول الطلب إلى "مرفوض".',
     'maintenance_report_material_approvers_saved'    => 'تم حفظ قائمة المعتمدين بنجاح.',
+
+    // ── Sales Representatives ─────────────────────────────────────────────────
+    'sales_rep'                 => 'مندوب مبيعات',
+    'sales_reps'                => 'مندوبو المبيعات',
+    'sales_reps_list'           => 'مندوبو المبيعات',
+    'sales_reps_subtitle'       => 'بيانات مندوبي المبيعات ونسبتهم من المشروع — تُختار عند إنشاء أي عطاء',
+    'add_sales_rep'             => 'إضافة مندوب',
+    'add_first_sales_rep'       => 'إضافة أول مندوب',
+    'edit_sales_rep'            => 'تعديل مندوب',
+    'no_sales_reps'             => 'لا يوجد مندوبو مبيعات بعد',
+    'sales_rep_name'            => 'الاسم',
+    'sales_rep_phone'           => 'رقم الهاتف',
+    'sales_rep_commission'      => 'النسبة من المشروع',
+    'sales_rep_added'           => 'تم إضافة المندوب بنجاح.',
+    'sales_rep_updated'         => 'تم تحديث بيانات المندوب بنجاح.',
+    'sales_rep_deleted'         => 'تم حذف المندوب بنجاح.',
+    'sales_rep_delete_blocked'  => 'لا يمكن حذف هذا المندوب لأنه مرتبط بعطاء واحد أو أكثر.',
 
 ];

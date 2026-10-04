@@ -9,10 +9,19 @@
         <h1 class="page-title">{{ __('warehouse.materials_list') }}</h1>
         <p class="page-subtitle">{{ __('warehouse.materials_subtitle') }}</p>
     </div>
-    <a href="{{ route('warehouse.materials.create') }}" class="btn-primary">
-        <i class="fa-solid fa-plus"></i>
-        {{ __('warehouse.add_material') }}
-    </a>
+    <div class="flex items-center gap-2">
+        @if($draftsCount > 0)
+            <a href="{{ route('warehouse.materials.drafts') }}" class="btn-secondary">
+                <i class="fa-solid fa-hourglass-half text-amber-500"></i>
+                {{ __('warehouse.draft_materials') }}
+                <span class="badge bg-amber-100 text-amber-700">{{ $draftsCount }}</span>
+            </a>
+        @endif
+        <a href="{{ route('warehouse.materials.create') }}" class="btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            {{ __('warehouse.add_material') }}
+        </a>
+    </div>
 </div>
 
 <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

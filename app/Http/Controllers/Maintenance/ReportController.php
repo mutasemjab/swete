@@ -103,7 +103,7 @@ class ReportController extends ModuleController
         return $this->moduleView('maintenance.reports.edit', [
             'report'    => $maintenanceReport,
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
             'materialStock' => $this->materialStock(),
         ]);
     }
@@ -203,7 +203,7 @@ class ReportController extends ModuleController
         return [
             'templates' => MaintenanceReportTemplate::where('status', true)->with('material')->with('fields')->orderBy('name')->get(),
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
             'materialStock' => $this->materialStock(),
         ];
     }

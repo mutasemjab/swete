@@ -14,7 +14,7 @@ class MaterialController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = Material::with(['category', 'unit']);
+        $query = Material::with(['category', 'unit'])->confirmed();
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -27,10 +27,67 @@ class MaterialController extends ModuleController
             $query->where('category_id', $request->input('category_id'));
         }
 
-        $materials  = $query->orderBy('name')->paginate(20)->withQueryString();
-        $categories = MaterialCategory::orderBy('name')->get();
+        $materials   = $query->orderBy('name')->paginate(20)->withQueryString();
+        $categories  = MaterialCategory::orderBy('name')->get();
+        $draftsCount = Material::where('is_draft', true)->count();
 
-        return $this->moduleView('warehouse.materials.index', compact('materials', 'categories'));
+        return $this->moduleView('warehouse.materials.index', compact('materials', 'categories', 'draftsCount'));
+    }
+
+    /** The "السلع المؤقتة" cleanup screen: every not-yet-promoted draft material, pick some/all and delete. */
+    public function drafts()
+    {
+        $materials = Material::with(['category', 'unit'])->where('is_draft', true)->orderByDesc('created_at')->get();
+
+        return $this->moduleView('warehouse.materials.drafts', compact('materials'));
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'material_ids'   => ['required', 'array', 'min:1'],
+            'material_ids.*' => ['exists:materials,id'],
+        ]);
+
+        $deleted = 0;
+        $blocked = 0;
+
+        foreach (Material::where('is_draft', true)->whereIn('id', $validated['material_ids'])->get() as $material) {
+            try {
+                $material->delete();
+                $deleted++;
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Still referenced by a saved price quote/analysis line — leave it, don't fail the whole batch.
+                $blocked++;
+            }
+        }
+
+        $message = __('warehouse.drafts_deleted', ['count' => $deleted]);
+
+        if ($blocked > 0) {
+            $message .= ' ' . __('warehouse.drafts_delete_blocked', ['count' => $blocked]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    /** AJAX quick-add from the Price Quote / CIAT Discount screens — always creates a draft, never a real catalog material. */
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:150'],
+            'category_id' => ['required', 'exists:material_categories,id'],
+            'unit_id'     => ['required', 'exists:units,id'],
+        ]);
+
+        $material = Material::create([
+            ...$validated,
+            'code'     => Material::nextDraftCode(),
+            'status'   => true,
+            'is_draft' => true,
+        ]);
+
+        return response()->json(['id' => $material->id, 'name' => $material->localized_name, 'code' => $material->code]);
     }
 
     public function create()
@@ -44,9 +101,14 @@ class MaterialController extends ModuleController
     {
         $validated = $this->validated($request);
 
+        if ($request->hasFile('photo')) {
+            $validated['photo_path'] = 'assets/uploads/materials/' . uploadImage('assets/uploads/materials', $request->file('photo'));
+        }
+
         Material::create([
             ...$validated,
-            'status' => $request->boolean('status', true),
+            'status'   => $request->boolean('status', true),
+            'is_draft' => false,
         ]);
 
         return redirect()->route('warehouse.materials.index')
@@ -69,6 +131,10 @@ class MaterialController extends ModuleController
     public function update(Request $request, Material $material)
     {
         $validated = $this->validated($request, $material->id);
+
+        if ($request->hasFile('photo')) {
+            $validated['photo_path'] = 'assets/uploads/materials/' . uploadImage('assets/uploads/materials', $request->file('photo'));
+        }
 
         $material->update([
             ...$validated,
@@ -96,6 +162,7 @@ class MaterialController extends ModuleController
             'name'             => ['required', 'string', 'max:150'],
             'name_en'          => ['nullable', 'string', 'max:150'],
             'description'      => ['nullable', 'string'],
+            'photo'            => ['nullable', 'image', 'max:5120'],
             'min_stock_level'  => ['nullable', 'numeric', 'min:0'],
             'status'           => ['boolean'],
         ]);

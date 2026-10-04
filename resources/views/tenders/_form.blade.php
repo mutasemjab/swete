@@ -121,6 +121,17 @@
             @error('currency_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div>
+            <label class="form-label">{{ __('tenders.tender_sales_rep') }}</label>
+            <select name="sales_rep_id" class="js-select2 form-select @error('sales_rep_id') is-invalid @enderror">
+                <option value="">{{ __('app.select') }}</option>
+                @foreach($salesReps as $salesRep)
+                    <option value="{{ $salesRep->id }}" @selected(old('sales_rep_id', $tender?->sales_rep_id) == $salesRep->id)>{{ $salesRep->localized_name }}</option>
+                @endforeach
+            </select>
+            @error('sales_rep_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
         <div class="sm:col-span-2 flex flex-wrap items-center gap-6 py-1">
             <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
                 <input type="hidden" name="tax_exempt" value="0">

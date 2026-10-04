@@ -15,7 +15,7 @@
     </a>
 </div>
 
-<form action="{{ route('warehouse.materials.update', $material) }}" method="POST">
+<form action="{{ route('warehouse.materials.update', $material) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
     @include('warehouse.materials._form', ['categories' => $categories, 'units' => $units, 'material' => $material])

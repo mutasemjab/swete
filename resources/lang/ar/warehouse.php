@@ -93,6 +93,8 @@ return [
     'material_category'     => 'التصنيف',
     'material_unit'         => 'وحدة القياس',
     'material_description'  => 'الوصف',
+    'material_photo'        => 'صورة المادة',
+    'material_photo_hint'   => 'تظهر أول صورتين لأول بندين بعرض السعر على صفحة الطباعة الأولى بدل صور الفرع الثابتة.',
     'min_stock_level'       => 'الحد الأدنى للمخزون',
     'min_stock_level_hint'  => 'يُستخدم للتنبيه عند انخفاض الكمية عن هذا الحد',
     'stock_by_warehouse'    => 'الرصيد حسب المستودع',
@@ -102,6 +104,18 @@ return [
     'material_added'        => 'تم إضافة المادة بنجاح.',
     'material_updated'      => 'تم تحديث بيانات المادة بنجاح.',
     'material_deleted'      => 'تم حذف المادة بنجاح.',
+
+    // ── Quick-add + draft materials (quick-added from Price Quote / CIAT Discount screens
+    // before a tender is won — hidden from the real catalog until then) ──────────────────
+    'add_material_quick'      => 'إضافة مادة جديدة',
+    'add_material_quick_hint' => 'بتتسجل كمادة مؤقتة لحد ما يرسى عليك العطاء، وما بتظهر بقائمة المستودع العادية لحد هيك.',
+    'nav_draft_materials'     => 'السلع المؤقتة',
+    'draft_materials'         => 'السلع المؤقتة',
+    'draft_materials_subtitle' => 'سلع أُضيفت من عروض الأسعار أو الخصومات قبل ما يرسى المشروع — بتتحول تلقائياً لسلع حقيقية بالمستودع لما يرسى، أو احذفها يدوياً هون إذا ما عاد فيها داعي.',
+    'no_draft_materials'      => 'لا توجد سلع مؤقتة حالياً.',
+    'delete_selected_drafts'  => 'حذف المحدد',
+    'drafts_deleted'          => 'تم حذف :count سلعة مؤقتة بنجاح.',
+    'drafts_delete_blocked'   => 'تعذّر حذف بعض السلع (:count) لأنها مستخدمة بعرض سعر محفوظ.',
     'total_materials'       => 'إجمالي المواد',
     'all_categories'        => 'جميع التصنيفات',
     'total_stock'           => 'إجمالي الرصيد',

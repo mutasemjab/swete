@@ -50,6 +50,7 @@ use App\Http\Controllers\Settings\ApprovalRuleController;
 use App\Http\Controllers\Settings\PurchaseRequestApproverController;
 use App\Http\Controllers\Settings\PurchaseRequestReminderRecipientController;
 use App\Http\Controllers\Settings\MaintenanceReportMaterialApproverController;
+use App\Http\Controllers\Settings\SalesRepresentativeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,6 +155,11 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
             Route::put('maintenance-report-material-approvers', [MaintenanceReportMaterialApproverController::class, 'update'])->name('maintenance-report-material-approvers.update');
         });
 
+        Route::resource('sales-representatives', SalesRepresentativeController::class)->only(['create', 'store'])->middleware('permission:settings.sales_representatives.create');
+        Route::resource('sales-representatives', SalesRepresentativeController::class)->only(['index'])->middleware('permission:settings.sales_representatives.view');
+        Route::resource('sales-representatives', SalesRepresentativeController::class)->only(['edit', 'update'])->middleware('permission:settings.sales_representatives.edit');
+        Route::resource('sales-representatives', SalesRepresentativeController::class)->only(['destroy'])->middleware('permission:settings.sales_representatives.delete');
+
     });
 
     Route::prefix('warehouse')->name('warehouse.')->group(function () {
@@ -173,6 +179,15 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('units', UnitController::class)->only(['edit', 'update'])->middleware('permission:warehouse.units.edit');
         Route::resource('units', UnitController::class)->only(['destroy'])->middleware('permission:warehouse.units.delete');
 
+        // Static "materials/..." segments must all be registered before the resource's
+        // show route ({material} wildcard, same segment count as any of these) — see the
+        // ordering note at the top of the settings group above.
+        Route::get('materials/drafts', [MaterialController::class, 'drafts'])->name('materials.drafts')->middleware('permission:warehouse.view');
+        Route::post('materials/bulk-destroy', [MaterialController::class, 'bulkDestroy'])->name('materials.bulk-destroy')->middleware('permission:warehouse.materials.delete');
+        // Gated by tenders.view (not a warehouse.materials.* permission) since it's only ever
+        // called from the Price Quote / CIAT Discount screens, both already behind their own
+        // tenders.* create permission — this is just the convenience action on top of that.
+        Route::post('materials/quick-store', [MaterialController::class, 'quickStore'])->name('materials.quick-store')->middleware('permission:tenders.view');
         Route::resource('materials', MaterialController::class)->only(['create', 'store'])->middleware('permission:warehouse.materials.create');
         Route::resource('materials', MaterialController::class)->only(['index', 'show'])->middleware('permission:warehouse.view');
         Route::resource('materials', MaterialController::class)->only(['edit', 'update'])->middleware('permission:warehouse.materials.edit');

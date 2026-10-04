@@ -1,11 +1,11 @@
-@php $analysis = $analysis ?? null; @endphp
+<?php $analysis = $analysis ?? null; ?>
 <div x-data="{
-        branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson() }},
-        ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent])->values()->toJson() }},
-        branchId: '{{ old('branch_id', $analysis?->branch_id) }}',
-        taxRate: {{ (float) old('tax_rate', $analysis?->tax_rate ?? 16) }},
-        jdRate: {{ (float) old('jd_rate', $analysis?->jd_rate ?? 0.82) }},
-        withTax: {{ old('with_tax', $analysis?->with_tax) ? 'true' : 'false' }},
+        branches: <?php echo e($branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson()); ?>,
+        ciatDiscounts: <?php echo e($ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent])->values()->toJson()); ?>,
+        branchId: '<?php echo e(old('branch_id', $analysis?->branch_id)); ?>',
+        taxRate: <?php echo e((float) old('tax_rate', $analysis?->tax_rate ?? 16)); ?>,
+        jdRate: <?php echo e((float) old('jd_rate', $analysis?->jd_rate ?? 0.82)); ?>,
+        withTax: <?php echo e(old('with_tax', $analysis?->with_tax) ? 'true' : 'false'); ?>,
         onBranchChange() {
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             if (b) { this.taxRate = b.taxRate; this.jdRate = b.jdRate; }
@@ -17,13 +17,13 @@
         // the array, must get a fresh _key.
         _keySeq: 0,
         nextKey() { return ++this._keySeq; },
-        items: {{ (
+        items: <?php echo e((
             $analysis?->items->map(fn ($i) => [
                 'ciat_discount_id' => $i->ciat_discount_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
                 'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
             ])->values()
             ?? collect([['ciat_discount_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
-        )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values()->toJson() }},
+        )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values()->toJson()); ?>,
         addItem() { this.items.push({ ciat_discount_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(id) { const d = this.ciatDiscounts.find(x => String(x.id) === String(id)); return d ? d.discount : 0; },
@@ -50,19 +50,34 @@
         <div class="card-header">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-orange-500 text-sm"></i>
-                {{ __('tenders.price_analyses_list') }}
+                <?php echo e(__('tenders.price_analyses_list')); ?>
+
             </h3>
         </div>
         <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-                <label class="form-label">{{ __('tenders.analysis_branch') }} <span class="text-rose-500">*</span></label>
-                <select name="branch_id" x-model="branchId" @change="onBranchChange()" class="js-select2 form-select @error('branch_id') is-invalid @enderror">
-                    <option value="">{{ __('app.select') }}</option>
-                    @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" @selected(old('branch_id', $analysis?->branch_id) == $branch->id)>{{ $branch->localized_name }}</option>
-                    @endforeach
+                <label class="form-label"><?php echo e(__('tenders.analysis_branch')); ?> <span class="text-rose-500">*</span></label>
+                <select name="branch_id" x-model="branchId" @change="onBranchChange()" class="js-select2 form-select <?php $__errorArgs = ['branch_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                    <option value=""><?php echo e(__('app.select')); ?></option>
+                    <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($branch->id); ?>" <?php if(old('branch_id', $analysis?->branch_id) == $branch->id): echo 'selected'; endif; ?>><?php echo e($branch->localized_name); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
-                @error('branch_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                <?php $__errorArgs = ['branch_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div class="flex items-center">
@@ -74,22 +89,36 @@
                                 after:content-[''] after:absolute after:top-0.5 after:start-[2px]
                                 after:bg-white after:rounded-full after:h-5 after:w-5
                                 after:transition-all peer-checked:after:translate-x-full"></div>
-                    <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('tenders.analysis_with_tax') }}</span>
+                    <span class="ms-3 text-sm font-semibold text-slate-700"><?php echo e(__('tenders.analysis_with_tax')); ?></span>
                 </label>
             </div>
 
             <div class="sm:col-span-2 flex flex-wrap items-center gap-4">
-                <p class="text-xs text-slate-400" x-text="'{{ __('tenders.analysis_with_tax_hint_before') }}' + taxRate + '{{ __('tenders.analysis_with_tax_hint_after') }}'"></p>
+                <p class="text-xs text-slate-400" x-text="'<?php echo e(__('tenders.analysis_with_tax_hint_before')); ?>' + taxRate + '<?php echo e(__('tenders.analysis_with_tax_hint_after')); ?>'"></p>
                 <p class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg" x-show="branchId" x-cloak>
                     <i class="fa-solid fa-coins text-amber-500"></i>
-                    {{ __('tenders.analysis_jd_rate') }}: <span dir="ltr" x-text="jdRate"></span>
+                    <?php echo e(__('tenders.analysis_jd_rate')); ?>: <span dir="ltr" x-text="jdRate"></span>
                 </p>
             </div>
 
             <div class="sm:col-span-2">
-                <label class="form-label">{{ __('tenders.analysis_notes') }}</label>
-                <textarea name="notes" rows="2" class="form-input @error('notes') is-invalid @enderror">{{ old('notes', $analysis?->notes) }}</textarea>
-                @error('notes')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                <label class="form-label"><?php echo e(__('tenders.analysis_notes')); ?></label>
+                <textarea name="notes" rows="2" class="form-input <?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"><?php echo e(old('notes', $analysis?->notes)); ?></textarea>
+                <?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
         </div>
     </div>
@@ -98,30 +127,32 @@
         <div class="card-header">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
                 <i class="fa-solid fa-list text-orange-500 text-sm"></i>
-                {{ __('tenders.analysis_item_product') }}
+                <?php echo e(__('tenders.analysis_item_product')); ?>
+
             </h3>
             <button type="button" @click="addItem()" class="btn-secondary btn-sm">
                 <i class="fa-solid fa-plus"></i>
-                {{ __('accounting.invoice_add_item') }}
+                <?php echo e(__('accounting.invoice_add_item')); ?>
+
             </button>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_product') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.ciat_model') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_quantity') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.analysis_item_list_price') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-16">{{ __('tenders.analysis_item_price_percent') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_cost') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_profit_percent') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_profit') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_total_profit') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_price') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_to_jd') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_shipping') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_subtotal') }}</th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.analysis_item_product')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28"><?php echo e(__('tenders.ciat_model')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20"><?php echo e(__('tenders.analysis_item_quantity')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28"><?php echo e(__('tenders.analysis_item_list_price')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-16"><?php echo e(__('tenders.analysis_item_price_percent')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_cost')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20"><?php echo e(__('tenders.analysis_item_profit_percent')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_profit')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_total_profit')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_price')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_to_jd')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_shipping')); ?></th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24"><?php echo e(__('tenders.analysis_item_subtotal')); ?></th>
                         <th class="px-3 py-3 w-10"></th>
                     </tr>
                 </thead>
@@ -130,10 +161,10 @@
                         <tr>
                             <td class="px-3 py-2.5">
                                 <select :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" required>
-                                    <option value="">{{ __('app.select') }}</option>
-                                    @foreach($ciatDiscounts as $ciatDiscount)
-                                        <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
-                                    @endforeach
+                                    <option value=""><?php echo e(__('app.select')); ?></option>
+                                    <?php $__currentLoopData = $ciatDiscounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ciatDiscount): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($ciatDiscount->id); ?>"><?php echo e($ciatDiscount->label); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </td>
                             <td class="px-3 py-2.5">
@@ -167,7 +198,7 @@
                             </td>
                             <td class="px-3 py-2.5 text-xs font-bold text-orange-700" dir="ltr" x-text="fmt(calc(item).subtotal)"></td>
                             <td class="px-3 py-2.5 text-center">
-                                <button type="button" @click="removeItem(index)" title="{{ __('accounting.invoice_remove_item') }}"
+                                <button type="button" @click="removeItem(index)" title="<?php echo e(__('accounting.invoice_remove_item')); ?>"
                                         class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
                                     <i class="fa-solid fa-trash text-sm"></i>
                                 </button>
@@ -177,21 +208,29 @@
                 </tbody>
             </table>
         </div>
-        @error('items')<p class="form-error px-5 py-3"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        <?php $__errorArgs = ['items'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error px-5 py-3"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
     </div>
 
     <div class="flex justify-end mb-5">
         <div class="card px-6 py-5 w-full sm:w-96">
             <dl class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                    <dt class="text-slate-500 font-medium">{{ __('tenders.analysis_item_subtotal') }}</dt>
+                    <dt class="text-slate-500 font-medium"><?php echo e(__('tenders.analysis_item_subtotal')); ?></dt>
                     <dd class="font-bold text-slate-800" dir="ltr" x-text="fmt(subtotal)"></dd>
                 </div>
                 <div class="flex justify-between" x-show="withTax">
-                    <dt class="text-slate-700 font-bold">{{ __('tenders.analysis_total_with_tax') }}</dt>
+                    <dt class="text-slate-700 font-bold"><?php echo e(__('tenders.analysis_total_with_tax')); ?></dt>
                     <dd class="font-black text-lg text-orange-700" dir="ltr" x-text="fmt(totalWithTax)"></dd>
                 </div>
             </dl>
         </div>
     </div>
 </div>
+<?php /**PATH C:\xampp\htdocs\swete\resources\views/tenders/price-analyses/_form.blade.php ENDPATH**/ ?>

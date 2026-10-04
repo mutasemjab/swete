@@ -146,12 +146,16 @@
 
     <div class="pq-project-title">
         <p class="label">{{ __('tenders.quote_print_project_title') }}</p>
-        <p class="value">{{ $priceQuote->customer?->localized_name }}</p>
+        <p class="value">{{ $priceQuote->tender?->localized_title ?? '—' }}</p>
     </div>
 
+    {{-- The first two line items' own photos, not fixed branch marketing images (removed 2026-10-04 —
+         see Branch::getQuoteBodyImagesAttribute(), kept but no longer referenced here). --}}
     <div class="pq-body-images">
-        @forelse($priceQuote->branch->quote_body_images as $url)
-            <img src="{{ $url }}" alt="">
+        @forelse($priceQuote->items->take(2) as $item)
+            @if($item->material?->photo_url)
+                <img src="{{ $item->material->photo_url }}" alt="">
+            @endif
         @empty
         @endforelse
     </div>
@@ -176,7 +180,7 @@
     <div class="pq-meta-row">
         <div>
             <p><span class="label">{{ __('tenders.quote_print_subject') }}:</span> <span class="value">{{ $priceQuote->tender?->localized_title ?? '—' }}</span></p>
-            <p><span class="label">{{ __('tenders.quote_print_project') }}:</span> <span class="value">{{ $priceQuote->customer?->localized_name }}</span></p>
+            <p><span class="label">{{ __('tenders.quote_print_project') }}:</span> <span class="value">{{ $priceQuote->tender?->localized_title ?? '—' }}</span></p>
         </div>
         <div style="text-align:end;">
             <p><span class="label">{{ __('tenders.quote_date') }}:</span> <span class="value">{{ $priceQuote->date->format('M d, Y') }}</span></p>

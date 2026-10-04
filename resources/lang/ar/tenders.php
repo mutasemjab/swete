@@ -66,6 +66,7 @@ return [
     'coverage_design_supply_execution'       => 'تصميم وتوريد وتنفيذ',
 
     'tender_currency'             => 'العملة',
+    'tender_sales_rep'            => 'مندوب المبيعات',
     'tender_description'         => 'وصف العطاء',
     'tender_win_probability'     => 'فرصة الفوز بالعطاء',
     'tender_submission_deadline' => 'آخر موعد للتقديم',
@@ -310,7 +311,9 @@ return [
     'quote_select_analysis_first' => 'اختر تحليل سعر أولاً.',
     'quote_analysis_no_items'   => 'لا توجد بنود منتجات في هذا التحليل.',
     'analysis_item_cost'        => 'Cost',
+    'analysis_item_profit_percent' => 'نسبة الربح %',
     'analysis_item_profit'      => 'الربح',
+    'analysis_jd_rate'           => 'سعر الصرف (To JD)',
     'analysis_item_total_profit' => 'إجمالي الربح',
     'analysis_item_price'       => 'Price',
     'analysis_item_to_jd'       => 'To JD',

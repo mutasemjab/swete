@@ -23,6 +23,9 @@ return new class extends Migration
             $table->decimal('list_price', 14, 3);
             $table->decimal('discount_percent', 5, 2);
             $table->decimal('cost', 14, 3);
+            // Profit is entered as a % markup on cost, not a flat amount — `profit` below is the
+            // computed flat amount (still what total_profit/price/to_jd are built from).
+            $table->decimal('profit_percent', 6, 2)->nullable();
             $table->decimal('profit', 14, 3);
             $table->decimal('total_profit', 14, 3);
             $table->decimal('price', 14, 3);

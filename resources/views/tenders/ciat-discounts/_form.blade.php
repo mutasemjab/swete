@@ -9,13 +9,23 @@
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
             <label class="form-label">{{ __('tenders.ciat_type') }} <span class="text-rose-500">*</span></label>
-            <select name="material_id" class="js-select2 form-select @error('material_id') is-invalid @enderror">
-                <option value="">{{ __('app.select') }}</option>
-                @foreach($materials as $material)
-                    <option value="{{ $material->id }}" @selected(old('material_id', $discount?->material_id) == $material->id)>{{ $material->localized_name }} ({{ $material->code }})</option>
-                @endforeach
-            </select>
-            @error('material_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            <div class="flex items-start gap-2">
+                <div class="flex-1">
+                    <select id="ciat_material_id" name="material_id" class="js-select2 form-select @error('material_id') is-invalid @enderror">
+                        <option value="">{{ __('app.select') }}</option>
+                        @foreach($materials as $material)
+                            <option value="{{ $material->id }}" @selected(old('material_id', $discount?->material_id) == $material->id)>{{ $material->localized_name }} ({{ $material->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('material_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+                @include('components.material-quick-add-modal', [
+                    'targetSelector' => '#ciat_material_id',
+                    'categories'     => $materialCategories,
+                    'units'          => $units,
+                    'label'          => __('warehouse.add_material_quick'),
+                ])
+            </div>
         </div>
 
         <div>

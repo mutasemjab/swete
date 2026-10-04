@@ -20,6 +20,7 @@ return [
     'nav_currencies'        => 'Currencies',
     'nav_countries'         => 'Countries',
     'nav_governorates'      => 'Governorates',
+    'nav_sales_representatives' => 'Sales Representatives',
     'nav_activity_log'      => 'Activity Log',
     'nav_approval_rules'    => 'Approval Rules',
     'nav_purchase_request_approvers' => 'Purchase Request Approvers',
@@ -241,5 +242,22 @@ return [
     'maintenance_report_material_approvers_subtitle' => 'Choose the users who must all approve the materials used in any maintenance report',
     'maintenance_report_material_approvers_hint'     => 'Everyone selected here must approve a report\'s materials-used list before an automatic stock-issue voucher is created for the used quantity. If any one rejects, the request becomes "Rejected".',
     'maintenance_report_material_approvers_saved'    => 'Approver list saved successfully.',
+
+    // ── Sales Representatives ─────────────────────────────────────────────────
+    'sales_rep'                 => 'Sales Representative',
+    'sales_reps'                => 'Sales Representatives',
+    'sales_reps_list'           => 'Sales Representatives',
+    'sales_reps_subtitle'       => 'Sales representatives and their commission % — picked when creating any tender',
+    'add_sales_rep'             => 'Add Representative',
+    'add_first_sales_rep'       => 'Add First Representative',
+    'edit_sales_rep'            => 'Edit Representative',
+    'no_sales_reps'             => 'No sales representatives yet',
+    'sales_rep_name'            => 'Name',
+    'sales_rep_phone'           => 'Phone',
+    'sales_rep_commission'      => 'Commission % of Project',
+    'sales_rep_added'           => 'Representative added successfully.',
+    'sales_rep_updated'         => 'Representative updated successfully.',
+    'sales_rep_deleted'         => 'Representative deleted successfully.',
+    'sales_rep_delete_blocked'  => 'This representative cannot be deleted — they are linked to one or more tenders.',
 
 ];

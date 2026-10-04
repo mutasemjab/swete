@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Tenders;
 use App\Http\Controllers\ModuleController;
 use App\Models\CiatDiscount;
 use App\Models\Material;
+use App\Models\MaterialCategory;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 
 /** Dynamic/manageable list of CIAT product discounts — looked up when building a Price Analysis line. */
@@ -23,8 +25,11 @@ class CiatDiscountController extends ModuleController
     public function create()
     {
         return $this->moduleView('tenders.ciat-discounts.create', [
-            'discount'  => null,
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'discount'           => null,
+            // Deliberately NOT ->confirmed() — a discount must still be settable on a draft material.
+            'materials'          => Material::where('status', true)->orderBy('name')->get(),
+            'materialCategories' => MaterialCategory::orderBy('name')->get(),
+            'units'              => Unit::where('status', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -45,8 +50,10 @@ class CiatDiscountController extends ModuleController
     public function edit(CiatDiscount $ciatDiscount)
     {
         return $this->moduleView('tenders.ciat-discounts.edit', [
-            'discount'  => $ciatDiscount,
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'discount'           => $ciatDiscount,
+            'materials'          => Material::where('status', true)->orderBy('name')->get(),
+            'materialCategories' => MaterialCategory::orderBy('name')->get(),
+            'units'              => Unit::where('status', true)->orderBy('name')->get(),
         ]);
     }
 

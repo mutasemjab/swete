@@ -66,6 +66,18 @@
             @error('description')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div class="sm:col-span-2">
+            <label class="form-label">{{ __('warehouse.material_photo') }}</label>
+            @if($material?->photo_url)
+                <div class="mb-2">
+                    <img src="{{ $material->photo_url }}" alt="" class="h-20 w-20 object-cover rounded-xl border border-slate-200">
+                </div>
+            @endif
+            <input type="file" name="photo" accept="image/*" class="form-input @error('photo') is-invalid @enderror">
+            <p class="text-xs text-slate-400 mt-1.5">{{ __('warehouse.material_photo_hint') }}</p>
+            @error('photo')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
         <div class="flex items-center">
             <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
                 <input type="hidden" name="status" value="0">

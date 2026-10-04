@@ -19,6 +19,7 @@ class Tender extends Model
     protected $fillable = [
         'number',
         'party_id',
+        'sales_rep_id',
         'title',
         'title_en',
         'entity_name',
@@ -56,6 +57,11 @@ class Tender extends Model
     public function party(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'party_id');
+    }
+
+    public function salesRep(): BelongsTo
+    {
+        return $this->belongsTo(SalesRepresentative::class, 'sales_rep_id');
     }
 
     public function statusRef(): BelongsTo

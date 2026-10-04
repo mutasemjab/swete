@@ -182,7 +182,7 @@ class PurchaseRequestController extends ModuleController
             'currencies'   => Currency::where('status', true)->orderBy('name')->get(),
             'countries'    => Country::where('status', true)->orderBy('name')->get(),
             'governorates' => Governorate::selectable($currentGovernorateId),
-            'materials'    => Material::where('status', true)->orderBy('name')->get(),
+            'materials'    => Material::confirmed()->where('status', true)->orderBy('name')->get(),
         ];
     }
 

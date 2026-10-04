@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('number')->unique();
             $table->foreignId('party_id')->nullable()->constrained('customers')->nullOnDelete();
+            $table->foreignId('sales_rep_id')->nullable()->constrained('sales_representatives')->nullOnDelete();
             $table->string('title');
             $table->string('title_en')->nullable();
             $table->string('entity_name');

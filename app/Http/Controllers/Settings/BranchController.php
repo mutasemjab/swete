@@ -10,11 +10,13 @@ class BranchController extends ModuleController
 {
     protected string $module = 'settings';
 
-    /** Every image field this form accepts — the `{field}_path` DB column is derived from each. */
+    /** Every image field this form accepts — the `{field}_path` DB column is derived from each.
+     *  quote_body_image1/2 were removed from the form (2026-10-04 — the price quote print's first
+     *  page now shows its own first two line items' photos instead, see Material::photo_path) but
+     *  their DB columns stay, unused, rather than a destructive drop on a now-live database. */
     private const IMAGE_FIELDS = [
         'logo', 'logo_secondary',
         'quote_header_image1', 'quote_header_image2', 'quote_header_image3',
-        'quote_body_image1', 'quote_body_image2',
     ];
 
     public function index()

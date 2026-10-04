@@ -7,8 +7,10 @@ use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Governorate;
+use App\Models\Material;
 use App\Models\PriceQuote;
 use App\Models\Project;
+use App\Models\SalesRepresentative;
 use App\Models\Tender;
 use App\Models\TenderStatus;
 use Illuminate\Http\Request;
@@ -44,10 +46,11 @@ class TenderController extends ModuleController
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
         $countries = Country::where('status', true)->orderBy('name')->get();
         $currencies = Currency::where('status', true)->orderBy('name')->get();
+        $salesReps = SalesRepresentative::where('status', true)->orderBy('name')->get();
 
         $governorates = Governorate::selectable();
 
-        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies', 'governorates'));
+        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps'));
     }
 
     public function store(Request $request)
@@ -78,10 +81,11 @@ class TenderController extends ModuleController
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
         $countries = Country::where('status', true)->orderBy('name')->get();
         $currencies = Currency::where('status', true)->orderBy('name')->get();
+        $salesReps = SalesRepresentative::where('status', true)->orderBy('name')->get();
 
         $governorates = Governorate::selectable($tender->governorate_id);
 
-        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates'));
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps'));
     }
 
     public function update(Request $request, Tender $tender)
@@ -128,8 +132,28 @@ class TenderController extends ModuleController
             'created_by'  => $request->user()->id,
         ]);
 
+        $this->promoteDraftMaterials($tender);
+
         return redirect()->route('projects.show', $project)
             ->with('success', __('tenders.project_created'));
+    }
+
+    /**
+     * A material quick-added from a Price Quote screen stays a "draft" (hidden from the real
+     * Warehouse catalog) until the tender it was priced for is actually won — this is that
+     * promotion. Only materials referenced by THIS tender's own price quotes are promoted; a
+     * draft used only in an unrelated/still-pending quote stays draft.
+     */
+    private function promoteDraftMaterials(Tender $tender): void
+    {
+        $materialIds = $tender->priceQuotes()->with('items')->get()
+            ->flatMap(fn ($quote) => $quote->items)
+            ->pluck('material_id')
+            ->unique();
+
+        if ($materialIds->isNotEmpty()) {
+            Material::where('is_draft', true)->whereIn('id', $materialIds)->update(['is_draft' => false]);
+        }
     }
 
     private function validated(Request $request): array
@@ -142,6 +166,7 @@ class TenderController extends ModuleController
 
         $rules = [
             'party_id'             => ['nullable', 'exists:customers,id'],
+            'sales_rep_id'         => ['nullable', 'exists:sales_representatives,id'],
             'title'                => ['required', 'string', 'max:255'],
             'title_en'             => ['nullable', 'string', 'max:255'],
             'entity_name'          => ['required', 'string', 'max:255'],

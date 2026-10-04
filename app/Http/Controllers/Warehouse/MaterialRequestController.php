@@ -26,7 +26,7 @@ class MaterialRequestController extends ModuleController
     public function create()
     {
         $warehouses = Warehouse::where('status', true)->orderBy('name')->get();
-        $materials  = Material::where('status', true)->orderBy('name')->get();
+        $materials  = Material::confirmed()->where('status', true)->orderBy('name')->get();
 
         return $this->moduleView('warehouse.material-requests.create', compact('warehouses', 'materials'));
     }

@@ -1,21 +1,29 @@
 @php $priceQuote = $priceQuote ?? null; $report = $report ?? null; @endphp
 <div x-data="{
+        // _key is a stable per-row identity for Alpine's x-for :key — NOT array index. Keying by
+        // index broke the select2 widget bound to whichever row shifted position after a delete
+        // (select2's own injected DOM stays bound to a position, not the row's actual data, once
+        // the array reorders). Every row, however it enters the array, must get a fresh _key.
+        _keySeq: 0,
+        nextKey() { return ++this._keySeq; },
         items: {{ (
-            $priceQuote?->items->map(fn ($i) => [
-                'material_id' => $i->material_id,
-                'quantity'    => (float) $i->quantity,
-                'unit_price'  => (float) $i->unit_price,
-                'notes'       => $i->notes ?: [''],
-            ])->values()
-            ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
-                'material_id' => $m->material_id,
-                'quantity'    => (float) $m->quantity,
-                'unit_price'  => 0,
-                'notes'       => [''],
-            ])->values() : null)
-            ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+            (
+                $priceQuote?->items->map(fn ($i) => [
+                    'material_id' => $i->material_id,
+                    'quantity'    => (float) $i->quantity,
+                    'unit_price'  => (float) $i->unit_price,
+                    'notes'       => $i->notes ?: [''],
+                ])->values()
+                ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
+                    'material_id' => $m->material_id,
+                    'quantity'    => (float) $m->quantity,
+                    'unit_price'  => 0,
+                    'notes'       => [''],
+                ])->values() : null)
+                ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+            )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values()
         )->toJson() }},
-        addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''] }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''], _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountType: '{{ old('discount_type', $priceQuote?->discount_type ?? 'amount') }}',
         discountValue: {{ (float) old('discount_value', $priceQuote?->discount_value ?? 0) }},
@@ -40,10 +48,19 @@
             return a ? a.items : [];
         },
         addFromAnalysis(analysisItem) {
-            this.items.push({
+            const newItem = {
                 material_id: analysisItem.material_id, quantity: analysisItem.quantity,
                 unit_price: analysisItem.unit_price, notes: analysisItem.ciat_model ? [analysisItem.ciat_model] : [''],
-            });
+                _key: this.nextKey(),
+            };
+            // A brand-new quote starts with one untouched empty placeholder row — fill it instead
+            // of appending after it, so "choose from analysis" never leaves a stray empty/invalid
+            // row the user has to remember to delete themselves.
+            if (this.items.length === 1 && !this.items[0].material_id) {
+                this.items[0] = newItem;
+            } else {
+                this.items.push(newItem);
+            }
             this.$nextTick(() => window.initSelect2());
         },
       }"
@@ -244,6 +261,12 @@
                 <i class="fa-solid fa-chart-line"></i>
                 {{ __('tenders.quote_choose_from_analysis') }}
             </button>
+            @include('components.material-quick-add-modal', [
+                'targetSelector' => 'select[name$="[material_id]"]',
+                'categories'     => $materialCategories,
+                'units'          => $units,
+                'label'          => __('warehouse.add_material_quick'),
+            ])
             <button type="button" @click="addItem()" class="btn-secondary btn-sm">
                 <i class="fa-solid fa-plus"></i>
                 {{ __('accounting.invoice_add_item') }}
@@ -262,7 +285,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                <template x-for="(item, index) in items" :key="index">
+                <template x-for="(item, index) in items" :key="item._key">
                     <tr>
                         <td class="px-5 py-2.5">
                             <select :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select" required>

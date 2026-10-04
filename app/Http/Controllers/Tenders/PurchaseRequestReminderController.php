@@ -95,7 +95,7 @@ class PurchaseRequestReminderController extends ModuleController
     {
         return [
             'projects'  => Project::where('status', 'active')->orderByDesc('created_at')->get(),
-            'materials' => Material::where('status', true)->orderBy('name')->get(),
+            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
         ];
     }
 
