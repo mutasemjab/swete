@@ -54,7 +54,7 @@
                 _key: this.nextKey(),
             };
             // A brand-new quote starts with one untouched empty placeholder row — fill it instead
-            // of appending after it, so "choose from analysis" never leaves a stray empty/invalid
+            // of appending after it, so Choose From Analysis never leaves a stray empty/invalid
             // row the user has to remember to delete themselves.
             if (this.items.length === 1 && !this.items[0].material_id) {
                 this.items[0] = newItem;
