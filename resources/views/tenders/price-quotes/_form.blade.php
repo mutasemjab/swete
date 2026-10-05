@@ -1,28 +1,33 @@
-@php $priceQuote = $priceQuote ?? null; $report = $report ?? null; @endphp
+@php
+    $priceQuote = $priceQuote ?? null;
+    $report = $report ?? null;
+    $seedItems = (
+        $priceQuote?->items->map(fn ($i) => [
+            'material_id' => $i->material_id,
+            'quantity'    => (float) $i->quantity,
+            'unit_price'  => (float) $i->unit_price,
+            'notes'       => $i->notes ?: [''],
+        ])->values()
+        ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
+            'material_id' => $m->material_id,
+            'quantity'    => (float) $m->quantity,
+            'unit_price'  => 0,
+            'notes'       => [''],
+        ])->values() : null)
+        ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+    )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
+@endphp
 <div x-data="{
         // _key is a stable per-row identity for Alpine's x-for :key — NOT array index. Keying by
         // index broke the select2 widget bound to whichever row shifted position after a delete
         // (select2's own injected DOM stays bound to a position, not the row's actual data, once
         // the array reorders). Every row, however it enters the array, must get a fresh _key.
-        _keySeq: 0,
+        // _keySeq must start past the highest _key already used by the seeded rows below —
+        // starting at 0 made the very first addItem() reuse _key 1, a duplicate x-for :key that
+        // broke Alpine's DOM diffing (reading 'after' on an undefined node).
+        _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
-        items: {{ (
-            (
-                $priceQuote?->items->map(fn ($i) => [
-                    'material_id' => $i->material_id,
-                    'quantity'    => (float) $i->quantity,
-                    'unit_price'  => (float) $i->unit_price,
-                    'notes'       => $i->notes ?: [''],
-                ])->values()
-                ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
-                    'material_id' => $m->material_id,
-                    'quantity'    => (float) $m->quantity,
-                    'unit_price'  => 0,
-                    'notes'       => [''],
-                ])->values() : null)
-                ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
-            )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values()
-        )->toJson() }},
+        items: {{ $seedItems->toJson() }},
         addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''], _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountType: '{{ old('discount_type', $priceQuote?->discount_type ?? 'amount') }}',

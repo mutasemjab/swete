@@ -1,4 +1,13 @@
-@php $analysis = $analysis ?? null; @endphp
+@php
+    $analysis = $analysis ?? null;
+    $seedItems = (
+        $analysis?->items->map(fn ($i) => [
+            'ciat_discount_id' => $i->ciat_discount_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
+            'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
+        ])->values()
+        ?? collect([['ciat_discount_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+    )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
+@endphp
 <div x-data="{
         branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson() }},
         ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent])->values()->toJson() }},
@@ -15,15 +24,12 @@
         // (select2's own injected DOM stays bound to a position, not the row's actual data, once
         // the array reorders) — see memory for the full diagnosis. Every row, however it enters
         // the array, must get a fresh _key.
-        _keySeq: 0,
+        // _keySeq must start past the highest _key already used by the seeded rows below —
+        // starting at 0 made the first addItem() reuse _key 1, a duplicate x-for :key that broke
+        // Alpine's DOM diffing (reading 'after' on an undefined node).
+        _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
-        items: {{ (
-            $analysis?->items->map(fn ($i) => [
-                'ciat_discount_id' => $i->ciat_discount_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
-                'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
-            ])->values()
-            ?? collect([['ciat_discount_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
-        )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values()->toJson() }},
+        items: {{ $seedItems->toJson() }},
         addItem() { this.items.push({ ciat_discount_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(id) { const d = this.ciatDiscounts.find(x => String(x.id) === String(id)); return d ? d.discount : 0; },
