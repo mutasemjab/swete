@@ -77,10 +77,16 @@
         <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
             <i class="fa-solid fa-screwdriver-wrench"></i>
         </div>
-        <div>
+        <div class="flex-1">
             <p class="font-black leading-tight">{{ __('maintenance.mobile_new_report_title') }}</p>
             <p class="text-xs text-white/60">{{ config('app.name', 'ERP') }}</p>
         </div>
+        <form method="POST" action="{{ route('auth.logout') }}">
+            @csrf
+            <button type="submit" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 active:bg-white/20" title="{{ __('app.logout') }}">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+        </form>
     </div>
 
     <div class="max-w-lg mx-auto px-4 pt-4"
