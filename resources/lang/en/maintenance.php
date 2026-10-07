@@ -186,6 +186,15 @@ return [
     'all_employees'                      => 'All Employees',
     'all_customers'                      => 'All Customers',
 
+    // ── Sidebar nav labels (config/modules.php) ─────────────────────────────────
+    'section_visits'              => 'Visits & Requests',
+    'nav_requests_inbox'          => 'Maintenance Requests',
+    'nav_visits_list'             => 'Visits Log',
+    'nav_visit_types'             => 'Visit Classifications',
+    'section_device_passwords'    => 'Device Passwords',
+    'nav_device_passwords'        => 'Device Passwords',
+    'nav_contract_scheduled_visits' => 'Scheduled Visits',
+
     // ── Visit Types (dynamic classification list) ──────────────────────────────
     'visit_type'                  => 'Visit Classification',
     'visit_type_name'             => 'Classification Name',

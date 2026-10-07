@@ -186,6 +186,15 @@ return [
     'all_employees'                      => 'جميع الموظفين',
     'all_customers'                      => 'جميع العملاء',
 
+    // ── Sidebar nav labels (config/modules.php) ─────────────────────────────────
+    'section_visits'              => 'الزيارات والطلبات',
+    'nav_requests_inbox'          => 'طلبات الصيانة',
+    'nav_visits_list'             => 'سجل الزيارات',
+    'nav_visit_types'             => 'تصنيفات الزيارات',
+    'section_device_passwords'    => 'باسوردات الأجهزة',
+    'nav_device_passwords'        => 'باسوردات الأجهزة',
+    'nav_contract_scheduled_visits' => 'الزيارات المجدولة',
+
     // ── Visit Types (dynamic classification list) ──────────────────────────────
     'visit_type'                  => 'تصنيف الزيارة',
     'visit_type_name'             => 'اسم التصنيف',
