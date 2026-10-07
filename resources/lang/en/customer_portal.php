@@ -5,8 +5,8 @@ return [
     'portal_title'           => 'Customer Portal',
     'login_title'             => 'Login',
     'login_subtitle'          => 'Customer Portal',
-    'login_error'             => 'Invalid customer code or password.',
-    'customer_code'           => 'Customer Code',
+    'login_error'             => 'Invalid phone number or password.',
+    'customer_phone'          => 'Phone Number',
 
     'dashboard_title'         => 'My Dashboard',
     'my_contracts'            => 'My Contracts',

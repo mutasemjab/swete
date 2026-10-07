@@ -13,15 +13,15 @@
             <p class="text-sm text-slate-500">{{ __('customer_portal.login_subtitle') }}</p>
         </div>
 
-        @error('code')
+        @error('phone')
             <p class="text-rose-600 text-sm font-bold text-center mb-4">{{ $message }}</p>
         @enderror
 
         <form method="POST" action="{{ route('customer-portal.authenticate') }}" class="space-y-4">
             @csrf
             <div>
-                <label class="cp-label">{{ __('customer_portal.customer_code') }}</label>
-                <input type="text" name="code" value="{{ old('code') }}" dir="ltr" class="cp-input" required autofocus>
+                <label class="cp-label">{{ __('customer_portal.customer_phone') }}</label>
+                <input type="text" name="phone" value="{{ old('phone') }}" dir="ltr" inputmode="tel" class="cp-input" required autofocus>
             </div>
             <div>
                 <label class="cp-label">{{ __('app.password') }}</label>

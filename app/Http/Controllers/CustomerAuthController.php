@@ -5,7 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-/** Mirrors AuthController, against the 'customer' guard — logs in with code+password, not email. */
+/**
+ * Mirrors AuthController, against the 'customer' guard — logs in with phone+password, not email,
+ * since phone is what a customer actually remembers (requested over the generated customer code).
+ * Known limitation, accepted by the user: Customer.phone has no uniqueness constraint, so if two
+ * customers share the same phone, Eloquent's credential lookup only ever matches the first one
+ * found — the other can never log in under that phone until it's made unique or changed.
+ */
 class CustomerAuthController extends Controller
 {
     public function showLogin()
@@ -16,7 +22,7 @@ class CustomerAuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'code'     => ['required', 'string'],
+            'phone'    => ['required', 'string'],
             'password' => ['required'],
         ]);
 
@@ -27,8 +33,8 @@ class CustomerAuthController extends Controller
         }
 
         return back()->withErrors([
-            'code' => __('customer_portal.login_error'),
-        ])->onlyInput('code');
+            'phone' => __('customer_portal.login_error'),
+        ])->onlyInput('phone');
     }
 
     public function logout(Request $request)

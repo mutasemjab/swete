@@ -5,8 +5,8 @@ return [
     'portal_title'           => 'بوابة العميل',
     'login_title'             => 'تسجيل الدخول',
     'login_subtitle'          => 'بوابة العميل',
-    'login_error'             => 'رقم العميل أو كلمة السر غير صحيحة.',
-    'customer_code'           => 'رقم العميل',
+    'login_error'             => 'رقم الهاتف أو كلمة السر غير صحيحة.',
+    'customer_phone'          => 'رقم الهاتف',
 
     'dashboard_title'         => 'لوحة العميل',
     'my_contracts'            => 'عقودي',
