@@ -23,14 +23,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                //write code for redirect both for admin or front in case login alerady done
-                if ($request->is('admin') || $request->is('admin/*')) {
-                    //redirect Backend
-                    return redirect(RouteServiceProvider::Admin);
-                } else {
-                    //redirect front end  in case there is front
-                    return redirect(RouteServiceProvider::Home);
+                if ($guard === 'customer') {
+                    return redirect()->route('customer-portal.dashboard');
                 }
+
+                return redirect(RouteServiceProvider::Home);
             }
         }
 

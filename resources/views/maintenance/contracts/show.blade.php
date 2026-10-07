@@ -128,4 +128,62 @@
         </form>
     </div>
 </div>
+
+<div class="card overflow-hidden">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('maintenance.contract_scheduled_visits') }}</h3>
+    </div>
+    <div class="px-6 py-5">
+        @forelse($contract->scheduledVisits as $scheduledVisit)
+            <div class="flex items-center justify-between flex-wrap gap-2 py-2.5 border-b border-slate-100 last:border-0">
+                <div class="flex items-center gap-3">
+                    <span class="font-mono text-sm text-slate-500" dir="ltr">{{ $scheduledVisit->scheduled_date->format('Y-m-d') }}</span>
+                    <span class="badge {{ $scheduledVisit->type === 'emergency' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700' }}">
+                        {{ __('maintenance.scheduled_visit_type_' . $scheduledVisit->type) }}
+                    </span>
+                    @if($scheduledVisit->isOverdue())
+                        <span class="badge bg-rose-100 text-rose-700">{{ __('maintenance.visit_overdue') }}</span>
+                    @elseif($scheduledVisit->isDueToday())
+                        <span class="badge bg-amber-100 text-amber-700">{{ __('maintenance.visit_due_today') }}</span>
+                    @endif
+                    @if($scheduledVisit->notes)
+                        <span class="text-xs text-slate-400">{{ $scheduledVisit->notes }}</span>
+                    @endif
+                </div>
+                <form action="{{ route('contract-scheduled-visits.destroy', [$contract, $scheduledVisit]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                    </button>
+                </form>
+            </div>
+        @empty
+            <p class="text-sm text-slate-400 mb-4">{{ __('maintenance.no_scheduled_visits') }}</p>
+        @endforelse
+
+        <form action="{{ route('contract-scheduled-visits.store', $contract) }}" method="POST" class="flex items-end gap-3 flex-wrap mt-4 pt-4 border-t border-slate-100">
+            @csrf
+            <div class="min-w-40">
+                <label class="form-label">{{ __('maintenance.scheduled_visit_date') }}</label>
+                <input type="date" name="scheduled_date" required class="form-input">
+            </div>
+            <div class="min-w-40">
+                <label class="form-label">{{ __('maintenance.scheduled_visit_type') }}</label>
+                <select name="type" class="form-select" required>
+                    <option value="periodic">{{ __('maintenance.scheduled_visit_type_periodic') }}</option>
+                    <option value="emergency">{{ __('maintenance.scheduled_visit_type_emergency') }}</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-40">
+                <label class="form-label">{{ __('maintenance.payment_notes') }}</label>
+                <input type="text" name="notes" class="form-input">
+            </div>
+            <button type="submit" class="btn-secondary">
+                <i class="fa-solid fa-plus"></i>
+                {{ __('maintenance.add_scheduled_visit') }}
+            </button>
+        </form>
+    </div>
+</div>
 @endsection

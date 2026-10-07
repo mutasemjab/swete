@@ -32,6 +32,13 @@ return new class extends Migration
             $table->string('shipping_country_en')->nullable();
 
             $table->boolean('status')->default(true);
+
+            // Customer-portal login (app/Models/Customer extends Authenticatable) — credentials
+            // are set manually by staff here, no self-service reset. Nullable: a customer with no
+            // password set simply has no portal access yet.
+            $table->string('password')->nullable();
+            $table->rememberToken();
+
             $table->timestamps();
         });
     }

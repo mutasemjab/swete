@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Maintenance;
 
+use App\Http\Controllers\Maintenance\Concerns\ManagesMaintenanceReportFields;
 use App\Http\Controllers\ModuleController;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\MaintenanceReport;
-use App\Models\MaintenanceReportField;
 use App\Models\MaintenanceReportTemplate;
 use App\Models\MaterialStock;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class ReportController extends ModuleController
 {
+    use ManagesMaintenanceReportFields;
+
     protected string $module = 'maintenance';
 
     public function index(Request $request)
@@ -40,12 +41,6 @@ class ReportController extends ModuleController
         return $this->moduleView('maintenance.reports.create', [
             ...$this->formOptions(),
         ]);
-    }
-
-    /** Same create form, rendered inside the minimal mobile layout for the maintenance technician's phone. */
-    public function mobileCreate()
-    {
-        return view('maintenance.reports.mobile-create', $this->formOptions());
     }
 
     public function store(Request $request)
@@ -82,11 +77,7 @@ class ReportController extends ModuleController
         $this->snapshotFields($request, $report, $template->fields);
         $this->syncMaterials($report, $validated['materials'] ?? []);
 
-        $isMobile = $request->routeIs('maintenance-reports.mobile.store');
-
-        return $isMobile
-            ? redirect()->route('maintenance-reports.mobile.create')->with('success', __('maintenance.report_added'))
-            : redirect()->route('maintenance-reports.show', $report)->with('success', __('maintenance.report_added'));
+        return redirect()->route('maintenance-reports.show', $report)->with('success', __('maintenance.report_added'));
     }
 
     public function show(MaintenanceReport $maintenanceReport)
@@ -215,96 +206,4 @@ class ReportController extends ModuleController
             ->pluck('qty', 'material_id');
     }
 
-    private function syncMaterials(MaintenanceReport $report, array $materials): void
-    {
-        $report->materials()->delete();
-
-        foreach ($materials as $row) {
-            $report->materials()->create($row);
-        }
-
-        $hasMaterials = $report->materials()->exists();
-
-        if ($hasMaterials && $report->materials_approval_status === 'none') {
-            $report->seedMaterialApprovals();
-        } elseif (! $hasMaterials) {
-            $report->update(['materials_approval_status' => 'none']);
-        }
-    }
-
-    /** @param  \Illuminate\Support\Collection<int,MaintenanceReportTemplateField>  $templateFields */
-    private function snapshotFields(Request $request, MaintenanceReport $report, $templateFields): void
-    {
-        $answers = $request->input('answers', []);
-
-        foreach ($templateFields as $field) {
-            $answer = $field->type === 'images'
-                ? $this->storeImageAnswer($request, "answers.{$field->id}", null)
-                : $this->normalizeAnswer($field->type, $field->options ?? [], $answers[$field->id] ?? null, "answers.{$field->id}");
-
-            MaintenanceReportField::create([
-                'report_id'   => $report->id,
-                'question'    => $field->question,
-                'question_en' => $field->question_en,
-                'type'        => $field->type,
-                'options'     => $field->options,
-                'order'       => $field->order,
-                'answer'      => $answer,
-            ]);
-        }
-    }
-
-    /** @param  \Illuminate\Support\Collection  $fields */
-    private function validateImageAnswers(Request $request, $fields, bool $optional = false): void
-    {
-        foreach ($fields as $field) {
-            if ($field->type === 'images') {
-                $request->validate([
-                    "answers.{$field->id}"   => [$optional ? 'sometimes' : 'nullable', 'array'],
-                    "answers.{$field->id}.*" => ['nullable', 'image', 'max:5120'],
-                ]);
-            }
-        }
-    }
-
-    /** Uploads any newly-submitted photos for one 'images' field; keeps the existing answer untouched if none were submitted this time. */
-    private function storeImageAnswer(Request $request, string $key, ?string $existingAnswer): ?string
-    {
-        $files = array_filter($request->file($key, []));
-
-        if (empty($files)) {
-            return $existingAnswer;
-        }
-
-        $paths = [];
-
-        foreach ($files as $file) {
-            $filename = uploadImage('assets/uploads/maintenance-reports', $file);
-            $paths[]  = 'assets/uploads/maintenance-reports/' . $filename;
-        }
-
-        return json_encode($paths);
-    }
-
-    /** Validates one answer against its field's own (possibly snapshotted) type/options, blank meaning "not answered". */
-    private function normalizeAnswer(string $type, array $options, mixed $raw, string $errorKey): ?string
-    {
-        if ($raw === null || $raw === '') {
-            return null;
-        }
-
-        if ($type === 'number' && ! is_numeric($raw)) {
-            throw ValidationException::withMessages([$errorKey => __('maintenance.answer_invalid_number')]);
-        }
-
-        if ($type === 'boolean' && ! in_array($raw, ['0', '1'], true)) {
-            throw ValidationException::withMessages([$errorKey => __('maintenance.answer_invalid_boolean')]);
-        }
-
-        if ($type === 'choice' && ! in_array($raw, $options, true)) {
-            throw ValidationException::withMessages([$errorKey => __('maintenance.answer_invalid_choice')]);
-        }
-
-        return (string) $raw;
-    }
 }

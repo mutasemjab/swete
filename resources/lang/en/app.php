@@ -60,6 +60,9 @@ return [
     'select'             => 'Select',
     'yes'                => 'Yes',
     'no'                 => 'No',
+    'all'                => 'All',
+    'notes'              => 'Notes',
+    'save_failed'        => 'Save failed',
 
     // ── Status values ────────────────────────────────────────────────────────
     'active'             => 'Active',

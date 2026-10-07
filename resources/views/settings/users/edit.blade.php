@@ -126,6 +126,21 @@
                     <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('app.active') }}</span>
                 </label>
             </div>
+
+            <div class="sm:col-span-2">
+                <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
+                    <input type="hidden" name="is_maintenance_manager" value="0">
+                    <input type="checkbox" name="is_maintenance_manager" value="1" class="sr-only peer"
+                           @checked(old('is_maintenance_manager', $user->is_maintenance_manager))>
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:ring-2 peer-focus:ring-indigo-400 rounded-full peer
+                                peer-checked:bg-indigo-600 transition-all
+                                after:content-[''] after:absolute after:top-0.5 after:start-[2px]
+                                after:bg-white after:rounded-full after:h-5 after:w-5
+                                after:transition-all peer-checked:after:translate-x-full"></div>
+                    <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('settings.is_maintenance_manager') }}</span>
+                </label>
+                <p class="text-xs text-slate-400 mt-1.5">{{ __('settings.is_maintenance_manager_hint') }}</p>
+            </div>
         </div>
     </div>
 

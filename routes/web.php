@@ -41,6 +41,14 @@ use App\Http\Controllers\Maintenance\ReportTemplateController;
 use App\Http\Controllers\Maintenance\ReportController as MaintenanceReportController;
 use App\Http\Controllers\Maintenance\ContractController as MaintenanceContractController;
 use App\Http\Controllers\Maintenance\ContractPaymentController;
+use App\Http\Controllers\Maintenance\ContractScheduledVisitController;
+use App\Http\Controllers\Maintenance\MobileVisitController;
+use App\Http\Controllers\Maintenance\MaintenanceVisitTypeController;
+use App\Http\Controllers\Maintenance\MaintenanceRequestController;
+use App\Http\Controllers\Maintenance\MaintenanceVisitController;
+use App\Http\Controllers\Maintenance\DevicePasswordController;
+use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\CustomerPortalController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestAttachmentController;
 use App\Http\Controllers\ExternalPurchases\ShippingCompanyController;
@@ -348,10 +356,35 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('maintenance-reports/{maintenanceReport}/approve-materials', [MaintenanceReportController::class, 'approveMaterials'])->name('maintenance-reports.approve-materials')->middleware('permission:maintenance.reports.approve_materials');
     Route::post('maintenance-reports/{maintenanceReport}/reject-materials', [MaintenanceReportController::class, 'rejectMaterials'])->name('maintenance-reports.reject-materials')->middleware('permission:maintenance.reports.approve_materials');
     Route::post('maintenance-reports/{maintenanceReport}/convert-to-quote', [MaintenanceReportController::class, 'convertToQuote'])->name('maintenance-reports.convert-to-quote')->middleware('permission:maintenance.reports.convert_to_quote');
-    Route::prefix('m/maintenance-reports')->name('maintenance-reports.mobile.')->middleware('permission:maintenance.reports.create')->group(function () {
-        Route::get('create', [MaintenanceReportController::class, 'mobileCreate'])->name('create');
-        Route::post('/', [MaintenanceReportController::class, 'store'])->name('store');
+
+    // Replaces the old m/maintenance-reports one-shot mobile flow — see MobileVisitController.
+    Route::prefix('m/visits')->name('maintenance-visits.mobile.')->middleware('permission:maintenance.reports.create')->group(function () {
+        Route::get('create', [MobileVisitController::class, 'create'])->name('create');
+        Route::post('/', [MobileVisitController::class, 'store'])->name('store');
+        Route::get('{maintenanceVisit}', [MobileVisitController::class, 'show'])->name('show');
+        Route::post('{maintenanceVisit}/reports', [MobileVisitController::class, 'storeReport'])->name('reports.store');
+        Route::patch('{maintenanceVisit}/reports/{maintenanceReport}', [MobileVisitController::class, 'updateReport'])->name('reports.update');
+        Route::patch('{maintenanceVisit}/reports/{maintenanceReport}/answer', [MobileVisitController::class, 'updateAnswer'])->name('reports.answer');
+        Route::post('{maintenanceVisit}/reports/{maintenanceReport}/materials', [MobileVisitController::class, 'syncMaterialsForReport'])->name('reports.materials');
+        Route::post('{maintenanceVisit}/finish', [MobileVisitController::class, 'finish'])->name('finish');
     });
+
+    Route::resource('maintenance-visit-types', MaintenanceVisitTypeController::class)->only(['index'])->middleware('permission:maintenance.view');
+    Route::resource('maintenance-visit-types', MaintenanceVisitTypeController::class)->only(['create', 'store'])->middleware('permission:maintenance.visit_types.create');
+    Route::resource('maintenance-visit-types', MaintenanceVisitTypeController::class)->only(['edit', 'update'])->middleware('permission:maintenance.visit_types.edit');
+    Route::resource('maintenance-visit-types', MaintenanceVisitTypeController::class)->only(['destroy'])->middleware('permission:maintenance.visit_types.delete');
+
+    Route::get('maintenance-requests', [MaintenanceRequestController::class, 'index'])->name('maintenance-requests.index')->middleware('permission:maintenance.requests.manage');
+    Route::post('maintenance-requests/{maintenanceRequest}/approve', [MaintenanceRequestController::class, 'approve'])->name('maintenance-requests.approve')->middleware('permission:maintenance.requests.manage');
+    Route::post('maintenance-requests/{maintenanceRequest}/reject', [MaintenanceRequestController::class, 'reject'])->name('maintenance-requests.reject')->middleware('permission:maintenance.requests.manage');
+
+    Route::resource('maintenance-visits', MaintenanceVisitController::class)->only(['index', 'show'])->middleware('permission:maintenance.visits.manage');
+    Route::post('maintenance-visits/{maintenanceVisit}/classify', [MaintenanceVisitController::class, 'classify'])->name('maintenance-visits.classify')->middleware('permission:maintenance.visits.manage');
+
+    Route::resource('maintenance-device-passwords', DevicePasswordController::class)->only(['index'])->middleware('permission:maintenance.view');
+    Route::resource('maintenance-device-passwords', DevicePasswordController::class)->only(['create', 'store'])->middleware('permission:maintenance.device_passwords.create');
+    Route::resource('maintenance-device-passwords', DevicePasswordController::class)->only(['edit', 'update'])->middleware('permission:maintenance.device_passwords.edit');
+    Route::resource('maintenance-device-passwords', DevicePasswordController::class)->only(['destroy'])->middleware('permission:maintenance.device_passwords.delete');
 
     Route::resource('maintenance-contracts', MaintenanceContractController::class)->only(['create', 'store'])->middleware('permission:maintenance.contracts.create');
     Route::resource('maintenance-contracts', MaintenanceContractController::class)->only(['index', 'show'])->middleware('permission:maintenance.view');
@@ -362,6 +395,10 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::get('contract-payments', [ContractPaymentController::class, 'index'])->name('contract-payments.index')->middleware('permission:maintenance.view');
     Route::post('contract-payments/assign', [ContractPaymentController::class, 'assign'])->name('contract-payments.assign')->middleware('permission:maintenance.contract_payments.assign');
     Route::post('contract-payments/{payment}/convert-to-invoice', [ContractPaymentController::class, 'convertToInvoice'])->name('contract-payments.convert-to-invoice')->middleware('permission:maintenance.contract_payments.convert_to_invoice');
+
+    Route::post('maintenance-contracts/{maintenanceContract}/scheduled-visits', [ContractScheduledVisitController::class, 'store'])->name('contract-scheduled-visits.store')->middleware('permission:maintenance.contract_scheduled_visits.create');
+    Route::delete('maintenance-contracts/{maintenanceContract}/scheduled-visits/{scheduledVisit}', [ContractScheduledVisitController::class, 'destroy'])->name('contract-scheduled-visits.destroy')->middleware('permission:maintenance.contract_scheduled_visits.delete');
+    Route::get('contract-scheduled-visits', [ContractScheduledVisitController::class, 'index'])->name('contract-scheduled-visits.index')->middleware('permission:maintenance.view');
 
     Route::patch('appointments/{appointment}/toggle-complete', [AppointmentController::class, 'toggleComplete'])->name('appointments.toggle-complete')->middleware('permission:crm.appointments.edit');
     Route::resource('appointments', AppointmentController::class)->only(['index'])->middleware('permission:crm.view');
@@ -374,4 +411,27 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::put('vendor-email-template', [VendorEmailTemplateController::class, 'update'])->name('vendor-email-template.update');
     });
 
+});
+
+/*
+|--------------------------------------------------------------------------
+| Customer Portal Routes  (separate 'customer' guard — never caught by the
+| 'auth'/'approval.gate' group above, which is the staff 'user' guard's own).
+|--------------------------------------------------------------------------
+*/
+Route::prefix('customer-portal')->name('customer-portal.')->group(function () {
+    Route::middleware('guest:customer')->group(function () {
+        Route::get('login',  [CustomerAuthController::class, 'showLogin'])->name('login');
+        Route::post('login', [CustomerAuthController::class, 'login'])->name('authenticate');
+    });
+
+    Route::middleware('auth:customer')->group(function () {
+        Route::post('logout', [CustomerAuthController::class, 'logout'])->name('logout');
+        Route::get('/', [CustomerPortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('contracts/{maintenanceContract}', [CustomerPortalController::class, 'showContract'])->name('contracts.show');
+        Route::get('maintenance-requests/create', [CustomerPortalController::class, 'createRequest'])->name('maintenance-requests.create');
+        Route::post('maintenance-requests', [CustomerPortalController::class, 'storeRequest'])->name('maintenance-requests.store');
+        Route::get('visits/{maintenanceVisit}', [CustomerPortalController::class, 'showVisit'])->name('visits.show');
+        Route::post('visits/{maintenanceVisit}/sign', [CustomerPortalController::class, 'signVisit'])->name('visits.sign');
+    });
 });

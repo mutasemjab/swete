@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Approval;
 use App\Models\MaintenanceReportMaterialApproval;
+use App\Models\MaintenanceRequest;
+use App\Models\MaintenanceVisit;
 use App\Models\PurchaseRequestApproval;
 use App\Models\PurchaseRequestReminder;
 use App\Models\PurchaseRequestReminderRecipient;
@@ -46,6 +48,18 @@ class ApprovalController extends Controller
             ->latest()
             ->get();
 
+        // Maintenance requests/visit classifications are gated by a plain boolean flag on the
+        // user, not a role or a Settings-managed pool — see User::is_maintenance_manager.
+        $isMaintenanceManager = (bool) auth()->user()->is_maintenance_manager;
+
+        $pendingMaintenanceRequests = $isMaintenanceManager
+            ? MaintenanceRequest::with('customer')->pending()->latest()->get()
+            : collect();
+
+        $pendingVisitClassifications = $isMaintenanceManager
+            ? MaintenanceVisit::with('customer')->where('status', 'customer_signed')->latest()->get()
+            : collect();
+
         // A rule-triggered request can fan out into one Approval row per eligible
         // approver (OR logic) — collapse those back into a single summarizing row
         // per logical request, preferring a real decision over a cancelled sibling.
@@ -69,7 +83,7 @@ class ApprovalController extends Controller
             'sections' => [],
         ];
 
-        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'pendingReminders', 'pendingMaterialApprovals', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
+        return view('approvals.index', compact('tab', 'pendingForMe', 'pendingPurchaseRequestApprovals', 'pendingReminders', 'pendingMaterialApprovals', 'pendingMaintenanceRequests', 'pendingVisitClassifications', 'submittedByMe', 'currentModule', 'currentModuleConfig'));
     }
 
     public function approve(Request $request, Approval $approval, ApprovalService $approvals)

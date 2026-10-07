@@ -11,7 +11,7 @@ class DashboardController extends Controller
         // Same rationale as the login redirect in AuthController — this role's entire
         // experience is the standalone mobile portal, never the normal dashboard.
         if (auth()->user()->hasRole('maintenance_technician')) {
-            return redirect()->route('maintenance-reports.mobile.create');
+            return redirect()->route('maintenance-visits.mobile.create');
         }
 
         $modules = collect(config('modules'))

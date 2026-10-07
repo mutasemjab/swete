@@ -63,6 +63,8 @@ return [
     'user_updated'          => 'User updated successfully.',
     'user_deleted'          => 'User deleted successfully.',
     'login_tip'             => 'The user will be able to sign in using their email and password.',
+    'is_maintenance_manager'      => 'Maintenance Manager',
+    'is_maintenance_manager_hint' => 'Grants approval of customer-submitted maintenance requests and classification of customer-signed visits.',
     'assign_role'           => 'Role',
     'assigned_roles'        => 'Assigned Roles',
     'no_role'               => 'No Role',

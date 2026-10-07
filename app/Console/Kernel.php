@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Requires a real server cron hitting `php artisan schedule:run` to actually fire.
+        $schedule->command('maintenance:notify-due-scheduled-visits')->dailyAt('08:00');
     }
 
     /**

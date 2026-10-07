@@ -6,6 +6,8 @@ use App\Models\Appointment;
 use App\Models\Approval;
 use App\Models\MaintenanceContractPayment;
 use App\Models\MaintenanceReportMaterialApproval;
+use App\Models\MaintenanceRequest;
+use App\Models\MaintenanceVisit;
 use App\Models\PriceQuote;
 use App\Models\PurchaseRequestApproval;
 use App\Models\PurchaseRequestReminder;
@@ -42,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
 
                 if (PurchaseRequestReminderRecipient::where('user_id', Auth::id())->exists()) {
                     $count += PurchaseRequestReminder::where('status', 'pending')->count();
+                }
+
+                if (Auth::user()->is_maintenance_manager) {
+                    $count += MaintenanceRequest::where('status', 'pending')->count()
+                        + MaintenanceVisit::where('status', 'customer_signed')->count();
                 }
             }
 

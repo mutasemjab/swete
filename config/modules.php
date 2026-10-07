@@ -270,6 +270,21 @@ return [
                     ['label' => 'maintenance.nav_contracts_list',  'route' => 'maintenance-contracts.index',  'icon' => 'file-contract', 'permission' => 'maintenance.view'],
                     ['label' => 'maintenance.nav_contracts_add',   'route' => 'maintenance-contracts.create', 'icon' => 'plus',          'permission' => 'maintenance.contracts.create'],
                     ['label' => 'maintenance.nav_contract_payments', 'route' => 'contract-payments.index',    'icon' => 'money-check-dollar', 'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_contract_scheduled_visits', 'route' => 'contract-scheduled-visits.index', 'icon' => 'calendar-days', 'permission' => 'maintenance.view'],
+                ],
+            ],
+            [
+                'label' => 'maintenance.section_visits',
+                'items' => [
+                    ['label' => 'maintenance.nav_requests_inbox', 'route' => 'maintenance-requests.index', 'icon' => 'bell', 'permission' => 'maintenance.requests.manage'],
+                    ['label' => 'maintenance.nav_visits_list',    'route' => 'maintenance-visits.index',   'icon' => 'route', 'permission' => 'maintenance.visits.manage'],
+                    ['label' => 'maintenance.nav_visit_types',    'route' => 'maintenance-visit-types.index', 'icon' => 'tags', 'permission' => 'maintenance.view'],
+                ],
+            ],
+            [
+                'label' => 'maintenance.section_device_passwords',
+                'items' => [
+                    ['label' => 'maintenance.nav_device_passwords', 'route' => 'maintenance-device-passwords.index', 'icon' => 'key', 'permission' => 'maintenance.view'],
                 ],
             ],
             [

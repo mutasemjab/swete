@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use App\Models\Concerns\FormatsAddressLines;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class Customer extends Model
+/** Also the Eloquent provider for the 'customer' auth guard — see config/auth.php. */
+class Customer extends Authenticatable
 {
-    use LogsActivity, FormatsAddressLines;
+    use LogsActivity, FormatsAddressLines, Notifiable;
 
     protected $fillable = [
         'customer_group_id',
@@ -32,6 +34,12 @@ class Customer extends Model
         'shipping_country',
         'shipping_country_en',
         'status',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -67,6 +75,16 @@ class Customer extends Model
     public function maintenanceContracts(): HasMany
     {
         return $this->hasMany(MaintenanceContract::class);
+    }
+
+    public function maintenanceRequests(): HasMany
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
+
+    public function maintenanceVisits(): HasMany
+    {
+        return $this->hasMany(MaintenanceVisit::class);
     }
 
     public function getLocalizedNameAttribute(): string

@@ -82,6 +82,31 @@
     </div>
 </div>
 
+<div class="card mb-5" x-data="{ show: false }">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-lock text-indigo-500 text-sm"></i>
+            {{ __('accounting.customer_portal_access') }}
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+            <label class="form-label">{{ __('accounting.customer_portal_password') }}</label>
+            <div class="relative">
+                <input :type="show ? 'text' : 'password'" name="password"
+                       class="form-input pe-10 @error('password') is-invalid @enderror"
+                       placeholder="{{ __('app.password_min') }}">
+                <button type="button" @click="show = !show"
+                        class="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                    <i :class="show ? 'fa-eye-slash' : 'fa-eye'" class="fa-solid text-sm"></i>
+                </button>
+            </div>
+            @error('password')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            <p class="text-xs text-slate-400 mt-1.5">{{ __('accounting.customer_portal_password_hint') }}</p>
+        </div>
+    </div>
+</div>
+
 <div class="card mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">

@@ -29,7 +29,7 @@ class AuthController extends Controller
             // experience — never the normal dashboard/sidebar. See DashboardController::index()
             // for the matching safety-net redirect if they ever navigate back to "/" directly.
             if ($user->hasRole('maintenance_technician')) {
-                return redirect()->intended(route('maintenance-reports.mobile.create'));
+                return redirect()->intended(route('maintenance-visits.mobile.create'));
             }
 
             return redirect()->intended(route('dashboard'));

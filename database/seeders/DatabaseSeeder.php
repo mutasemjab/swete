@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AppointmentTypeSeeder::class,
             UnitSeeder::class,
             MaterialSeeder::class,
+            MaintenanceVisitTypeSeeder::class,
         ]);
     }
 }

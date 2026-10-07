@@ -28,6 +28,7 @@ class MaintenanceReport extends Model
         'issue_voucher_id',
         'price_quote_id',
         'created_by',
+        'visit_id',
     ];
 
     protected $casts = [
@@ -77,6 +78,11 @@ class MaintenanceReport extends Model
     public function priceQuote(): BelongsTo
     {
         return $this->belongsTo(PriceQuote::class);
+    }
+
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(MaintenanceVisit::class, 'visit_id');
     }
 
     public static function nextNumber(): string

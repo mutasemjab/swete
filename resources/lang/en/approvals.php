@@ -33,6 +33,8 @@ return [
     'no_pending_for_me'     => 'No requests are waiting on your approval right now',
     'pending_purchase_requests' => 'Purchase Requests Awaiting Your Approval',
     'pending_purchase_request_reminders' => 'Requested Purchases Awaiting Creation',
+    'pending_maintenance_requests' => 'Maintenance Requests Awaiting Approval',
+    'pending_visit_classifications' => 'Visits Awaiting Classification',
     'no_submitted_by_me'    => 'You haven\'t submitted any approval request yet',
 
     // ── Rule-triggered pending actions ──────────────────────────────────────

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'phone',
         'avatar',
         'status',
+        'is_maintenance_manager',
         'last_login_at',
     ];
 
@@ -30,9 +31,10 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'last_login_at'     => 'datetime',
-        'status'            => 'boolean',
+        'email_verified_at'      => 'datetime',
+        'last_login_at'          => 'datetime',
+        'status'                 => 'boolean',
+        'is_maintenance_manager' => 'boolean',
     ];
 
     /** Display name for the first assigned role. */

@@ -30,6 +30,11 @@ return new class extends Migration
             // Set once this report has been converted into a price quote — see ReportController::convertToQuote().
             $table->foreignId('price_quote_id')->nullable()->constrained('price_quotes')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
+            // Groups this report under one technician visit — see App\Models\MaintenanceVisit.
+            // Left unconstrained here (maintenance_visits is created later in the migration order);
+            // the real FK is added at the bottom of that table's own migration. Null means a legacy/
+            // desktop ad-hoc report created outside the visit workflow.
+            $table->unsignedBigInteger('visit_id')->nullable()->index();
             $table->timestamps();
         });
     }

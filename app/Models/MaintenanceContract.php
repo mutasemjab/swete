@@ -42,6 +42,11 @@ class MaintenanceContract extends Model
         return $this->hasMany(MaintenanceContractPayment::class, 'contract_id');
     }
 
+    public function scheduledVisits(): HasMany
+    {
+        return $this->hasMany(MaintenanceContractScheduledVisit::class, 'contract_id');
+    }
+
     public function getUrlAttribute(): string
     {
         return asset($this->path);

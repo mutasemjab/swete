@@ -87,6 +87,10 @@ class PermissionSeeder extends Seeder
             'maintenance.contracts.create', 'maintenance.contracts.edit', 'maintenance.contracts.delete',
             'maintenance.contract_payments.create', 'maintenance.contract_payments.delete',
             'maintenance.contract_payments.assign', 'maintenance.contract_payments.convert_to_invoice',
+            'maintenance.visit_types.create', 'maintenance.visit_types.edit', 'maintenance.visit_types.delete',
+            'maintenance.requests.manage', 'maintenance.visits.manage',
+            'maintenance.device_passwords.create', 'maintenance.device_passwords.edit', 'maintenance.device_passwords.delete',
+            'maintenance.contract_scheduled_visits.create', 'maintenance.contract_scheduled_visits.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -143,6 +147,7 @@ class PermissionSeeder extends Seeder
                 'name'     => 'System Administrator',
                 'password' => Hash::make('password'),
                 'status'   => true,
+                'is_maintenance_manager' => true,
             ]
         );
 

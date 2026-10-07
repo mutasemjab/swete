@@ -57,6 +57,7 @@ class UserController extends ModuleController
             'phone'    => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'status'   => ['boolean'],
+            'is_maintenance_manager' => ['boolean'],
             'role'     => ['nullable', 'exists:roles,name'],
         ]);
 
@@ -66,6 +67,7 @@ class UserController extends ModuleController
             'phone'    => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
             'status'   => $request->boolean('status', true),
+            'is_maintenance_manager' => $request->boolean('is_maintenance_manager'),
         ]);
 
         if (! empty($validated['role'])) {
@@ -96,6 +98,7 @@ class UserController extends ModuleController
             'phone'    => ['nullable', 'string', 'max:30'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'status'   => ['boolean'],
+            'is_maintenance_manager' => ['boolean'],
             'role'     => ['nullable', 'exists:roles,name'],
         ]);
 
@@ -104,6 +107,7 @@ class UserController extends ModuleController
             'email'  => $validated['email'],
             'phone'  => $validated['phone'] ?? null,
             'status' => $request->boolean('status'),
+            'is_maintenance_manager' => $request->boolean('is_maintenance_manager'),
         ]);
 
         if ($request->filled('password')) {

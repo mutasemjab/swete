@@ -6,6 +6,7 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends ModuleController
 {
@@ -37,6 +38,12 @@ class CustomerController extends ModuleController
     {
         $validated = $this->validated($request);
 
+        if (! empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
         $customer = Customer::create([
             ...$validated,
             'code'   => Customer::nextCode(),
@@ -60,6 +67,12 @@ class CustomerController extends ModuleController
     public function update(Request $request, Customer $customer)
     {
         $validated = $this->validated($request);
+
+        if (! empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
         $customer->update([
             ...$validated,
@@ -98,6 +111,7 @@ class CustomerController extends ModuleController
             'shipping_country'          => ['nullable', 'string', 'max:100'],
             'shipping_country_en'       => ['nullable', 'string', 'max:100'],
             'status'            => ['boolean'],
+            'password'          => ['nullable', 'string', 'min:6'],
         ]);
     }
 }
