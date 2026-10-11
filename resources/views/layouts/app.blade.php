@@ -183,6 +183,10 @@
                                 if (! $hasPermission) { continue; }
                                 $color       = $currentModuleConfig['color'];
                                 $params      = $item['params'] ?? [];
+                                // Plain query-string extras (e.g. a shared feature's "which module am I
+                                // linked from" context) — merged into the URL only, never into the
+                                // active-link check below, which is strictly about real route segments.
+                                $linkParams  = $params + ($item['query'] ?? []);
                                 // Index items stay active for show/edit but not create; other items exact-match
                                 if ($routeExists && str_ends_with($item['route'], '.index')) {
                                     $base     = substr($item['route'], 0, -6);
@@ -198,7 +202,7 @@
                             @endphp
 
                             @if($routeExists)
-                                <a href="{{ route($item['route'], $params) }}"
+                                <a href="{{ route($item['route'], $linkParams) }}"
                                    class="sidebar-link {{ $isActive
                                         ? "active bg-{$color}-50 text-{$color}-700"
                                         : 'text-slate-600' }}">

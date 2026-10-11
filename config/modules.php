@@ -124,8 +124,8 @@ return [
             [
                 'label' => 'tenders.section_price_quotes',
                 'items' => [
-                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'tenders.view'],
-                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'tenders.price_quotes.create'],
+                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'tenders.view', 'query' => ['module' => 'tenders']],
+                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'tenders.price_quotes.create', 'query' => ['module' => 'tenders']],
                 ],
             ],
             [
@@ -251,8 +251,8 @@ return [
             [
                 'label' => 'maintenance.section_price_quotes',
                 'items' => [
-                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'tenders.view'],
-                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'tenders.price_quotes.create'],
+                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'tenders.view', 'query' => ['module' => 'maintenance']],
+                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'tenders.price_quotes.create', 'query' => ['module' => 'maintenance']],
                 ],
             ],
             [

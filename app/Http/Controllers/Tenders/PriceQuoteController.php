@@ -27,6 +27,27 @@ class PriceQuoteController extends ModuleController
 {
     protected string $module = 'tenders';
 
+    /**
+     * Price Quotes is the exact same feature linked from both the Tenders and Maintenance
+     * sidebars (see config/modules.php) — this is not two separate copies. Whichever sidebar
+     * entry point the user clicked (carrying ?module=) is remembered in session so every
+     * subsequent page in this CRUD flow (create/store/show/edit/update, including after a
+     * redirect, where a query param wouldn't otherwise survive) keeps showing that module's
+     * sidebar instead of silently switching back to Tenders.
+     */
+    protected function moduleView(string $view, array $data = [])
+    {
+        if (request()->has('module') && array_key_exists(request()->query('module'), config('modules'))) {
+            session(['price_quotes_module' => request()->query('module')]);
+        }
+
+        $this->module = in_array(session('price_quotes_module'), ['tenders', 'maintenance'], true)
+            ? session('price_quotes_module')
+            : 'tenders';
+
+        return parent::moduleView($view, $data);
+    }
+
     public function index(Request $request)
     {
         $query = PriceQuote::with(['customer', 'tender', 'assignee', 'invoice']);
