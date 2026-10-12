@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class PriceAnalysisController extends ModuleController
 {
-    protected string $module = 'tenders';
+    protected string $module = 'analyses';
 
     public function index(Request $request)
     {

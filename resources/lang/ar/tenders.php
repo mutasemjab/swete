@@ -193,6 +193,15 @@ return [
     'quote_additional_terms'       => 'شروط إضافية',
     'quote_additional_terms_hint'  => 'نقاط إضافية تُضاف إلى "الملاحظات الهامة جداً" في الطباعة — كل نقطة بسطر مستقل.',
 
+    // ── Price quote installments ─────────────────────────────────────────────
+    'quote_installments'          => 'الدفعات ومواعيدها',
+    'add_installment'             => 'إضافة دفعة',
+    'installment_description'     => 'الوصف',
+    'installment_amount'          => 'المبلغ',
+    'installment_due_date'        => 'تاريخ الاستحقاق',
+    'no_installments'             => 'لا توجد دفعات محددة.',
+    'quote_print_installments'    => 'جدول الدفعات',
+
     // ── Price quote print document ───────────────────────────────────────────
     'quote_print_prepared_by'         => 'مُقدَّم من / أُعِد بواسطة',
     'quote_print_project_title'       => 'عنوان المشروع',

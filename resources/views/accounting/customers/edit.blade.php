@@ -15,7 +15,7 @@
     </a>
 </div>
 
-<form action="{{ route('accounting.customers.update', $customer) }}" method="POST">
+<form action="{{ route('accounting.customers.update', $customer) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
     @include('accounting.customers._form', ['groups' => $groups, 'customer' => $customer])

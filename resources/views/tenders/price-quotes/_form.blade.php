@@ -406,6 +406,63 @@
     </div>
 </div>
 
+{{-- Installments card --}}
+<div class="card mb-5" x-data="{
+    installments: {{ Js::from(old('installments', $seedInstallments ?? [['description'=>'','amount'=>'','due_date'=>'']])) }},
+    addInstallment() { this.installments.push({ description: '', amount: '', due_date: '' }); },
+    removeInstallment(i) { this.installments.splice(i, 1); },
+}">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-orange-500 text-sm"></i>
+            {{ __('tenders.quote_installments') }}
+        </h3>
+        <button type="button" @click="addInstallment()" class="btn-secondary btn-sm">
+            <i class="fa-solid fa-plus"></i>
+            {{ __('tenders.add_installment') }}
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <template x-if="installments.length === 0">
+            <p class="text-sm text-slate-400 px-5 py-4">{{ __('tenders.no_installments') }}</p>
+        </template>
+        <table class="w-full" x-show="installments.length > 0">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.installment_description') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_amount') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-44">{{ __('tenders.installment_due_date') }}</th>
+                    <th class="px-5 py-3 w-10"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <template x-for="(row, index) in installments" :key="index">
+                    <tr>
+                        <td class="px-5 py-2.5">
+                            <input type="text" :name="`installments[${index}][description]`" x-model="row.description"
+                                   class="form-input" placeholder="{{ __('tenders.installment_description') }}">
+                        </td>
+                        <td class="px-5 py-2.5">
+                            <input type="number" :name="`installments[${index}][amount]`" x-model="row.amount"
+                                   step="0.001" min="0" dir="ltr" class="form-input">
+                        </td>
+                        <td class="px-5 py-2.5">
+                            <input type="date" :name="`installments[${index}][due_date]`" x-model="row.due_date"
+                                   class="form-input">
+                        </td>
+                        <td class="px-5 py-2.5 text-center">
+                            <button type="button" @click="removeInstallment(index)"
+                                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {{-- Choose-from-analysis modal: pick a saved Price Analysis, then add any of its product lines straight into this quote's items. --}}
 <div x-show="showAnalysisPicker" x-cloak
      class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">

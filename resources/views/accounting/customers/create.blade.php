@@ -14,7 +14,7 @@
     </a>
 </div>
 
-<form action="{{ route('accounting.customers.store') }}" method="POST">
+<form action="{{ route('accounting.customers.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     @include('accounting.customers._form', ['groups' => $groups])
 

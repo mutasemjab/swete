@@ -109,6 +109,11 @@
     table.pq-summary td.amount { text-align: end; font-weight: 700; }
     table.pq-summary tr.total td { border-bottom: 0; background: var(--pq-red); color: #fff; font-weight: 800; font-size: 13px; }
 
+    table.pq-installments { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 11px; }
+    table.pq-installments th, table.pq-installments td { border: 1px solid var(--pq-border); padding: 5px 8px; }
+    table.pq-installments th { background: var(--pq-red); color: #fff; font-weight: 700; }
+    table.pq-installments td.amount { text-align: end; font-weight: 700; }
+
     .pq-notes-title { font-size: 13px; font-weight: 800; color: var(--pq-red); margin: 0 0 8px; }
     .pq-notes-list { margin: 0; padding-inline-start: 18px; font-size: 11.5px; line-height: 1.8; }
 
@@ -247,6 +252,28 @@
             <td class="amount">{{ number_format($priceQuote->total, 3) }} {{ $priceQuote->currency?->code }}</td>
         </tr>
     </table>
+
+    @if($priceQuote->installments->isNotEmpty())
+    <p class="pq-notes-title">{{ __('tenders.quote_print_installments') }}</p>
+    <table class="pq-installments">
+        <thead>
+            <tr>
+                <th>{{ __('tenders.installment_description') }}</th>
+                <th class="amount" style="width:110px">{{ __('tenders.installment_amount') }}</th>
+                <th style="width:110px" dir="ltr">{{ __('tenders.installment_due_date') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($priceQuote->installments as $installment)
+            <tr>
+                <td>{{ $installment->description ?: '' }}</td>
+                <td class="amount" dir="ltr">{{ number_format($installment->amount, 3) }}</td>
+                <td dir="ltr">{{ $installment->due_date?->format('Y-m-d') ?? '' }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
 
     <div>
         <p class="pq-notes-title">{{ __('tenders.quote_print_very_important_notes') }}</p>

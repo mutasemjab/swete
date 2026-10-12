@@ -17,6 +17,10 @@ class Supplier extends Model
         'code',
         'name',
         'name_en',
+        'company_name',
+        'company_name_en',
+        'commercial_registration',
+        'personal_id',
         'phone',
         'email',
         'address',
@@ -52,6 +56,17 @@ class Supplier extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class, 'party_id')->where('party_type', 'supplier');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(SupplierContact::class)->orderBy('sort_order');
+    }
+
+    public function extraFieldValues(): HasMany
+    {
+        return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')
+            ->where('entity_type', 'supplier');
     }
 
     public function getLocalizedNameAttribute(): string

@@ -14,6 +14,7 @@ use App\Models\MaterialCategory;
 use App\Models\MaterialStock;
 use App\Models\PriceAnalysis;
 use App\Models\PriceQuote;
+use App\Models\PriceQuoteInstallment;
 use App\Models\PriceQuoteItem;
 use App\Models\QuoteDeliveryTerm;
 use App\Models\QuoteSupplyScope;
@@ -79,9 +80,10 @@ class PriceQuoteController extends ModuleController
         return $this->moduleView('tenders.price-quotes.create', [
             ...$this->formOptions(),
             ...$this->historyData(),
-            'priceQuote' => null,
-            'tender'     => $tender,
-            'report'     => $report,
+            'priceQuote'        => null,
+            'tender'            => $tender,
+            'report'            => $report,
+            'seedInstallments'  => [['description' => '', 'amount' => '', 'due_date' => '']],
         ]);
     }
 
@@ -99,6 +101,7 @@ class PriceQuoteController extends ModuleController
         ]);
 
         $this->syncItems($priceQuote, $validated['items']);
+        $this->syncInstallments($priceQuote, $validated['installments'] ?? []);
 
         if ($request->filled('report_id')) {
             MaintenanceReport::where('id', $request->input('report_id'))->update(['price_quote_id' => $priceQuote->id]);
@@ -112,7 +115,7 @@ class PriceQuoteController extends ModuleController
     {
         $priceQuote->load([
             'customer', 'tender', 'creator', 'branch', 'currency', 'supplyScope', 'deliveryTerm',
-            'items.material.unit', 'assignee', 'invoice',
+            'items.material.unit', 'assignee', 'invoice', 'installments',
         ]);
 
         return $this->moduleView('tenders.price-quotes.show', compact('priceQuote'));
@@ -120,13 +123,24 @@ class PriceQuoteController extends ModuleController
 
     public function edit(PriceQuote $priceQuote)
     {
-        $priceQuote->load('items');
+        $priceQuote->load(['items', 'installments']);
+
+        $seedInstallments = $priceQuote->installments->map(fn ($i) => [
+            'description' => $i->description ?? '',
+            'amount'      => (string) $i->amount,
+            'due_date'    => $i->due_date?->format('Y-m-d') ?? '',
+        ])->toArray();
+
+        if (empty($seedInstallments)) {
+            $seedInstallments = [['description' => '', 'amount' => '', 'due_date' => '']];
+        }
 
         return $this->moduleView('tenders.price-quotes.edit', [
             ...$this->formOptions(),
             ...$this->historyData($priceQuote),
-            'priceQuote' => $priceQuote,
-            'tender'     => $priceQuote->tender,
+            'priceQuote'       => $priceQuote,
+            'tender'           => $priceQuote->tender,
+            'seedInstallments' => $seedInstallments,
         ]);
     }
 
@@ -137,6 +151,7 @@ class PriceQuoteController extends ModuleController
         $priceQuote->update($validated);
 
         $this->syncItems($priceQuote, $validated['items']);
+        $this->syncInstallments($priceQuote, $validated['installments'] ?? []);
 
         return redirect()->route('price-quotes.show', $priceQuote)
             ->with('success', __('tenders.quote_updated'));
@@ -147,7 +162,7 @@ class PriceQuoteController extends ModuleController
     {
         $priceQuote->load([
             'branch', 'currency', 'customer', 'tender', 'supplyScope', 'deliveryTerm',
-            'items.material.unit',
+            'items.material.unit', 'installments',
         ]);
 
         return view('tenders.price-quotes.print', compact('priceQuote'));
@@ -342,6 +357,10 @@ class PriceQuoteController extends ModuleController
             'items.*.unit_price'        => ['required', 'numeric', 'min:0'],
             'items.*.notes'             => ['nullable', 'array'],
             'items.*.notes.*'           => ['nullable', 'string', 'max:500'],
+            'installments'              => ['nullable', 'array'],
+            'installments.*.description'=> ['nullable', 'string', 'max:255'],
+            'installments.*.amount'     => ['required_with:installments.*', 'nullable', 'numeric', 'min:0'],
+            'installments.*.due_date'   => ['nullable', 'date'],
             'discount_type'             => ['required', 'in:amount,percent'],
             'discount_value'            => ['nullable', 'numeric', 'min:0', $request->input('discount_type') === 'percent' ? 'max:100' : 'max:999999999'],
         ]);
@@ -382,5 +401,25 @@ class PriceQuoteController extends ModuleController
         }
 
         $priceQuote->recalculateTotals();
+    }
+
+    private function syncInstallments(PriceQuote $priceQuote, array $installments): void
+    {
+        $priceQuote->installments()->delete();
+
+        $sort = 0;
+        foreach ($installments as $row) {
+            $amount = trim((string) ($row['amount'] ?? ''));
+            if ($amount === '' || $amount === null) {
+                continue;
+            }
+
+            $priceQuote->installments()->create([
+                'description' => $row['description'] ?? null,
+                'amount'      => $amount,
+                'due_date'    => $row['due_date'] ?: null,
+                'sort_order'  => $sort++,
+            ]);
+        }
     }
 }

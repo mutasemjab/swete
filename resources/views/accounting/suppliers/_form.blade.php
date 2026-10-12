@@ -104,6 +104,127 @@
 <div class="card mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-building text-violet-500 text-sm"></i>
+            {{ __('clients.company_id_details') }}
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+            <label class="form-label">{{ __('clients.company_name') }}</label>
+            <input type="text" name="company_name" value="{{ old('company_name', $supplier?->company_name) }}"
+                   class="form-input @error('company_name') is-invalid @enderror">
+            @error('company_name')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <div>
+            <label class="form-label">{{ __('clients.company_name_en') }}</label>
+            <input type="text" name="company_name_en" value="{{ old('company_name_en', $supplier?->company_name_en) }}" dir="ltr"
+                   class="form-input @error('company_name_en') is-invalid @enderror">
+            @error('company_name_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <div>
+            <label class="form-label">{{ __('clients.commercial_registration') }}</label>
+            <input type="text" name="commercial_registration" value="{{ old('commercial_registration', $supplier?->commercial_registration) }}"
+                   class="form-input @error('commercial_registration') is-invalid @enderror">
+            @error('commercial_registration')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        <div>
+            <label class="form-label">{{ __('clients.personal_id') }}</label>
+            <input type="text" name="personal_id" value="{{ old('personal_id', $supplier?->personal_id) }}"
+                   class="form-input @error('personal_id') is-invalid @enderror">
+            @error('personal_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+    </div>
+</div>
+
+<div class="card mb-5" x-data="{ contacts: {{ json_encode(old('contacts', $seedContacts)) }} }">
+    <div class="card-header flex items-center justify-between">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-user-group text-teal-500 text-sm"></i>
+            {{ __('clients.contacts_section') }}
+        </h3>
+        <button type="button" @click="contacts.push({ name: '', phone: '', job_title: '' })"
+                class="btn-secondary btn-sm">
+            <i class="fa-solid fa-plus"></i>
+            {{ __('clients.add_contact') }}
+        </button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+        <template x-for="(contact, index) in contacts" :key="index">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl">
+                <div>
+                    <label class="form-label">{{ __('clients.contact_name') }}</label>
+                    <input type="text" :name="`contacts[${index}][name]`" x-model="contact.name"
+                           class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">{{ __('clients.contact_phone') }}</label>
+                    <input type="text" :name="`contacts[${index}][phone]`" x-model="contact.phone"
+                           class="form-input" dir="ltr">
+                </div>
+                <div>
+                    <label class="form-label">{{ __('clients.contact_job_title') }}</label>
+                    <div class="flex gap-2">
+                        <input type="text" :name="`contacts[${index}][job_title]`" x-model="contact.job_title"
+                               class="form-input flex-1">
+                        <button type="button" @click="contacts.splice(index, 1)"
+                                class="btn-danger btn-sm self-end flex-shrink-0" title="{{ __('app.delete') }}">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <p x-show="contacts.length === 0" class="text-slate-400 text-sm text-center py-4">{{ __('clients.no_contacts') }}</p>
+    </div>
+</div>
+
+@if($extraFields->isNotEmpty())
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-amber-500 text-sm"></i>
+            {{ __('clients.extra_fields_section') }}
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        @foreach($extraFields as $field)
+            @php $efv = ($extraFieldValues ?? collect())->get($field->id); @endphp
+            <div class="{{ in_array($field->field_type, ['textarea', 'image']) ? 'sm:col-span-2' : '' }}">
+                <label class="form-label">{{ $field->localized_label }}</label>
+                @if($field->field_type === 'textarea')
+                    <textarea name="extra_fields[{{ $field->id }}]" rows="3"
+                              class="form-input">{{ old("extra_fields.{$field->id}", $efv?->value) }}</textarea>
+                @elseif($field->field_type === 'image')
+                    @if($efv?->file_path)
+                        <div class="mb-2">
+                            <img src="{{ asset($efv->file_path) }}" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
+                        </div>
+                    @endif
+                    <input type="file" name="extra_fields_images[{{ $field->id }}]"
+                           class="form-input @error("extra_fields_images.{$field->id}") is-invalid @enderror"
+                           accept="image/*">
+                @elseif($field->field_type === 'number')
+                    <input type="number" name="extra_fields[{{ $field->id }}]"
+                           value="{{ old("extra_fields.{$field->id}", $efv?->value) }}" dir="ltr"
+                           class="form-input">
+                @elseif($field->field_type === 'date')
+                    <input type="date" name="extra_fields[{{ $field->id }}]"
+                           value="{{ old("extra_fields.{$field->id}", $efv?->value) }}" dir="ltr"
+                           class="form-input">
+                @else
+                    <input type="text" name="extra_fields[{{ $field->id }}]"
+                           value="{{ old("extra_fields.{$field->id}", $efv?->value) }}"
+                           class="form-input">
+                @endif
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
             <i class="fa-solid fa-file-lines text-blue-500 text-sm"></i>
             {{ __('accounting.supplier_shipping_instruction') }}
         </h3>

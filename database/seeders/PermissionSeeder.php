@@ -48,6 +48,7 @@ class PermissionSeeder extends Seeder
             'clients.suppliers.create', 'clients.suppliers.edit', 'clients.suppliers.delete',
             'clients.customer_groups.create', 'clients.customer_groups.edit', 'clients.customer_groups.delete',
             'clients.supplier_groups.create', 'clients.supplier_groups.edit', 'clients.supplier_groups.delete',
+            'clients.extra_fields.view', 'clients.extra_fields.create', 'clients.extra_fields.edit', 'clients.extra_fields.delete',
 
             // Warehouse
             'warehouse.view',
@@ -71,6 +72,11 @@ class PermissionSeeder extends Seeder
             'tenders.purchase_request_reminders.edit', 'tenders.purchase_request_reminders.delete',
             'tenders.ciat_discounts.create', 'tenders.ciat_discounts.edit', 'tenders.ciat_discounts.delete',
             'tenders.price_analyses.create', 'tenders.price_analyses.edit', 'tenders.price_analyses.delete',
+
+            // Analyses (standalone module — CIAT discounts + price analyses moved out of tenders)
+            'analyses.view',
+            'analyses.ciat_discounts.create', 'analyses.ciat_discounts.edit', 'analyses.ciat_discounts.delete',
+            'analyses.price_analyses.create', 'analyses.price_analyses.edit', 'analyses.price_analyses.delete',
 
             // Quotations (standalone module — price quotes for all flows)
             'quotations.view',

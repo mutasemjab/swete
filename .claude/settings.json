@@ -9,7 +9,10 @@
       "Bash(dir \"c:\\\\xampp\\\\htdocs\\\\swete\\\\database\\\\migrations\")",
       "Bash(sed -i 's/protected string $module = '\\\\''accounting'\\\\'';/protected string $module = '\\\\''clients'\\\\'';/' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\CustomerController.php' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\CustomerGroupController.php' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\SupplierController.php' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\SupplierGroupController.php')",
       "Bash(sed -i 's/protected string $module = '\\\\''tenders'\\\\'';/protected string $module = '\\\\''projects'\\\\'';/' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Tenders\\\\ProjectController.php')",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "PowerShell(head -50)",
+      "Bash(xargs grep *)",
+      "PowerShell(php artisan db:seed --class=PermissionSeeder 2>&1)"
     ]
   }
 }

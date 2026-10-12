@@ -193,6 +193,15 @@ return [
     'quote_additional_terms'       => 'Additional Terms',
     'quote_additional_terms_hint'  => 'Extra points to add to the printed "Very Important Notes" — one point per line.',
 
+    // ── Price quote installments ─────────────────────────────────────────────
+    'quote_installments'          => 'Payment Installments',
+    'add_installment'             => 'Add Installment',
+    'installment_description'     => 'Description',
+    'installment_amount'          => 'Amount',
+    'installment_due_date'        => 'Due Date',
+    'no_installments'             => 'No installments defined.',
+    'quote_print_installments'    => 'Payment Schedule',
+
     // ── Price quote print document ───────────────────────────────────────────
     'quote_print_prepared_by'         => 'Submitted / Prepared By',
     'quote_print_project_title'       => 'Project Title',

@@ -20,6 +20,10 @@ class Customer extends Authenticatable
         'code',
         'name',
         'name_en',
+        'company_name',
+        'company_name_en',
+        'commercial_registration',
+        'personal_id',
         'phone',
         'email',
         'address',
@@ -85,6 +89,17 @@ class Customer extends Authenticatable
     public function maintenanceVisits(): HasMany
     {
         return $this->hasMany(MaintenanceVisit::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(CustomerContact::class)->orderBy('sort_order');
+    }
+
+    public function extraFieldValues(): HasMany
+    {
+        return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')
+            ->where('entity_type', 'customer');
     }
 
     public function getLocalizedNameAttribute(): string

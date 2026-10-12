@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Accounting;
 
 use App\Http\Controllers\ModuleController;
+use App\Models\ClientExtraField;
+use App\Models\ClientExtraFieldValue;
 use App\Models\Country;
 use App\Models\Governorate;
 use App\Models\Supplier;
@@ -32,10 +34,13 @@ class SupplierController extends ModuleController
 
     public function create()
     {
-        $groups    = SupplierGroup::orderBy('name')->get();
-        $countries = Country::where('status', true)->orderBy('name')->get();
+        $groups       = SupplierGroup::orderBy('name')->get();
+        $countries    = Country::where('status', true)->orderBy('name')->get();
         $governorates = Governorate::selectable();
-        return $this->moduleView('accounting.suppliers.create', compact('groups', 'countries', 'governorates'));
+        $extraFields  = ClientExtraField::forSuppliers()->active()->orderBy('sort_order')->get();
+        $seedContacts = [['name' => '', 'phone' => '', 'job_title' => '']];
+
+        return $this->moduleView('accounting.suppliers.create', compact('groups', 'countries', 'governorates', 'extraFields', 'seedContacts'));
     }
 
     public function store(Request $request)
@@ -48,6 +53,9 @@ class SupplierController extends ModuleController
             'status' => $request->boolean('status', true),
         ]);
 
+        $this->syncContacts($supplier, $request->input('contacts', []));
+        $this->syncExtraFieldValues('supplier', $supplier->id, $request);
+
         if ($request->wantsJson()) {
             return response()->json(['id' => $supplier->id, 'name' => $supplier->localized_name, 'code' => $supplier->code]);
         }
@@ -58,10 +66,22 @@ class SupplierController extends ModuleController
 
     public function edit(Supplier $supplier)
     {
-        $groups    = SupplierGroup::orderBy('name')->get();
-        $countries = Country::where('status', true)->orderBy('name')->get();
+        $supplier->load('contacts');
+        $groups       = SupplierGroup::orderBy('name')->get();
+        $countries    = Country::where('status', true)->orderBy('name')->get();
         $governorates = Governorate::selectable($supplier->governorate_id);
-        return $this->moduleView('accounting.suppliers.edit', compact('supplier', 'groups', 'countries', 'governorates'));
+        $extraFields  = ClientExtraField::forSuppliers()->active()->orderBy('sort_order')->get();
+        $seedContacts = $supplier->contacts->map(fn ($c) => [
+            'name'      => $c->name,
+            'phone'     => $c->phone ?? '',
+            'job_title' => $c->job_title ?? '',
+        ])->all() ?: [['name' => '', 'phone' => '', 'job_title' => '']];
+        $extraFieldValues = ClientExtraFieldValue::where('entity_type', 'supplier')
+            ->where('entity_id', $supplier->id)
+            ->get()
+            ->keyBy('field_id');
+
+        return $this->moduleView('accounting.suppliers.edit', compact('supplier', 'groups', 'countries', 'governorates', 'extraFields', 'seedContacts', 'extraFieldValues'));
     }
 
     public function update(Request $request, Supplier $supplier)
@@ -72,6 +92,9 @@ class SupplierController extends ModuleController
             ...$validated,
             'status' => $request->boolean('status'),
         ]);
+
+        $this->syncContacts($supplier, $request->input('contacts', []));
+        $this->syncExtraFieldValues('supplier', $supplier->id, $request);
 
         return redirect()->route('accounting.suppliers.index')
             ->with('success', __('accounting.party_updated'));
@@ -85,7 +108,7 @@ class SupplierController extends ModuleController
             ->with('success', __('accounting.party_deleted'));
     }
 
-    /** Image upload target for the shipping-instruction rich-text editor — stored the same way branch logos are (no public disk symlink in this app). */
+    /** Image upload target for the shipping-instruction rich-text editor. */
     public function uploadShippingInstructionImage(Request $request)
     {
         $request->validate(['file' => ['required', 'image', 'max:4096']]);
@@ -97,22 +120,79 @@ class SupplierController extends ModuleController
         ]);
     }
 
+    private function syncContacts(Supplier $supplier, array $contacts): void
+    {
+        $supplier->contacts()->delete();
+
+        $i = 0;
+        foreach ($contacts as $row) {
+            $name = trim($row['name'] ?? '');
+            if ($name === '') {
+                continue;
+            }
+            $supplier->contacts()->create([
+                'name'       => $name,
+                'phone'      => $row['phone'] ?: null,
+                'job_title'  => $row['job_title'] ?: null,
+                'sort_order' => $i++,
+            ]);
+        }
+    }
+
+    private function syncExtraFieldValues(string $entityType, int $entityId, Request $request): void
+    {
+        $fields = ClientExtraField::where('entity_type', $entityType)->active()->get();
+
+        foreach ($fields as $field) {
+            if ($field->field_type === 'image') {
+                if ($request->hasFile("extra_fields_images.{$field->id}")) {
+                    $filename = uploadImage(
+                        'assets/uploads/clients/extra-fields',
+                        $request->file("extra_fields_images.{$field->id}")
+                    );
+                    ClientExtraFieldValue::updateOrCreate(
+                        ['field_id' => $field->id, 'entity_type' => $entityType, 'entity_id' => $entityId],
+                        ['file_path' => "assets/uploads/clients/extra-fields/{$filename}", 'value' => null]
+                    );
+                }
+            } else {
+                $value = $request->input("extra_fields.{$field->id}");
+                ClientExtraFieldValue::updateOrCreate(
+                    ['field_id' => $field->id, 'entity_type' => $entityType, 'entity_id' => $entityId],
+                    ['value' => $value ?: null, 'file_path' => null]
+                );
+            }
+        }
+    }
+
     private function validated(Request $request): array
     {
         $validated = $request->validate([
-            'supplier_group_id' => ['nullable', 'exists:supplier_groups,id'],
-            'name'              => ['required', 'string', 'max:150'],
-            'name_en'           => ['nullable', 'string', 'max:150'],
-            'phone'             => ['nullable', 'string', 'max:30'],
-            'email'             => ['nullable', 'email', 'max:150'],
-            'address'           => ['nullable', 'string', 'max:255'],
-            'tax_number'        => ['nullable', 'string', 'max:50'],
-            'opening_balance'   => ['nullable', 'numeric'],
-            'location_scope'    => ['nullable', 'in:inside_jordan,outside_jordan'],
-            'governorate_id'       => ['required_if:location_scope,inside_jordan', 'nullable', 'exists:governorates,id'],
-            'country_id'        => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
-            'shipping_instruction' => ['nullable', 'string'],
-            'status'            => ['boolean'],
+            'supplier_group_id'       => ['nullable', 'exists:supplier_groups,id'],
+            'name'                    => ['required', 'string', 'max:150'],
+            'name_en'                 => ['nullable', 'string', 'max:150'],
+            'company_name'            => ['nullable', 'string', 'max:200'],
+            'company_name_en'         => ['nullable', 'string', 'max:200'],
+            'commercial_registration' => ['nullable', 'string', 'max:100'],
+            'personal_id'             => ['nullable', 'string', 'max:100'],
+            'phone'                   => ['nullable', 'string', 'max:30'],
+            'email'                   => ['nullable', 'email', 'max:150'],
+            'address'                 => ['nullable', 'string', 'max:255'],
+            'tax_number'              => ['nullable', 'string', 'max:50'],
+            'opening_balance'         => ['nullable', 'numeric'],
+            'location_scope'          => ['nullable', 'in:inside_jordan,outside_jordan'],
+            'governorate_id'          => ['required_if:location_scope,inside_jordan', 'nullable', 'exists:governorates,id'],
+            'country_id'              => ['required_if:location_scope,outside_jordan', 'nullable', 'exists:countries,id'],
+            'shipping_instruction'    => ['nullable', 'string'],
+            'status'                  => ['boolean'],
+            'contacts'                => ['nullable', 'array'],
+            'contacts.*.name'         => ['nullable', 'string', 'max:150'],
+            'contacts.*.phone'        => ['nullable', 'string', 'max:30'],
+            'contacts.*.job_title'    => ['nullable', 'string', 'max:100'],
+            'extra_fields'            => ['nullable', 'array'],
+            'extra_fields.*'          => ['nullable', 'string'],
+            'extra_fields_images'     => ['nullable', 'array'],
+            'extra_fields_images.*'   => ['nullable', 'image', 'max:4096'],
         ]);
 
         if (($validated['location_scope'] ?? null) === 'outside_jordan') {

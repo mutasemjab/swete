@@ -60,6 +60,7 @@ use App\Http\Controllers\Settings\PurchaseRequestReminderRecipientController;
 use App\Http\Controllers\Settings\MaintenanceReportMaterialApproverController;
 use App\Http\Controllers\Settings\SalesRepresentativeController;
 use App\Http\Controllers\SplitUnits\SplitUnitController;
+use App\Http\Controllers\Clients\ClientExtraFieldController;
 
 /*
 |--------------------------------------------------------------------------
@@ -265,6 +266,16 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     });
 
+    // ── Client Extra Fields ────────────────────────────────────────────────────
+    Route::prefix('client-extra-fields')->name('client-extra-fields.')->group(function () {
+        Route::get('customers', [ClientExtraFieldController::class, 'customers'])->name('customers')->middleware('permission:clients.extra_fields.view');
+        Route::get('suppliers', [ClientExtraFieldController::class, 'suppliers'])->name('suppliers')->middleware('permission:clients.extra_fields.view');
+        Route::post('/', [ClientExtraFieldController::class, 'store'])->name('store')->middleware('permission:clients.extra_fields.create');
+        Route::get('{clientExtraField}/edit', [ClientExtraFieldController::class, 'edit'])->name('edit')->middleware('permission:clients.extra_fields.edit');
+        Route::put('{clientExtraField}', [ClientExtraFieldController::class, 'update'])->name('update')->middleware('permission:clients.extra_fields.edit');
+        Route::delete('{clientExtraField}', [ClientExtraFieldController::class, 'destroy'])->name('destroy')->middleware('permission:clients.extra_fields.delete');
+    });
+
     Route::resource('tenders', TenderController::class)->only(['create', 'store'])->middleware('permission:tenders.create');
     Route::resource('tenders', TenderController::class)->only(['index', 'show'])->middleware('permission:tenders.view');
     Route::resource('tenders', TenderController::class)->only(['edit', 'update'])->middleware('permission:tenders.edit');
@@ -287,15 +298,15 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->only(['edit', 'update'])->middleware('permission:tenders.quote_delivery_terms.edit');
     Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->only(['destroy'])->middleware('permission:tenders.quote_delivery_terms.delete');
 
-    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['index'])->middleware('permission:tenders.view');
-    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['create', 'store'])->middleware('permission:tenders.ciat_discounts.create');
-    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['edit', 'update'])->middleware('permission:tenders.ciat_discounts.edit');
-    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['destroy'])->middleware('permission:tenders.ciat_discounts.delete');
+    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['index'])->middleware('permission:analyses.view|tenders.view');
+    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['create', 'store'])->middleware('permission:analyses.ciat_discounts.create|tenders.ciat_discounts.create');
+    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['edit', 'update'])->middleware('permission:analyses.ciat_discounts.edit|tenders.ciat_discounts.edit');
+    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['destroy'])->middleware('permission:analyses.ciat_discounts.delete|tenders.ciat_discounts.delete');
 
-    Route::resource('price-analyses', PriceAnalysisController::class)->only(['create', 'store'])->middleware('permission:tenders.price_analyses.create');
-    Route::resource('price-analyses', PriceAnalysisController::class)->only(['index', 'show'])->middleware('permission:tenders.view');
-    Route::resource('price-analyses', PriceAnalysisController::class)->only(['edit', 'update'])->middleware('permission:tenders.price_analyses.edit');
-    Route::resource('price-analyses', PriceAnalysisController::class)->only(['destroy'])->middleware('permission:tenders.price_analyses.delete');
+    Route::resource('price-analyses', PriceAnalysisController::class)->only(['create', 'store'])->middleware('permission:analyses.price_analyses.create|tenders.price_analyses.create');
+    Route::resource('price-analyses', PriceAnalysisController::class)->only(['index', 'show'])->middleware('permission:analyses.view|tenders.view');
+    Route::resource('price-analyses', PriceAnalysisController::class)->only(['edit', 'update'])->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
+    Route::resource('price-analyses', PriceAnalysisController::class)->only(['destroy'])->middleware('permission:analyses.price_analyses.delete|tenders.price_analyses.delete');
 
     // ── Price Quotes (now standalone quotations module — still accessible from tenders/maintenance flows) ──
     Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print')->middleware('permission:quotations.view|tenders.view|maintenance.view');

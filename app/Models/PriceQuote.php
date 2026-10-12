@@ -114,6 +114,11 @@ class PriceQuote extends Model
         return $this->belongsTo(Invoice::class);
     }
 
+    public function installments(): HasMany
+    {
+        return $this->hasMany(PriceQuoteInstallment::class)->orderBy('sort_order');
+    }
+
     public function scopeAssignedTo(Builder $query, int $userId): Builder
     {
         return $query->where('assigned_to', $userId);

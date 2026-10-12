@@ -81,6 +81,13 @@ return [
                     ['label' => 'clients.nav_supplier_groups', 'route' => 'accounting.supplier-groups.index', 'icon' => 'sitemap', 'permission' => 'clients.view'],
                 ],
             ],
+            [
+                'label' => 'clients.section_settings',
+                'items' => [
+                    ['label' => 'clients.nav_customer_extra_fields', 'route' => 'client-extra-fields.customers', 'icon' => 'sliders', 'permission' => 'clients.extra_fields.view'],
+                    ['label' => 'clients.nav_supplier_extra_fields', 'route' => 'client-extra-fields.suppliers', 'icon' => 'sliders', 'permission' => 'clients.extra_fields.view'],
+                ],
+            ],
         ],
     ],
 
@@ -126,7 +133,7 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
-    // TENDERS MODULE  ← price quotes and projects moved to their own modules
+    // TENDERS MODULE  ← price quotes, projects, and analyses moved to own modules
     // ──────────────────────────────────────────────────────────────────────────
     'tenders' => [
         'name'        => 'tenders.module_name',
@@ -142,20 +149,6 @@ return [
                 'items' => [
                     ['label' => 'tenders.nav_list', 'route' => 'tenders.index',  'icon' => 'list', 'permission' => 'tenders.view'],
                     ['label' => 'tenders.nav_add',  'route' => 'tenders.create', 'icon' => 'plus', 'permission' => 'tenders.create'],
-                ],
-            ],
-            [
-                'label' => 'tenders.section_ciat_discounts',
-                'items' => [
-                    ['label' => 'tenders.nav_ciat_discounts_list', 'route' => 'ciat-discounts.index',  'icon' => 'percent', 'permission' => 'tenders.view'],
-                    ['label' => 'tenders.nav_ciat_discounts_add',  'route' => 'ciat-discounts.create', 'icon' => 'plus',    'permission' => 'tenders.ciat_discounts.create'],
-                ],
-            ],
-            [
-                'label' => 'tenders.section_price_analysis',
-                'items' => [
-                    ['label' => 'tenders.nav_price_analyses_list', 'route' => 'price-analyses.index',  'icon' => 'chart-line', 'permission' => 'tenders.view'],
-                    ['label' => 'tenders.nav_price_analyses_add',  'route' => 'price-analyses.create', 'icon' => 'plus',       'permission' => 'tenders.price_analyses.create'],
                 ],
             ],
             [
@@ -193,6 +186,35 @@ return [
                 'items' => [
                     ['label' => 'quotations.nav_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'quotations.view'],
                     ['label' => 'quotations.nav_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'quotations.price_quotes.create'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // ANALYSES MODULE  ← CIAT discounts + price analyses moved out of tenders
+    // ──────────────────────────────────────────────────────────────────────────
+    'analyses' => [
+        'name'        => 'analyses.module_name',
+        'description' => 'analyses.module_desc',
+        'icon'        => 'chart-line',
+        'color'       => 'cyan',
+        'route'       => 'price-analyses.index',
+        'permission'  => 'analyses.view',
+        'gradient'    => 'from-cyan-500 to-cyan-700',
+        'sections'    => [
+            [
+                'label' => 'tenders.section_ciat_discounts',
+                'items' => [
+                    ['label' => 'tenders.nav_ciat_discounts_list', 'route' => 'ciat-discounts.index',  'icon' => 'percent',    'permission' => 'analyses.view'],
+                    ['label' => 'tenders.nav_ciat_discounts_add',  'route' => 'ciat-discounts.create', 'icon' => 'plus',       'permission' => 'analyses.ciat_discounts.create'],
+                ],
+            ],
+            [
+                'label' => 'tenders.section_price_analysis',
+                'items' => [
+                    ['label' => 'tenders.nav_price_analyses_list', 'route' => 'price-analyses.index',  'icon' => 'chart-line', 'permission' => 'analyses.view'],
+                    ['label' => 'tenders.nav_price_analyses_add',  'route' => 'price-analyses.create', 'icon' => 'plus',       'permission' => 'analyses.price_analyses.create'],
                 ],
             ],
         ],

@@ -174,4 +174,35 @@
         </dl>
     </div>
 </div>
+
+@if($priceQuote->installments->isNotEmpty())
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-orange-500 text-sm"></i>
+            {{ __('tenders.quote_installments') }}
+        </h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.installment_description') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_amount') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-40">{{ __('tenders.installment_due_date') }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @foreach($priceQuote->installments as $installment)
+                <tr>
+                    <td class="px-5 py-3 text-sm text-slate-700">{{ $installment->description ?: '—' }}</td>
+                    <td class="px-5 py-3 text-sm font-bold text-slate-800" dir="ltr">{{ number_format($installment->amount, 3) }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-700" dir="ltr">{{ $installment->due_date?->format('Y-m-d') ?? '—' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 @endsection
