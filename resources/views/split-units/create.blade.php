@@ -1,0 +1,31 @@
+@extends('layouts.app')
+
+@section('title', __('split_units.add'))
+@section('breadcrumb', __('split_units.add'))
+
+@section('content')
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ __('split_units.add') }}</h1>
+        <p class="page-subtitle">{{ __('split_units.add_subtitle') }}</p>
+    </div>
+    <a href="{{ route('split-units.index') }}" class="btn-secondary">
+        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
+        {{ __('app.back_to_list') }}
+    </a>
+</div>
+
+<form action="{{ route('split-units.store') }}" method="POST">
+    @csrf
+
+    @include('split-units._form')
+
+    <div class="flex items-center gap-3">
+        <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i>
+            {{ __('split_units.add') }}
+        </button>
+        <a href="{{ route('split-units.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+    </div>
+</form>
+@endsection

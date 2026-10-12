@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"c:\\\\xampp\\\\htdocs\\\\swete\" /b)",
+      "Bash(dir \"c:\\\\xampp\\\\htdocs\\\\swete\\\\app\" /s /b)",
+      "Bash(Get-ChildItem -Path \"C:\\\\xampp\\\\htdocs\\\\swete\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Read(//c/xampp/htdocs/swete/app/Models\" | grep -E '/**)",
+      "Bash(dir \"c:\\\\xampp\\\\htdocs\\\\swete\\\\database\\\\migrations\")",
+      "Bash(sed -i 's/protected string $module = '\\\\''accounting'\\\\'';/protected string $module = '\\\\''clients'\\\\'';/' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\CustomerController.php' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\CustomerGroupController.php' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\SupplierController.php' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Accounting\\\\SupplierGroupController.php')",
+      "Bash(sed -i 's/protected string $module = '\\\\''tenders'\\\\'';/protected string $module = '\\\\''projects'\\\\'';/' 'c:\\\\xampp\\\\htdocs\\\\swete\\\\app\\\\Http\\\\Controllers\\\\Tenders\\\\ProjectController.php')",
+      "Bash(php artisan *)"
+    ]
+  }
+}

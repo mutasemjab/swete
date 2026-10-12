@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ProjectController extends ModuleController
 {
-    protected string $module = 'tenders';
+    protected string $module = 'projects';
 
     public function index(Request $request)
     {

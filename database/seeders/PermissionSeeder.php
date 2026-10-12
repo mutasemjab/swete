@@ -42,6 +42,13 @@ class PermissionSeeder extends Seeder
             // Accounting (future — journal/GL not built yet)
             'accounting.journal.create', 'accounting.journal.edit', 'accounting.journal.delete',
 
+            // Clients (customers, suppliers and their groups — moved out of accounting)
+            'clients.view',
+            'clients.customers.create', 'clients.customers.edit', 'clients.customers.delete',
+            'clients.suppliers.create', 'clients.suppliers.edit', 'clients.suppliers.delete',
+            'clients.customer_groups.create', 'clients.customer_groups.edit', 'clients.customer_groups.delete',
+            'clients.supplier_groups.create', 'clients.supplier_groups.edit', 'clients.supplier_groups.delete',
+
             // Warehouse
             'warehouse.view',
             'warehouse.warehouses.create', 'warehouse.warehouses.edit', 'warehouse.warehouses.delete',
@@ -64,6 +71,18 @@ class PermissionSeeder extends Seeder
             'tenders.purchase_request_reminders.edit', 'tenders.purchase_request_reminders.delete',
             'tenders.ciat_discounts.create', 'tenders.ciat_discounts.edit', 'tenders.ciat_discounts.delete',
             'tenders.price_analyses.create', 'tenders.price_analyses.edit', 'tenders.price_analyses.delete',
+
+            // Quotations (standalone module — price quotes for all flows)
+            'quotations.view',
+            'quotations.price_quotes.create', 'quotations.price_quotes.edit',
+            'quotations.price_quotes.assign', 'quotations.price_quotes.convert_to_invoice',
+
+            // Projects (standalone module — moved out of tenders)
+            'projects.view', 'projects.edit', 'projects.delete', 'projects.convert',
+
+            // Split Units (new module — separate quotations for split AC units)
+            'split_units.view',
+            'split_units.create', 'split_units.edit', 'split_units.delete', 'split_units.print',
 
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',
@@ -118,6 +137,11 @@ class PermissionSeeder extends Seeder
             'accounting.invoice_types.create', 'accounting.invoice_types.edit',
             'accounting.invoices.create',
             'settings.currencies.view',
+            'clients.view',
+            'clients.customers.create', 'clients.customers.edit',
+            'clients.suppliers.create', 'clients.suppliers.edit',
+            'clients.customer_groups.create', 'clients.customer_groups.edit',
+            'clients.supplier_groups.create', 'clients.supplier_groups.edit',
         ]);
 
         $warehouseOfficer = Role::firstOrCreate(['name' => 'warehouse_officer', 'guard_name' => 'web']);
@@ -131,9 +155,6 @@ class PermissionSeeder extends Seeder
             'warehouse.reports.view',
         ]);
 
-        // Scoped to the mobile report-creation portal only — no other maintenance/admin
-        // permission. Note: permissions aren't enforced via route/UI gating anywhere in this
-        // app yet (pre-existing gap), so this role is organizational only for now, not a real restriction.
         $maintenanceTechnician = Role::firstOrCreate(['name' => 'maintenance_technician', 'guard_name' => 'web']);
         $maintenanceTechnician->syncPermissions([
             'maintenance.reports.create',

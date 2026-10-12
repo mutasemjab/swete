@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 /** شجرة العملاء */
 class CustomerGroupController extends ModuleController
 {
-    protected string $module = 'accounting';
+    protected string $module = 'clients';
 
     public function index()
     {

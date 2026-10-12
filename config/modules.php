@@ -23,7 +23,7 @@
 return [
 
     // ──────────────────────────────────────────────────────────────────────────
-    // ACCOUNTING MODULE
+    // ACCOUNTING MODULE  ← invoices only; customers/suppliers moved to 'clients'
     // ──────────────────────────────────────────────────────────────────────────
     'accounting' => [
         'name'        => 'accounting.module_name',
@@ -38,24 +38,47 @@ return [
                 'label' => 'accounting.section_operations',
                 'items' => [
                     ['label' => 'accounting.nav_invoices',   'route' => 'accounting.invoices.index', 'icon' => 'file-invoice-dollar', 'permission' => 'accounting.view'],
-
                 ],
             ],
             [
                 'label' => 'accounting.section_management',
                 'items' => [
-                    ['label' => 'accounting.nav_customers',       'route' => 'accounting.customers.index',        'icon' => 'address-book', 'permission' => 'accounting.view'],
-                    ['label' => 'accounting.nav_customer_groups', 'route' => 'accounting.customer-groups.index',  'icon' => 'sitemap',      'permission' => 'accounting.view'],
-                    ['label' => 'accounting.nav_suppliers',       'route' => 'accounting.suppliers.index',        'icon' => 'truck',        'permission' => 'accounting.view'],
-                    ['label' => 'accounting.nav_supplier_groups', 'route' => 'accounting.supplier-groups.index',  'icon' => 'sitemap',      'permission' => 'accounting.view'],
-                    ['label' => 'accounting.nav_invoice_types',   'route' => 'accounting.invoice-types.index',    'icon' => 'tags',         'permission' => 'accounting.view'],
+                    ['label' => 'accounting.nav_invoice_types', 'route' => 'accounting.invoice-types.index', 'icon' => 'tags', 'permission' => 'accounting.view'],
                 ],
             ],
             [
                 'label' => 'accounting.section_reports',
                 'items' => [
-                    ['label' => 'accounting.nav_balance',    'route' => '#', 'icon' => 'scale-balanced', 'permission' => 'accounting.view'],
+                    ['label' => 'accounting.nav_balance', 'route' => '#', 'icon' => 'scale-balanced', 'permission' => 'accounting.view'],
+                ],
+            ],
+        ],
+    ],
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // CLIENTS MODULE  ← customers, suppliers and their groups (moved out of accounting)
+    // ──────────────────────────────────────────────────────────────────────────
+    'clients' => [
+        'name'        => 'clients.module_name',
+        'description' => 'clients.module_desc',
+        'icon'        => 'address-book',
+        'color'       => 'violet',
+        'route'       => 'accounting.customers.index',
+        'permission'  => 'clients.view',
+        'gradient'    => 'from-violet-500 to-violet-700',
+        'sections'    => [
+            [
+                'label' => 'clients.section_customers',
+                'items' => [
+                    ['label' => 'clients.nav_customers',       'route' => 'accounting.customers.index',       'icon' => 'address-book', 'permission' => 'clients.view'],
+                    ['label' => 'clients.nav_customer_groups', 'route' => 'accounting.customer-groups.index', 'icon' => 'sitemap',      'permission' => 'clients.view'],
+                ],
+            ],
+            [
+                'label' => 'clients.section_suppliers',
+                'items' => [
+                    ['label' => 'clients.nav_suppliers',       'route' => 'accounting.suppliers.index',       'icon' => 'truck',   'permission' => 'clients.view'],
+                    ['label' => 'clients.nav_supplier_groups', 'route' => 'accounting.supplier-groups.index', 'icon' => 'sitemap', 'permission' => 'clients.view'],
                 ],
             ],
         ],
@@ -95,15 +118,15 @@ return [
             [
                 'label' => 'warehouse.section_reports',
                 'items' => [
-                    ['label' => 'warehouse.nav_material_report',  'route' => 'warehouse.reports.materials',  'icon' => 'chart-column',     'permission' => 'warehouse.reports.view'],
-                    ['label' => 'warehouse.nav_stocktake_report', 'route' => 'warehouse.reports.stocktake',  'icon' => 'clipboard-check',  'permission' => 'warehouse.reports.view'],
+                    ['label' => 'warehouse.nav_material_report',  'route' => 'warehouse.reports.materials',  'icon' => 'chart-column',    'permission' => 'warehouse.reports.view'],
+                    ['label' => 'warehouse.nav_stocktake_report', 'route' => 'warehouse.reports.stocktake',  'icon' => 'clipboard-check', 'permission' => 'warehouse.reports.view'],
                 ],
             ],
         ],
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
-    // TENDERS MODULE
+    // TENDERS MODULE  ← price quotes and projects moved to their own modules
     // ──────────────────────────────────────────────────────────────────────────
     'tenders' => [
         'name'        => 'tenders.module_name',
@@ -122,13 +145,6 @@ return [
                 ],
             ],
             [
-                'label' => 'tenders.section_price_quotes',
-                'items' => [
-                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'tenders.view', 'query' => ['module' => 'tenders']],
-                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'tenders.price_quotes.create', 'query' => ['module' => 'tenders']],
-                ],
-            ],
-            [
                 'label' => 'tenders.section_ciat_discounts',
                 'items' => [
                     ['label' => 'tenders.nav_ciat_discounts_list', 'route' => 'ciat-discounts.index',  'icon' => 'percent', 'permission' => 'tenders.view'],
@@ -143,12 +159,6 @@ return [
                 ],
             ],
             [
-                'label' => 'tenders.section_projects',
-                'items' => [
-                    ['label' => 'tenders.nav_projects_list', 'route' => 'projects.index', 'icon' => 'diagram-project', 'permission' => 'tenders.projects.view'],
-                ],
-            ],
-            [
                 'label' => 'tenders.section_reminders',
                 'items' => [
                     ['label' => 'tenders.nav_reminders_list', 'route' => 'purchase-request-reminders.index',  'icon' => 'bell', 'permission' => 'tenders.view'],
@@ -158,9 +168,74 @@ return [
             [
                 'label' => 'tenders.section_settings',
                 'items' => [
-                    ['label' => 'tenders.nav_statuses', 'route' => 'tender-statuses.index', 'icon' => 'list-check', 'permission' => 'tenders.view'],
+                    ['label' => 'tenders.nav_statuses',            'route' => 'tender-statuses.index',    'icon' => 'list-check',    'permission' => 'tenders.view'],
                     ['label' => 'tenders.nav_quote_supply_scopes', 'route' => 'quote-supply-scopes.index', 'icon' => 'boxes-stacked', 'permission' => 'tenders.view'],
-                    ['label' => 'tenders.nav_quote_delivery_terms', 'route' => 'quote-delivery-terms.index', 'icon' => 'truck-fast', 'permission' => 'tenders.view'],
+                    ['label' => 'tenders.nav_quote_delivery_terms','route' => 'quote-delivery-terms.index','icon' => 'truck-fast',    'permission' => 'tenders.view'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // QUOTATIONS MODULE  ← standalone module, formerly inside tenders & maintenance
+    // ──────────────────────────────────────────────────────────────────────────
+    'quotations' => [
+        'name'        => 'quotations.module_name',
+        'description' => 'quotations.module_desc',
+        'icon'        => 'file-invoice',
+        'color'       => 'amber',
+        'route'       => 'price-quotes.index',
+        'permission'  => 'quotations.view',
+        'gradient'    => 'from-amber-500 to-amber-700',
+        'sections'    => [
+            [
+                'label' => 'quotations.section_quotes',
+                'items' => [
+                    ['label' => 'quotations.nav_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'quotations.view'],
+                    ['label' => 'quotations.nav_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'quotations.price_quotes.create'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // PROJECTS MODULE  ← standalone module, formerly inside tenders
+    // ──────────────────────────────────────────────────────────────────────────
+    'projects' => [
+        'name'        => 'projects.module_name',
+        'description' => 'projects.module_desc',
+        'icon'        => 'diagram-project',
+        'color'       => 'indigo',
+        'route'       => 'projects.index',
+        'permission'  => 'projects.view',
+        'gradient'    => 'from-indigo-500 to-indigo-700',
+        'sections'    => [
+            [
+                'label' => 'projects.section_projects',
+                'items' => [
+                    ['label' => 'projects.nav_list', 'route' => 'projects.index', 'icon' => 'diagram-project', 'permission' => 'projects.view'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // SPLIT UNIT MODULE  ← new module, separate quotations for split AC units
+    // ──────────────────────────────────────────────────────────────────────────
+    'split_units' => [
+        'name'        => 'split_units.module_name',
+        'description' => 'split_units.module_desc',
+        'icon'        => 'snowflake',
+        'color'       => 'sky',
+        'route'       => 'split-units.index',
+        'permission'  => 'split_units.view',
+        'gradient'    => 'from-sky-500 to-sky-700',
+        'sections'    => [
+            [
+                'label' => 'split_units.section_quotes',
+                'items' => [
+                    ['label' => 'split_units.nav_list', 'route' => 'split-units.index',  'icon' => 'file-invoice', 'permission' => 'split_units.view'],
+                    ['label' => 'split_units.nav_add',  'route' => 'split-units.create', 'icon' => 'plus',         'permission' => 'split_units.create'],
                 ],
             ],
         ],
@@ -237,7 +312,7 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
-    // MAINTENANCE MODULE  ← price quotes reuses the Tenders resource as-is; service_calls UI later
+    // MAINTENANCE MODULE  ← price quotes removed (now in standalone quotations module)
     // ──────────────────────────────────────────────────────────────────────────
     'maintenance' => [
         'name'        => 'maintenance.module_name',
@@ -249,36 +324,29 @@ return [
         'gradient'    => 'from-teal-500 to-teal-700',
         'sections'    => [
             [
-                'label' => 'maintenance.section_price_quotes',
-                'items' => [
-                    ['label' => 'tenders.nav_quotes_list', 'route' => 'price-quotes.index',  'icon' => 'file-invoice', 'permission' => 'tenders.view', 'query' => ['module' => 'maintenance']],
-                    ['label' => 'tenders.nav_quotes_add',  'route' => 'price-quotes.create', 'icon' => 'plus',         'permission' => 'tenders.price_quotes.create', 'query' => ['module' => 'maintenance']],
-                ],
-            ],
-            [
                 'label' => 'maintenance.section_reports',
                 'items' => [
-                    ['label' => 'maintenance.nav_reports_list',   'route' => 'maintenance-reports.index',  'icon' => 'clipboard-list', 'permission' => 'maintenance.view'],
-                    ['label' => 'maintenance.nav_reports_add',    'route' => 'maintenance-reports.create', 'icon' => 'plus',           'permission' => 'maintenance.reports.create'],
-                    ['label' => 'maintenance.nav_reports_search', 'route' => 'maintenance-reports.search', 'icon' => 'magnifying-glass', 'permission' => 'maintenance.view'],
-                    ['label' => 'maintenance.nav_report_templates', 'route' => 'report-templates.index',   'icon' => 'sliders',        'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_reports_list',   'route' => 'maintenance-reports.index',  'icon' => 'clipboard-list',  'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_reports_add',    'route' => 'maintenance-reports.create', 'icon' => 'plus',            'permission' => 'maintenance.reports.create'],
+                    ['label' => 'maintenance.nav_reports_search', 'route' => 'maintenance-reports.search', 'icon' => 'magnifying-glass','permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_report_templates','route' => 'report-templates.index',    'icon' => 'sliders',         'permission' => 'maintenance.view'],
                 ],
             ],
             [
                 'label' => 'maintenance.section_contracts',
                 'items' => [
-                    ['label' => 'maintenance.nav_contracts_list',  'route' => 'maintenance-contracts.index',  'icon' => 'file-contract', 'permission' => 'maintenance.view'],
-                    ['label' => 'maintenance.nav_contracts_add',   'route' => 'maintenance-contracts.create', 'icon' => 'plus',          'permission' => 'maintenance.contracts.create'],
-                    ['label' => 'maintenance.nav_contract_payments', 'route' => 'contract-payments.index',    'icon' => 'money-check-dollar', 'permission' => 'maintenance.view'],
-                    ['label' => 'maintenance.nav_contract_scheduled_visits', 'route' => 'contract-scheduled-visits.index', 'icon' => 'calendar-days', 'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_contracts_list',  'route' => 'maintenance-contracts.index',  'icon' => 'file-contract',      'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_contracts_add',   'route' => 'maintenance-contracts.create', 'icon' => 'plus',               'permission' => 'maintenance.contracts.create'],
+                    ['label' => 'maintenance.nav_contract_payments','route' => 'contract-payments.index',     'icon' => 'money-check-dollar',  'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_contract_scheduled_visits','route' => 'contract-scheduled-visits.index','icon' => 'calendar-days','permission' => 'maintenance.view'],
                 ],
             ],
             [
                 'label' => 'maintenance.section_visits',
                 'items' => [
-                    ['label' => 'maintenance.nav_requests_inbox', 'route' => 'maintenance-requests.index', 'icon' => 'bell', 'permission' => 'maintenance.requests.manage'],
-                    ['label' => 'maintenance.nav_visits_list',    'route' => 'maintenance-visits.index',   'icon' => 'route', 'permission' => 'maintenance.visits.manage'],
-                    ['label' => 'maintenance.nav_visit_types',    'route' => 'maintenance-visit-types.index', 'icon' => 'tags', 'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.nav_requests_inbox', 'route' => 'maintenance-requests.index',    'icon' => 'bell',  'permission' => 'maintenance.requests.manage'],
+                    ['label' => 'maintenance.nav_visits_list',    'route' => 'maintenance-visits.index',      'icon' => 'route', 'permission' => 'maintenance.visits.manage'],
+                    ['label' => 'maintenance.nav_visit_types',    'route' => 'maintenance-visit-types.index', 'icon' => 'tags',  'permission' => 'maintenance.view'],
                 ],
             ],
             [
@@ -311,19 +379,19 @@ return [
             [
                 'label' => 'settings.section_management',
                 'items' => [
-                    ['label' => 'settings.nav_users',        'route' => 'settings.users.index',       'icon' => 'users',          'permission' => 'settings.users.view'],
-                    ['label' => 'settings.nav_add_user',     'route' => 'settings.users.create',      'icon' => 'user-plus',      'permission' => 'settings.users.create'],
-                    ['label' => 'settings.nav_roles',        'route' => 'settings.roles.index',       'icon' => 'shield-halved',  'permission' => 'settings.roles.view'],
-                    ['label' => 'settings.nav_permissions',  'route' => 'settings.permissions.index', 'icon' => 'key',            'permission' => 'settings.permissions.view'],
+                    ['label' => 'settings.nav_users',        'route' => 'settings.users.index',       'icon' => 'users',         'permission' => 'settings.users.view'],
+                    ['label' => 'settings.nav_add_user',     'route' => 'settings.users.create',      'icon' => 'user-plus',     'permission' => 'settings.users.create'],
+                    ['label' => 'settings.nav_roles',        'route' => 'settings.roles.index',       'icon' => 'shield-halved', 'permission' => 'settings.roles.view'],
+                    ['label' => 'settings.nav_permissions',  'route' => 'settings.permissions.index', 'icon' => 'key',           'permission' => 'settings.permissions.view'],
                 ],
             ],
             [
                 'label' => 'settings.section_master_data',
                 'items' => [
-                    ['label' => 'settings.nav_branches',     'route' => 'settings.branches.index',    'icon' => 'code-branch',       'permission' => 'settings.branches.view'],
-                    ['label' => 'settings.nav_currencies',   'route' => 'settings.currencies.index',  'icon' => 'coins',              'permission' => 'settings.currencies.view'],
-                    ['label' => 'settings.nav_countries',    'route' => 'settings.countries.index',   'icon' => 'earth-americas',     'permission' => 'settings.countries.view'],
-                    ['label' => 'settings.nav_governorates', 'route' => 'settings.governorates.index', 'icon' => 'map-location-dot',  'permission' => 'settings.governorates.view'],
+                    ['label' => 'settings.nav_branches',     'route' => 'settings.branches.index',    'icon' => 'code-branch',      'permission' => 'settings.branches.view'],
+                    ['label' => 'settings.nav_currencies',   'route' => 'settings.currencies.index',  'icon' => 'coins',             'permission' => 'settings.currencies.view'],
+                    ['label' => 'settings.nav_countries',    'route' => 'settings.countries.index',   'icon' => 'earth-americas',    'permission' => 'settings.countries.view'],
+                    ['label' => 'settings.nav_governorates', 'route' => 'settings.governorates.index','icon' => 'map-location-dot',  'permission' => 'settings.governorates.view'],
                     ['label' => 'settings.nav_sales_representatives', 'route' => 'settings.sales-representatives.index', 'icon' => 'user-tie', 'permission' => 'settings.sales_representatives.view'],
                 ],
             ],

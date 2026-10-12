@@ -59,6 +59,7 @@ use App\Http\Controllers\Settings\PurchaseRequestApproverController;
 use App\Http\Controllers\Settings\PurchaseRequestReminderRecipientController;
 use App\Http\Controllers\Settings\MaintenanceReportMaterialApproverController;
 use App\Http\Controllers\Settings\SalesRepresentativeController;
+use App\Http\Controllers\SplitUnits\SplitUnitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -188,14 +189,12 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('units', UnitController::class)->only(['destroy'])->middleware('permission:warehouse.units.delete');
 
         // Static "materials/..." segments must all be registered before the resource's
-        // show route ({material} wildcard, same segment count as any of these) — see the
-        // ordering note at the top of the settings group above.
+        // show route ({material} wildcard, same segment count as any of these).
         Route::get('materials/drafts', [MaterialController::class, 'drafts'])->name('materials.drafts')->middleware('permission:warehouse.view');
         Route::post('materials/bulk-destroy', [MaterialController::class, 'bulkDestroy'])->name('materials.bulk-destroy')->middleware('permission:warehouse.materials.delete');
-        // Gated by tenders.view (not a warehouse.materials.* permission) since it's only ever
-        // called from the Price Quote / CIAT Discount screens, both already behind their own
-        // tenders.* create permission — this is just the convenience action on top of that.
-        Route::post('materials/quick-store', [MaterialController::class, 'quickStore'])->name('materials.quick-store')->middleware('permission:tenders.view');
+        // Gated by quotations.view|tenders.view|split_units.view — only ever called from
+        // Price Quote / CIAT Discount / Split Unit screens, already behind their own create permissions.
+        Route::post('materials/quick-store', [MaterialController::class, 'quickStore'])->name('materials.quick-store')->middleware('permission:tenders.view|quotations.view|split_units.view');
         Route::resource('materials', MaterialController::class)->only(['create', 'store'])->middleware('permission:warehouse.materials.create');
         Route::resource('materials', MaterialController::class)->only(['index', 'show'])->middleware('permission:warehouse.view');
         Route::resource('materials', MaterialController::class)->only(['edit', 'update'])->middleware('permission:warehouse.materials.edit');
@@ -223,31 +222,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     });
 
+    // ── Accounting (invoices and invoice types only) ───────────────────────────
     Route::prefix('accounting')->name('accounting.')->group(function () {
-
-        // Customers and suppliers are separate tables/models/controllers — each
-        // is its own domain, not a shared "party" concept.
-        Route::resource('customers', CustomerController::class)->only(['index'])->middleware('permission:accounting.view');
-        Route::resource('customers', CustomerController::class)->only(['create', 'store'])->middleware('permission:accounting.customers.create');
-        Route::resource('customers', CustomerController::class)->only(['edit', 'update'])->middleware('permission:accounting.customers.edit');
-        Route::resource('customers', CustomerController::class)->only(['destroy'])->middleware('permission:accounting.customers.delete');
-
-        Route::resource('customer-groups', CustomerGroupController::class)->only(['index'])->middleware('permission:accounting.view');
-        Route::resource('customer-groups', CustomerGroupController::class)->only(['create', 'store'])->middleware('permission:accounting.customer_groups.create');
-        Route::resource('customer-groups', CustomerGroupController::class)->only(['edit', 'update'])->middleware('permission:accounting.customer_groups.edit');
-        Route::resource('customer-groups', CustomerGroupController::class)->only(['destroy'])->middleware('permission:accounting.customer_groups.delete');
-
-        Route::post('suppliers/shipping-instruction-image', [SupplierController::class, 'uploadShippingInstructionImage'])
-            ->name('suppliers.shipping-instruction-image')->middleware('permission:accounting.suppliers.edit');
-        Route::resource('suppliers', SupplierController::class)->only(['index'])->middleware('permission:accounting.view');
-        Route::resource('suppliers', SupplierController::class)->only(['create', 'store'])->middleware('permission:accounting.suppliers.create');
-        Route::resource('suppliers', SupplierController::class)->only(['edit', 'update'])->middleware('permission:accounting.suppliers.edit');
-        Route::resource('suppliers', SupplierController::class)->only(['destroy'])->middleware('permission:accounting.suppliers.delete');
-
-        Route::resource('supplier-groups', SupplierGroupController::class)->only(['index'])->middleware('permission:accounting.view');
-        Route::resource('supplier-groups', SupplierGroupController::class)->only(['create', 'store'])->middleware('permission:accounting.supplier_groups.create');
-        Route::resource('supplier-groups', SupplierGroupController::class)->only(['edit', 'update'])->middleware('permission:accounting.supplier_groups.edit');
-        Route::resource('supplier-groups', SupplierGroupController::class)->only(['destroy'])->middleware('permission:accounting.supplier_groups.delete');
 
         Route::resource('invoice-types', InvoiceTypeController::class)->only(['index'])->middleware('permission:accounting.view');
         Route::resource('invoice-types', InvoiceTypeController::class)->only(['create', 'store'])->middleware('permission:accounting.invoice_types.create');
@@ -256,6 +232,36 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
         Route::resource('invoices', InvoiceController::class)->only(['create', 'store'])->middleware('permission:accounting.invoices.create');
         Route::resource('invoices', InvoiceController::class)->only(['index', 'show'])->middleware('permission:accounting.view');
+
+    });
+
+    // ── Clients (customers, suppliers and groups — moved out of accounting prefix but
+    //    route NAMES stay as accounting.customers.* so existing blade templates need no changes) ──
+    Route::prefix('clients')->name('accounting.')->group(function () {
+
+        // Customers and suppliers are separate tables/models/controllers — each
+        // is its own domain, not a shared "party" concept.
+        Route::resource('customers', CustomerController::class)->only(['index'])->middleware('permission:clients.view|accounting.view');
+        Route::resource('customers', CustomerController::class)->only(['create', 'store'])->middleware('permission:clients.customers.create|accounting.customers.create');
+        Route::resource('customers', CustomerController::class)->only(['edit', 'update'])->middleware('permission:clients.customers.edit|accounting.customers.edit');
+        Route::resource('customers', CustomerController::class)->only(['destroy'])->middleware('permission:clients.customers.delete|accounting.customers.delete');
+
+        Route::resource('customer-groups', CustomerGroupController::class)->only(['index'])->middleware('permission:clients.view|accounting.view');
+        Route::resource('customer-groups', CustomerGroupController::class)->only(['create', 'store'])->middleware('permission:clients.customer_groups.create|accounting.customer_groups.create');
+        Route::resource('customer-groups', CustomerGroupController::class)->only(['edit', 'update'])->middleware('permission:clients.customer_groups.edit|accounting.customer_groups.edit');
+        Route::resource('customer-groups', CustomerGroupController::class)->only(['destroy'])->middleware('permission:clients.customer_groups.delete|accounting.customer_groups.delete');
+
+        Route::post('suppliers/shipping-instruction-image', [SupplierController::class, 'uploadShippingInstructionImage'])
+            ->name('suppliers.shipping-instruction-image')->middleware('permission:clients.suppliers.edit|accounting.suppliers.edit');
+        Route::resource('suppliers', SupplierController::class)->only(['index'])->middleware('permission:clients.view|accounting.view');
+        Route::resource('suppliers', SupplierController::class)->only(['create', 'store'])->middleware('permission:clients.suppliers.create|accounting.suppliers.create');
+        Route::resource('suppliers', SupplierController::class)->only(['edit', 'update'])->middleware('permission:clients.suppliers.edit|accounting.suppliers.edit');
+        Route::resource('suppliers', SupplierController::class)->only(['destroy'])->middleware('permission:clients.suppliers.delete|accounting.suppliers.delete');
+
+        Route::resource('supplier-groups', SupplierGroupController::class)->only(['index'])->middleware('permission:clients.view|accounting.view');
+        Route::resource('supplier-groups', SupplierGroupController::class)->only(['create', 'store'])->middleware('permission:clients.supplier_groups.create|accounting.supplier_groups.create');
+        Route::resource('supplier-groups', SupplierGroupController::class)->only(['edit', 'update'])->middleware('permission:clients.supplier_groups.edit|accounting.supplier_groups.edit');
+        Route::resource('supplier-groups', SupplierGroupController::class)->only(['destroy'])->middleware('permission:clients.supplier_groups.delete|accounting.supplier_groups.delete');
 
     });
 
@@ -291,23 +297,32 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['edit', 'update'])->middleware('permission:tenders.price_analyses.edit');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['destroy'])->middleware('permission:tenders.price_analyses.delete');
 
-    Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print')->middleware('permission:tenders.view');
-    Route::post('price-quotes/assign', [PriceQuoteController::class, 'assign'])->name('price-quotes.assign')->middleware('permission:tenders.price_quotes.assign');
-    Route::post('price-quotes/{priceQuote}/convert-to-invoice', [PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice')->middleware('permission:tenders.price_quotes.convert_to_invoice');
-    Route::resource('price-quotes', PriceQuoteController::class)->only(['create', 'store'])->middleware('permission:tenders.price_quotes.create');
-    Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'show'])->middleware('permission:tenders.view');
-    Route::resource('price-quotes', PriceQuoteController::class)->only(['edit', 'update'])->middleware('permission:tenders.price_quotes.edit');
+    // ── Price Quotes (now standalone quotations module — still accessible from tenders/maintenance flows) ──
+    Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print')->middleware('permission:quotations.view|tenders.view|maintenance.view');
+    Route::post('price-quotes/assign', [PriceQuoteController::class, 'assign'])->name('price-quotes.assign')->middleware('permission:quotations.price_quotes.assign|tenders.price_quotes.assign');
+    Route::post('price-quotes/{priceQuote}/convert-to-invoice', [PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice')->middleware('permission:quotations.price_quotes.convert_to_invoice|tenders.price_quotes.convert_to_invoice');
+    Route::resource('price-quotes', PriceQuoteController::class)->only(['create', 'store'])->middleware('permission:quotations.price_quotes.create|tenders.price_quotes.create');
+    Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'show'])->middleware('permission:quotations.view|tenders.view|maintenance.view');
+    Route::resource('price-quotes', PriceQuoteController::class)->only(['edit', 'update'])->middleware('permission:quotations.price_quotes.edit|tenders.price_quotes.edit');
 
-    Route::resource('projects', ProjectController::class)->only(['index', 'show'])->middleware('permission:tenders.projects.view');
-    Route::resource('projects', ProjectController::class)->only(['edit', 'update'])->middleware('permission:tenders.projects.edit');
-    Route::resource('projects', ProjectController::class)->only(['destroy'])->middleware('permission:tenders.projects.delete');
-    Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store')->middleware('permission:tenders.projects.edit');
-    Route::delete('projects/{project}/attachments/{attachment}', [ProjectAttachmentController::class, 'destroy'])->name('projects.attachments.destroy')->middleware('permission:tenders.projects.edit');
+    // ── Projects (now standalone module — still created via tenders convert-to-project) ──
+    Route::resource('projects', ProjectController::class)->only(['index', 'show'])->middleware('permission:projects.view|tenders.projects.view');
+    Route::resource('projects', ProjectController::class)->only(['edit', 'update'])->middleware('permission:projects.edit|tenders.projects.edit');
+    Route::resource('projects', ProjectController::class)->only(['destroy'])->middleware('permission:projects.delete|tenders.projects.delete');
+    Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store')->middleware('permission:projects.edit|tenders.projects.edit');
+    Route::delete('projects/{project}/attachments/{attachment}', [ProjectAttachmentController::class, 'destroy'])->name('projects.attachments.destroy')->middleware('permission:projects.edit|tenders.projects.edit');
 
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['create', 'store'])->middleware('permission:tenders.purchase_request_reminders.create');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'show'])->middleware('permission:tenders.view');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['edit', 'update'])->middleware('permission:tenders.purchase_request_reminders.edit');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['destroy'])->middleware('permission:tenders.purchase_request_reminders.delete');
+
+    // ── Split Units (new standalone module) ───────────────────────────────────
+    Route::get('split-units/{splitUnit}/print', [SplitUnitController::class, 'printDocument'])->name('split-units.print')->middleware('permission:split_units.view');
+    Route::resource('split-units', SplitUnitController::class)->only(['index', 'show'])->middleware('permission:split_units.view');
+    Route::resource('split-units', SplitUnitController::class)->only(['create', 'store'])->middleware('permission:split_units.create');
+    Route::resource('split-units', SplitUnitController::class)->only(['edit', 'update'])->middleware('permission:split_units.edit');
+    Route::resource('split-units', SplitUnitController::class)->only(['destroy'])->middleware('permission:split_units.delete');
 
     // Must be registered before the {purchase_request} resource routes below, since
     // "ship" would otherwise be swallowed by the show route's single-segment wildcard.

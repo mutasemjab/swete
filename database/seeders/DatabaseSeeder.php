@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             UnitSeeder::class,
             MaterialSeeder::class,
             MaintenanceVisitTypeSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

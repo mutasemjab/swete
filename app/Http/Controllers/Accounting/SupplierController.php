@@ -12,7 +12,7 @@ use Mews\Purifier\Facades\Purifier;
 
 class SupplierController extends ModuleController
 {
-    protected string $module = 'accounting';
+    protected string $module = 'clients';
 
     public function index(Request $request)
     {

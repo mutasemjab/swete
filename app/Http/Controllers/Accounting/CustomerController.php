@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends ModuleController
 {
-    protected string $module = 'accounting';
+    protected string $module = 'clients';
 
     public function index(Request $request)
     {

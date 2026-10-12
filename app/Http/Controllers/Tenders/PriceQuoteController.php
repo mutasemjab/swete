@@ -41,7 +41,7 @@ class PriceQuoteController extends ModuleController
             session(['price_quotes_module' => request()->query('module')]);
         }
 
-        $this->module = in_array(session('price_quotes_module'), ['tenders', 'maintenance'], true)
+        $this->module = in_array(session('price_quotes_module'), ['tenders', 'maintenance', 'quotations'], true)
             ? session('price_quotes_module')
             : 'tenders';
 
