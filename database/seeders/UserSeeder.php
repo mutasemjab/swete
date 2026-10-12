@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
             // محمد الزعاترة — مدير المشاريع
             [
                 'name'                   => 'محمد الزعاترة',
-                'email'                  => 'mohammad.zaatara@erp.local',
+                'email'                  => 'm@m.com',
                 'password'               => Hash::make('password'),
                 'status'                 => true,
                 'is_maintenance_manager' => false,
@@ -85,7 +85,7 @@ class UserSeeder extends Seeder
             // أم رسمي — مشتريات خارجية ومشاريع
             [
                 'name'                   => 'أم رسمي',
-                'email'                  => 'umm.rasmi@erp.local',
+                'email'                  => 'r@r.com',
                 'password'               => Hash::make('password'),
                 'status'                 => true,
                 'is_maintenance_manager' => false,
