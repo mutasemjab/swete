@@ -5,6 +5,10 @@ return [
     // ── Module ───────────────────────────────────────────────────────────────
     'module_name' => 'Clients',
     'module_desc' => 'Manage customers, suppliers, and their groups',
+    'customers_module_name' => 'Customers',
+    'customers_module_desc' => 'Manage customers and their groups',
+    'suppliers_module_name' => 'Suppliers',
+    'suppliers_module_desc' => 'Manage suppliers and their groups',
 
     // ── Sidebar sections ─────────────────────────────────────────────────────
     'section_customers' => 'Customers',

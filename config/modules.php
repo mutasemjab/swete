@@ -58,9 +58,13 @@ return [
     // ──────────────────────────────────────────────────────────────────────────
     // CLIENTS MODULE  ← customers, suppliers and their groups (moved out of accounting)
     // ──────────────────────────────────────────────────────────────────────────
-    'clients' => [
-        'name'        => 'clients.module_name',
-        'description' => 'clients.module_desc',
+    // Customers and Suppliers used to share one "Clients" module — split into two separate
+    // top-level modules per the user's request, while deliberately keeping every underlying
+    // route name/permission string (still 'accounting.customers.*'/'clients.*') unchanged, since
+    // this is purely a navigation/sidebar reorganization, not a routing or permissions change.
+    'customers' => [
+        'name'        => 'clients.customers_module_name',
+        'description' => 'clients.customers_module_desc',
         'icon'        => 'address-book',
         'color'       => 'violet',
         'route'       => 'accounting.customers.index',
@@ -75,6 +79,24 @@ return [
                 ],
             ],
             [
+                'label' => 'clients.section_settings',
+                'items' => [
+                    ['label' => 'clients.nav_customer_extra_fields', 'route' => 'client-extra-fields.customers', 'icon' => 'sliders', 'permission' => 'clients.extra_fields.view'],
+                ],
+            ],
+        ],
+    ],
+
+    'suppliers' => [
+        'name'        => 'clients.suppliers_module_name',
+        'description' => 'clients.suppliers_module_desc',
+        'icon'        => 'truck',
+        'color'       => 'orange',
+        'route'       => 'accounting.suppliers.index',
+        'permission'  => 'clients.view',
+        'gradient'    => 'from-orange-500 to-orange-700',
+        'sections'    => [
+            [
                 'label' => 'clients.section_suppliers',
                 'items' => [
                     ['label' => 'clients.nav_suppliers',       'route' => 'accounting.suppliers.index',       'icon' => 'truck',   'permission' => 'clients.view'],
@@ -84,7 +106,6 @@ return [
             [
                 'label' => 'clients.section_settings',
                 'items' => [
-                    ['label' => 'clients.nav_customer_extra_fields', 'route' => 'client-extra-fields.customers', 'icon' => 'sliders', 'permission' => 'clients.extra_fields.view'],
                     ['label' => 'clients.nav_supplier_extra_fields', 'route' => 'client-extra-fields.suppliers', 'icon' => 'sliders', 'permission' => 'clients.extra_fields.view'],
                 ],
             ],
@@ -258,6 +279,28 @@ return [
                 'items' => [
                     ['label' => 'split_units.nav_list', 'route' => 'split-units.index',  'icon' => 'file-invoice', 'permission' => 'split_units.view'],
                     ['label' => 'split_units.nav_add',  'route' => 'split-units.create', 'icon' => 'plus',         'permission' => 'split_units.create'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // AGREEMENTS MODULE  ← new standalone module: a customer-or-supplier agreement (PDF + note)
+    // ──────────────────────────────────────────────────────────────────────────
+    'agreements' => [
+        'name'        => 'agreements.module_name',
+        'description' => 'agreements.module_desc',
+        'icon'        => 'file-signature',
+        'color'       => 'rose',
+        'route'       => 'agreements.index',
+        'permission'  => 'agreements.view',
+        'gradient'    => 'from-rose-500 to-rose-700',
+        'sections'    => [
+            [
+                'label' => 'agreements.section_agreements',
+                'items' => [
+                    ['label' => 'agreements.nav_list', 'route' => 'agreements.index',  'icon' => 'file-signature', 'permission' => 'agreements.view'],
+                    ['label' => 'agreements.nav_add',  'route' => 'agreements.create', 'icon' => 'plus',           'permission' => 'agreements.create'],
                 ],
             ],
         ],

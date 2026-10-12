@@ -26,28 +26,12 @@ use Illuminate\Validation\ValidationException;
 
 class PriceQuoteController extends ModuleController
 {
-    protected string $module = 'tenders';
-
-    /**
-     * Price Quotes is the exact same feature linked from both the Tenders and Maintenance
-     * sidebars (see config/modules.php) — this is not two separate copies. Whichever sidebar
-     * entry point the user clicked (carrying ?module=) is remembered in session so every
-     * subsequent page in this CRUD flow (create/store/show/edit/update, including after a
-     * redirect, where a query param wouldn't otherwise survive) keeps showing that module's
-     * sidebar instead of silently switching back to Tenders.
-     */
-    protected function moduleView(string $view, array $data = [])
-    {
-        if (request()->has('module') && array_key_exists(request()->query('module'), config('modules'))) {
-            session(['price_quotes_module' => request()->query('module')]);
-        }
-
-        $this->module = in_array(session('price_quotes_module'), ['tenders', 'maintenance', 'quotations'], true)
-            ? session('price_quotes_module')
-            : 'tenders';
-
-        return parent::moduleView($view, $data);
-    }
+    // Price Quotes is now its own standalone module (see config/modules.php's 'quotations' key) —
+    // no longer shared/linked from the Tenders or Maintenance sidebars, so this just reports its
+    // own module like every other controller. (A session-based multi-module trick used to live
+    // here when Price Quotes really was reachable from two different sidebars; that's no longer
+    // the case, so the simpler static value is correct again.)
+    protected string $module = 'quotations';
 
     public function index(Request $request)
     {

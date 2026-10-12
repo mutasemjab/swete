@@ -61,6 +61,7 @@ use App\Http\Controllers\Settings\MaintenanceReportMaterialApproverController;
 use App\Http\Controllers\Settings\SalesRepresentativeController;
 use App\Http\Controllers\SplitUnits\SplitUnitController;
 use App\Http\Controllers\Clients\ClientExtraFieldController;
+use App\Http\Controllers\Agreements\AgreementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -334,6 +335,12 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('split-units', SplitUnitController::class)->only(['create', 'store'])->middleware('permission:split_units.create');
     Route::resource('split-units', SplitUnitController::class)->only(['edit', 'update'])->middleware('permission:split_units.edit');
     Route::resource('split-units', SplitUnitController::class)->only(['destroy'])->middleware('permission:split_units.delete');
+
+    // ── Agreements (new standalone module) ─────────────────────────────────────
+    Route::resource('agreements', AgreementController::class)->only(['index', 'show'])->middleware('permission:agreements.view');
+    Route::resource('agreements', AgreementController::class)->only(['create', 'store'])->middleware('permission:agreements.create');
+    Route::resource('agreements', AgreementController::class)->only(['edit', 'update'])->middleware('permission:agreements.edit');
+    Route::resource('agreements', AgreementController::class)->only(['destroy'])->middleware('permission:agreements.delete');
 
     // Must be registered before the {purchase_request} resource routes below, since
     // "ship" would otherwise be swallowed by the show route's single-segment wildcard.

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends ModuleController
 {
-    protected string $module = 'clients';
+    protected string $module = 'customers';
 
     public function index(Request $request)
     {
@@ -51,8 +51,9 @@ class CustomerController extends ModuleController
 
         $customer = Customer::create([
             ...$validated,
-            'code'   => Customer::nextCode(),
-            'status' => $request->boolean('status', true),
+            'code'       => Customer::nextCode(),
+            'status'     => $request->boolean('status', true),
+            'created_by' => $request->user()->id,
         ]);
 
         $this->syncContacts($customer, $request->input('contacts', []));

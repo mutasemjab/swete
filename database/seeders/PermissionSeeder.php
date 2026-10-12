@@ -90,6 +90,10 @@ class PermissionSeeder extends Seeder
             'split_units.view',
             'split_units.create', 'split_units.edit', 'split_units.delete', 'split_units.print',
 
+            // Agreements (new standalone module — customer/supplier agreement, PDF + note)
+            'agreements.view',
+            'agreements.create', 'agreements.edit', 'agreements.delete',
+
             // External Purchases
             'external_purchases.view', 'external_purchases.purchase_requests.create',
             'external_purchases.purchase_requests.edit', 'external_purchases.purchase_requests.delete',

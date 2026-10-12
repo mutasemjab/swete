@@ -14,7 +14,7 @@ use Mews\Purifier\Facades\Purifier;
 
 class SupplierController extends ModuleController
 {
-    protected string $module = 'clients';
+    protected string $module = 'suppliers';
 
     public function index(Request $request)
     {
@@ -49,8 +49,9 @@ class SupplierController extends ModuleController
 
         $supplier = Supplier::create([
             ...$validated,
-            'code'   => Supplier::nextCode(),
-            'status' => $request->boolean('status', true),
+            'code'       => Supplier::nextCode(),
+            'status'     => $request->boolean('status', true),
+            'created_by' => $request->user()->id,
         ]);
 
         $this->syncContacts($supplier, $request->input('contacts', []));

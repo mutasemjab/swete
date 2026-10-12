@@ -31,6 +31,7 @@ class Supplier extends Model
         'country_id',
         'shipping_instruction',
         'status',
+        'created_by',
     ];
 
     protected $casts = [
@@ -51,6 +52,11 @@ class Supplier extends Model
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function invoices(): HasMany

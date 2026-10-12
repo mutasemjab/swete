@@ -8,10 +8,13 @@ use Illuminate\Http\Request;
 
 class ClientExtraFieldController extends ModuleController
 {
-    protected string $module = 'clients';
+    // One controller serves both entity types, each belonging to a different module now that
+    // Customers/Suppliers are separate modules — set which one per request, not a fixed property.
+    protected string $module = 'customers';
 
     public function customers()
     {
+        $this->module = 'customers';
         $fields = ClientExtraField::forCustomers()->orderBy('sort_order')->orderBy('id')->get();
 
         return $this->moduleView('clients.extra-fields.index', [
@@ -23,6 +26,7 @@ class ClientExtraFieldController extends ModuleController
 
     public function suppliers()
     {
+        $this->module = 'suppliers';
         $fields = ClientExtraField::forSuppliers()->orderBy('sort_order')->orderBy('id')->get();
 
         return $this->moduleView('clients.extra-fields.index', [
@@ -50,6 +54,8 @@ class ClientExtraFieldController extends ModuleController
 
     public function edit(ClientExtraField $clientExtraField)
     {
+        $this->module = $clientExtraField->entity_type === 'customer' ? 'customers' : 'suppliers';
+
         return $this->moduleView('clients.extra-fields.edit', [
             'field'      => $clientExtraField,
             'fieldTypes' => ClientExtraField::FIELD_TYPES,

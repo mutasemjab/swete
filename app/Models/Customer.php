@@ -39,6 +39,7 @@ class Customer extends Authenticatable
         'shipping_country_en',
         'status',
         'password',
+        'created_by',
     ];
 
     protected $hidden = [
@@ -54,6 +55,11 @@ class Customer extends Authenticatable
     public function group(): BelongsTo
     {
         return $this->belongsTo(CustomerGroup::class, 'customer_group_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function invoices(): HasMany

@@ -5,6 +5,10 @@ return [
     // ── Module ───────────────────────────────────────────────────────────────
     'module_name' => 'العملاء والموردون',
     'module_desc' => 'إدارة العملاء والموردين وتصنيفاتهم',
+    'customers_module_name' => 'العملاء',
+    'customers_module_desc' => 'إدارة العملاء وتصنيفاتهم',
+    'suppliers_module_name' => 'الموردون',
+    'suppliers_module_desc' => 'إدارة الموردين وتصنيفاتهم',
 
     // ── Sidebar sections ─────────────────────────────────────────────────────
     'section_customers' => 'العملاء',

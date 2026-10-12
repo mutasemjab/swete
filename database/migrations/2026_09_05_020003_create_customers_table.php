@@ -39,6 +39,11 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->rememberToken();
 
+            // Nullable: seeded/legacy rows have no creator. Who changed the record afterward is
+            // still fully tracked by Spatie Activitylog (see getActivitylogOptions()) — this is
+            // only "who originally created it", which the activity log doesn't expose as a column.
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+
             $table->timestamps();
         });
     }
