@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Accounting;
 
+use App\Exports\CustomersTemplateExport;
 use App\Http\Controllers\ModuleController;
+use App\Imports\CustomersImport;
 use App\Models\ClientExtraField;
 use App\Models\ClientExtraFieldValue;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends ModuleController
 {
@@ -113,6 +116,30 @@ class CustomerController extends ModuleController
 
         return redirect()->route('accounting.customers.index')
             ->with('success', __('accounting.party_deleted'));
+    }
+
+    public function importTemplate()
+    {
+        return Excel::download(new CustomersTemplateExport(), 'customers-import-template.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+        ]);
+
+        $import = new CustomersImport($request->user()->id);
+        Excel::import($import, $request->file('file'));
+
+        if ($import->failures()->isNotEmpty()) {
+            $rows = $import->failures()->map(fn ($f) => $f->row())->implode(', ');
+
+            return back()->with('error', __('accounting.import_partial', ['rows' => $rows]));
+        }
+
+        return redirect()->route('accounting.customers.index')
+            ->with('success', __('accounting.import_success'));
     }
 
     private function syncContacts(Customer $customer, array $contacts): void

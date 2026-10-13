@@ -30,6 +30,7 @@ class PermissionSeeder extends Seeder
             'settings.maintenance_report_material_approvers.edit',
             'settings.sales_representatives.view', 'settings.sales_representatives.create',
             'settings.sales_representatives.edit', 'settings.sales_representatives.delete',
+            'settings.quote_discount_limit.edit',
 
             // Accounting
             'accounting.view',
@@ -85,6 +86,9 @@ class PermissionSeeder extends Seeder
 
             // Projects (standalone module — moved out of tenders)
             'projects.view', 'projects.edit', 'projects.delete', 'projects.convert',
+
+            // Projects Under Review (new standalone module — approval queue before a converted tender becomes a real project)
+            'projects_under_review.view', 'projects_under_review.approve',
 
             // Split Units (new module — separate quotations for split AC units)
             'split_units.view',

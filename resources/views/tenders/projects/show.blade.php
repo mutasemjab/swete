@@ -13,11 +13,20 @@
         <p class="page-subtitle">{{ $project->localized_title }}</p>
     </div>
     <div class="flex items-center gap-2">
+        @if($project->status === 'under_review')
+            <form action="{{ route('project-reviews.approve', $project) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-check"></i>
+                    {{ __('tenders.project_approve') }}
+                </button>
+            </form>
+        @endif
         <a href="{{ route('projects.edit', $project) }}" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
         </a>
-        <a href="{{ route('projects.index') }}" class="btn-secondary">
+        <a href="{{ $project->status === 'under_review' ? route('project-reviews.index') : route('projects.index') }}" class="btn-secondary">
             <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
             {{ __('app.back_to_list') }}
         </a>

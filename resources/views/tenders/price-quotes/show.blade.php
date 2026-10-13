@@ -4,10 +4,25 @@
 @section('breadcrumb', $priceQuote->number)
 
 @section('content')
+
+@unless($priceQuote->is_current)
+    <div class="card !bg-amber-50 !border-amber-200 px-5 py-4 mb-5 flex items-center justify-between gap-3">
+        <p class="font-bold text-amber-800">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ __('tenders.quote_old_version_banner') }}
+        </p>
+        @if($priceQuote->root)
+            <a href="{{ route('price-quotes.show', $priceQuote->root) }}" class="btn-secondary btn-sm">
+                {{ __('tenders.quote_view_current_version') }}
+            </a>
+        @endif
+    </div>
+@endunless
+
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ $priceQuote->number }}</h1>
-        <p class="page-subtitle">{{ __('tenders.price_quote') }}</p>
+        <p class="page-subtitle">{{ __('tenders.price_quote') }} — {{ __('tenders.quote_version_label', ['version' => $priceQuote->version]) }}</p>
     </div>
     <div class="flex items-center gap-2">
         @if($priceQuote->invoice_id)
@@ -15,7 +30,7 @@
                 <i class="fa-solid fa-file-invoice-dollar"></i>
                 {{ __('tenders.quote_view_invoice') }}
             </a>
-        @elseif($priceQuote->assigned_to === Auth::id())
+        @elseif($priceQuote->is_current && $priceQuote->assigned_to === Auth::id())
             <form action="{{ route('price-quotes.convert-to-invoice', $priceQuote) }}" method="POST">
                 @csrf
                 <button type="submit" class="btn-primary">
@@ -24,20 +39,47 @@
                 </button>
             </form>
         @endif
-        <a href="{{ route('price-quotes.print', $priceQuote) }}" target="_blank" class="btn-secondary">
+        <a href="{{ route('price-quotes.print', ['priceQuote' => $priceQuote, 'lang' => 'ar']) }}" target="_blank" class="btn-secondary">
             <i class="fa-solid fa-print"></i>
-            {{ __('external_purchases.print') }}
+            {{ __('tenders.quote_print_ar') }}
         </a>
-        <a href="{{ route('price-quotes.edit', $priceQuote) }}" class="btn-secondary">
-            <i class="fa-solid fa-pen"></i>
-            {{ __('app.edit') }}
+        <a href="{{ route('price-quotes.print', ['priceQuote' => $priceQuote, 'lang' => 'en']) }}" target="_blank" class="btn-secondary">
+            <i class="fa-solid fa-print"></i>
+            {{ __('tenders.quote_print_en') }}
         </a>
+        @if($priceQuote->is_current)
+            <a href="{{ route('price-quotes.edit', $priceQuote) }}" class="btn-secondary">
+                <i class="fa-solid fa-pen"></i>
+                {{ __('app.edit') }}
+            </a>
+        @endif
         <a href="{{ route('price-quotes.index') }}" class="btn-secondary">
             <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
             {{ __('app.back_to_list') }}
         </a>
     </div>
 </div>
+
+@if($priceQuote->is_current && $priceQuote->versions->isNotEmpty())
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.quote_version_history') }}</h3>
+    </div>
+    <div class="px-6 py-4">
+        @foreach($priceQuote->versions as $oldVersion)
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span class="text-sm text-slate-600">
+                    {{ __('tenders.quote_version_label', ['version' => $oldVersion->version]) }}
+                    — <span dir="ltr">{{ $oldVersion->updated_at->format('Y-m-d H:i') }}</span>
+                </span>
+                <a href="{{ route('price-quotes.show', $oldVersion) }}" class="btn-secondary btn-sm">
+                    <i class="fa-solid fa-eye"></i> {{ __('app.view') }}
+                </a>
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
 
 <div class="card px-6 py-5 mb-5">
     <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">

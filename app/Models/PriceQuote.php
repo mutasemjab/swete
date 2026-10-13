@@ -13,16 +13,6 @@ class PriceQuote extends Model
 {
     use LogsActivity;
 
-    /** Fixed set of work-scope line items the print's exclusion sentence draws from — not admin-manageable, unlike supply-scope/delivery-term. */
-    public const WORK_SCOPE_ITEMS = [
-        'pipe_work'           => ['ar' => 'أعمال المواسير', 'en' => 'Pipe Work'],
-        'duct_work'           => ['ar' => 'أعمال الدكت', 'en' => 'Duct Work'],
-        'electrical_works'    => ['ar' => 'الأعمال الكهربائية', 'en' => 'Electrical Works'],
-        'power_control_cable' => ['ar' => 'كابلات الطاقة والتحكم', 'en' => 'Power and Control Cable'],
-        'drain_works'         => ['ar' => 'أعمال الصرف', 'en' => 'Drain Works'],
-        'civil_works'         => ['ar' => 'الأعمال المدنية', 'en' => 'Civil Works'],
-    ];
-
     protected $fillable = [
         'number',
         'tender_id',
@@ -43,12 +33,14 @@ class PriceQuote extends Model
         'sales_tax_included',
         'customs_fees_included',
         'include_boiler_note',
-        'included_work_scopes',
         'additional_terms',
         'notes',
         'assigned_to',
         'invoice_id',
         'created_by',
+        'is_current',
+        'version',
+        'root_id',
     ];
 
     protected $casts = [
@@ -61,7 +53,7 @@ class PriceQuote extends Model
         'sales_tax_included'    => 'boolean',
         'customs_fees_included' => 'boolean',
         'include_boiler_note'   => 'boolean',
-        'included_work_scopes'  => 'array',
+        'is_current'            => 'boolean',
     ];
 
     public function tender(): BelongsTo
@@ -119,6 +111,18 @@ class PriceQuote extends Model
         return $this->hasMany(PriceQuoteInstallment::class)->orderBy('sort_order');
     }
 
+    /** Only meaningful on a frozen/archived row — the still-editable live quote it was cloned from. */
+    public function root(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'root_id');
+    }
+
+    /** Only meaningful on the live (is_current=true) row — its frozen edit history, newest first. */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(self::class, 'root_id')->orderByDesc('version');
+    }
+
     public function scopeAssignedTo(Builder $query, int $userId): Builder
     {
         return $query->where('assigned_to', $userId);
@@ -160,6 +164,34 @@ class PriceQuote extends Model
     }
 
     /**
+     * Freezes the current DB state (header + items + installments) into a new, read-only row and
+     * returns it — called by the controller right before applying an edit, so nothing is ever
+     * silently overwritten. The live row (this one) keeps its id/number; only the frozen clone
+     * gets a "-vN" number suffix (the real `number` column is unique, so two rows can't share it).
+     */
+    public function archiveCurrentVersion(): self
+    {
+        $this->loadMissing(['items', 'installments']);
+
+        $archive = $this->replicate(['root_id']);
+        $archive->number     = "{$this->number}-v{$this->version}";
+        $archive->is_current = false;
+        $archive->version    = $this->version;
+        $archive->root_id    = $this->id;
+        $archive->save();
+
+        foreach ($this->items as $item) {
+            $archive->items()->create($item->toArray());
+        }
+
+        foreach ($this->installments as $installment) {
+            $archive->installments()->create($installment->toArray());
+        }
+
+        return $archive;
+    }
+
+    /**
      * The "Very Important Notes" clause block for the print document, in a fixed order —
      * each line skipped/worded per the per-quote toggles/selections. See the plan file's
      * Models section for the full rationale behind each step.
@@ -190,7 +222,7 @@ class PriceQuote extends Model
             $lines[] = __('tenders.quote_note_boiler');
         }
 
-        $lines = array_merge($lines, $this->workScopeNoteLines());
+        $lines[] = __('tenders.quote_note_items_only');
 
         if ($this->currency) {
             $lines[] = __('tenders.quote_note_currency', ['code' => $this->currency->code]);
@@ -231,36 +263,6 @@ class PriceQuote extends Model
 
         if ($excluded) {
             $lines[] = __('tenders.quote_note_prices_exclude', ['items' => implode(' ' . __('tenders.and') . ' ', $excluded)]);
-        }
-
-        return $lines;
-    }
-
-    /** The 6 fixed work-scope items bucket into "included" and "excluded" — both lists are stated explicitly, mirroring the tax/customs lines. */
-    private function workScopeNoteLines(): array
-    {
-        $includedKeys = $this->included_work_scopes ?? [];
-        $locale       = app()->isLocale('en') ? 'en' : 'ar';
-
-        $included = [];
-        $excluded = [];
-
-        foreach (self::WORK_SCOPE_ITEMS as $key => $labels) {
-            if (in_array($key, $includedKeys, true)) {
-                $included[] = $labels[$locale];
-            } else {
-                $excluded[] = $labels[$locale];
-            }
-        }
-
-        $lines = [];
-
-        if ($included) {
-            $lines[] = __('tenders.quote_note_prices_include', ['items' => implode(', ', $included)]);
-        }
-
-        if ($excluded) {
-            $lines[] = __('tenders.quote_note_prices_exclude', ['items' => implode(', ', $excluded)]);
         }
 
         return $lines;

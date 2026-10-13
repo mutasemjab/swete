@@ -345,23 +345,6 @@ unset($__errorArgs, $__bag); ?>
         </div>
 
         <div class="sm:col-span-2">
-            <label class="form-label"><?php echo e(__('tenders.quote_included_work_scopes')); ?></label>
-            <p class="text-xs text-slate-400 mb-2"><?php echo e(__('tenders.quote_included_work_scopes_hint')); ?></p>
-            <?php $includedScopes = old('included_work_scopes', $priceQuote?->included_work_scopes ?? array_keys(\App\Models\PriceQuote::WORK_SCOPE_ITEMS)); ?>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <?php $__currentLoopData = \App\Models\PriceQuote::WORK_SCOPE_ITEMS; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $labels): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input type="checkbox" name="included_work_scopes[]" value="<?php echo e($key); ?>"
-                           <?php if(in_array($key, $includedScopes)): echo 'checked'; endif; ?>
-                           class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                    <?php echo e(__('tenders.quote_work_scope_' . $key)); ?>
-
-                </label>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </div>
-        </div>
-
-        <div class="sm:col-span-2">
             <label class="form-label"><?php echo e(__('tenders.quote_additional_terms')); ?></label>
             <p class="text-xs text-slate-400 mb-2"><?php echo e(__('tenders.quote_additional_terms_hint')); ?></p>
             <textarea name="additional_terms" rows="3"
@@ -529,7 +512,7 @@ unset($__errorArgs, $__bag); ?>">
                     <option value="percent"><?php echo e(__('tenders.quote_discount_percent')); ?></option>
                 </select>
                 <input type="number" name="discount_value" x-model="discountValue" step="0.001" min="0" dir="ltr"
-                       :max="discountType === 'percent' ? 100 : null"
+                       :max="discountType === 'percent' ? <?php echo e($discountLimit->max_discount_percent ?? 100); ?> : <?php echo e($discountLimit->max_discount_amount ?? 'null'); ?>"
                        class="form-input col-span-2 <?php $__errorArgs = ['discount_value'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -539,6 +522,15 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
             </div>
+            <?php if($discountLimit->max_discount_percent !== null || $discountLimit->max_discount_amount !== null): ?>
+                <p class="text-xs text-slate-400 mt-1.5">
+                    <?php echo e(__('tenders.quote_discount_limit_hint', [
+                        'percent' => $discountLimit->max_discount_percent !== null ? $discountLimit->max_discount_percent . '%' : '—',
+                        'amount'  => $discountLimit->max_discount_amount !== null ? $discountLimit->max_discount_amount : '—',
+                    ])); ?>
+
+                </p>
+            <?php endif; ?>
             <?php $__errorArgs = ['discount_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -574,6 +566,65 @@ unset($__errorArgs, $__bag); ?>
             </div>
         </dl>
         </div>
+    </div>
+</div>
+
+
+<div class="card mb-5" x-data="{
+    installments: <?php echo e(Js::from(old('installments', $seedInstallments ?? [['description'=>'','amount'=>'','due_date'=>'']]))); ?>,
+    addInstallment() { this.installments.push({ description: '', amount: '', due_date: '' }); },
+    removeInstallment(i) { this.installments.splice(i, 1); },
+}">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-orange-500 text-sm"></i>
+            <?php echo e(__('tenders.quote_installments')); ?>
+
+        </h3>
+        <button type="button" @click="addInstallment()" class="btn-secondary btn-sm">
+            <i class="fa-solid fa-plus"></i>
+            <?php echo e(__('tenders.add_installment')); ?>
+
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <template x-if="installments.length === 0">
+            <p class="text-sm text-slate-400 px-5 py-4"><?php echo e(__('tenders.no_installments')); ?></p>
+        </template>
+        <table class="w-full" x-show="installments.length > 0">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.installment_description')); ?></th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36"><?php echo e(__('tenders.installment_amount')); ?></th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-44"><?php echo e(__('tenders.installment_due_date')); ?></th>
+                    <th class="px-5 py-3 w-10"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <template x-for="(row, index) in installments" :key="index">
+                    <tr>
+                        <td class="px-5 py-2.5">
+                            <input type="text" :name="`installments[${index}][description]`" x-model="row.description"
+                                   class="form-input" placeholder="<?php echo e(__('tenders.installment_description')); ?>">
+                        </td>
+                        <td class="px-5 py-2.5">
+                            <input type="number" :name="`installments[${index}][amount]`" x-model="row.amount"
+                                   step="0.001" min="0" dir="ltr" class="form-input">
+                        </td>
+                        <td class="px-5 py-2.5">
+                            <input type="date" :name="`installments[${index}][due_date]`" x-model="row.due_date"
+                                   class="form-input">
+                        </td>
+                        <td class="px-5 py-2.5 text-center">
+                            <button type="button" @click="removeInstallment(index)"
+                                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
     </div>
 </div>
 

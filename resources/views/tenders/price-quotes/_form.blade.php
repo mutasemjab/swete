@@ -230,22 +230,6 @@
         </div>
 
         <div class="sm:col-span-2">
-            <label class="form-label">{{ __('tenders.quote_included_work_scopes') }}</label>
-            <p class="text-xs text-slate-400 mb-2">{{ __('tenders.quote_included_work_scopes_hint') }}</p>
-            @php $includedScopes = old('included_work_scopes', $priceQuote?->included_work_scopes ?? array_keys(\App\Models\PriceQuote::WORK_SCOPE_ITEMS)); @endphp
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                @foreach(\App\Models\PriceQuote::WORK_SCOPE_ITEMS as $key => $labels)
-                <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input type="checkbox" name="included_work_scopes[]" value="{{ $key }}"
-                           @checked(in_array($key, $includedScopes))
-                           class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                    {{ __('tenders.quote_work_scope_' . $key) }}
-                </label>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="sm:col-span-2">
             <label class="form-label">{{ __('tenders.quote_additional_terms') }}</label>
             <p class="text-xs text-slate-400 mb-2">{{ __('tenders.quote_additional_terms_hint') }}</p>
             <textarea name="additional_terms" rows="3"
@@ -379,9 +363,17 @@
                     <option value="percent">{{ __('tenders.quote_discount_percent') }}</option>
                 </select>
                 <input type="number" name="discount_value" x-model="discountValue" step="0.001" min="0" dir="ltr"
-                       :max="discountType === 'percent' ? 100 : null"
+                       :max="discountType === 'percent' ? {{ $discountLimit->max_discount_percent ?? 100 }} : {{ $discountLimit->max_discount_amount ?? 'null' }}"
                        class="form-input col-span-2 @error('discount_value') is-invalid @enderror">
             </div>
+            @if($discountLimit->max_discount_percent !== null || $discountLimit->max_discount_amount !== null)
+                <p class="text-xs text-slate-400 mt-1.5">
+                    {{ __('tenders.quote_discount_limit_hint', [
+                        'percent' => $discountLimit->max_discount_percent !== null ? $discountLimit->max_discount_percent . '%' : '—',
+                        'amount'  => $discountLimit->max_discount_amount !== null ? $discountLimit->max_discount_amount : '—',
+                    ]) }}
+                </p>
+            @endif
             @error('discount_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             @error('discount_value')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>

@@ -17,6 +17,7 @@ use App\Models\PriceQuote;
 use App\Models\PriceQuoteInstallment;
 use App\Models\PriceQuoteItem;
 use App\Models\QuoteDeliveryTerm;
+use App\Models\QuoteDiscountLimit;
 use App\Models\QuoteSupplyScope;
 use App\Models\Tender;
 use App\Models\Unit;
@@ -35,7 +36,8 @@ class PriceQuoteController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = PriceQuote::with(['customer', 'tender', 'assignee', 'invoice']);
+        // Archived/old versions don't clutter the main list — see PriceQuote::archiveCurrentVersion().
+        $query = PriceQuote::with(['customer', 'tender', 'assignee', 'invoice'])->where('is_current', true);
 
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->input('customer_id'));
@@ -99,7 +101,7 @@ class PriceQuoteController extends ModuleController
     {
         $priceQuote->load([
             'customer', 'tender', 'creator', 'branch', 'currency', 'supplyScope', 'deliveryTerm',
-            'items.material.unit', 'assignee', 'invoice', 'installments',
+            'items.material.unit', 'assignee', 'invoice', 'installments', 'versions', 'root',
         ]);
 
         return $this->moduleView('tenders.price-quotes.show', compact('priceQuote'));
@@ -107,6 +109,9 @@ class PriceQuoteController extends ModuleController
 
     public function edit(PriceQuote $priceQuote)
     {
+        // A frozen historical version is read-only — only the live quote can be edited.
+        abort_unless($priceQuote->is_current, 404);
+
         $priceQuote->load(['items', 'installments']);
 
         $seedInstallments = $priceQuote->installments->map(fn ($i) => [
@@ -130,8 +135,15 @@ class PriceQuoteController extends ModuleController
 
     public function update(Request $request, PriceQuote $priceQuote)
     {
+        abort_unless($priceQuote->is_current, 404);
+
         $validated = $this->validated($request);
 
+        // Freeze the pre-edit state into a new read-only row before touching anything — the live
+        // row (this one) keeps its id/number and just moves forward to the next version number.
+        $priceQuote->archiveCurrentVersion();
+
+        $validated['version'] = $priceQuote->version + 1;
         $priceQuote->update($validated);
 
         $this->syncItems($priceQuote, $validated['items']);
@@ -141,9 +153,17 @@ class PriceQuoteController extends ModuleController
             ->with('success', __('tenders.quote_updated'));
     }
 
-    /** Standalone, print-optimized 2-page A4 document — deliberately not wrapped in the app shell. */
-    public function printDocument(PriceQuote $priceQuote)
+    /**
+     * Standalone, print-optimized 2-page A4 document — deliberately not wrapped in the app shell.
+     * `?lang=ar|en` prints in that language regardless of the viewer's own session locale (scoped
+     * to this one request/render only — never persisted, never affects anything else).
+     */
+    public function printDocument(Request $request, PriceQuote $priceQuote)
     {
+        if (in_array($request->query('lang'), ['ar', 'en'], true)) {
+            app()->setLocale($request->query('lang'));
+        }
+
         $priceQuote->load([
             'branch', 'currency', 'customer', 'tender', 'supplyScope', 'deliveryTerm',
             'items.material.unit', 'installments',
@@ -164,6 +184,7 @@ class PriceQuoteController extends ModuleController
         // Defensive re-filter: a stale checkbox selection shouldn't reassign an already-invoiced quote.
         $updated = PriceQuote::whereIn('id', $validated['quote_ids'])
             ->whereNull('invoice_id')
+            ->where('is_current', true)
             ->update(['assigned_to' => $validated['assigned_to']]);
 
         return back()->with('success', __('tenders.quote_sent_to_employee', ['count' => $updated]));
@@ -172,6 +193,7 @@ class PriceQuoteController extends ModuleController
     /** One-click: turn this quote into a draft sales invoice. Only the employee it was sent to may do this. */
     public function convertToInvoice(Request $request, PriceQuote $priceQuote)
     {
+        abort_unless($priceQuote->is_current, 404);
         abort_unless($priceQuote->assigned_to === $request->user()->id, 403, __('tenders.quote_convert_unauthorized'));
 
         if ($priceQuote->invoice_id) {
@@ -244,6 +266,7 @@ class PriceQuoteController extends ModuleController
             // For the "quick add material" modal on the items table.
             'materialCategories' => MaterialCategory::orderBy('name')->get(),
             'units'              => Unit::where('status', true)->orderBy('name')->get(),
+            'discountLimit'      => QuoteDiscountLimit::current(),
         ];
     }
 
@@ -331,8 +354,6 @@ class PriceQuoteController extends ModuleController
             'sales_tax_included'        => ['boolean'],
             'customs_fees_included'     => ['boolean'],
             'include_boiler_note'       => ['boolean'],
-            'included_work_scopes'      => ['nullable', 'array'],
-            'included_work_scopes.*'    => ['string', 'in:' . implode(',', array_keys(PriceQuote::WORK_SCOPE_ITEMS))],
             'additional_terms'          => ['nullable', 'string'],
             'notes'                     => ['nullable', 'string'],
             'items'                     => ['required', 'array', 'min:1'],
@@ -357,15 +378,26 @@ class PriceQuoteController extends ModuleController
             throw ValidationException::withMessages(['discount_value' => __('tenders.quote_discount_exceeds')]);
         }
 
+        $limit = QuoteDiscountLimit::current();
+
+        if ($validated['discount_type'] === 'percent' && $limit->max_discount_percent !== null
+            && $validated['discount_value'] > (float) $limit->max_discount_percent) {
+            throw ValidationException::withMessages(['discount_value' => __('tenders.quote_discount_over_limit_percent', [
+                'limit' => (float) $limit->max_discount_percent,
+            ])]);
+        }
+
+        if ($validated['discount_type'] === 'amount' && $limit->max_discount_amount !== null
+            && $validated['discount_value'] > (float) $limit->max_discount_amount) {
+            throw ValidationException::withMessages(['discount_value' => __('tenders.quote_discount_over_limit_amount', [
+                'limit' => (float) $limit->max_discount_amount,
+            ])]);
+        }
+
         $validated['winching_included']     = $request->boolean('winching_included');
         $validated['sales_tax_included']    = $request->boolean('sales_tax_included');
         $validated['customs_fees_included'] = $request->boolean('customs_fees_included');
         $validated['include_boiler_note']   = $request->boolean('include_boiler_note');
-
-        // No checkboxes submitted at all (e.g. a non-JS fallback) shouldn't collapse to "everything excluded".
-        $validated['included_work_scopes'] = $request->has('included_work_scopes')
-            ? ($validated['included_work_scopes'] ?? [])
-            : array_keys(PriceQuote::WORK_SCOPE_ITEMS);
 
         return $validated;
     }

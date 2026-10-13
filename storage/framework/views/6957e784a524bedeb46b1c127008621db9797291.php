@@ -1,3 +1,5 @@
+
+
 <?php $__env->startSection('title', __('accounting.add_customer')); ?>
 <?php $__env->startSection('breadcrumb', __('accounting.add_customer')); ?>
 
@@ -13,7 +15,7 @@
     </a>
 </div>
 
-<form action="<?php echo e(route('accounting.customers.store')); ?>" method="POST">
+<form action="<?php echo e(route('accounting.customers.store')); ?>" method="POST" enctype="multipart/form-data">
     <?php echo csrf_field(); ?>
     <?php echo $__env->make('accounting.customers._form', ['groups' => $groups], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 

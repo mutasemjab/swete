@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Accounting;
 
+use App\Exports\SuppliersTemplateExport;
 use App\Http\Controllers\ModuleController;
+use App\Imports\SuppliersImport;
 use App\Models\ClientExtraField;
 use App\Models\ClientExtraFieldValue;
 use App\Models\Country;
@@ -10,6 +12,7 @@ use App\Models\Governorate;
 use App\Models\Supplier;
 use App\Models\SupplierGroup;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Mews\Purifier\Facades\Purifier;
 
 class SupplierController extends ModuleController
@@ -107,6 +110,30 @@ class SupplierController extends ModuleController
 
         return redirect()->route('accounting.suppliers.index')
             ->with('success', __('accounting.party_deleted'));
+    }
+
+    public function importTemplate()
+    {
+        return Excel::download(new SuppliersTemplateExport(), 'suppliers-import-template.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+        ]);
+
+        $import = new SuppliersImport($request->user()->id);
+        Excel::import($import, $request->file('file'));
+
+        if ($import->failures()->isNotEmpty()) {
+            $rows = $import->failures()->map(fn ($f) => $f->row())->implode(', ');
+
+            return back()->with('error', __('accounting.import_partial', ['rows' => $rows]));
+        }
+
+        return redirect()->route('accounting.suppliers.index')
+            ->with('success', __('accounting.import_success'));
     }
 
     /** Image upload target for the shipping-instruction rich-text editor. */

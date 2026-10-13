@@ -129,6 +129,12 @@
 </head>
 <body>
 
+@unless($priceQuote->is_current)
+    <div style="background:#fef3c7; border:2px solid #f59e0b; color:#92400e; font-weight:800; text-align:center; padding:10px; margin-bottom:10px;">
+        {{ __('tenders.quote_old_version_print_mark', ['version' => $priceQuote->version]) }}
+    </div>
+@endunless
+
 <div class="pq-toolbar">
     <button type="button" onclick="window.print()">
         {{ __('external_purchases.print') }}

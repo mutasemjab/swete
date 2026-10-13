@@ -12,4 +12,10 @@ return [
     // ── Sidebar items ────────────────────────────────────────────────────────
     'nav_list' => 'قائمة المشاريع',
 
+    // ── Projects Under Review module ────────────────────────────────────────
+    'under_review_module_name' => 'مشاريع قيد المراجعة',
+    'under_review_module_desc' => 'عطاءات تم تحويلها لمشاريع بانتظار الموافقة',
+    'section_under_review' => 'قيد المراجعة',
+    'nav_under_review_list' => 'قائمة المراجعة',
+
 ];

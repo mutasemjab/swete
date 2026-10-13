@@ -128,7 +128,7 @@ class TenderController extends ModuleController
             'customer_id' => $tender->party_id,
             'title'       => $tender->title,
             'title_en'    => $tender->title_en,
-            'status'      => 'active',
+            'status'      => 'under_review',
             'created_by'  => $request->user()->id,
         ]);
 

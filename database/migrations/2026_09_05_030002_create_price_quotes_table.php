@@ -36,9 +36,6 @@ return new class extends Migration
             $table->boolean('sales_tax_included')->default(false);
             $table->boolean('customs_fees_included')->default(false);
             $table->boolean('include_boiler_note')->default(false);
-            // No DB-level default — the controller always supplies this explicitly on create
-            // (defaulting to "all included" if the request omits the key entirely).
-            $table->json('included_work_scopes')->nullable();
             // Free-text custom points, one per line — appended to the auto-generated "Very Important
             // Notes" clause block on print, after the fixed toggles/selections above.
             $table->text('additional_terms')->nullable();
@@ -51,6 +48,16 @@ return new class extends Migration
             // used both to hide it from the assignee's pending list and to link to the result.
             $table->foreignId('invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
+
+            // Versioning: editing a quote never overwrites it — the live row (is_current=true) keeps
+            // its id/number and just bumps `version`; the pre-edit state is cloned into a frozen row
+            // (is_current=false, number suffixed "-vN", root_id pointing back at the live row) by
+            // PriceQuote::archiveCurrentVersion(), called from the controller right before an update
+            // is applied. See PriceQuoteController::update().
+            $table->boolean('is_current')->default(true);
+            $table->unsignedInteger('version')->default(1);
+            $table->foreignId('root_id')->nullable()->constrained('price_quotes')->nullOnDelete();
+
             $table->timestamps();
         });
     }

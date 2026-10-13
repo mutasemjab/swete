@@ -4,15 +4,47 @@
 @section('breadcrumb', __('accounting.suppliers'))
 
 @section('content')
-<div class="page-header">
+<div class="page-header" x-data="{ showImport: false }">
     <div>
         <h1 class="page-title">{{ __('accounting.suppliers_list') }}</h1>
         <p class="page-subtitle">{{ __('accounting.suppliers_subtitle') }}</p>
     </div>
-    <a href="{{ route('accounting.suppliers.create') }}" class="btn-primary">
-        <i class="fa-solid fa-plus"></i>
-        {{ __('accounting.add_supplier') }}
-    </a>
+    <div class="flex items-center gap-2">
+        <button type="button" @click="showImport = true" class="btn-secondary">
+            <i class="fa-solid fa-file-excel"></i>
+            {{ __('accounting.import_excel') }}
+        </button>
+        <a href="{{ route('accounting.suppliers.create') }}" class="btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            {{ __('accounting.add_supplier') }}
+        </a>
+    </div>
+
+    <div x-show="showImport" x-cloak
+         class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div @click.outside="showImport = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <form action="{{ route('accounting.suppliers.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="px-6 py-5 border-b border-slate-100">
+                    <h3 class="font-bold text-slate-800">{{ __('accounting.import_suppliers') }}</h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        {{ __('accounting.import_hint') }}
+                        <a href="{{ route('accounting.suppliers.import-template') }}" class="text-indigo-600 hover:underline">{{ __('accounting.download_template') }}</a>
+                    </p>
+                </div>
+                <div class="px-6 py-5">
+                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="form-input">
+                </div>
+                <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="showImport = false" class="btn-secondary">{{ __('app.cancel') }}</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-upload"></i>
+                        {{ __('accounting.import_excel') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

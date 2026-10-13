@@ -263,6 +263,27 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
+    // PROJECTS UNDER REVIEW MODULE  ← new module: tenders land here before approval
+    // ──────────────────────────────────────────────────────────────────────────
+    'projects_under_review' => [
+        'name'        => 'projects.under_review_module_name',
+        'description' => 'projects.under_review_module_desc',
+        'icon'        => 'hourglass-half',
+        'color'       => 'amber',
+        'route'       => 'project-reviews.index',
+        'permission'  => 'projects_under_review.view',
+        'gradient'    => 'from-amber-500 to-amber-700',
+        'sections'    => [
+            [
+                'label' => 'projects.section_under_review',
+                'items' => [
+                    ['label' => 'projects.nav_under_review_list', 'route' => 'project-reviews.index', 'icon' => 'hourglass-half', 'permission' => 'projects_under_review.view'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
     // SPLIT UNIT MODULE  ← new module, separate quotations for split AC units
     // ──────────────────────────────────────────────────────────────────────────
     'split_units' => [
@@ -458,6 +479,7 @@ return [
                     ['label' => 'settings.nav_countries',    'route' => 'settings.countries.index',   'icon' => 'earth-americas',    'permission' => 'settings.countries.view'],
                     ['label' => 'settings.nav_governorates', 'route' => 'settings.governorates.index','icon' => 'map-location-dot',  'permission' => 'settings.governorates.view'],
                     ['label' => 'settings.nav_sales_representatives', 'route' => 'settings.sales-representatives.index', 'icon' => 'user-tie', 'permission' => 'settings.sales_representatives.view'],
+                    ['label' => 'settings.nav_quote_discount_limit', 'route' => 'settings.quote-discount-limit.index', 'icon' => 'percent', 'permission' => 'settings.quote_discount_limit.edit'],
                 ],
             ],
             [

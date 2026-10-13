@@ -195,6 +195,194 @@ unset($__errorArgs, $__bag); ?>
     </div>
 </div>
 
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-building text-violet-500 text-sm"></i>
+            <?php echo e(__('clients.company_id_details')); ?>
+
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+            <label class="form-label"><?php echo e(__('clients.company_name')); ?></label>
+            <input type="text" name="company_name" value="<?php echo e(old('company_name', $customer?->company_name)); ?>"
+                   class="form-input <?php $__errorArgs = ['company_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+            <?php $__errorArgs = ['company_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+        </div>
+        <div>
+            <label class="form-label"><?php echo e(__('clients.company_name_en')); ?></label>
+            <input type="text" name="company_name_en" value="<?php echo e(old('company_name_en', $customer?->company_name_en)); ?>" dir="ltr"
+                   class="form-input <?php $__errorArgs = ['company_name_en'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+            <?php $__errorArgs = ['company_name_en'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+        </div>
+        <div>
+            <label class="form-label"><?php echo e(__('clients.commercial_registration')); ?></label>
+            <input type="text" name="commercial_registration" value="<?php echo e(old('commercial_registration', $customer?->commercial_registration)); ?>"
+                   class="form-input <?php $__errorArgs = ['commercial_registration'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+            <?php $__errorArgs = ['commercial_registration'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+        </div>
+        <div>
+            <label class="form-label"><?php echo e(__('clients.personal_id')); ?></label>
+            <input type="text" name="personal_id" value="<?php echo e(old('personal_id', $customer?->personal_id)); ?>"
+                   class="form-input <?php $__errorArgs = ['personal_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+            <?php $__errorArgs = ['personal_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><p class="form-error"><i class="fa-solid fa-circle-exclamation"></i><?php echo e($message); ?></p><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-5" x-data="{ contacts: <?php echo e(json_encode(old('contacts', $seedContacts))); ?> }">
+    <div class="card-header flex items-center justify-between">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-user-group text-teal-500 text-sm"></i>
+            <?php echo e(__('clients.contacts_section')); ?>
+
+        </h3>
+        <button type="button" @click="contacts.push({ name: '', phone: '', job_title: '' })"
+                class="btn-secondary btn-sm">
+            <i class="fa-solid fa-plus"></i>
+            <?php echo e(__('clients.add_contact')); ?>
+
+        </button>
+    </div>
+    <div class="px-6 py-5 space-y-4">
+        <template x-for="(contact, index) in contacts" :key="index">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl">
+                <div>
+                    <label class="form-label"><?php echo e(__('clients.contact_name')); ?></label>
+                    <input type="text" :name="`contacts[${index}][name]`" x-model="contact.name"
+                           class="form-input">
+                </div>
+                <div>
+                    <label class="form-label"><?php echo e(__('clients.contact_phone')); ?></label>
+                    <input type="text" :name="`contacts[${index}][phone]`" x-model="contact.phone"
+                           class="form-input" dir="ltr">
+                </div>
+                <div>
+                    <label class="form-label"><?php echo e(__('clients.contact_job_title')); ?></label>
+                    <div class="flex gap-2">
+                        <input type="text" :name="`contacts[${index}][job_title]`" x-model="contact.job_title"
+                               class="form-input flex-1">
+                        <button type="button" @click="contacts.splice(index, 1)"
+                                class="btn-danger btn-sm self-end flex-shrink-0" title="<?php echo e(__('app.delete')); ?>">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <p x-show="contacts.length === 0" class="text-slate-400 text-sm text-center py-4"><?php echo e(__('clients.no_contacts')); ?></p>
+    </div>
+</div>
+
+<?php if($extraFields->isNotEmpty()): ?>
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-amber-500 text-sm"></i>
+            <?php echo e(__('clients.extra_fields_section')); ?>
+
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <?php $__currentLoopData = $extraFields; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $efv = ($extraFieldValues ?? collect())->get($field->id); ?>
+            <div class="<?php echo e(in_array($field->field_type, ['textarea', 'image']) ? 'sm:col-span-2' : ''); ?>">
+                <label class="form-label"><?php echo e($field->localized_label); ?></label>
+                <?php if($field->field_type === 'textarea'): ?>
+                    <textarea name="extra_fields[<?php echo e($field->id); ?>]" rows="3"
+                              class="form-input"><?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?></textarea>
+                <?php elseif($field->field_type === 'image'): ?>
+                    <?php if($efv?->file_path): ?>
+                        <div class="mb-2">
+                            <img src="<?php echo e(asset($efv->file_path)); ?>" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
+                        </div>
+                    <?php endif; ?>
+                    <input type="file" name="extra_fields_images[<?php echo e($field->id); ?>]"
+                           class="form-input <?php $__errorArgs = ["extra_fields_images.{$field->id}"];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                           accept="image/*">
+                <?php elseif($field->field_type === 'number'): ?>
+                    <input type="number" name="extra_fields[<?php echo e($field->id); ?>]"
+                           value="<?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?>" dir="ltr"
+                           class="form-input">
+                <?php elseif($field->field_type === 'date'): ?>
+                    <input type="date" name="extra_fields[<?php echo e($field->id); ?>]"
+                           value="<?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?>" dir="ltr"
+                           class="form-input">
+                <?php else: ?>
+                    <input type="text" name="extra_fields[<?php echo e($field->id); ?>]"
+                           value="<?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?>"
+                           class="form-input">
+                <?php endif; ?>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="card mb-5" x-data="{ show: false }">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">

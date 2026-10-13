@@ -18,7 +18,9 @@ return new class extends Migration
             $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->string('title');
             $table->string('title_en')->nullable();
-            $table->enum('status', ['active', 'completed', 'cancelled'])->default('active');
+            // 'under_review' = just converted from a tender, awaiting approval before it's a real,
+            // active project — see Tenders\ProjectReviewController (its own module/nav section).
+            $table->enum('status', ['under_review', 'active', 'completed', 'cancelled'])->default('active');
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();

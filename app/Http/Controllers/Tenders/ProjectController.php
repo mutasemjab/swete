@@ -12,7 +12,10 @@ class ProjectController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = Project::with(['customer', 'tender']);
+        // Newly-converted tenders land in their own "Projects Under Review" module/queue first
+        // (see Tenders\ProjectReviewController) — they don't clutter the real projects list
+        // until approved.
+        $query = Project::with(['customer', 'tender'])->where('status', '!=', 'under_review');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -42,7 +45,7 @@ class ProjectController extends ModuleController
         $validated = $request->validate([
             'title'    => ['required', 'string', 'max:255'],
             'title_en' => ['nullable', 'string', 'max:255'],
-            'status'   => ['required', 'in:active,completed,cancelled'],
+            'status'   => ['required', 'in:under_review,active,completed,cancelled'],
             'notes'    => ['nullable', 'string'],
         ]);
 
