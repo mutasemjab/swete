@@ -265,16 +265,14 @@
         <thead>
             <tr>
                 <th>{{ __('tenders.installment_description') }}</th>
-                <th class="amount" style="width:110px">{{ __('tenders.installment_amount') }}</th>
-                <th style="width:110px" dir="ltr">{{ __('tenders.installment_due_date') }}</th>
+                <th class="amount" style="width:110px">{{ __('tenders.installment_percentage') }}</th>
             </tr>
         </thead>
         <tbody>
             @foreach($priceQuote->installments as $installment)
             <tr>
                 <td>{{ $installment->description ?: '' }}</td>
-                <td class="amount" dir="ltr">{{ number_format($installment->amount, 3) }}</td>
-                <td dir="ltr">{{ $installment->due_date?->format('Y-m-d') ?? '' }}</td>
+                <td class="amount" dir="ltr">{{ number_format($installment->percentage, 2) }}%</td>
             </tr>
             @endforeach
         </tbody>

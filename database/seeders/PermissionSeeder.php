@@ -40,6 +40,7 @@ class PermissionSeeder extends Seeder
             'accounting.supplier_groups.create', 'accounting.supplier_groups.edit', 'accounting.supplier_groups.delete',
             'accounting.invoice_types.create', 'accounting.invoice_types.edit', 'accounting.invoice_types.delete',
             'accounting.invoices.create',
+            'accounting.invoices.receipts.delete',
             // Accounting (future — journal/GL not built yet)
             'accounting.journal.create', 'accounting.journal.edit', 'accounting.journal.delete',
 
@@ -88,7 +89,7 @@ class PermissionSeeder extends Seeder
             'projects.view', 'projects.edit', 'projects.delete', 'projects.convert',
 
             // Projects Under Review (new standalone module — approval queue before a converted tender becomes a real project)
-            'projects_under_review.view', 'projects_under_review.approve',
+            'projects_under_review.view', 'projects_under_review.approve', 'projects_under_review.reject',
 
             // Split Units (new module — separate quotations for split AC units)
             'split_units.view',
@@ -150,6 +151,7 @@ class PermissionSeeder extends Seeder
             'accounting.supplier_groups.create', 'accounting.supplier_groups.edit',
             'accounting.invoice_types.create', 'accounting.invoice_types.edit',
             'accounting.invoices.create',
+            'accounting.invoices.receipts.delete',
             'settings.currencies.view',
             'clients.view',
             'clients.customers.create', 'clients.customers.edit',

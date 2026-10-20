@@ -20,6 +20,10 @@ class Project extends Model
         'title_en',
         'status',
         'notes',
+        'manager_id',
+        'engineer_id',
+        'foreman_id',
+        'review_reason',
         'created_by',
     ];
 
@@ -38,6 +42,21 @@ class Project extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function engineer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'engineer_id');
+    }
+
+    public function foreman(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'foreman_id');
+    }
+
     public function purchaseRequests(): HasMany
     {
         return $this->hasMany(PurchaseRequest::class);
@@ -46,6 +65,47 @@ class Project extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(ProjectAttachment::class);
+    }
+
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(Agreement::class);
+    }
+
+    /** Every line item across all of the linked tender's CURRENT price quotes — a project has no price quote of its own. */
+    public function quoteItems()
+    {
+        return $this->tender
+            ?->priceQuotes()
+            ->where('is_current', true)
+            ->with(['items.material', 'items.assignments.assignee'])
+            ->get()
+            ->flatMap(fn ($quote) => $quote->items->map(function ($item) use ($quote) {
+                $item->setAttribute('quoteNumber', $quote->number);
+
+                return $item;
+            }))
+            ?? collect();
+    }
+
+    /** Project value (all current quotes' totals) vs. what's actually been received against their invoices. */
+    public function financialSummary(): array
+    {
+        $quotes = $this->tender
+            ?->priceQuotes()
+            ->where('is_current', true)
+            ->with('invoice.receipts')
+            ->get()
+            ?? collect();
+
+        $value = (float) $quotes->sum('total');
+        $paid  = (float) $quotes->sum(fn ($quote) => $quote->invoice?->paid_amount ?? 0);
+
+        return [
+            'value' => $value,
+            'paid'  => $paid,
+            'due'   => max($value - $paid, 0),
+        ];
     }
 
     public function getLocalizedTitleAttribute(): string

@@ -8,14 +8,14 @@
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-            <label class="form-label">{{ __('accounting.party_name') }} <span class="text-rose-500">*</span></label>
+            <label class="form-label">{{ __('accounting.supplier_name_or_company') }} <span class="text-rose-500">*</span></label>
             <input type="text" name="name" value="{{ old('name', $supplier?->name) }}"
                    class="form-input @error('name') is-invalid @enderror">
             @error('name')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
         <div>
-            <label class="form-label">{{ __('app.name_en') }}</label>
+            <label class="form-label">{{ __('accounting.supplier_name_or_company_en') }}</label>
             <input type="text" name="name_en" value="{{ old('name_en', $supplier?->name_en) }}" dir="ltr"
                    class="form-input @error('name_en') is-invalid @enderror">
             @error('name_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -51,6 +51,30 @@
             <input type="text" name="tax_number" value="{{ old('tax_number', $supplier?->tax_number) }}" dir="ltr"
                    class="form-input @error('tax_number') is-invalid @enderror">
             @error('tax_number')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('clients.commercial_registration') }}</label>
+            @if($supplier?->commercial_registration_url)
+                <a href="{{ $supplier->commercial_registration_url }}" target="_blank" class="block mb-2">
+                    <img src="{{ $supplier->commercial_registration_url }}" class="h-20 rounded-lg object-cover border border-slate-200">
+                </a>
+            @endif
+            <input type="file" name="commercial_registration_file" accept="image/*"
+                   class="form-input @error('commercial_registration_file') is-invalid @enderror">
+            @error('commercial_registration_file')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div>
+            <label class="form-label">{{ __('clients.personal_id') }}</label>
+            @if($supplier?->personal_id_url)
+                <a href="{{ $supplier->personal_id_url }}" target="_blank" class="block mb-2">
+                    <img src="{{ $supplier->personal_id_url }}" class="h-20 rounded-lg object-cover border border-slate-200">
+                </a>
+            @endif
+            <input type="file" name="personal_id_file" accept="image/*"
+                   class="form-input @error('personal_id_file') is-invalid @enderror">
+            @error('personal_id_file')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
         <div class="sm:col-span-2">
@@ -97,41 +121,6 @@
             <input type="number" name="opening_balance" value="{{ old('opening_balance', $supplier?->opening_balance ?? 0) }}"
                    step="0.001" dir="ltr" class="form-input @error('opening_balance') is-invalid @enderror">
             @error('opening_balance')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-    </div>
-</div>
-
-<div class="card mb-5">
-    <div class="card-header">
-        <h3 class="font-bold text-slate-700 flex items-center gap-2">
-            <i class="fa-solid fa-building text-violet-500 text-sm"></i>
-            {{ __('clients.company_id_details') }}
-        </h3>
-    </div>
-    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div>
-            <label class="form-label">{{ __('clients.company_name') }}</label>
-            <input type="text" name="company_name" value="{{ old('company_name', $supplier?->company_name) }}"
-                   class="form-input @error('company_name') is-invalid @enderror">
-            @error('company_name')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-        <div>
-            <label class="form-label">{{ __('clients.company_name_en') }}</label>
-            <input type="text" name="company_name_en" value="{{ old('company_name_en', $supplier?->company_name_en) }}" dir="ltr"
-                   class="form-input @error('company_name_en') is-invalid @enderror">
-            @error('company_name_en')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-        <div>
-            <label class="form-label">{{ __('clients.commercial_registration') }}</label>
-            <input type="text" name="commercial_registration" value="{{ old('commercial_registration', $supplier?->commercial_registration) }}"
-                   class="form-input @error('commercial_registration') is-invalid @enderror">
-            @error('commercial_registration')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-        <div>
-            <label class="form-label">{{ __('clients.personal_id') }}</label>
-            <input type="text" name="personal_id" value="{{ old('personal_id', $supplier?->personal_id) }}"
-                   class="form-input @error('personal_id') is-invalid @enderror">
-            @error('personal_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
     </div>
 </div>

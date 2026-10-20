@@ -95,7 +95,67 @@
                 <dt class="text-slate-700 font-bold">{{ __('accounting.invoice_total') }}</dt>
                 <dd class="font-black text-lg text-blue-700">{{ number_format($invoice->total, 3) }}</dd>
             </div>
+            <div class="flex justify-between">
+                <dt class="text-emerald-600">{{ __('accounting.invoice_paid_amount') }}</dt>
+                <dd class="font-bold text-emerald-700">{{ number_format($invoice->paid_amount, 3) }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-rose-600">{{ __('accounting.invoice_balance_due') }}</dt>
+                <dd class="font-bold text-rose-700">{{ number_format($invoice->balance_due, 3) }}</dd>
+            </div>
         </dl>
+    </div>
+</div>
+
+<div class="card overflow-hidden mt-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('accounting.receipt_vouchers_section') }}</h3>
+    </div>
+    <div class="px-6 py-5">
+        @forelse($invoice->receipts as $receipt)
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <div class="flex items-center gap-3">
+                    <span class="font-mono text-xs text-slate-500">{{ $receipt->number }}</span>
+                    <span class="text-sm text-slate-600" dir="ltr">{{ $receipt->date->format('Y-m-d') }}</span>
+                    @if($receipt->notes)
+                        <span class="text-xs text-slate-400">{{ $receipt->notes }}</span>
+                    @endif
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="font-bold text-emerald-700" dir="ltr">{{ number_format($receipt->amount, 3) }}</span>
+                    <form action="{{ route('accounting.invoices.receipts.destroy', [$invoice, $receipt]) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                            <i class="fa-solid fa-trash text-sm"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @empty
+            <p class="text-sm text-slate-400 mb-4">{{ __('accounting.no_receipt_vouchers') }}</p>
+        @endforelse
+
+        <form action="{{ route('accounting.invoices.receipts.store', $invoice) }}" method="POST"
+              class="mt-4 pt-4 border-t border-slate-100 flex items-end gap-3 flex-wrap">
+            @csrf
+            <div class="flex-1 min-w-36">
+                <label class="form-label">{{ __('accounting.receipt_voucher_date') }}</label>
+                <input type="date" name="date" value="{{ now()->toDateString() }}" class="form-input">
+            </div>
+            <div class="flex-1 min-w-36">
+                <label class="form-label">{{ __('accounting.receipt_voucher_amount') }}</label>
+                <input type="number" name="amount" step="0.001" min="0" dir="ltr" class="form-input">
+            </div>
+            <div class="flex-1 min-w-48">
+                <label class="form-label">{{ __('accounting.receipt_voucher_notes') }}</label>
+                <input type="text" name="notes" class="form-input">
+            </div>
+            <button type="submit" class="btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                {{ __('accounting.add_receipt_voucher') }}
+            </button>
+        </form>
     </div>
 </div>
 @endsection

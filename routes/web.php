@@ -25,6 +25,7 @@ use App\Http\Controllers\Accounting\SupplierController;
 use App\Http\Controllers\Accounting\SupplierGroupController;
 use App\Http\Controllers\Accounting\InvoiceTypeController;
 use App\Http\Controllers\Accounting\InvoiceController;
+use App\Http\Controllers\Accounting\InvoiceReceiptController;
 use App\Http\Controllers\Tenders\TenderController;
 use App\Http\Controllers\Tenders\TenderStatusController;
 use App\Http\Controllers\Tenders\PriceQuoteController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Tenders\CiatDiscountController;
 use App\Http\Controllers\Tenders\PriceAnalysisController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
+use App\Http\Controllers\Tenders\ProjectItemAssignmentController;
 use App\Http\Controllers\Tenders\ProjectReviewController;
 use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
 use App\Http\Controllers\Crm\AppointmentController;
@@ -241,6 +243,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
         Route::resource('invoices', InvoiceController::class)->only(['create', 'store'])->middleware('permission:accounting.invoices.create');
         Route::resource('invoices', InvoiceController::class)->only(['index', 'show'])->middleware('permission:accounting.view');
+        Route::post('invoices/{invoice}/receipts', [InvoiceReceiptController::class, 'store'])->name('invoices.receipts.store')->middleware('permission:accounting.invoices.create');
+        Route::delete('invoices/{invoice}/receipts/{receipt}', [InvoiceReceiptController::class, 'destroy'])->name('invoices.receipts.destroy')->middleware('permission:accounting.invoices.receipts.delete');
 
     });
 
@@ -288,6 +292,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::prefix('client-extra-fields')->name('client-extra-fields.')->group(function () {
         Route::get('customers', [ClientExtraFieldController::class, 'customers'])->name('customers')->middleware('permission:clients.extra_fields.view');
         Route::get('suppliers', [ClientExtraFieldController::class, 'suppliers'])->name('suppliers')->middleware('permission:clients.extra_fields.view');
+        Route::get('tenders', [ClientExtraFieldController::class, 'tenders'])->name('tenders')->middleware('permission:clients.extra_fields.view');
         Route::post('/', [ClientExtraFieldController::class, 'store'])->name('store')->middleware('permission:clients.extra_fields.create');
         Route::get('{clientExtraField}/edit', [ClientExtraFieldController::class, 'edit'])->name('edit')->middleware('permission:clients.extra_fields.edit');
         Route::put('{clientExtraField}', [ClientExtraFieldController::class, 'update'])->name('update')->middleware('permission:clients.extra_fields.edit');
@@ -340,10 +345,16 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('projects', ProjectController::class)->only(['destroy'])->middleware('permission:projects.delete|tenders.projects.delete');
     Route::post('projects/{project}/attachments', [ProjectAttachmentController::class, 'store'])->name('projects.attachments.store')->middleware('permission:projects.edit|tenders.projects.edit');
     Route::delete('projects/{project}/attachments/{attachment}', [ProjectAttachmentController::class, 'destroy'])->name('projects.attachments.destroy')->middleware('permission:projects.edit|tenders.projects.edit');
+    Route::post('projects/{project}/item-assignments', [ProjectItemAssignmentController::class, 'store'])->name('projects.item-assignments.store')->middleware('permission:projects.edit|tenders.projects.edit');
+    // No extra permission string — the row's own `assigned_to`/`manager_id` ownership check inside
+    // the controller is the real gate here, same precedent as ApprovalController's approve/reject.
+    Route::post('projects/{project}/item-assignments/{assignment}/mark-done', [ProjectItemAssignmentController::class, 'markDone'])->name('projects.item-assignments.mark-done');
+    Route::post('projects/{project}/assign-team', [ProjectController::class, 'assignTeam'])->name('projects.assign-team');
 
     // ── Projects Under Review (new standalone module — tenders land here before approval) ─────
     Route::get('project-reviews', [ProjectReviewController::class, 'index'])->name('project-reviews.index')->middleware('permission:projects_under_review.view');
     Route::post('project-reviews/{project}/approve', [ProjectReviewController::class, 'approve'])->name('project-reviews.approve')->middleware('permission:projects_under_review.approve');
+    Route::post('project-reviews/{project}/reject', [ProjectReviewController::class, 'reject'])->name('project-reviews.reject')->middleware('permission:projects_under_review.reject');
 
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['create', 'store'])->middleware('permission:tenders.purchase_request_reminders.create');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'show'])->middleware('permission:tenders.view');

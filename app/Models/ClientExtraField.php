@@ -34,6 +34,11 @@ class ClientExtraField extends Model
         return $query->where('entity_type', 'supplier');
     }
 
+    public function scopeForTenders(Builder $query): Builder
+    {
+        return $query->where('entity_type', 'tender');
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', true);

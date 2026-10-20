@@ -1,20 +1,22 @@
 @php
     $priceQuote = $priceQuote ?? null;
     $report = $report ?? null;
-    $seedItems = (
-        $priceQuote?->items->map(fn ($i) => [
-            'material_id' => $i->material_id,
-            'quantity'    => (float) $i->quantity,
-            'unit_price'  => (float) $i->unit_price,
-            'notes'       => $i->notes ?: [''],
-        ])->values()
-        ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
-            'material_id' => $m->material_id,
-            'quantity'    => (float) $m->quantity,
-            'unit_price'  => 0,
-            'notes'       => [''],
-        ])->values() : null)
-        ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+    $seedItems = collect(
+        old('items') ?? (
+            $priceQuote?->items->map(fn ($i) => [
+                'material_id' => $i->material_id,
+                'quantity'    => (float) $i->quantity,
+                'unit_price'  => (float) $i->unit_price,
+                'notes'       => $i->notes ?: [''],
+            ])->values()
+            ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
+                'material_id' => $m->material_id,
+                'quantity'    => (float) $m->quantity,
+                'unit_price'  => 0,
+                'notes'       => [''],
+            ])->values() : null)
+            ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+        )
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp
 <div x-data="{
@@ -130,7 +132,7 @@
             <select name="branch_id" class="js-select2 form-select @error('branch_id') is-invalid @enderror">
                 <option value="">{{ __('app.select') }}</option>
                 @foreach($branches as $branch)
-                    <option value="{{ $branch->id }}" @selected(old('branch_id', $priceQuote?->branch_id) == $branch->id)>{{ $branch->localized_name }}</option>
+                    <option value="{{ $branch->id }}" @selected(old('branch_id', $priceQuote?->branch_id ?? $branches->first()?->id) == $branch->id)>{{ $branch->localized_name }}</option>
                 @endforeach
             </select>
             @error('branch_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -400,8 +402,8 @@
 
 {{-- Installments card --}}
 <div class="card mb-5" x-data="{
-    installments: {{ Js::from(old('installments', $seedInstallments ?? [['description'=>'','amount'=>'','due_date'=>'']])) }},
-    addInstallment() { this.installments.push({ description: '', amount: '', due_date: '' }); },
+    installments: {{ Js::from(old('installments', $seedInstallments ?? [['description'=>'','percentage'=>'']])) }},
+    addInstallment() { this.installments.push({ description: '', percentage: '' }); },
     removeInstallment(i) { this.installments.splice(i, 1); },
 }">
     <div class="card-header">
@@ -422,8 +424,7 @@
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.installment_description') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_amount') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-44">{{ __('tenders.installment_due_date') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_percentage') }}</th>
                     <th class="px-5 py-3 w-10"></th>
                 </tr>
             </thead>
@@ -435,12 +436,8 @@
                                    class="form-input" placeholder="{{ __('tenders.installment_description') }}">
                         </td>
                         <td class="px-5 py-2.5">
-                            <input type="number" :name="`installments[${index}][amount]`" x-model="row.amount"
-                                   step="0.001" min="0" dir="ltr" class="form-input">
-                        </td>
-                        <td class="px-5 py-2.5">
-                            <input type="date" :name="`installments[${index}][due_date]`" x-model="row.due_date"
-                                   class="form-input">
+                            <input type="number" :name="`installments[${index}][percentage]`" x-model="row.percentage"
+                                   step="0.01" min="0" max="100" dir="ltr" class="form-input">
                         </td>
                         <td class="px-5 py-2.5 text-center">
                             <button type="button" @click="removeInstallment(index)"

@@ -230,16 +230,14 @@
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.installment_description') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_amount') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-40">{{ __('tenders.installment_due_date') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_percentage') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @foreach($priceQuote->installments as $installment)
                 <tr>
                     <td class="px-5 py-3 text-sm text-slate-700">{{ $installment->description ?: '—' }}</td>
-                    <td class="px-5 py-3 text-sm font-bold text-slate-800" dir="ltr">{{ number_format($installment->amount, 3) }}</td>
-                    <td class="px-5 py-3 text-sm text-slate-700" dir="ltr">{{ $installment->due_date?->format('Y-m-d') ?? '—' }}</td>
+                    <td class="px-5 py-3 text-sm font-bold text-slate-800" dir="ltr">{{ number_format($installment->percentage, 2) }}%</td>
                 </tr>
                 @endforeach
             </tbody>

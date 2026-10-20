@@ -68,6 +68,21 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(InvoiceReceipt::class);
+    }
+
+    public function getPaidAmountAttribute(): float
+    {
+        return (float) $this->receipts->sum('amount');
+    }
+
+    public function getBalanceDueAttribute(): float
+    {
+        return max((float) $this->total - $this->paid_amount, 0);
+    }
+
     public static function nextNumber(InvoiceType $type): string
     {
         $prefix = strtoupper(substr($type->code, 0, 3));

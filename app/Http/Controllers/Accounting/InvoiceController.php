@@ -90,7 +90,7 @@ class InvoiceController extends ModuleController
 
     public function show(Invoice $invoice)
     {
-        $invoice->load(['invoiceType', 'party', 'currency', 'creator', 'items']);
+        $invoice->load(['invoiceType', 'party', 'currency', 'creator', 'items', 'receipts.creator']);
         return $this->moduleView('accounting.invoices.show', compact('invoice'));
     }
 }

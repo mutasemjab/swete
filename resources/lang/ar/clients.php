@@ -25,10 +25,7 @@ return [
     // ── Section labels ───────────────────────────────────────────────────────
     'section_settings' => 'الإعدادات',
 
-    // ── Company & ID fields ──────────────────────────────────────────────────
-    'company_id_details'      => 'بيانات الشركة والهوية',
-    'company_name'            => 'اسم الشركة',
-    'company_name_en'         => 'اسم الشركة (إنجليزي)',
+    // ── ID fields ─────────────────────────────────────────────────────────────
     'commercial_registration' => 'السجل التجاري',
     'personal_id'             => 'الهوية الشخصية',
 
@@ -44,8 +41,10 @@ return [
     'extra_fields_section'           => 'الحقول الإضافية',
     'customer_extra_fields'          => 'الزيادات على العملاء',
     'supplier_extra_fields'          => 'الزيادات على الموردين',
+    'tender_extra_fields'            => 'الزيادات على العطاءات',
     'extra_fields_subtitle_customer' => 'تعريف الحقول الإضافية التي تظهر في نماذج العملاء',
     'extra_fields_subtitle_supplier' => 'تعريف الحقول الإضافية التي تظهر في نماذج الموردين',
+    'extra_fields_subtitle_tender'   => 'تعريف الحقول الإضافية التي تظهر في نماذج العطاءات',
     'add_extra_field'                => 'إضافة حقل جديد',
     'extra_field_added'              => 'تمت إضافة الحقل بنجاح',
     'extra_field_updated'            => 'تم تحديث الحقل بنجاح',

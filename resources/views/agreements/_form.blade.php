@@ -1,4 +1,7 @@
-@php $agreement = $agreement ?? null; @endphp
+@php
+    $agreement = $agreement ?? null;
+    $project = $project ?? null;
+@endphp
 <div class="card mb-5" x-data="{ partyType: '{{ old('party_type', $agreement?->party_type ?? 'customer') }}' }">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">
@@ -6,6 +9,15 @@
             {{ __('agreements.agreement') }}
         </h3>
     </div>
+    @if($project)
+        <input type="hidden" name="project_id" value="{{ $project->id }}">
+        <div class="px-6 pt-5">
+            <p class="text-sm text-slate-500">
+                <i class="fa-solid fa-diagram-project"></i>
+                {{ __('tenders.project') }}: <span class="font-bold text-slate-700">{{ $project->number }} — {{ $project->localized_title }}</span>
+            </p>
+        </div>
+    @endif
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
             <label class="form-label">{{ __('agreements.party_type') }} <span class="text-rose-500">*</span></label>
@@ -22,7 +34,7 @@
                 <select name="party_id" class="js-select2 form-select @error('party_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($customers as $customer)
-                        <option value="{{ $customer->id }}" @selected(old('party_id', $agreement?->party_type === 'customer' ? $agreement?->party_id : null) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
+                        <option value="{{ $customer->id }}" @selected(old('party_id', $agreement?->party_type === 'customer' ? $agreement?->party_id : ($project?->customer_id)) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
                     @endforeach
                 </select>
             </template>

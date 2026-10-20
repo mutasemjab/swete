@@ -94,6 +94,12 @@ class Tender extends Model
         return $this->hasMany(Project::class);
     }
 
+    public function extraFieldValues(): HasMany
+    {
+        return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')
+            ->where('entity_type', 'tender');
+    }
+
     public function getLocalizedTitleAttribute(): string
     {
         return app()->isLocale('en') && $this->title_en

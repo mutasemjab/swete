@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', $entityType === 'customer' ? __('clients.customer_extra_fields') : __('clients.supplier_extra_fields'))
-@section('breadcrumb', $entityType === 'customer' ? __('clients.customer_extra_fields') : __('clients.supplier_extra_fields'))
+@section('title', __("clients.{$entityType}_extra_fields"))
+@section('breadcrumb', __("clients.{$entityType}_extra_fields"))
 
 @section('content')
 <div class="page-header">
     <div>
-        <h1 class="page-title">{{ $entityType === 'customer' ? __('clients.customer_extra_fields') : __('clients.supplier_extra_fields') }}</h1>
-        <p class="page-subtitle">{{ $entityType === 'customer' ? __('clients.extra_fields_subtitle_customer') : __('clients.extra_fields_subtitle_supplier') }}</p>
+        <h1 class="page-title">{{ __("clients.{$entityType}_extra_fields") }}</h1>
+        <p class="page-subtitle">{{ __("clients.extra_fields_subtitle_{$entityType}") }}</p>
     </div>
 </div>
 

@@ -243,16 +243,14 @@
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.installment_description')); ?></th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36"><?php echo e(__('tenders.installment_amount')); ?></th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-40"><?php echo e(__('tenders.installment_due_date')); ?></th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36"><?php echo e(__('tenders.installment_percentage')); ?></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 <?php $__currentLoopData = $priceQuote->installments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $installment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td class="px-5 py-3 text-sm text-slate-700"><?php echo e($installment->description ?: '—'); ?></td>
-                    <td class="px-5 py-3 text-sm font-bold text-slate-800" dir="ltr"><?php echo e(number_format($installment->amount, 3)); ?></td>
-                    <td class="px-5 py-3 text-sm text-slate-700" dir="ltr"><?php echo e($installment->due_date?->format('Y-m-d') ?? '—'); ?></td>
+                    <td class="px-5 py-3 text-sm font-bold text-slate-800" dir="ltr"><?php echo e(number_format($installment->percentage, 2)); ?>%</td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>

@@ -114,6 +114,31 @@
     </div>
 </div>
 
+@if($tender->extraFieldValues->isNotEmpty())
+<div class="card px-6 py-5 mb-5">
+    <h3 class="text-sm font-black text-slate-700 mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-amber-500 text-sm"></i>
+        {{ __('clients.extra_fields_section') }}
+    </h3>
+    <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        @foreach($tender->extraFieldValues as $efv)
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ $efv->field?->localized_label }}</dt>
+            <dd class="font-bold text-slate-800">
+                @if($efv->file_path)
+                    <a href="{{ asset($efv->file_path) }}" target="_blank" class="block">
+                        <img src="{{ asset($efv->file_path) }}" class="h-20 rounded-lg object-cover border border-slate-200">
+                    </a>
+                @else
+                    {{ $efv->value ?: '—' }}
+                @endif
+            </dd>
+        </div>
+        @endforeach
+    </dl>
+</div>
+@endif
+
 <div class="card overflow-hidden">
     <div class="card-header">
         <h3 class="font-bold text-slate-700">{{ __('tenders.price_quotes') }}</h3>

@@ -1,20 +1,22 @@
 <?php
     $priceQuote = $priceQuote ?? null;
     $report = $report ?? null;
-    $seedItems = (
-        $priceQuote?->items->map(fn ($i) => [
-            'material_id' => $i->material_id,
-            'quantity'    => (float) $i->quantity,
-            'unit_price'  => (float) $i->unit_price,
-            'notes'       => $i->notes ?: [''],
-        ])->values()
-        ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
-            'material_id' => $m->material_id,
-            'quantity'    => (float) $m->quantity,
-            'unit_price'  => 0,
-            'notes'       => [''],
-        ])->values() : null)
-        ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+    $seedItems = collect(
+        old('items') ?? (
+            $priceQuote?->items->map(fn ($i) => [
+                'material_id' => $i->material_id,
+                'quantity'    => (float) $i->quantity,
+                'unit_price'  => (float) $i->unit_price,
+                'notes'       => $i->notes ?: [''],
+            ])->values()
+            ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
+                'material_id' => $m->material_id,
+                'quantity'    => (float) $m->quantity,
+                'unit_price'  => 0,
+                'notes'       => [''],
+            ])->values() : null)
+            ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+        )
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 ?>
 <div x-data="{
@@ -167,7 +169,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                 <option value=""><?php echo e(__('app.select')); ?></option>
                 <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <option value="<?php echo e($branch->id); ?>" <?php if(old('branch_id', $priceQuote?->branch_id) == $branch->id): echo 'selected'; endif; ?>><?php echo e($branch->localized_name); ?></option>
+                    <option value="<?php echo e($branch->id); ?>" <?php if(old('branch_id', $priceQuote?->branch_id ?? $branches->first()?->id) == $branch->id): echo 'selected'; endif; ?>><?php echo e($branch->localized_name); ?></option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
             <?php $__errorArgs = ['branch_id'];
@@ -571,8 +573,8 @@ unset($__errorArgs, $__bag); ?>
 
 
 <div class="card mb-5" x-data="{
-    installments: <?php echo e(Js::from(old('installments', $seedInstallments ?? [['description'=>'','amount'=>'','due_date'=>'']]))); ?>,
-    addInstallment() { this.installments.push({ description: '', amount: '', due_date: '' }); },
+    installments: <?php echo e(Js::from(old('installments', $seedInstallments ?? [['description'=>'','percentage'=>'']]))); ?>,
+    addInstallment() { this.installments.push({ description: '', percentage: '' }); },
     removeInstallment(i) { this.installments.splice(i, 1); },
 }">
     <div class="card-header">
@@ -595,8 +597,7 @@ unset($__errorArgs, $__bag); ?>
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.installment_description')); ?></th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36"><?php echo e(__('tenders.installment_amount')); ?></th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-44"><?php echo e(__('tenders.installment_due_date')); ?></th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36"><?php echo e(__('tenders.installment_percentage')); ?></th>
                     <th class="px-5 py-3 w-10"></th>
                 </tr>
             </thead>
@@ -608,12 +609,8 @@ unset($__errorArgs, $__bag); ?>
                                    class="form-input" placeholder="<?php echo e(__('tenders.installment_description')); ?>">
                         </td>
                         <td class="px-5 py-2.5">
-                            <input type="number" :name="`installments[${index}][amount]`" x-model="row.amount"
-                                   step="0.001" min="0" dir="ltr" class="form-input">
-                        </td>
-                        <td class="px-5 py-2.5">
-                            <input type="date" :name="`installments[${index}][due_date]`" x-model="row.due_date"
-                                   class="form-input">
+                            <input type="number" :name="`installments[${index}][percentage]`" x-model="row.percentage"
+                                   step="0.01" min="0" max="100" dir="ltr" class="form-input">
                         </td>
                         <td class="px-5 py-2.5 text-center">
                             <button type="button" @click="removeInstallment(index)"

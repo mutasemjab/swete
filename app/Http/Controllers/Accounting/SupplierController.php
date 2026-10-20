@@ -21,7 +21,7 @@ class SupplierController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = Supplier::with('group');
+        $query = Supplier::with(['group', 'creator']);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -49,9 +49,11 @@ class SupplierController extends ModuleController
     public function store(Request $request)
     {
         $validated = $this->validated($request);
+        unset($validated['commercial_registration_file'], $validated['personal_id_file']);
 
         $supplier = Supplier::create([
             ...$validated,
+            ...$this->documentPaths($request),
             'code'       => Supplier::nextCode(),
             'status'     => $request->boolean('status', true),
             'created_by' => $request->user()->id,
@@ -91,9 +93,11 @@ class SupplierController extends ModuleController
     public function update(Request $request, Supplier $supplier)
     {
         $validated = $this->validated($request);
+        unset($validated['commercial_registration_file'], $validated['personal_id_file']);
 
         $supplier->update([
             ...$validated,
+            ...$this->documentPaths($request, $supplier),
             'status' => $request->boolean('status'),
         ]);
 
@@ -148,6 +152,27 @@ class SupplierController extends ModuleController
         ]);
     }
 
+    /** Uploads whichever of the two document photos were submitted; keeps the existing path (on edit) for whichever wasn't. */
+    private function documentPaths(Request $request, ?Supplier $existing = null): array
+    {
+        $paths = [
+            'commercial_registration_path' => $existing?->commercial_registration_path,
+            'personal_id_path'             => $existing?->personal_id_path,
+        ];
+
+        if ($request->hasFile('commercial_registration_file')) {
+            $filename = uploadImage('assets/uploads/clients/documents', $request->file('commercial_registration_file'));
+            $paths['commercial_registration_path'] = 'assets/uploads/clients/documents/' . $filename;
+        }
+
+        if ($request->hasFile('personal_id_file')) {
+            $filename = uploadImage('assets/uploads/clients/documents', $request->file('personal_id_file'));
+            $paths['personal_id_path'] = 'assets/uploads/clients/documents/' . $filename;
+        }
+
+        return $paths;
+    }
+
     private function syncContacts(Supplier $supplier, array $contacts): void
     {
         $supplier->contacts()->delete();
@@ -199,14 +224,12 @@ class SupplierController extends ModuleController
             'supplier_group_id'       => ['nullable', 'exists:supplier_groups,id'],
             'name'                    => ['required', 'string', 'max:150'],
             'name_en'                 => ['nullable', 'string', 'max:150'],
-            'company_name'            => ['nullable', 'string', 'max:200'],
-            'company_name_en'         => ['nullable', 'string', 'max:200'],
-            'commercial_registration' => ['nullable', 'string', 'max:100'],
-            'personal_id'             => ['nullable', 'string', 'max:100'],
             'phone'                   => ['nullable', 'string', 'max:30'],
             'email'                   => ['nullable', 'email', 'max:150'],
             'address'                 => ['nullable', 'string', 'max:255'],
             'tax_number'              => ['nullable', 'string', 'max:50'],
+            'commercial_registration_file' => ['nullable', 'image', 'max:4096'],
+            'personal_id_file'             => ['nullable', 'image', 'max:4096'],
             'opening_balance'         => ['nullable', 'numeric'],
             'location_scope'          => ['nullable', 'in:inside_jordan,outside_jordan'],
             'governorate_id'          => ['required_if:location_scope,inside_jordan', 'nullable', 'exists:governorates,id'],

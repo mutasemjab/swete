@@ -17,14 +17,12 @@ class Supplier extends Model
         'code',
         'name',
         'name_en',
-        'company_name',
-        'company_name_en',
-        'commercial_registration',
-        'personal_id',
         'phone',
         'email',
         'address',
         'tax_number',
+        'commercial_registration_path',
+        'personal_id_path',
         'opening_balance',
         'location_scope',
         'governorate_id',
@@ -73,6 +71,16 @@ class Supplier extends Model
     {
         return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')
             ->where('entity_type', 'supplier');
+    }
+
+    public function getCommercialRegistrationUrlAttribute(): ?string
+    {
+        return $this->commercial_registration_path ? asset($this->commercial_registration_path) : null;
+    }
+
+    public function getPersonalIdUrlAttribute(): ?string
+    {
+        return $this->personal_id_path ? asset($this->personal_id_path) : null;
     }
 
     public function getLocalizedNameAttribute(): string

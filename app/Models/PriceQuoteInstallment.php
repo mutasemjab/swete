@@ -10,14 +10,12 @@ class PriceQuoteInstallment extends Model
     protected $fillable = [
         'price_quote_id',
         'description',
-        'amount',
-        'due_date',
+        'percentage',
         'sort_order',
     ];
 
     protected $casts = [
-        'amount'   => 'decimal:3',
-        'due_date' => 'date',
+        'percentage' => 'decimal:2',
     ];
 
     public function priceQuote(): BelongsTo

@@ -185,6 +185,7 @@ return [
                     ['label' => 'tenders.nav_statuses',            'route' => 'tender-statuses.index',    'icon' => 'list-check',    'permission' => 'tenders.view'],
                     ['label' => 'tenders.nav_quote_supply_scopes', 'route' => 'quote-supply-scopes.index', 'icon' => 'boxes-stacked', 'permission' => 'tenders.view'],
                     ['label' => 'tenders.nav_quote_delivery_terms','route' => 'quote-delivery-terms.index','icon' => 'truck-fast',    'permission' => 'tenders.view'],
+                    ['label' => 'tenders.nav_extra_fields',        'route' => 'client-extra-fields.tenders','icon' => 'sliders',      'permission' => 'clients.extra_fields.view'],
                 ],
             ],
         ],

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Tenders;
 
 use App\Http\Controllers\ModuleController;
+use App\Models\ClientExtraField;
+use App\Models\ClientExtraFieldValue;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Customer;
@@ -34,10 +36,21 @@ class TenderController extends ModuleController
                 ->orWhere('number', 'like', "%{$search}%"));
         }
 
+        // Defaults to "not yet converted" (the common case to check) unless the user explicitly
+        // picks the "converted" or "all" tab.
+        $converted = $request->filled('converted') ? $request->input('converted') : '0';
+        if ($converted === '1') {
+            $query->whereHas('projects');
+        } elseif ($converted === '0') {
+            $query->whereDoesntHave('projects');
+        }
+
         $tenders = $query->with(['party', 'statusRef'])->orderByDesc('submission_deadline')->paginate(20)->withQueryString();
         $statuses = TenderStatus::where('status', true)->orderBy('name')->get();
+        $notConvertedCount = Tender::whereDoesntHave('projects')->count();
+        $convertedCount = Tender::whereHas('projects')->count();
 
-        return $this->moduleView('tenders.index', compact('tenders', 'statuses'));
+        return $this->moduleView('tenders.index', compact('tenders', 'statuses', 'notConvertedCount', 'convertedCount'));
     }
 
     public function create()
@@ -47,10 +60,11 @@ class TenderController extends ModuleController
         $countries = Country::where('status', true)->orderBy('name')->get();
         $currencies = Currency::where('status', true)->orderBy('name')->get();
         $salesReps = SalesRepresentative::where('status', true)->orderBy('name')->get();
+        $extraFields = ClientExtraField::forTenders()->active()->orderBy('sort_order')->get();
 
         $governorates = Governorate::selectable();
 
-        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps'));
+        return $this->moduleView('tenders.create', compact('customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps', 'extraFields'));
     }
 
     public function store(Request $request)
@@ -63,13 +77,19 @@ class TenderController extends ModuleController
             'created_by' => $request->user()->id,
         ]);
 
+        $this->syncExtraFieldValues($tender, $request);
+
         return redirect()->route('tenders.show', $tender)
             ->with('success', __('tenders.tender_added'));
     }
 
     public function show(Tender $tender)
     {
-        $tender->load(['party', 'statusRef', 'governorate', 'country', 'creator', 'priceQuotes.customer', 'projects']);
+        $tender->load([
+            'party', 'statusRef', 'governorate', 'country', 'creator',
+            'priceQuotes' => fn ($query) => $query->where('is_current', true)->with('customer'),
+            'projects', 'extraFieldValues.field',
+        ]);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 
         return $this->moduleView('tenders.show', compact('tender', 'unlinkedQuotes'));
@@ -82,10 +102,15 @@ class TenderController extends ModuleController
         $countries = Country::where('status', true)->orderBy('name')->get();
         $currencies = Currency::where('status', true)->orderBy('name')->get();
         $salesReps = SalesRepresentative::where('status', true)->orderBy('name')->get();
+        $extraFields = ClientExtraField::forTenders()->active()->orderBy('sort_order')->get();
+        $extraFieldValues = ClientExtraFieldValue::where('entity_type', 'tender')
+            ->where('entity_id', $tender->id)
+            ->get()
+            ->keyBy('field_id');
 
         $governorates = Governorate::selectable($tender->governorate_id);
 
-        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps'));
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps', 'extraFields', 'extraFieldValues'));
     }
 
     public function update(Request $request, Tender $tender)
@@ -93,6 +118,8 @@ class TenderController extends ModuleController
         $validated = $this->validated($request);
 
         $tender->update($validated);
+
+        $this->syncExtraFieldValues($tender, $request);
 
         return redirect()->route('tenders.show', $tender)
             ->with('success', __('tenders.tender_updated'));
@@ -156,6 +183,32 @@ class TenderController extends ModuleController
         }
     }
 
+    private function syncExtraFieldValues(Tender $tender, Request $request): void
+    {
+        $fields = ClientExtraField::forTenders()->active()->get();
+
+        foreach ($fields as $field) {
+            if ($field->field_type === 'image') {
+                if ($request->hasFile("extra_fields_images.{$field->id}")) {
+                    $filename = uploadImage(
+                        'assets/uploads/clients/extra-fields',
+                        $request->file("extra_fields_images.{$field->id}")
+                    );
+                    ClientExtraFieldValue::updateOrCreate(
+                        ['field_id' => $field->id, 'entity_type' => 'tender', 'entity_id' => $tender->id],
+                        ['file_path' => "assets/uploads/clients/extra-fields/{$filename}", 'value' => null]
+                    );
+                }
+            } else {
+                $value = $request->input("extra_fields.{$field->id}");
+                ClientExtraFieldValue::updateOrCreate(
+                    ['field_id' => $field->id, 'entity_type' => 'tender', 'entity_id' => $tender->id],
+                    ['value' => $value ?: null, 'file_path' => null]
+                );
+            }
+        }
+    }
+
     private function validated(Request $request): array
     {
         // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
@@ -186,6 +239,10 @@ class TenderController extends ModuleController
             'documents_url'        => ['nullable', 'url', 'max:255'],
             'design_documents_url' => ['nullable', 'url', 'max:255'],
             'notes'                => ['nullable', 'string'],
+            'extra_fields'          => ['nullable', 'array'],
+            'extra_fields.*'        => ['nullable', 'string'],
+            'extra_fields_images'   => ['nullable', 'array'],
+            'extra_fields_images.*' => ['nullable', 'image', 'max:4096'],
         ];
 
         $validated = $request->validate($rules);

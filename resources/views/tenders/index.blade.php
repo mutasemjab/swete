@@ -46,13 +46,29 @@
         <i class="fa-solid fa-filter"></i>
         {{ __('app.search') }}
     </button>
-    @if(request()->hasAny(['search','status_id']))
+    <input type="hidden" name="converted" value="{{ request('converted') }}">
+    @if(request()->hasAny(['search','status_id','converted']))
         <a href="{{ route('tenders.index') }}" class="btn-secondary">
             <i class="fa-solid fa-xmark"></i>
             {{ __('app.clear_filters') }}
         </a>
     @endif
 </form>
+
+<div class="flex items-center gap-2 mb-4">
+    <a href="{{ route('tenders.index', array_merge(request()->except('converted'), ['converted' => '0'])) }}"
+       class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ request('converted', '0') === '0' ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+        {{ __('tenders.tenders_not_converted') }} ({{ $notConvertedCount }})
+    </a>
+    <a href="{{ route('tenders.index', array_merge(request()->except('converted'), ['converted' => '1'])) }}"
+       class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ request('converted') === '1' ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+        {{ __('tenders.tenders_converted') }} ({{ $convertedCount }})
+    </a>
+    <a href="{{ route('tenders.index', array_merge(request()->except('converted'), ['converted' => 'all'])) }}"
+       class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ request('converted') === 'all' ? 'bg-orange-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+        {{ __('app.all') }}
+    </a>
+</div>
 
 <div class="card overflow-hidden">
     @if($tenders->isEmpty())

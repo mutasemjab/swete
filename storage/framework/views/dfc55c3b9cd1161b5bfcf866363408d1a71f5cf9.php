@@ -14,7 +14,7 @@
     </a>
 </div>
 
-<form action="<?php echo e(route('tenders.store')); ?>" method="POST">
+<form action="<?php echo e(route('tenders.store')); ?>" method="POST" enctype="multipart/form-data">
     <?php echo csrf_field(); ?>
     <?php echo $__env->make('tenders._form', ['customers' => $customers, 'statuses' => $statuses, 'countries' => $countries, 'governorates' => $governorates], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 

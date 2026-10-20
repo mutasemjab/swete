@@ -12,8 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('price_quote_id')->constrained()->cascadeOnDelete();
             $table->string('description', 255)->nullable();
-            $table->decimal('amount', 14, 3);
-            $table->date('due_date')->nullable();
+            $table->decimal('percentage', 5, 2);
             $table->smallInteger('sort_order')->default(0);
             $table->timestamps();
         });

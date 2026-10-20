@@ -101,6 +101,7 @@
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.party_name') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('accounting.party_group') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('accounting.party_phone') }}</th>
+                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('accounting.party_created_by') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.status') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                     </tr>
@@ -114,6 +115,7 @@
                         <td class="px-5 py-4"><p class="font-bold text-slate-800">{{ $customer->localized_name }}</p></td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">{{ $customer->group?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-4 hidden lg:table-cell text-sm text-slate-600" dir="ltr">{{ $customer->phone ?? '—' }}</td>
+                        <td class="px-5 py-4 hidden lg:table-cell text-sm text-slate-600">{{ $customer->creator?->name ?? '—' }}</td>
                         <td class="px-5 py-4">
                             @if($customer->status)
                                 <span class="badge bg-emerald-100 text-emerald-700">

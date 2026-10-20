@@ -69,8 +69,13 @@ return [
     'customer_default_shipping_address_hint' => 'Used to auto-fill the shipping address on a purchase request once a project or service call belonging to this customer is selected.',
     'party_code'          => 'Code',
     'party_name'          => 'Name',
+    'customer_name_or_company'    => 'Customer Name / Company Name',
+    'customer_name_or_company_en' => 'Customer Name / Company Name (English)',
+    'supplier_name_or_company'    => 'Supplier Name / Company Name',
+    'supplier_name_or_company_en' => 'Supplier Name / Company Name (English)',
     'party_group'         => 'Group',
     'party_phone'         => 'Phone',
+    'party_created_by'    => 'Created By',
     'party_email'         => 'Email',
     'party_address'       => 'Address',
     'party_tax_number'    => 'Tax Number',
@@ -142,6 +147,19 @@ return [
     'no_invoices'            => 'No invoices yet',
     'add_first_invoice'      => 'Create First Invoice',
     'total_invoices'         => 'Total Invoices',
+
+    // ── Receipt vouchers ──────────────────────────────────────────────────────
+    'receipt_vouchers_section' => 'Receipt Vouchers',
+    'receipt_voucher_number'   => 'Voucher No.',
+    'receipt_voucher_date'     => 'Date',
+    'receipt_voucher_amount'   => 'Amount',
+    'receipt_voucher_notes'    => 'Notes',
+    'add_receipt_voucher'      => 'Add Receipt Voucher',
+    'no_receipt_vouchers'      => 'No receipt vouchers on this invoice',
+    'receipt_voucher_added'    => 'Receipt voucher added successfully.',
+    'receipt_voucher_deleted'  => 'Receipt voucher deleted successfully.',
+    'invoice_paid_amount'      => 'Paid',
+    'invoice_balance_due'      => 'Balance Due',
     'all_invoice_types'      => 'All Types',
 
 ];

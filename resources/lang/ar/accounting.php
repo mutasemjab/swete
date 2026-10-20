@@ -69,8 +69,13 @@ return [
     'customer_default_shipping_address_hint' => 'يُستخدم لتعبئة عنوان الشحن تلقائيًا في طلب الشراء عند اختيار مشروع أو طلب صيانة تابع لهذا العميل.',
     'party_code'          => 'الرمز',
     'party_name'          => 'الاسم',
+    'customer_name_or_company'    => 'اسم العميل / اسم الشركة',
+    'customer_name_or_company_en' => 'اسم العميل / اسم الشركة (إنجليزي)',
+    'supplier_name_or_company'    => 'اسم المورد / اسم الشركة',
+    'supplier_name_or_company_en' => 'اسم المورد / اسم الشركة (إنجليزي)',
     'party_group'         => 'المجموعة',
     'party_phone'         => 'الهاتف',
+    'party_created_by'    => 'أنشئ بواسطة',
     'party_email'         => 'البريد الإلكتروني',
     'party_address'       => 'العنوان',
     'party_tax_number'    => 'الرقم الضريبي',
@@ -142,6 +147,19 @@ return [
     'no_invoices'            => 'لا توجد فواتير بعد',
     'add_first_invoice'      => 'إنشاء أول فاتورة',
     'total_invoices'         => 'إجمالي الفواتير',
+
+    // ── Receipt vouchers (سندات القبض) ───────────────────────────────────────
+    'receipt_vouchers_section' => 'سندات القبض',
+    'receipt_voucher_number'   => 'رقم السند',
+    'receipt_voucher_date'     => 'التاريخ',
+    'receipt_voucher_amount'   => 'المبلغ',
+    'receipt_voucher_notes'    => 'ملاحظات',
+    'add_receipt_voucher'      => 'إضافة سند قبض',
+    'no_receipt_vouchers'      => 'لا توجد سندات قبض على هذه الفاتورة',
+    'receipt_voucher_added'    => 'تم إضافة سند القبض بنجاح.',
+    'receipt_voucher_deleted'  => 'تم حذف سند القبض بنجاح.',
+    'invoice_paid_amount'      => 'المدفوع',
+    'invoice_balance_due'      => 'المتبقي',
     'all_invoice_types'      => 'جميع الأنواع',
 
 ];

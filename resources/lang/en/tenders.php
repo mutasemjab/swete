@@ -22,6 +22,7 @@ return [
     'nav_statuses'      => 'Tender Statuses',
     'nav_quote_supply_scopes'  => 'Quote Supply Scopes',
     'nav_quote_delivery_terms' => 'Quote Delivery Terms',
+    'nav_extra_fields'         => 'Extra Fields',
     'nav_reminders_list'       => 'Requests List',
     'nav_reminders_add'        => 'New Request',
     'section_ciat_discounts'   => 'CIAT Discounts',
@@ -134,6 +135,8 @@ return [
     'quote_old_version_print_mark' => 'OLD VERSION (:version) — this price quote was edited after this was printed.',
     'quote_total'             => 'Total',
     'quote_added'             => 'Price quote created successfully.',
+    'quote_review_reason_added'  => 'A new price quote was added (#:number)',
+    'quote_review_reason_edited' => 'The price quote was edited (#:number)',
     'quote_updated'           => 'Price quote updated successfully.',
     'no_quotes'               => 'No price quotes yet',
     'total_quotes'            => 'Total Quotes',
@@ -205,11 +208,10 @@ return [
     'quote_additional_terms_hint'  => 'Extra points to add to the printed "Very Important Notes" — one point per line.',
 
     // ── Price quote installments ─────────────────────────────────────────────
-    'quote_installments'          => 'Payment Installments',
+    'quote_installments'          => 'Payments',
     'add_installment'             => 'Add Installment',
     'installment_description'     => 'Description',
-    'installment_amount'          => 'Amount',
-    'installment_due_date'        => 'Due Date',
+    'installment_percentage'      => 'Percentage (%)',
     'no_installments'             => 'No installments defined.',
     'quote_print_installments'    => 'Payment Schedule',
 
@@ -266,11 +268,55 @@ return [
     'no_projects_under_review'       => 'No projects awaiting review',
     'project_approve'   => 'Approve',
     'project_approved'  => 'Project approved successfully.',
+    'project_reject'    => 'Reject',
+    'project_reject_confirm' => 'Are you sure you want to reject and permanently delete this project? This cannot be undone.',
+    'project_rejected'  => 'Project rejected and deleted.',
     'project_updated'      => 'Project updated successfully.',
     'project_deleted'      => 'Project deleted successfully.',
     'project_created'      => 'Tender converted to a project successfully.',
     'convert_to_project'         => 'Convert to Project',
     'convert_to_project_confirm' => 'Are you sure you want to convert this tender into a project?',
+    'project_review_reason_notice' => 'This project was sent back to review because:',
+
+    // ── Tenders index: converted vs not-converted filter ───────────────────────
+    'tenders_not_converted' => 'Not Converted to Project',
+    'tenders_converted'     => 'Converted to Project',
+
+    // ── Project quote items + assignment ────────────────────────────────────────
+    'project_quote_items_section' => 'Price Quote Items',
+    'no_project_quote_items'      => 'No price quote items on this project',
+    'quote_item_quote_number'     => 'Quote Number',
+    'quote_item_material'         => 'Material',
+    'quote_item_quantity'         => 'Quantity',
+    'quote_item_unit_price'       => 'Unit Price',
+    'quote_item_assigned_to'      => 'Assigned To',
+    'quote_item_assign'           => 'Assign',
+    'quote_item_unassigned'       => 'Unassigned',
+    'quote_item_mark_done'        => 'Done ✓',
+    'quote_item_done'             => 'Done',
+    'quote_item_done_at'          => 'Done At',
+    'item_assigned_success'       => 'Item assigned successfully.',
+    'item_marked_done_success'    => 'Item marked as done.',
+
+    // ── Project team: manager / engineer / foreman ──────────────────────────────
+    'project_manager'          => 'Project Manager',
+    'project_engineer'         => 'Project Engineer',
+    'project_foreman'          => 'Project Foreman',
+    'project_team_section'     => 'Project Team',
+    'project_team_updated'     => 'Project team updated successfully.',
+    'project_team_unauthorized'=> 'Only the assigned project manager can set the engineer and foreman.',
+    'my_managed_projects'      => 'My Managed Projects',
+
+    // ── Agreements inside a project ─────────────────────────────────────────────
+    'project_agreements_section' => 'Agreements',
+    'no_project_agreements'      => 'No agreements linked to this project',
+    'add_project_agreement'      => 'Add Agreement',
+
+    // ── Financial analysis ──────────────────────────────────────────────────────
+    'financial_analysis_section' => 'Financial Analysis',
+    'financial_project_value'    => 'Project Value',
+    'financial_paid'             => 'Paid',
+    'financial_due'              => 'Due',
 
     // ── Project attachments ──────────────────────────────────────────────────
     'project_attachments'         => 'Project Attachments',

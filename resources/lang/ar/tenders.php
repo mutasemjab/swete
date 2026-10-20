@@ -22,6 +22,7 @@ return [
     'nav_statuses'      => 'حالات العطاء',
     'nav_quote_supply_scopes'  => 'نطاق توريد عروض الأسعار',
     'nav_quote_delivery_terms' => 'شروط تسليم عروض الأسعار',
+    'nav_extra_fields'         => 'الزيادة على الحقول',
     'nav_reminders_list'       => 'قائمة الطلبات',
     'nav_reminders_add'        => 'طلب جديد',
     'section_ciat_discounts'   => 'خصومات CIAT',
@@ -134,6 +135,8 @@ return [
     'quote_old_version_print_mark' => 'نسخة قديمة (رقم :version) — تم تعديل عرض السعر هذا لاحقاً.',
     'quote_total'             => 'الإجمالي',
     'quote_added'             => 'تم إنشاء عرض السعر بنجاح.',
+    'quote_review_reason_added'  => 'تمت إضافة عرض سعر جديد (#:number)',
+    'quote_review_reason_edited' => 'تم تعديل عرض السعر (#:number)',
     'quote_updated'           => 'تم تحديث عرض السعر بنجاح.',
     'no_quotes'               => 'لا توجد عروض أسعار بعد',
     'total_quotes'            => 'إجمالي العروض',
@@ -205,11 +208,10 @@ return [
     'quote_additional_terms_hint'  => 'نقاط إضافية تُضاف إلى "الملاحظات الهامة جداً" في الطباعة — كل نقطة بسطر مستقل.',
 
     // ── Price quote installments ─────────────────────────────────────────────
-    'quote_installments'          => 'الدفعات ومواعيدها',
+    'quote_installments'          => 'الدفعات',
     'add_installment'             => 'إضافة دفعة',
     'installment_description'     => 'الوصف',
-    'installment_amount'          => 'المبلغ',
-    'installment_due_date'        => 'تاريخ الاستحقاق',
+    'installment_percentage'      => 'النسبة (%)',
     'no_installments'             => 'لا توجد دفعات محددة.',
     'quote_print_installments'    => 'جدول الدفعات',
 
@@ -266,11 +268,55 @@ return [
     'no_projects_under_review'       => 'لا توجد مشاريع بانتظار المراجعة',
     'project_approve'   => 'الموافقة',
     'project_approved'  => 'تمت الموافقة على المشروع بنجاح.',
+    'project_reject'    => 'رفض',
+    'project_reject_confirm' => 'هل أنت متأكد من رفض وحذف هذا المشروع بالكامل؟ لا يمكن التراجع عن هذا الإجراء.',
+    'project_rejected'  => 'تم رفض وحذف المشروع.',
     'project_updated'      => 'تم تحديث المشروع بنجاح.',
     'project_deleted'      => 'تم حذف المشروع بنجاح.',
     'project_created'      => 'تم تحويل العطاء إلى مشروع بنجاح.',
     'convert_to_project'         => 'تحويل إلى مشروع',
     'convert_to_project_confirm' => 'هل أنت متأكد من تحويل هذا العطاء إلى مشروع؟',
+    'project_review_reason_notice' => 'تمت إعادة هذا المشروع لقائمة المراجعة لأن:',
+
+    // ── Tenders index: converted vs not-converted filter ───────────────────────
+    'tenders_not_converted' => 'لم تتحول لمشروع',
+    'tenders_converted'     => 'تحولت لمشروع',
+
+    // ── Project quote items + assignment ────────────────────────────────────────
+    'project_quote_items_section' => 'بنود عروض الأسعار',
+    'no_project_quote_items'      => 'لا توجد بنود عروض أسعار على هذا المشروع',
+    'quote_item_quote_number'     => 'رقم عرض السعر',
+    'quote_item_material'         => 'المادة',
+    'quote_item_quantity'         => 'الكمية',
+    'quote_item_unit_price'       => 'سعر الوحدة',
+    'quote_item_assigned_to'      => 'مسؤول عنه',
+    'quote_item_assign'           => 'تعيين',
+    'quote_item_unassigned'       => 'غير معيّن',
+    'quote_item_mark_done'        => 'تم ✓',
+    'quote_item_done'             => 'منجز',
+    'quote_item_done_at'          => 'تاريخ الإنجاز',
+    'item_assigned_success'       => 'تم تعيين البند بنجاح.',
+    'item_marked_done_success'    => 'تم وضع علامة إنجاز على البند.',
+
+    // ── Project team: manager / engineer / foreman ──────────────────────────────
+    'project_manager'          => 'مدير المشروع',
+    'project_engineer'         => 'مهندس المشروع',
+    'project_foreman'          => 'فورمان المشروع',
+    'project_team_section'     => 'فريق المشروع',
+    'project_team_updated'     => 'تم تحديث فريق المشروع بنجاح.',
+    'project_team_unauthorized'=> 'فقط مدير المشروع المعيّن يستطيع تحديد المهندس والفورمان.',
+    'my_managed_projects'      => 'مشاريعي كمدير مشروع',
+
+    // ── Agreements inside a project ─────────────────────────────────────────────
+    'project_agreements_section' => 'الاتفاقيات',
+    'no_project_agreements'      => 'لا توجد اتفاقيات مرتبطة بهذا المشروع',
+    'add_project_agreement'      => 'إضافة اتفاقية',
+
+    // ── Financial analysis ──────────────────────────────────────────────────────
+    'financial_analysis_section' => 'التحليل المالي',
+    'financial_project_value'    => 'قيمة المشروع',
+    'financial_paid'             => 'المدفوع',
+    'financial_due'              => 'المستحق',
 
     // ── Project attachments ──────────────────────────────────────────────────
     'project_attachments'         => 'مرفقات المشروع',

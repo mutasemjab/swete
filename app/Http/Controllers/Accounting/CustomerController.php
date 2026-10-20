@@ -19,7 +19,7 @@ class CustomerController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = Customer::with('group');
+        $query = Customer::with(['group', 'creator']);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -52,8 +52,11 @@ class CustomerController extends ModuleController
             unset($validated['password']);
         }
 
+        unset($validated['commercial_registration_file'], $validated['personal_id_file']);
+
         $customer = Customer::create([
             ...$validated,
+            ...$this->documentPaths($request),
             'code'       => Customer::nextCode(),
             'status'     => $request->boolean('status', true),
             'created_by' => $request->user()->id,
@@ -98,8 +101,11 @@ class CustomerController extends ModuleController
             unset($validated['password']);
         }
 
+        unset($validated['commercial_registration_file'], $validated['personal_id_file']);
+
         $customer->update([
             ...$validated,
+            ...$this->documentPaths($request, $customer),
             'status' => $request->boolean('status'),
         ]);
 
@@ -140,6 +146,27 @@ class CustomerController extends ModuleController
 
         return redirect()->route('accounting.customers.index')
             ->with('success', __('accounting.import_success'));
+    }
+
+    /** Uploads whichever of the two document photos were submitted; keeps the existing path (on edit) for whichever wasn't. */
+    private function documentPaths(Request $request, ?Customer $existing = null): array
+    {
+        $paths = [
+            'commercial_registration_path' => $existing?->commercial_registration_path,
+            'personal_id_path'             => $existing?->personal_id_path,
+        ];
+
+        if ($request->hasFile('commercial_registration_file')) {
+            $filename = uploadImage('assets/uploads/clients/documents', $request->file('commercial_registration_file'));
+            $paths['commercial_registration_path'] = 'assets/uploads/clients/documents/' . $filename;
+        }
+
+        if ($request->hasFile('personal_id_file')) {
+            $filename = uploadImage('assets/uploads/clients/documents', $request->file('personal_id_file'));
+            $paths['personal_id_path'] = 'assets/uploads/clients/documents/' . $filename;
+        }
+
+        return $paths;
     }
 
     private function syncContacts(Customer $customer, array $contacts): void
@@ -193,14 +220,12 @@ class CustomerController extends ModuleController
             'customer_group_id'        => ['nullable', 'exists:customer_groups,id'],
             'name'                     => ['required', 'string', 'max:150'],
             'name_en'                  => ['nullable', 'string', 'max:150'],
-            'company_name'             => ['nullable', 'string', 'max:200'],
-            'company_name_en'          => ['nullable', 'string', 'max:200'],
-            'commercial_registration'  => ['nullable', 'string', 'max:100'],
-            'personal_id'              => ['nullable', 'string', 'max:100'],
             'phone'                    => ['nullable', 'string', 'max:30'],
             'email'                    => ['nullable', 'email', 'max:150'],
             'address'                  => ['nullable', 'string', 'max:255'],
             'tax_number'               => ['nullable', 'string', 'max:50'],
+            'commercial_registration_file' => ['nullable', 'image', 'max:4096'],
+            'personal_id_file'             => ['nullable', 'image', 'max:4096'],
             'opening_balance'          => ['nullable', 'numeric'],
             'shipping_address_line1'    => ['nullable', 'string', 'max:255'],
             'shipping_address_line1_en' => ['nullable', 'string', 'max:255'],

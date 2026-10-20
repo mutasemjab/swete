@@ -40,4 +40,14 @@ class ProjectReviewController extends ModuleController
         return redirect()->route('projects.show', $project)
             ->with('success', __('tenders.project_approved'));
     }
+
+    public function reject(Project $project)
+    {
+        abort_unless($project->status === 'under_review', 404);
+
+        $project->delete();
+
+        return redirect()->route('project-reviews.index')
+            ->with('success', __('tenders.project_rejected'));
+    }
 }

@@ -15,7 +15,7 @@
     </a>
 </div>
 
-<form action="{{ route('tenders.update', $tender) }}" method="POST">
+<form action="{{ route('tenders.update', $tender) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
     @include('tenders._form', ['tender' => $tender, 'customers' => $customers, 'statuses' => $statuses, 'countries' => $countries, 'governorates' => $governorates])

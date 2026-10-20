@@ -58,7 +58,12 @@
                         <td class="px-5 py-4">
                             <a href="{{ route('projects.show', $project) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm">{{ $project->number }}</a>
                         </td>
-                        <td class="px-5 py-4"><p class="font-bold text-slate-800">{{ $project->localized_title }}</p></td>
+                        <td class="px-5 py-4">
+                            <p class="font-bold text-slate-800">{{ $project->localized_title }}</p>
+                            @if($project->review_reason)
+                                <p class="text-xs text-amber-600 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> {{ $project->review_reason }}</p>
+                            @endif
+                        </td>
                         <td class="px-5 py-4 hidden lg:table-cell text-sm text-slate-600">{{ $project->customer?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                             @if($project->tender)
@@ -76,6 +81,13 @@
                                     @csrf
                                     <button type="submit" class="btn-primary btn-sm">
                                         <i class="fa-solid fa-check"></i> {{ __('tenders.project_approve') }}
+                                    </button>
+                                </form>
+                                <form action="{{ route('project-reviews.reject', $project) }}" method="POST"
+                                      @submit="if (! confirm('{{ __('tenders.project_reject_confirm') }}')) $event.preventDefault()">
+                                    @csrf
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class="fa-solid fa-xmark"></i> {{ __('tenders.project_reject') }}
                                     </button>
                                 </form>
                             </div>

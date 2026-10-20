@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PriceQuoteItem extends Model
 {
@@ -31,5 +32,11 @@ class PriceQuoteItem extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    /** Usually at most one row (one per project this item was ever assigned under) — see ProjectItemAssignment. */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ProjectItemAssignment::class, 'price_quote_item_id');
     }
 }

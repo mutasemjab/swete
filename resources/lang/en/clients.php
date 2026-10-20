@@ -25,10 +25,7 @@ return [
     // ── Section labels ───────────────────────────────────────────────────────
     'section_settings' => 'Settings',
 
-    // ── Company & ID fields ──────────────────────────────────────────────────
-    'company_id_details'      => 'Company & ID Details',
-    'company_name'            => 'Company Name',
-    'company_name_en'         => 'Company Name (English)',
+    // ── ID fields ─────────────────────────────────────────────────────────────
     'commercial_registration' => 'Commercial Registration',
     'personal_id'             => 'Personal ID',
 
@@ -44,8 +41,10 @@ return [
     'extra_fields_section'           => 'Extra Fields',
     'customer_extra_fields'          => 'Customer Extra Fields',
     'supplier_extra_fields'          => 'Supplier Extra Fields',
+    'tender_extra_fields'            => 'Tender Extra Fields',
     'extra_fields_subtitle_customer' => 'Define extra fields that appear on customer forms',
     'extra_fields_subtitle_supplier' => 'Define extra fields that appear on supplier forms',
+    'extra_fields_subtitle_tender'   => 'Define extra fields that appear on tender forms',
     'add_extra_field'                => 'Add New Field',
     'extra_field_added'              => 'Field added successfully',
     'extra_field_updated'            => 'Field updated successfully',

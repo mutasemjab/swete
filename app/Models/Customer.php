@@ -20,14 +20,12 @@ class Customer extends Authenticatable
         'code',
         'name',
         'name_en',
-        'company_name',
-        'company_name_en',
-        'commercial_registration',
-        'personal_id',
         'phone',
         'email',
         'address',
         'tax_number',
+        'commercial_registration_path',
+        'personal_id_path',
         'opening_balance',
         'shipping_address_line1',
         'shipping_address_line1_en',
@@ -106,6 +104,16 @@ class Customer extends Authenticatable
     {
         return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')
             ->where('entity_type', 'customer');
+    }
+
+    public function getCommercialRegistrationUrlAttribute(): ?string
+    {
+        return $this->commercial_registration_path ? asset($this->commercial_registration_path) : null;
+    }
+
+    public function getPersonalIdUrlAttribute(): ?string
+    {
+        return $this->personal_id_path ? asset($this->personal_id_path) : null;
     }
 
     public function getLocalizedNameAttribute(): string

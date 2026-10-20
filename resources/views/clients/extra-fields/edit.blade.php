@@ -9,7 +9,7 @@
         <h1 class="page-title">{{ __('app.edit') }}</h1>
         <p class="page-subtitle">{{ $field->label_ar }}</p>
     </div>
-    <a href="{{ $field->entity_type === 'customer' ? route('client-extra-fields.customers') : route('client-extra-fields.suppliers') }}"
+    <a href="{{ route('client-extra-fields.' . $field->entity_type . 's') }}"
        class="btn-secondary">
         <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
         {{ __('app.back_to_list') }}
@@ -25,7 +25,7 @@
         <div class="card-header">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
                 <i class="fa-solid fa-sliders text-amber-500 text-sm"></i>
-                {{ $field->entity_type === 'customer' ? __('clients.customer_extra_fields') : __('clients.supplier_extra_fields') }}
+                {{ __("clients.{$field->entity_type}_extra_fields") }}
             </h3>
         </div>
         <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -79,7 +79,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ $field->entity_type === 'customer' ? route('client-extra-fields.customers') : route('client-extra-fields.suppliers') }}"
+        <a href="{{ route('client-extra-fields.' . $field->entity_type . 's') }}"
            class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>

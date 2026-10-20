@@ -58,7 +58,12 @@
                         <td class="px-5 py-4">
                             <a href="<?php echo e(route('projects.show', $project)); ?>" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm"><?php echo e($project->number); ?></a>
                         </td>
-                        <td class="px-5 py-4"><p class="font-bold text-slate-800"><?php echo e($project->localized_title); ?></p></td>
+                        <td class="px-5 py-4">
+                            <p class="font-bold text-slate-800"><?php echo e($project->localized_title); ?></p>
+                            <?php if($project->review_reason): ?>
+                                <p class="text-xs text-amber-600 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> <?php echo e($project->review_reason); ?></p>
+                            <?php endif; ?>
+                        </td>
                         <td class="px-5 py-4 hidden lg:table-cell text-sm text-slate-600"><?php echo e($project->customer?->localized_name ?? '—'); ?></td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                             <?php if($project->tender): ?>
@@ -77,6 +82,14 @@
                                     <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn-primary btn-sm">
                                         <i class="fa-solid fa-check"></i> <?php echo e(__('tenders.project_approve')); ?>
+
+                                    </button>
+                                </form>
+                                <form action="<?php echo e(route('project-reviews.reject', $project)); ?>" method="POST"
+                                      @submit="if (! confirm('<?php echo e(__('tenders.project_reject_confirm')); ?>')) $event.preventDefault()">
+                                    <?php echo csrf_field(); ?>
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class="fa-solid fa-xmark"></i> <?php echo e(__('tenders.project_reject')); ?>
 
                                     </button>
                                 </form>

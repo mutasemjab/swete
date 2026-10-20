@@ -1,4 +1,7 @@
-<?php $agreement = $agreement ?? null; ?>
+<?php
+    $agreement = $agreement ?? null;
+    $project = $project ?? null;
+?>
 <div class="card mb-5" x-data="{ partyType: '<?php echo e(old('party_type', $agreement?->party_type ?? 'customer')); ?>' }">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">
@@ -7,6 +10,15 @@
 
         </h3>
     </div>
+    <?php if($project): ?>
+        <input type="hidden" name="project_id" value="<?php echo e($project->id); ?>">
+        <div class="px-6 pt-5">
+            <p class="text-sm text-slate-500">
+                <i class="fa-solid fa-diagram-project"></i>
+                <?php echo e(__('tenders.project')); ?>: <span class="font-bold text-slate-700"><?php echo e($project->number); ?> — <?php echo e($project->localized_title); ?></span>
+            </p>
+        </div>
+    <?php endif; ?>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
             <label class="form-label"><?php echo e(__('agreements.party_type')); ?> <span class="text-rose-500">*</span></label>
@@ -44,7 +56,7 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                     <option value=""><?php echo e(__('app.select')); ?></option>
                     <?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($customer->id); ?>" <?php if(old('party_id', $agreement?->party_type === 'customer' ? $agreement?->party_id : null) == $customer->id): echo 'selected'; endif; ?>><?php echo e($customer->localized_name); ?> (<?php echo e($customer->code); ?>)</option>
+                        <option value="<?php echo e($customer->id); ?>" <?php if(old('party_id', $agreement?->party_type === 'customer' ? $agreement?->party_id : ($project?->customer_id)) == $customer->id): echo 'selected'; endif; ?>><?php echo e($customer->localized_name); ?> (<?php echo e($customer->code); ?>)</option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
             </template>

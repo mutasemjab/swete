@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Agreements;
 use App\Http\Controllers\ModuleController;
 use App\Models\Agreement;
 use App\Models\Customer;
+use App\Models\Project;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
@@ -33,10 +34,13 @@ class AgreementController extends ModuleController
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $project = $request->filled('project_id') ? Project::find($request->input('project_id')) : null;
+
         return $this->moduleView('agreements.create', [
             'agreement' => null,
+            'project'   => $project,
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
             'suppliers' => Supplier::where('status', true)->orderBy('name')->get(),
         ]);
@@ -48,14 +52,20 @@ class AgreementController extends ModuleController
 
         $filename = uploadImage('assets/uploads/agreements', $validated['file']);
 
-        Agreement::create([
+        $agreement = Agreement::create([
             'number'     => Agreement::nextNumber(),
             'party_type' => $validated['party_type'],
             'party_id'   => $validated['party_id'],
+            'project_id' => $validated['project_id'] ?? null,
             'path'       => 'assets/uploads/agreements/' . $filename,
             'notes'      => $validated['notes'] ?? null,
             'created_by' => $request->user()->id,
         ]);
+
+        if ($agreement->project_id) {
+            return redirect()->route('projects.show', $agreement->project_id)
+                ->with('success', __('agreements.agreement_added'));
+        }
 
         return redirect()->route('agreements.index')
             ->with('success', __('agreements.agreement_added'));
@@ -125,6 +135,7 @@ class AgreementController extends ModuleController
                 'required',
                 $request->input('party_type') === 'supplier' ? 'exists:suppliers,id' : 'exists:customers,id',
             ],
+            'project_id' => ['nullable', 'exists:projects,id'],
             'file'       => [$fileOptional ? 'nullable' : 'required', 'file', 'mimes:pdf', 'max:10240'],
             'notes'      => ['nullable', 'string'],
         ]);

@@ -16,6 +16,7 @@ use App\Models\PriceAnalysis;
 use App\Models\PriceQuote;
 use App\Models\PriceQuoteInstallment;
 use App\Models\PriceQuoteItem;
+use App\Models\Project;
 use App\Models\QuoteDeliveryTerm;
 use App\Models\QuoteDiscountLimit;
 use App\Models\QuoteSupplyScope;
@@ -69,7 +70,7 @@ class PriceQuoteController extends ModuleController
             'priceQuote'        => null,
             'tender'            => $tender,
             'report'            => $report,
-            'seedInstallments'  => [['description' => '', 'amount' => '', 'due_date' => '']],
+            'seedInstallments'  => [['description' => '', 'percentage' => '']],
         ]);
     }
 
@@ -92,6 +93,8 @@ class PriceQuoteController extends ModuleController
         if ($request->filled('report_id')) {
             MaintenanceReport::where('id', $request->input('report_id'))->update(['price_quote_id' => $priceQuote->id]);
         }
+
+        $this->revertProjectIfNeeded($priceQuote, __('tenders.quote_review_reason_added', ['number' => $priceQuote->number]));
 
         return redirect()->route('price-quotes.show', $priceQuote)
             ->with('success', __('tenders.quote_added'));
@@ -116,12 +119,11 @@ class PriceQuoteController extends ModuleController
 
         $seedInstallments = $priceQuote->installments->map(fn ($i) => [
             'description' => $i->description ?? '',
-            'amount'      => (string) $i->amount,
-            'due_date'    => $i->due_date?->format('Y-m-d') ?? '',
+            'percentage'  => (string) $i->percentage,
         ])->toArray();
 
         if (empty($seedInstallments)) {
-            $seedInstallments = [['description' => '', 'amount' => '', 'due_date' => '']];
+            $seedInstallments = [['description' => '', 'percentage' => '']];
         }
 
         return $this->moduleView('tenders.price-quotes.edit', [
@@ -148,6 +150,8 @@ class PriceQuoteController extends ModuleController
 
         $this->syncItems($priceQuote, $validated['items']);
         $this->syncInstallments($priceQuote, $validated['installments'] ?? []);
+
+        $this->revertProjectIfNeeded($priceQuote, __('tenders.quote_review_reason_edited', ['number' => $priceQuote->number]));
 
         return redirect()->route('price-quotes.show', $priceQuote)
             ->with('success', __('tenders.quote_updated'));
@@ -362,10 +366,9 @@ class PriceQuoteController extends ModuleController
             'items.*.unit_price'        => ['required', 'numeric', 'min:0'],
             'items.*.notes'             => ['nullable', 'array'],
             'items.*.notes.*'           => ['nullable', 'string', 'max:500'],
-            'installments'              => ['nullable', 'array'],
-            'installments.*.description'=> ['nullable', 'string', 'max:255'],
-            'installments.*.amount'     => ['required_with:installments.*', 'nullable', 'numeric', 'min:0'],
-            'installments.*.due_date'   => ['nullable', 'date'],
+            'installments'               => ['nullable', 'array'],
+            'installments.*.description' => ['nullable', 'string', 'max:255'],
+            'installments.*.percentage'  => ['required_with:installments.*', 'nullable', 'numeric', 'min:0', 'max:100'],
             'discount_type'             => ['required', 'in:amount,percent'],
             'discount_value'            => ['nullable', 'numeric', 'min:0', $request->input('discount_type') === 'percent' ? 'max:100' : 'max:999999999'],
         ]);
@@ -419,21 +422,33 @@ class PriceQuoteController extends ModuleController
         $priceQuote->recalculateTotals();
     }
 
+    /** A live (already-approved) project built from this quote's tender needs a fresh look once its pricing changes. */
+    private function revertProjectIfNeeded(PriceQuote $priceQuote, string $reason): void
+    {
+        if (! $priceQuote->tender_id) {
+            return;
+        }
+
+        Project::where('tender_id', $priceQuote->tender_id)
+            ->where('status', 'active')
+            ->first()
+            ?->update(['status' => 'under_review', 'review_reason' => $reason]);
+    }
+
     private function syncInstallments(PriceQuote $priceQuote, array $installments): void
     {
         $priceQuote->installments()->delete();
 
         $sort = 0;
         foreach ($installments as $row) {
-            $amount = trim((string) ($row['amount'] ?? ''));
-            if ($amount === '' || $amount === null) {
+            $percentage = trim((string) ($row['percentage'] ?? ''));
+            if ($percentage === '' || $percentage === null) {
                 continue;
             }
 
             $priceQuote->installments()->create([
                 'description' => $row['description'] ?? null,
-                'amount'      => $amount,
-                'due_date'    => $row['due_date'] ?: null,
+                'percentage'  => $percentage,
                 'sort_order'  => $sort++,
             ]);
         }

@@ -9,17 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('suppliers', function (Blueprint $table) {
-            $table->string('company_name', 200)->nullable()->after('name_en');
-            $table->string('company_name_en', 200)->nullable()->after('company_name');
-            $table->string('commercial_registration', 100)->nullable()->after('company_name_en');
-            $table->string('personal_id', 100)->nullable()->after('commercial_registration');
+            // Dropped the separate "company" concept entirely — `name` itself now doubles as
+            // either a personal or a company name (see its updated form label). These two stay,
+            // moved next to tax_number, and now hold an uploaded document photo's path, not typed text.
+            $table->string('commercial_registration_path', 255)->nullable()->after('tax_number');
+            $table->string('personal_id_path', 255)->nullable()->after('commercial_registration_path');
         });
     }
 
     public function down(): void
     {
         Schema::table('suppliers', function (Blueprint $table) {
-            $table->dropColumn(['company_name', 'company_name_en', 'commercial_registration', 'personal_id']);
+            $table->dropColumn(['commercial_registration_path', 'personal_id_path']);
         });
     }
 };

@@ -264,6 +264,64 @@
     </div>
     @endif
 
+    {{-- My assigned price-quote items --}}
+    @if($myAssignedItems->isNotEmpty())
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-8 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-list-check text-indigo-600 text-sm"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-base font-black text-slate-800">{{ __('tenders.project_quote_items_section') }}</h3>
+            </div>
+        </div>
+        <div class="divide-y divide-slate-100">
+            @foreach($myAssignedItems as $assignment)
+                <div class="px-6 py-3.5 flex items-center gap-4 flex-wrap">
+                    <div class="flex-1 min-w-48">
+                        <a href="{{ route('projects.show', $assignment->project) }}" class="font-bold text-slate-800 text-sm hover:text-indigo-600">
+                            {{ $assignment->project->number }} — {{ $assignment->item->material?->localized_name }}
+                        </a>
+                        <p class="text-xs text-slate-500 mt-0.5">{{ $assignment->project->localized_title }}</p>
+                    </div>
+                    <form action="{{ route('projects.item-assignments.mark-done', [$assignment->project, $assignment]) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="text-xs font-bold text-emerald-600 hover:underline">
+                            <i class="fa-solid fa-check"></i> {{ __('tenders.quote_item_mark_done') }}
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Projects I manage --}}
+    @if($myManagedProjects->isNotEmpty())
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-8 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-diagram-project text-emerald-600 text-sm"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-base font-black text-slate-800">{{ __('tenders.my_managed_projects') }}</h3>
+            </div>
+        </div>
+        <div class="divide-y divide-slate-100">
+            @foreach($myManagedProjects as $project)
+                <div class="px-6 py-3.5 flex items-center gap-4 flex-wrap">
+                    <div class="flex-1 min-w-48">
+                        <a href="{{ route('projects.show', $project) }}" class="font-bold text-slate-800 text-sm hover:text-indigo-600">
+                            {{ $project->number }} — {{ $project->localized_title }}
+                        </a>
+                    </div>
+                    <span class="badge bg-slate-100 text-slate-600">{{ __('tenders.project_status_' . $project->status) }}</span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Section title --}}
     <div class="flex items-center gap-3 mb-5">
         <h3 class="text-base font-black text-slate-700 uppercase tracking-wider">{{ __('app.system_modules') }}</h3>

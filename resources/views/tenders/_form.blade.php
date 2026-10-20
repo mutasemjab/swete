@@ -210,3 +210,47 @@
         </div>
     </div>
 </div>
+
+@if($extraFields->isNotEmpty())
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-amber-500 text-sm"></i>
+            {{ __('clients.extra_fields_section') }}
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        @foreach($extraFields as $field)
+            @php $efv = ($extraFieldValues ?? collect())->get($field->id); @endphp
+            <div class="{{ in_array($field->field_type, ['textarea', 'image']) ? 'sm:col-span-2' : '' }}">
+                <label class="form-label">{{ $field->localized_label }}</label>
+                @if($field->field_type === 'textarea')
+                    <textarea name="extra_fields[{{ $field->id }}]" rows="3"
+                              class="form-input">{{ old("extra_fields.{$field->id}", $efv?->value) }}</textarea>
+                @elseif($field->field_type === 'image')
+                    @if($efv?->file_path)
+                        <div class="mb-2">
+                            <img src="{{ asset($efv->file_path) }}" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
+                        </div>
+                    @endif
+                    <input type="file" name="extra_fields_images[{{ $field->id }}]"
+                           class="form-input @error("extra_fields_images.{$field->id}") is-invalid @enderror"
+                           accept="image/*">
+                @elseif($field->field_type === 'number')
+                    <input type="number" name="extra_fields[{{ $field->id }}]"
+                           value="{{ old("extra_fields.{$field->id}", $efv?->value) }}" dir="ltr"
+                           class="form-input">
+                @elseif($field->field_type === 'date')
+                    <input type="date" name="extra_fields[{{ $field->id }}]"
+                           value="{{ old("extra_fields.{$field->id}", $efv?->value) }}" dir="ltr"
+                           class="form-input">
+                @else
+                    <input type="text" name="extra_fields[{{ $field->id }}]"
+                           value="{{ old("extra_fields.{$field->id}", $efv?->value) }}"
+                           class="form-input">
+                @endif
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif

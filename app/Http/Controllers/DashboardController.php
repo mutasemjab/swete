@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Project;
+use App\Models\ProjectItemAssignment;
 
 class DashboardController extends Controller
 {
@@ -26,6 +28,19 @@ class DashboardController extends Controller
             ->orderBy('appointment_date')
             ->get();
 
-        return view('dashboard.index', compact('modules', 'myAppointments'));
+        // Price-quote line items assigned to this employee, not yet checked off.
+        $myAssignedItems = ProjectItemAssignment::with(['project', 'item.material'])
+            ->where('assigned_to', auth()->id())
+            ->where('is_done', false)
+            ->latest()
+            ->get();
+
+        // Projects this employee manages, still open (under review or active).
+        $myManagedProjects = Project::where('manager_id', auth()->id())
+            ->whereIn('status', ['under_review', 'active'])
+            ->latest()
+            ->get();
+
+        return view('dashboard.index', compact('modules', 'myAppointments', 'myAssignedItems', 'myManagedProjects'));
     }
 }

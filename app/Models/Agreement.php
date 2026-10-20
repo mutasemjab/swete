@@ -15,6 +15,7 @@ class Agreement extends Model
         'number',
         'party_type',
         'party_id',
+        'project_id',
         'path',
         'notes',
         'created_by',
@@ -26,6 +27,11 @@ class Agreement extends Model
         return $this->party_type === 'supplier'
             ? $this->belongsTo(Supplier::class, 'party_id')
             : $this->belongsTo(Customer::class, 'party_id');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function creator(): BelongsTo

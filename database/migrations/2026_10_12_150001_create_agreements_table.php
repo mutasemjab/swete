@@ -15,6 +15,7 @@ return new class extends Migration
             // same convention as invoices.party_type/party_id (see App\Models\Invoice).
             $table->enum('party_type', ['customer', 'supplier']);
             $table->unsignedBigInteger('party_id');
+            $table->foreignId('project_id')->nullable()->constrained('projects')->nullOnDelete();
             $table->string('path');
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

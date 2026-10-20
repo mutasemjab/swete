@@ -477,4 +477,56 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </div>
 </div>
+
+<?php if($extraFields->isNotEmpty()): ?>
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-amber-500 text-sm"></i>
+            <?php echo e(__('clients.extra_fields_section')); ?>
+
+        </h3>
+    </div>
+    <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <?php $__currentLoopData = $extraFields; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $efv = ($extraFieldValues ?? collect())->get($field->id); ?>
+            <div class="<?php echo e(in_array($field->field_type, ['textarea', 'image']) ? 'sm:col-span-2' : ''); ?>">
+                <label class="form-label"><?php echo e($field->localized_label); ?></label>
+                <?php if($field->field_type === 'textarea'): ?>
+                    <textarea name="extra_fields[<?php echo e($field->id); ?>]" rows="3"
+                              class="form-input"><?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?></textarea>
+                <?php elseif($field->field_type === 'image'): ?>
+                    <?php if($efv?->file_path): ?>
+                        <div class="mb-2">
+                            <img src="<?php echo e(asset($efv->file_path)); ?>" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
+                        </div>
+                    <?php endif; ?>
+                    <input type="file" name="extra_fields_images[<?php echo e($field->id); ?>]"
+                           class="form-input <?php $__errorArgs = ["extra_fields_images.{$field->id}"];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                           accept="image/*">
+                <?php elseif($field->field_type === 'number'): ?>
+                    <input type="number" name="extra_fields[<?php echo e($field->id); ?>]"
+                           value="<?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?>" dir="ltr"
+                           class="form-input">
+                <?php elseif($field->field_type === 'date'): ?>
+                    <input type="date" name="extra_fields[<?php echo e($field->id); ?>]"
+                           value="<?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?>" dir="ltr"
+                           class="form-input">
+                <?php else: ?>
+                    <input type="text" name="extra_fields[<?php echo e($field->id); ?>]"
+                           value="<?php echo e(old("extra_fields.{$field->id}", $efv?->value)); ?>"
+                           class="form-input">
+                <?php endif; ?>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+</div>
+<?php endif; ?>
 <?php /**PATH C:\xampp\htdocs\swete\resources\views/tenders/_form.blade.php ENDPATH**/ ?>
