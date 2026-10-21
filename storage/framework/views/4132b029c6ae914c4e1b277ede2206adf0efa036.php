@@ -9,6 +9,9 @@
 
             <?php $statusColor = ['active' => 'emerald', 'under_review' => 'amber', 'completed' => 'indigo', 'cancelled' => 'slate'][$project->status] ?? 'slate'; ?>
             <span class="badge bg-<?php echo e($statusColor); ?>-100 text-<?php echo e($statusColor); ?>-700"><?php echo e(__('tenders.project_status_' . $project->status)); ?></span>
+            <?php if($project->variation_round > 0): ?>
+                <span class="badge bg-purple-100 text-purple-700">P<?php echo e($project->variation_round); ?></span>
+            <?php endif; ?>
         </h1>
         <p class="page-subtitle"><?php echo e($project->localized_title); ?></p>
         <?php if($project->review_reason): ?>
@@ -110,7 +113,10 @@
         </h3>
     </div>
     <div class="px-6 py-5">
-        <?php $canAssignTeam = auth()->id() === $project->manager_id; ?>
+        <?php
+            $canAssignTeam = auth()->id() === $project->manager_id;
+            $canAssignManager = auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit');
+        ?>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm">
             <div>
                 <dt class="text-slate-400 font-medium mb-0.5"><?php echo e(__('tenders.project_manager')); ?></dt>
@@ -125,6 +131,25 @@
                 <dd class="font-bold text-slate-800"><?php echo e($project->foreman?->name ?? '—'); ?></dd>
             </div>
         </div>
+        <?php if($canAssignManager): ?>
+        <form action="<?php echo e(route('projects.assign-manager', $project)); ?>" method="POST" class="flex items-end gap-3 flex-wrap pt-4 border-t border-slate-100">
+            <?php echo csrf_field(); ?>
+            <div class="flex-1 min-w-48">
+                <label class="form-label"><?php echo e(__('tenders.project_manager')); ?></label>
+                <select name="manager_id" class="js-select2 form-select">
+                    <option value=""><?php echo e(__('app.select')); ?></option>
+                    <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($employee->id); ?>" <?php if($project->manager_id == $employee->id): echo 'selected'; endif; ?>><?php echo e($employee->name); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary btn-sm">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <?php echo e(__('app.save')); ?>
+
+            </button>
+        </form>
+        <?php endif; ?>
         <?php if($canAssignTeam): ?>
         <form action="<?php echo e(route('projects.assign-team', $project)); ?>" method="POST" class="flex items-end gap-3 flex-wrap pt-4 border-t border-slate-100">
             <?php echo csrf_field(); ?>
@@ -178,7 +203,7 @@
                 <tbody class="divide-y divide-slate-100">
                     <?php $__currentLoopData = $quoteItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php $assignment = $item->assignments->firstWhere('project_id', $project->id); ?>
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    <tr class="hover:bg-slate-50/50 transition-colors <?php echo e($assignment && ! $assignment->is_done ? 'bg-amber-50' : ($assignment?->is_done ? 'bg-emerald-50' : '')); ?>">
                         <td class="px-5 py-3 font-mono text-xs text-slate-500"><?php echo e($item->quoteNumber); ?></td>
                         <td class="px-5 py-3 text-sm font-bold text-slate-800"><?php echo e($item->material?->localized_name ?? '—'); ?></td>
                         <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e(number_format($item->quantity, 3)); ?></td>
@@ -221,6 +246,66 @@
             </table>
         </div>
     <?php endif; ?>
+</div>
+
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700"><?php echo e(__('tenders.project_questions_section')); ?></h3>
+    </div>
+    <div class="px-6 py-5">
+        <?php $__empty_1 = true; $__currentLoopData = $project->questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $question): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <div class="py-3 border-b border-slate-100 last:border-0">
+                <div class="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                        <p class="text-sm text-slate-800"><?php echo e($question->question); ?></p>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            <?php echo e(__('tenders.question_target_employee')); ?>: <span class="font-bold"><?php echo e($question->askedTo?->name ?? __('app.all')); ?></span>
+                            · <?php echo e($question->askedBy?->name); ?>
+
+                        </p>
+                    </div>
+                </div>
+                <?php if($question->answer): ?>
+                    <div class="mt-2 bg-emerald-50 rounded-lg px-3 py-2">
+                        <p class="text-xs text-emerald-600 font-bold mb-0.5"><?php echo e(__('tenders.question_answer')); ?></p>
+                        <p class="text-sm text-slate-700"><?php echo e($question->answer); ?></p>
+                    </div>
+                <?php elseif(auth()->id() === $question->asked_to || auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit')): ?>
+                    <form action="<?php echo e(route('projects.questions.answer', [$project, $question])); ?>" method="POST" class="mt-2 flex items-end gap-2 flex-wrap">
+                        <?php echo csrf_field(); ?>
+                        <div class="flex-1 min-w-48">
+                            <input type="text" name="answer" class="form-input" placeholder="<?php echo e(__('tenders.question_answer')); ?>" required>
+                        </div>
+                        <button type="submit" class="btn-secondary btn-sm"><?php echo e(__('tenders.answer_question')); ?></button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <p class="text-sm text-slate-400 mb-4"><?php echo e(__('tenders.no_questions')); ?></p>
+        <?php endif; ?>
+
+        <form action="<?php echo e(route('projects.questions.store', $project)); ?>" method="POST" class="mt-4 pt-4 border-t border-slate-100 flex items-end gap-3 flex-wrap">
+            <?php echo csrf_field(); ?>
+            <div class="flex-1 min-w-56">
+                <label class="form-label"><?php echo e(__('tenders.add_question')); ?></label>
+                <input type="text" name="question" class="form-input" required>
+            </div>
+            <div class="flex-1 min-w-40">
+                <label class="form-label"><?php echo e(__('tenders.question_target_employee')); ?></label>
+                <select name="asked_to" class="js-select2 form-select">
+                    <option value=""><?php echo e(__('app.all')); ?></option>
+                    <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($employee->id); ?>"><?php echo e($employee->name); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                <?php echo e(__('tenders.add_question')); ?>
+
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card overflow-hidden mb-5">

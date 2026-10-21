@@ -135,8 +135,6 @@ return [
     'quote_old_version_print_mark' => 'OLD VERSION (:version) — this price quote was edited after this was printed.',
     'quote_total'             => 'Total',
     'quote_added'             => 'Price quote created successfully.',
-    'quote_review_reason_added'  => 'A new price quote was added (#:number)',
-    'quote_review_reason_edited' => 'The price quote was edited (#:number)',
     'quote_updated'           => 'Price quote updated successfully.',
     'no_quotes'               => 'No price quotes yet',
     'total_quotes'            => 'Total Quotes',
@@ -214,6 +212,25 @@ return [
     'installment_percentage'      => 'Percentage (%)',
     'no_installments'             => 'No installments defined.',
     'quote_print_installments'    => 'Payment Schedule',
+    'installments_must_total_100' => 'Installment percentages must add up to 100%.',
+    'quote_converted_badge'       => 'Converted',
+
+    // ── Variation Orders ──────────────────────────────────────────────────────
+    'variation_order_created'  => 'The price quote was sent as a Variation Order to the review queue.',
+    'variation_orders_section' => 'Variation Orders',
+    'variation_order_badge'    => 'Variation Order',
+    'vo_approved'               => 'Variation Order approved successfully.',
+    'vo_rejected'               => 'Variation Order rejected.',
+
+    // ── Project questions (Q&A to employees) ────────────────────────────────────
+    'project_questions_section'  => 'Questions for Employees',
+    'add_question'               => 'Add Question',
+    'question_target_employee'   => 'Target Employee',
+    'question_answer'            => 'Answer',
+    'answer_question'            => 'Submit Answer',
+    'no_questions'                => 'No questions yet',
+    'question_added'             => 'Question added successfully.',
+    'question_answered'          => 'Answer submitted successfully.',
 
     // ── Price quote print document ───────────────────────────────────────────
     'quote_print_prepared_by'         => 'Submitted / Prepared By',

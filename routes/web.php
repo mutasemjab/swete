@@ -36,6 +36,7 @@ use App\Http\Controllers\Tenders\PriceAnalysisController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
 use App\Http\Controllers\Tenders\ProjectItemAssignmentController;
+use App\Http\Controllers\Tenders\ProjectQuestionController;
 use App\Http\Controllers\Tenders\ProjectReviewController;
 use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
 use App\Http\Controllers\Crm\AppointmentController;
@@ -304,7 +305,6 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('tenders', TenderController::class)->only(['edit', 'update'])->middleware('permission:tenders.edit');
     Route::resource('tenders', TenderController::class)->only(['destroy'])->middleware('permission:tenders.delete');
     Route::post('tenders/{tender}/attach-quote', [TenderController::class, 'attachPriceQuote'])->name('tenders.attach-quote')->middleware('permission:tenders.edit');
-    Route::post('tenders/{tender}/convert-to-project', [TenderController::class, 'convertToProject'])->name('tenders.convert-to-project')->middleware('permission:tenders.projects.convert');
 
     Route::resource('tender-statuses', TenderStatusController::class)->only(['index'])->middleware('permission:tenders.view');
     Route::resource('tender-statuses', TenderStatusController::class)->only(['create', 'store'])->middleware('permission:tenders.tender_statuses.create');
@@ -335,6 +335,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print')->middleware('permission:quotations.view|tenders.view|maintenance.view');
     Route::post('price-quotes/assign', [PriceQuoteController::class, 'assign'])->name('price-quotes.assign')->middleware('permission:quotations.price_quotes.assign|tenders.price_quotes.assign');
     Route::post('price-quotes/{priceQuote}/convert-to-invoice', [PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice')->middleware('permission:quotations.price_quotes.convert_to_invoice|tenders.price_quotes.convert_to_invoice');
+    Route::post('price-quotes/{priceQuote}/convert-to-project', [TenderController::class, 'convertToProject'])->name('price-quotes.convert-to-project')->middleware('permission:tenders.projects.convert');
     Route::resource('price-quotes', PriceQuoteController::class)->only(['create', 'store'])->middleware('permission:quotations.price_quotes.create|tenders.price_quotes.create');
     Route::resource('price-quotes', PriceQuoteController::class)->only(['index', 'show'])->middleware('permission:quotations.view|tenders.view|maintenance.view');
     Route::resource('price-quotes', PriceQuoteController::class)->only(['edit', 'update'])->middleware('permission:quotations.price_quotes.edit|tenders.price_quotes.edit');
@@ -350,11 +351,16 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     // the controller is the real gate here, same precedent as ApprovalController's approve/reject.
     Route::post('projects/{project}/item-assignments/{assignment}/mark-done', [ProjectItemAssignmentController::class, 'markDone'])->name('projects.item-assignments.mark-done');
     Route::post('projects/{project}/assign-team', [ProjectController::class, 'assignTeam'])->name('projects.assign-team');
+    Route::post('projects/{project}/assign-manager', [ProjectController::class, 'assignManager'])->name('projects.assign-manager')->middleware('permission:projects.edit|tenders.projects.edit');
+    Route::post('projects/{project}/questions', [ProjectQuestionController::class, 'store'])->name('projects.questions.store')->middleware('permission:projects.edit|tenders.projects.edit');
+    Route::post('projects/{project}/questions/{question}/answer', [ProjectQuestionController::class, 'answer'])->name('projects.questions.answer');
 
     // ── Projects Under Review (new standalone module — tenders land here before approval) ─────
     Route::get('project-reviews', [ProjectReviewController::class, 'index'])->name('project-reviews.index')->middleware('permission:projects_under_review.view');
     Route::post('project-reviews/{project}/approve', [ProjectReviewController::class, 'approve'])->name('project-reviews.approve')->middleware('permission:projects_under_review.approve');
     Route::post('project-reviews/{project}/reject', [ProjectReviewController::class, 'reject'])->name('project-reviews.reject')->middleware('permission:projects_under_review.reject');
+    Route::post('project-reviews/variation-orders/{variationOrder}/approve', [ProjectReviewController::class, 'approveVariationOrder'])->name('project-reviews.variation-orders.approve')->middleware('permission:projects_under_review.approve');
+    Route::post('project-reviews/variation-orders/{variationOrder}/reject', [ProjectReviewController::class, 'rejectVariationOrder'])->name('project-reviews.variation-orders.reject')->middleware('permission:projects_under_review.reject');
 
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['create', 'store'])->middleware('permission:tenders.purchase_request_reminders.create');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'show'])->middleware('permission:tenders.view');

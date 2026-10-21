@@ -10,6 +10,9 @@
             {{ $project->number }}
             @php $statusColor = ['active' => 'emerald', 'under_review' => 'amber', 'completed' => 'indigo', 'cancelled' => 'slate'][$project->status] ?? 'slate'; @endphp
             <span class="badge bg-{{ $statusColor }}-100 text-{{ $statusColor }}-700">{{ __('tenders.project_status_' . $project->status) }}</span>
+            @if($project->variation_round > 0)
+                <span class="badge bg-purple-100 text-purple-700">P{{ $project->variation_round }}</span>
+            @endif
         </h1>
         <p class="page-subtitle">{{ $project->localized_title }}</p>
         @if($project->review_reason)
@@ -105,7 +108,10 @@
         </h3>
     </div>
     <div class="px-6 py-5">
-        @php $canAssignTeam = auth()->id() === $project->manager_id; @endphp
+        @php
+            $canAssignTeam = auth()->id() === $project->manager_id;
+            $canAssignManager = auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit');
+        @endphp
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm">
             <div>
                 <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.project_manager') }}</dt>
@@ -120,6 +126,24 @@
                 <dd class="font-bold text-slate-800">{{ $project->foreman?->name ?? '—' }}</dd>
             </div>
         </div>
+        @if($canAssignManager)
+        <form action="{{ route('projects.assign-manager', $project) }}" method="POST" class="flex items-end gap-3 flex-wrap pt-4 border-t border-slate-100">
+            @csrf
+            <div class="flex-1 min-w-48">
+                <label class="form-label">{{ __('tenders.project_manager') }}</label>
+                <select name="manager_id" class="js-select2 form-select">
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach($employees as $employee)
+                        <option value="{{ $employee->id }}" @selected($project->manager_id == $employee->id)>{{ $employee->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="btn-primary btn-sm">
+                <i class="fa-solid fa-floppy-disk"></i>
+                {{ __('app.save') }}
+            </button>
+        </form>
+        @endif
         @if($canAssignTeam)
         <form action="{{ route('projects.assign-team', $project) }}" method="POST" class="flex items-end gap-3 flex-wrap pt-4 border-t border-slate-100">
             @csrf
@@ -172,7 +196,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach($quoteItems as $item)
                     @php $assignment = $item->assignments->firstWhere('project_id', $project->id); @endphp
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    <tr class="hover:bg-slate-50/50 transition-colors {{ $assignment && ! $assignment->is_done ? 'bg-amber-50' : ($assignment?->is_done ? 'bg-emerald-50' : '') }}">
                         <td class="px-5 py-3 font-mono text-xs text-slate-500">{{ $item->quoteNumber }}</td>
                         <td class="px-5 py-3 text-sm font-bold text-slate-800">{{ $item->material?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-sm text-slate-600" dir="ltr">{{ number_format($item->quantity, 3) }}</td>
@@ -215,6 +239,64 @@
             </table>
         </div>
     @endif
+</div>
+
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.project_questions_section') }}</h3>
+    </div>
+    <div class="px-6 py-5">
+        @forelse($project->questions as $question)
+            <div class="py-3 border-b border-slate-100 last:border-0">
+                <div class="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                        <p class="text-sm text-slate-800">{{ $question->question }}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            {{ __('tenders.question_target_employee') }}: <span class="font-bold">{{ $question->askedTo?->name ?? __('app.all') }}</span>
+                            · {{ $question->askedBy?->name }}
+                        </p>
+                    </div>
+                </div>
+                @if($question->answer)
+                    <div class="mt-2 bg-emerald-50 rounded-lg px-3 py-2">
+                        <p class="text-xs text-emerald-600 font-bold mb-0.5">{{ __('tenders.question_answer') }}</p>
+                        <p class="text-sm text-slate-700">{{ $question->answer }}</p>
+                    </div>
+                @elseif(auth()->id() === $question->asked_to || auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit'))
+                    <form action="{{ route('projects.questions.answer', [$project, $question]) }}" method="POST" class="mt-2 flex items-end gap-2 flex-wrap">
+                        @csrf
+                        <div class="flex-1 min-w-48">
+                            <input type="text" name="answer" class="form-input" placeholder="{{ __('tenders.question_answer') }}" required>
+                        </div>
+                        <button type="submit" class="btn-secondary btn-sm">{{ __('tenders.answer_question') }}</button>
+                    </form>
+                @endif
+            </div>
+        @empty
+            <p class="text-sm text-slate-400 mb-4">{{ __('tenders.no_questions') }}</p>
+        @endforelse
+
+        <form action="{{ route('projects.questions.store', $project) }}" method="POST" class="mt-4 pt-4 border-t border-slate-100 flex items-end gap-3 flex-wrap">
+            @csrf
+            <div class="flex-1 min-w-56">
+                <label class="form-label">{{ __('tenders.add_question') }}</label>
+                <input type="text" name="question" class="form-input" required>
+            </div>
+            <div class="flex-1 min-w-40">
+                <label class="form-label">{{ __('tenders.question_target_employee') }}</label>
+                <select name="asked_to" class="js-select2 form-select">
+                    <option value="">{{ __('app.all') }}</option>
+                    @foreach($employees as $employee)
+                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                {{ __('tenders.add_question') }}
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card overflow-hidden mb-5">

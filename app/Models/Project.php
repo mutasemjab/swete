@@ -16,6 +16,7 @@ class Project extends Model
         'number',
         'tender_id',
         'customer_id',
+        'price_quote_id',
         'title',
         'title_en',
         'status',
@@ -24,12 +25,24 @@ class Project extends Model
         'engineer_id',
         'foreman_id',
         'review_reason',
+        'variation_round',
         'created_by',
     ];
 
     public function tender(): BelongsTo
     {
         return $this->belongsTo(Tender::class);
+    }
+
+    /** The specific quote this project was converted from — see Tenders\TenderController@convertToProject. */
+    public function priceQuote(): BelongsTo
+    {
+        return $this->belongsTo(PriceQuote::class);
+    }
+
+    public function variationOrders(): HasMany
+    {
+        return $this->hasMany(ProjectVariationOrder::class);
     }
 
     public function customer(): BelongsTo
@@ -72,31 +85,37 @@ class Project extends Model
         return $this->hasMany(Agreement::class);
     }
 
-    /** Every line item across all of the linked tender's CURRENT price quotes — a project has no price quote of its own. */
-    public function quoteItems()
+    public function questions(): HasMany
     {
-        return $this->tender
-            ?->priceQuotes()
-            ->where('is_current', true)
-            ->with(['items.material', 'items.assignments.assignee'])
-            ->get()
-            ->flatMap(fn ($quote) => $quote->items->map(function ($item) use ($quote) {
-                $item->setAttribute('quoteNumber', $quote->number);
-
-                return $item;
-            }))
-            ?? collect();
+        return $this->hasMany(ProjectQuestion::class);
     }
 
-    /** Project value (all current quotes' totals) vs. what's actually been received against their invoices. */
+    /** This project's own origin quote, plus any Variation Order quote that's been approved. */
+    private function relevantQuoteIds()
+    {
+        return collect([$this->price_quote_id])
+            ->merge($this->variationOrders()->where('status', 'approved')->pluck('price_quote_id'))
+            ->filter()
+            ->unique();
+    }
+
+    /** Every line item across the origin quote + any approved Variation Order quotes. */
+    public function quoteItems()
+    {
+        return PriceQuoteItem::whereIn('price_quote_id', $this->relevantQuoteIds())
+            ->with(['material', 'assignments.assignee', 'priceQuote'])
+            ->get()
+            ->map(function ($item) {
+                $item->setAttribute('quoteNumber', "{$item->priceQuote->number} ({$item->priceQuote->revision_label})");
+
+                return $item;
+            });
+    }
+
+    /** Project value (origin + approved VO quotes' totals) vs. what's actually been received against their invoices. */
     public function financialSummary(): array
     {
-        $quotes = $this->tender
-            ?->priceQuotes()
-            ->where('is_current', true)
-            ->with('invoice.receipts')
-            ->get()
-            ?? collect();
+        $quotes = PriceQuote::whereIn('id', $this->relevantQuoteIds())->with('invoice.receipts')->get();
 
         $value = (float) $quotes->sum('total');
         $paid  = (float) $quotes->sum(fn ($quote) => $quote->invoice?->paid_amount ?? 0);

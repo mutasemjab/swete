@@ -12,6 +12,7 @@ use App\Models\Governorate;
 use App\Models\Material;
 use App\Models\PriceQuote;
 use App\Models\Project;
+use App\Models\ProjectVariationOrder;
 use App\Models\SalesRepresentative;
 use App\Models\Tender;
 use App\Models\TenderStatus;
@@ -146,17 +147,44 @@ class TenderController extends ModuleController
         return back()->with('success', __('tenders.quote_attached'));
     }
 
-    /** Turn a won tender into a project, copying over its title and customer. */
-    public function convertToProject(Request $request, Tender $tender)
+    /**
+     * Turn a specific won price quote into a project. If its tender already has an ACTIVE project
+     * (i.e. this isn't the first quote converted for it), this is a mid-project change requested by
+     * the customer — a Variation Order queued for its own review, never touching the live project's
+     * status. Only the very first conversion for a tender creates the project itself.
+     */
+    public function convertToProject(Request $request, PriceQuote $priceQuote)
     {
+        abort_unless($priceQuote->tender_id, 404);
+        $tender = $priceQuote->tender;
+
+        $activeProject = Project::where('tender_id', $tender->id)->where('status', 'active')->latest()->first();
+
+        if ($activeProject) {
+            $activeProject->increment('variation_round');
+
+            ProjectVariationOrder::create([
+                'project_id'     => $activeProject->id,
+                'price_quote_id' => $priceQuote->id,
+                'status'         => 'pending',
+                'created_by'     => $request->user()->id,
+            ]);
+
+            $this->promoteDraftMaterials($tender);
+
+            return redirect()->route('project-reviews.index')
+                ->with('success', __('tenders.variation_order_created'));
+        }
+
         $project = Project::create([
-            'number'      => Project::nextNumber(),
-            'tender_id'   => $tender->id,
-            'customer_id' => $tender->party_id,
-            'title'       => $tender->title,
-            'title_en'    => $tender->title_en,
-            'status'      => 'under_review',
-            'created_by'  => $request->user()->id,
+            'number'         => Project::nextNumber(),
+            'tender_id'      => $tender->id,
+            'customer_id'    => $tender->party_id,
+            'price_quote_id' => $priceQuote->id,
+            'title'          => $tender->title,
+            'title_en'       => $tender->title_en,
+            'status'         => 'under_review',
+            'created_by'     => $request->user()->id,
         ]);
 
         $this->promoteDraftMaterials($tender);

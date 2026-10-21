@@ -20,6 +20,7 @@
         name: '',
         categoryId: '',
         unitId: '',
+        units: {{ $units->mapWithKeys(fn ($u) => [$u->id => $u->localized_name])->toJson() }},
         submit() {
             this.saving = true;
             this.error = '';
@@ -46,6 +47,15 @@
                         select.appendChild(option);
                         $(select).trigger('change.select2');
                     });
+                    // Lets a form elsewhere on the page (its own, separate x-data scope — e.g. the
+                    // Price Quote items table) pick this material up for rows added after this point.
+                    window.dispatchEvent(new CustomEvent('material-quick-added', {
+                        detail: {
+                            id: data.id,
+                            label: data.name + ' (' + data.code + ')',
+                            unit: this.units[this.unitId] || '',
+                        },
+                    }));
                     this.open = false;
                     this.name = '';
                     this.categoryId = '';

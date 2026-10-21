@@ -57,6 +57,9 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-4">
                             <a href="{{ route('projects.show', $project) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm">{{ $project->number }}</a>
+                            @if($project->variation_round > 0)
+                                <span class="badge bg-purple-100 text-purple-700">P{{ $project->variation_round }}</span>
+                            @endif
                         </td>
                         <td class="px-5 py-4">
                             <p class="font-bold text-slate-800">{{ $project->localized_title }}</p>
@@ -122,4 +125,65 @@
         @endif
     @endif
 </div>
+
+@if($variationOrders->isNotEmpty())
+<div class="card overflow-hidden mt-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-file-circle-plus text-purple-500 text-sm"></i>
+            {{ __('tenders.variation_orders_section') }}
+        </h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.project_number') }}</th>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_number') }}</th>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('tenders.project_tender') }}</th>
+                    <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @foreach($variationOrders as $vo)
+                <tr class="hover:bg-slate-50/50 transition-colors bg-purple-50/30">
+                    <td class="px-5 py-4">
+                        <a href="{{ route('projects.show', $vo->project) }}" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm">{{ $vo->project->number }}</a>
+                        <span class="badge bg-purple-100 text-purple-700">{{ __('tenders.variation_order_badge') }}</span>
+                    </td>
+                    <td class="px-5 py-4">
+                        <a href="{{ route('price-quotes.show', $vo->priceQuote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $vo->priceQuote->number }}</a>
+                        <span class="text-xs text-slate-400">({{ $vo->priceQuote->revision_label }})</span>
+                    </td>
+                    <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
+                        @if($vo->priceQuote->tender)
+                            <a href="{{ route('tenders.show', $vo->priceQuote->tender) }}" class="text-indigo-600 hover:underline">{{ $vo->priceQuote->tender->number }}</a>
+                        @else
+                            —
+                        @endif
+                    </td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center justify-end gap-2">
+                            <form action="{{ route('project-reviews.variation-orders.approve', $vo) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-primary btn-sm">
+                                    <i class="fa-solid fa-check"></i> {{ __('tenders.project_approve') }}
+                                </button>
+                            </form>
+                            <form action="{{ route('project-reviews.variation-orders.reject', $vo) }}" method="POST"
+                                  @submit="if (! confirm('{{ __('tenders.project_reject_confirm') }}')) $event.preventDefault()">
+                                @csrf
+                                <button type="submit" class="btn-danger btn-sm">
+                                    <i class="fa-solid fa-xmark"></i> {{ __('tenders.project_reject') }}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 @endsection

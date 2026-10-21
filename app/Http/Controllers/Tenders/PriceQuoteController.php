@@ -16,7 +16,6 @@ use App\Models\PriceAnalysis;
 use App\Models\PriceQuote;
 use App\Models\PriceQuoteInstallment;
 use App\Models\PriceQuoteItem;
-use App\Models\Project;
 use App\Models\QuoteDeliveryTerm;
 use App\Models\QuoteDiscountLimit;
 use App\Models\QuoteSupplyScope;
@@ -82,8 +81,11 @@ class PriceQuoteController extends ModuleController
 
         $priceQuote = PriceQuote::create([
             ...$validated,
-            'number'     => PriceQuote::nextNumber(),
-            'status'     => 'draft',
+            'number'          => PriceQuote::nextNumber(),
+            'status'          => 'draft',
+            'tender_sequence' => ($validated['tender_id'] ?? null)
+                ? (int) PriceQuote::where('tender_id', $validated['tender_id'])->max('tender_sequence') + 1
+                : null,
             'created_by' => $request->user()->id,
         ]);
 
@@ -93,8 +95,6 @@ class PriceQuoteController extends ModuleController
         if ($request->filled('report_id')) {
             MaintenanceReport::where('id', $request->input('report_id'))->update(['price_quote_id' => $priceQuote->id]);
         }
-
-        $this->revertProjectIfNeeded($priceQuote, __('tenders.quote_review_reason_added', ['number' => $priceQuote->number]));
 
         return redirect()->route('price-quotes.show', $priceQuote)
             ->with('success', __('tenders.quote_added'));
@@ -138,6 +138,9 @@ class PriceQuoteController extends ModuleController
     public function update(Request $request, PriceQuote $priceQuote)
     {
         abort_unless($priceQuote->is_current, 404);
+        // Once this exact quote has become a project's own origin, or an approved Variation Order,
+        // it's permanently frozen — any further change must go through a brand-new quote instead.
+        abort_unless(! $priceQuote->isLocked(), 403);
 
         $validated = $this->validated($request);
 
@@ -150,8 +153,6 @@ class PriceQuoteController extends ModuleController
 
         $this->syncItems($priceQuote, $validated['items']);
         $this->syncInstallments($priceQuote, $validated['installments'] ?? []);
-
-        $this->revertProjectIfNeeded($priceQuote, __('tenders.quote_review_reason_edited', ['number' => $priceQuote->number]));
 
         return redirect()->route('price-quotes.show', $priceQuote)
             ->with('success', __('tenders.quote_updated'));
@@ -402,6 +403,11 @@ class PriceQuoteController extends ModuleController
         $validated['customs_fees_included'] = $request->boolean('customs_fees_included');
         $validated['include_boiler_note']   = $request->boolean('include_boiler_note');
 
+        if (! empty($validated['installments'])
+            && round(collect($validated['installments'])->sum('percentage'), 2) !== 100.0) {
+            throw ValidationException::withMessages(['installments' => __('tenders.installments_must_total_100')]);
+        }
+
         return $validated;
     }
 
@@ -420,19 +426,6 @@ class PriceQuoteController extends ModuleController
         }
 
         $priceQuote->recalculateTotals();
-    }
-
-    /** A live (already-approved) project built from this quote's tender needs a fresh look once its pricing changes. */
-    private function revertProjectIfNeeded(PriceQuote $priceQuote, string $reason): void
-    {
-        if (! $priceQuote->tender_id) {
-            return;
-        }
-
-        Project::where('tender_id', $priceQuote->tender_id)
-            ->where('status', 'active')
-            ->first()
-            ?->update(['status' => 'under_review', 'review_reason' => $reason]);
     }
 
     private function syncInstallments(PriceQuote $priceQuote, array $installments): void

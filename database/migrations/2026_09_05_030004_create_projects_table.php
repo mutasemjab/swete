@@ -16,6 +16,10 @@ return new class extends Migration
             // in case a project ever needs to be created without one.
             $table->foreignId('tender_id')->nullable()->constrained('tenders')->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
+            // The specific quote this project was converted from (Tenders\TenderController@convertToProject) —
+            // this is "the project's own quote"; a later price quote on the same tender is a Variation
+            // Order (see project_variation_orders), never a second origin for this same project.
+            $table->foreignId('price_quote_id')->nullable()->constrained('price_quotes')->nullOnDelete();
             $table->string('title');
             $table->string('title_en')->nullable();
             // 'under_review' = just converted from a tender, awaiting approval before it's a real,
@@ -28,9 +32,12 @@ return new class extends Migration
             $table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('engineer_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('foreman_id')->nullable()->constrained('users')->nullOnDelete();
-            // Set whenever an active project is bounced back to under_review because one of its
-            // tender's price quotes changed — see Tenders\PriceQuoteController@revertProjectIfNeeded.
+            // Unused going forward (the whole-project auto-revert this backed was replaced by the
+            // Variation Order flow — see project_variation_orders) — kept rather than dropped mid-session.
             $table->text('review_reason')->nullable();
+            // "P{n}" — incremented each time a Variation Order is created for this project (see
+            // Tenders\TenderController@convertToProject).
+            $table->unsignedInteger('variation_round')->default(0);
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });

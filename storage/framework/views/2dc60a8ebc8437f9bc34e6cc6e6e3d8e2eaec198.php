@@ -12,15 +12,6 @@
         <p class="page-subtitle"><?php echo e($tender->localized_title); ?></p>
     </div>
     <div class="flex items-center gap-2">
-        <form action="<?php echo e(route('tenders.convert-to-project', $tender)); ?>" method="POST"
-              @submit="if (! confirm('<?php echo e(__('tenders.convert_to_project_confirm')); ?>')) $event.preventDefault()">
-            <?php echo csrf_field(); ?>
-            <button type="submit" class="btn-primary">
-                <i class="fa-solid fa-diagram-project"></i>
-                <?php echo e(__('tenders.convert_to_project')); ?>
-
-            </button>
-        </form>
         <a href="<?php echo e(route('tenders.edit', $tender)); ?>" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             <?php echo e(__('app.edit')); ?>
@@ -165,6 +156,7 @@
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.quote_number')); ?></th>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.quote_date')); ?></th>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.quote_total')); ?></th>
+                        <th class="px-5 py-3 w-48"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -172,9 +164,25 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-3">
                             <a href="<?php echo e(route('price-quotes.show', $quote)); ?>" class="font-mono font-bold text-indigo-600 hover:underline"><?php echo e($quote->number); ?></a>
+                            <span class="text-xs text-slate-400">(<?php echo e($quote->revision_label); ?>)</span>
                         </td>
                         <td class="px-5 py-3 text-slate-600"><?php echo e($quote->date->format('Y-m-d')); ?></td>
                         <td class="px-5 py-3 font-bold text-slate-800"><?php echo e(number_format($quote->total, 3)); ?></td>
+                        <td class="px-5 py-3 text-end">
+                            <?php if($quote->isLocked()): ?>
+                                <span class="badge bg-emerald-100 text-emerald-700"><?php echo e(__('tenders.quote_converted_badge')); ?></span>
+                            <?php else: ?>
+                                <form action="<?php echo e(route('price-quotes.convert-to-project', $quote)); ?>" method="POST"
+                                      @submit="if (! confirm('<?php echo e(__('tenders.convert_to_project_confirm')); ?>')) $event.preventDefault()">
+                                    <?php echo csrf_field(); ?>
+                                    <button type="submit" class="btn-primary btn-sm">
+                                        <i class="fa-solid fa-diagram-project"></i>
+                                        <?php echo e(__('tenders.convert_to_project')); ?>
+
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>

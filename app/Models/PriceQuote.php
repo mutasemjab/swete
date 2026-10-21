@@ -16,6 +16,7 @@ class PriceQuote extends Model
     protected $fillable = [
         'number',
         'tender_id',
+        'tender_sequence',
         'customer_id',
         'date',
         'status',
@@ -132,6 +133,19 @@ class PriceQuote extends Model
     public function scopePendingInvoice(Builder $query): Builder
     {
         return $query->whereNull('invoice_id');
+    }
+
+    /** Display-only relabel of the existing version counter: R0 on creation, R1/R2/... after each edit. */
+    public function getRevisionLabelAttribute(): string
+    {
+        return 'R' . ($this->version - 1);
+    }
+
+    /** Locked once it's a project's own origin quote, or an approved Variation Order — never editable past that point. */
+    public function isLocked(): bool
+    {
+        return Project::where('price_quote_id', $this->id)->exists()
+            || ProjectVariationOrder::where('price_quote_id', $this->id)->where('status', 'approved')->exists();
     }
 
     public static function nextNumber(): string

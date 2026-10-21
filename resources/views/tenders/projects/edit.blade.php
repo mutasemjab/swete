@@ -51,17 +51,6 @@
                 @error('status')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
-            <div>
-                <label class="form-label">{{ __('tenders.project_manager') }}</label>
-                <select name="manager_id" class="js-select2 form-select @error('manager_id') is-invalid @enderror">
-                    <option value="">{{ __('app.select') }}</option>
-                    @foreach($employees as $employee)
-                        <option value="{{ $employee->id }}" @selected(old('manager_id', $project->manager_id) == $employee->id)>{{ $employee->name }}</option>
-                    @endforeach
-                </select>
-                @error('manager_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-            </div>
-
             <div class="sm:col-span-2">
                 <label class="form-label">{{ __('tenders.tender_notes') }}</label>
                 <textarea name="notes" rows="3" class="form-input @error('notes') is-invalid @enderror">{{ old('notes', $project->notes) }}</textarea>

@@ -47,7 +47,7 @@
             <i class="fa-solid fa-print"></i>
             {{ __('tenders.quote_print_en') }}
         </a>
-        @if($priceQuote->is_current)
+        @if($priceQuote->is_current && ! $priceQuote->isLocked())
             <a href="{{ route('price-quotes.edit', $priceQuote) }}" class="btn-secondary">
                 <i class="fa-solid fa-pen"></i>
                 {{ __('app.edit') }}

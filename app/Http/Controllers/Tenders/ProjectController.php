@@ -31,7 +31,14 @@ class ProjectController extends ModuleController
 
     public function show(Project $project)
     {
-        $project->load(['customer', 'tender', 'creator', 'manager', 'engineer', 'foreman', 'purchaseRequests.supplier', 'attachments.creator', 'agreements']);
+        // Keeps the sidebar/title context matching wherever the project actually is right now,
+        // not always "Projects" — mirrors Clients\ClientExtraFieldController's per-action module switch.
+        $this->module = $project->status === 'under_review' ? 'projects_under_review' : 'projects';
+
+        $project->load([
+            'customer', 'tender', 'creator', 'manager', 'engineer', 'foreman',
+            'purchaseRequests.supplier', 'attachments.creator', 'agreements', 'questions.askedTo', 'questions.askedBy',
+        ]);
         $employees = User::where('status', true)->orderBy('name')->get();
         $quoteItems = $project->quoteItems();
         $financialSummary = $project->financialSummary();
@@ -41,9 +48,9 @@ class ProjectController extends ModuleController
 
     public function edit(Project $project)
     {
-        $employees = User::where('status', true)->orderBy('name')->get();
+        $this->module = $project->status === 'under_review' ? 'projects_under_review' : 'projects';
 
-        return $this->moduleView('tenders.projects.edit', compact('project', 'employees'));
+        return $this->moduleView('tenders.projects.edit', compact('project'));
     }
 
     public function update(Request $request, Project $project)
@@ -53,13 +60,24 @@ class ProjectController extends ModuleController
             'title_en'   => ['nullable', 'string', 'max:255'],
             'status'     => ['required', 'in:under_review,active,completed,cancelled'],
             'notes'      => ['nullable', 'string'],
-            'manager_id' => ['nullable', 'exists:users,id'],
         ]);
 
         $project->update($validated);
 
         return redirect()->route('projects.show', $project)
             ->with('success', __('tenders.project_updated'));
+    }
+
+    /** The project manager is picked by whoever has edit rights — from the project's own show page, not edit. */
+    public function assignManager(Request $request, Project $project)
+    {
+        $validated = $request->validate([
+            'manager_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $project->update($validated);
+
+        return back()->with('success', __('tenders.project_team_updated'));
     }
 
     public function destroy(Project $project)

@@ -14,6 +14,10 @@ return new class extends Migration
             // Nullable: a quote can be drafted before a tender exists, or reused,
             // then attached to a tender later (Tenders\TenderController@attachPriceQuote).
             $table->foreignId('tender_id')->nullable()->constrained('tenders')->nullOnDelete();
+            // Per-tender counter for genuinely distinct quotes (never touched by an edit — editing
+            // bumps `version`/R-label instead): 1 for the first quote ever created against a tender,
+            // 2+ for each later one (a Variation Order once the tender already has an active project).
+            $table->unsignedInteger('tender_sequence')->nullable();
             $table->foreignId('customer_id')->constrained('customers')->restrictOnDelete();
             $table->date('date');
             $table->enum('status', ['draft', 'sent', 'accepted', 'rejected'])->default('draft');

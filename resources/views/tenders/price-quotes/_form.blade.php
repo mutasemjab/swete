@@ -32,6 +32,13 @@
         items: {{ $seedItems->toJson() }},
         addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''], _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
+        // Materials created via the quick-add modal mid-form — the modal's own x-data scope has no
+        // access to this one, so it reaches us through a window event instead (see
+        // components/material-quick-add-modal.blade.php). Needed so a row added with addItem()
+        // after a quick-add can still select it (the static materials option list below was baked
+        // at page load and doesn't know about it).
+        quickAddedMaterials: [],
+        materialUnits: {{ $materials->mapWithKeys(fn ($m) => [$m->id => $m->unit?->localized_name ?? ''])->toJson() }},
         discountType: '{{ old('discount_type', $priceQuote?->discount_type ?? 'amount') }}',
         discountValue: {{ (float) old('discount_value', $priceQuote?->discount_value ?? 0) }},
         get subtotal() { return this.items.reduce((sum, i) => sum + (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0), 0); },
@@ -71,7 +78,14 @@
             this.$nextTick(() => window.initSelect2());
         },
       }"
-      x-init="$nextTick(() => window.initSelect2())">
+      x-init="$nextTick(() => window.initSelect2())"
+      x-on:material-quick-added.window="
+        quickAddedMaterials.push($event.detail);
+        materialUnits[String($event.detail.id)] = $event.detail.unit;
+        if (items.length === 1 && !items[0].material_id) { items[0].material_id = String($event.detail.id); }
+        else { addItem(); items[items.length - 1].material_id = String($event.detail.id); }
+        $nextTick(() => window.initSelect2());
+      ">
 
 <div class="card mb-5">
     <div class="card-header">
@@ -167,7 +181,7 @@
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
             <label class="form-label">{{ __('tenders.quote_validity_weeks') }}</label>
-            <input type="number" name="validity_weeks" value="{{ old('validity_weeks', $priceQuote?->validity_weeks) }}"
+            <input type="number" name="validity_weeks" value="{{ old('validity_weeks', $priceQuote?->validity_weeks ?? 1) }}"
                    min="1" dir="ltr" class="form-input @error('validity_weeks') is-invalid @enderror">
             @error('validity_weeks')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
@@ -284,6 +298,9 @@
                                 @foreach($materials as $material)
                                     <option value="{{ $material->id }}">{{ $material->localized_name }} ({{ $material->code }})</option>
                                 @endforeach
+                                <template x-for="m in quickAddedMaterials" :key="m.id">
+                                    <option :value="String(m.id)" x-text="m.label"></option>
+                                </template>
                             </select>
                             <template x-if="item.material_id">
                                 <div class="mt-1.5 text-[11px] text-slate-500 space-y-1">
@@ -316,6 +333,7 @@
                         <td class="px-5 py-2.5">
                             <input type="number" :name="`items[${index}][unit_price]`" x-model="item.unit_price"
                                    step="0.001" min="0" dir="ltr" class="form-input" required>
+                            <p class="mt-1 text-[11px] text-slate-400" x-show="materialUnits[item.material_id]" x-text="materialUnits[item.material_id]"></p>
                         </td>
                         <td class="px-5 py-2.5">
                             <div class="space-y-1">
@@ -416,6 +434,9 @@
             {{ __('tenders.add_installment') }}
         </button>
     </div>
+    <div class="px-5">
+        @error('installments')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+    </div>
     <div class="overflow-x-auto">
         <template x-if="installments.length === 0">
             <p class="text-sm text-slate-400 px-5 py-4">{{ __('tenders.no_installments') }}</p>
@@ -424,7 +445,7 @@
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.installment_description') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_percentage') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('tenders.installment_percentage') }} <span class="text-rose-500">*</span></th>
                     <th class="px-5 py-3 w-10"></th>
                 </tr>
             </thead>

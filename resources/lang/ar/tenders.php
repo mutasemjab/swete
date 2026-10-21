@@ -135,8 +135,6 @@ return [
     'quote_old_version_print_mark' => 'نسخة قديمة (رقم :version) — تم تعديل عرض السعر هذا لاحقاً.',
     'quote_total'             => 'الإجمالي',
     'quote_added'             => 'تم إنشاء عرض السعر بنجاح.',
-    'quote_review_reason_added'  => 'تمت إضافة عرض سعر جديد (#:number)',
-    'quote_review_reason_edited' => 'تم تعديل عرض السعر (#:number)',
     'quote_updated'           => 'تم تحديث عرض السعر بنجاح.',
     'no_quotes'               => 'لا توجد عروض أسعار بعد',
     'total_quotes'            => 'إجمالي العروض',
@@ -214,6 +212,25 @@ return [
     'installment_percentage'      => 'النسبة (%)',
     'no_installments'             => 'لا توجد دفعات محددة.',
     'quote_print_installments'    => 'جدول الدفعات',
+    'installments_must_total_100' => 'مجموع نسب الدفعات يجب أن يكون 100%.',
+    'quote_converted_badge'       => 'تم التحويل',
+
+    // ── Variation Orders ──────────────────────────────────────────────────────
+    'variation_order_created'  => 'تم إرسال عرض السعر كطلب تغيير (Variation Order) لقائمة المراجعة.',
+    'variation_orders_section' => 'طلبات تغيير (Variation Orders)',
+    'variation_order_badge'    => 'Variation Order',
+    'vo_approved'               => 'تمت الموافقة على طلب التغيير بنجاح.',
+    'vo_rejected'               => 'تم رفض طلب التغيير.',
+
+    // ── Project questions (Q&A to employees) ────────────────────────────────────
+    'project_questions_section'  => 'أسئلة للموظفين',
+    'add_question'               => 'إضافة سؤال',
+    'question_target_employee'   => 'الموظف المستهدف',
+    'question_answer'            => 'الإجابة',
+    'answer_question'            => 'إرسال الإجابة',
+    'no_questions'                => 'لا توجد أسئلة حتى الآن',
+    'question_added'             => 'تمت إضافة السؤال بنجاح.',
+    'question_answered'          => 'تم إرسال الإجابة بنجاح.',
 
     // ── Price quote print document ───────────────────────────────────────────
     'quote_print_prepared_by'         => 'مُقدَّم من / أُعِد بواسطة',

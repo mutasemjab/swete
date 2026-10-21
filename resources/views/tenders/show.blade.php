@@ -13,14 +13,6 @@
         <p class="page-subtitle">{{ $tender->localized_title }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <form action="{{ route('tenders.convert-to-project', $tender) }}" method="POST"
-              @submit="if (! confirm('{{ __('tenders.convert_to_project_confirm') }}')) $event.preventDefault()">
-            @csrf
-            <button type="submit" class="btn-primary">
-                <i class="fa-solid fa-diagram-project"></i>
-                {{ __('tenders.convert_to_project') }}
-            </button>
-        </form>
         <a href="{{ route('tenders.edit', $tender) }}" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
@@ -156,6 +148,7 @@
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_number') }}</th>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_date') }}</th>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_total') }}</th>
+                        <th class="px-5 py-3 w-48"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -163,9 +156,24 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-3">
                             <a href="{{ route('price-quotes.show', $quote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $quote->number }}</a>
+                            <span class="text-xs text-slate-400">({{ $quote->revision_label }})</span>
                         </td>
                         <td class="px-5 py-3 text-slate-600">{{ $quote->date->format('Y-m-d') }}</td>
                         <td class="px-5 py-3 font-bold text-slate-800">{{ number_format($quote->total, 3) }}</td>
+                        <td class="px-5 py-3 text-end">
+                            @if($quote->isLocked())
+                                <span class="badge bg-emerald-100 text-emerald-700">{{ __('tenders.quote_converted_badge') }}</span>
+                            @else
+                                <form action="{{ route('price-quotes.convert-to-project', $quote) }}" method="POST"
+                                      @submit="if (! confirm('{{ __('tenders.convert_to_project_confirm') }}')) $event.preventDefault()">
+                                    @csrf
+                                    <button type="submit" class="btn-primary btn-sm">
+                                        <i class="fa-solid fa-diagram-project"></i>
+                                        {{ __('tenders.convert_to_project') }}
+                                    </button>
+                                </form>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
