@@ -158,7 +158,6 @@
                     </td>
                     <td class="px-5 py-4">
                         <a href="<?php echo e(route('price-quotes.show', $vo->priceQuote)); ?>" class="font-mono font-bold text-indigo-600 hover:underline"><?php echo e($vo->priceQuote->number); ?></a>
-                        <span class="text-xs text-slate-400">(<?php echo e($vo->priceQuote->revision_label); ?>)</span>
                     </td>
                     <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                         <?php if($vo->priceQuote->tender): ?>

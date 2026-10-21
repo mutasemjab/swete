@@ -156,7 +156,6 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-3">
                             <a href="{{ route('price-quotes.show', $quote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $quote->number }}</a>
-                            <span class="text-xs text-slate-400">({{ $quote->revision_label }})</span>
                         </td>
                         <td class="px-5 py-3 text-slate-600">{{ $quote->date->format('Y-m-d') }}</td>
                         <td class="px-5 py-3 font-bold text-slate-800">{{ number_format($quote->total, 3) }}</td>

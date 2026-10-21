@@ -135,10 +135,10 @@ class PriceQuote extends Model
         return $query->whereNull('invoice_id');
     }
 
-    /** Display-only relabel of the existing version counter: R0 on creation, R1/R2/... after each edit. */
-    public function getRevisionLabelAttribute(): string
+    /** The stable "PQ-YYYY-00001" part of the number, with its "-R{n}" revision suffix stripped off. */
+    public function getBaseNumberAttribute(): string
     {
-        return 'R' . ($this->version - 1);
+        return preg_replace('/-R\d+$/', '', $this->number);
     }
 
     /** Locked once it's a project's own origin quote, or an approved Variation Order — never editable past that point. */
@@ -148,12 +148,13 @@ class PriceQuote extends Model
             || ProjectVariationOrder::where('price_quote_id', $this->id)->where('status', 'approved')->exists();
     }
 
+    /** A brand-new, distinct quote always starts at revision R0. */
     public static function nextNumber(): string
     {
         $year  = now()->format('Y');
         $count = static::whereYear('created_at', $year)->count() + 1;
 
-        return sprintf('PQ-%s-%05d', $year, $count);
+        return sprintf('PQ-%s-%05d-R0', $year, $count);
     }
 
     public function recalculateTotals(): void
@@ -180,17 +181,28 @@ class PriceQuote extends Model
     /**
      * Freezes the current DB state (header + items + installments) into a new, read-only row and
      * returns it — called by the controller right before applying an edit, so nothing is ever
-     * silently overwritten. The live row (this one) keeps its id/number; only the frozen clone
-     * gets a "-vN" number suffix (the real `number` column is unique, so two rows can't share it).
+     * silently overwritten. The quote's number carries its revision right in it everywhere
+     * (PQ-2026-00001-R0, then -R1, -R2... on every subsequent edit — same base number throughout,
+     * a genuinely new quote gets its own fresh base number instead, see nextNumber()). Since
+     * `number` is unique, the live row must move onto its new revision number FIRST, before the
+     * frozen snapshot can take over the one it just vacated.
      */
     public function archiveCurrentVersion(): self
     {
         $this->loadMissing(['items', 'installments']);
 
+        $oldNumber  = $this->number;
+        $oldVersion = $this->version;
+
+        $this->update([
+            'number'  => $this->base_number . '-R' . $oldVersion,
+            'version' => $oldVersion + 1,
+        ]);
+
         $archive = $this->replicate(['root_id']);
-        $archive->number     = "{$this->number}-v{$this->version}";
+        $archive->number     = $oldNumber;
         $archive->is_current = false;
-        $archive->version    = $this->version;
+        $archive->version    = $oldVersion;
         $archive->root_id    = $this->id;
         $archive->save();
 

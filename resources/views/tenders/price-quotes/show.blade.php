@@ -22,7 +22,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ $priceQuote->number }}</h1>
-        <p class="page-subtitle">{{ __('tenders.price_quote') }} — {{ __('tenders.quote_version_label', ['version' => $priceQuote->version]) }}</p>
+        <p class="page-subtitle">{{ __('tenders.price_quote') }}</p>
     </div>
     <div class="flex items-center gap-2">
         @if($priceQuote->invoice_id)
@@ -69,7 +69,7 @@
         @foreach($priceQuote->versions as $oldVersion)
             <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <span class="text-sm text-slate-600">
-                    {{ __('tenders.quote_version_label', ['version' => $oldVersion->version]) }}
+                    <span class="font-mono font-bold" dir="ltr">{{ $oldVersion->number }}</span>
                     — <span dir="ltr">{{ $oldVersion->updated_at->format('Y-m-d H:i') }}</span>
                 </span>
                 <a href="{{ route('price-quotes.show', $oldVersion) }}" class="btn-secondary btn-sm">

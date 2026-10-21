@@ -106,7 +106,7 @@ class Project extends Model
             ->with(['material', 'assignments.assignee', 'priceQuote'])
             ->get()
             ->map(function ($item) {
-                $item->setAttribute('quoteNumber', "{$item->priceQuote->number} ({$item->priceQuote->revision_label})");
+                $item->setAttribute('quoteNumber', $item->priceQuote->number);
 
                 return $item;
             });

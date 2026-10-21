@@ -153,7 +153,6 @@
                     </td>
                     <td class="px-5 py-4">
                         <a href="{{ route('price-quotes.show', $vo->priceQuote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $vo->priceQuote->number }}</a>
-                        <span class="text-xs text-slate-400">({{ $vo->priceQuote->revision_label }})</span>
                     </td>
                     <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">
                         @if($vo->priceQuote->tender)

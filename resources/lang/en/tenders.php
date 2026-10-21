@@ -128,7 +128,6 @@ return [
     'quote_discount_limit_hint' => 'Allowed limit: :percent percentage, or :amount flat amount.',
     'quote_old_version_banner' => 'This is an old version of this price quote — it was later edited.',
     'quote_view_current_version' => 'View Current Version',
-    'quote_version_label' => 'Version :version',
     'quote_version_history' => 'Edit History',
     'quote_print_ar' => 'Print Arabic',
     'quote_print_en' => 'Print English',
@@ -213,6 +212,7 @@ return [
     'no_installments'             => 'No installments defined.',
     'quote_print_installments'    => 'Payment Schedule',
     'installments_must_total_100' => 'Installment percentages must add up to 100%.',
+    'installments_total'          => 'Total',
     'quote_converted_badge'       => 'Converted',
 
     // ── Variation Orders ──────────────────────────────────────────────────────

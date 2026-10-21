@@ -164,7 +164,6 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-3">
                             <a href="<?php echo e(route('price-quotes.show', $quote)); ?>" class="font-mono font-bold text-indigo-600 hover:underline"><?php echo e($quote->number); ?></a>
-                            <span class="text-xs text-slate-400">(<?php echo e($quote->revision_label); ?>)</span>
                         </td>
                         <td class="px-5 py-3 text-slate-600"><?php echo e($quote->date->format('Y-m-d')); ?></td>
                         <td class="px-5 py-3 font-bold text-slate-800"><?php echo e(number_format($quote->total, 3)); ?></td>

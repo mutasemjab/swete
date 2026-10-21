@@ -144,11 +144,10 @@ class PriceQuoteController extends ModuleController
 
         $validated = $this->validated($request);
 
-        // Freeze the pre-edit state into a new read-only row before touching anything — the live
-        // row (this one) keeps its id/number and just moves forward to the next version number.
+        // Freeze the pre-edit state into a new read-only row before touching anything — this also
+        // moves the live row (this one, same id) forward onto its next revision number itself.
         $priceQuote->archiveCurrentVersion();
 
-        $validated['version'] = $priceQuote->version + 1;
         $priceQuote->update($validated);
 
         $this->syncItems($priceQuote, $validated['items']);

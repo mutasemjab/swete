@@ -128,7 +128,6 @@ return [
     'quote_discount_limit_hint' => 'الحد المسموح به: :percent نسبة، أو :amount قيمة ثابتة.',
     'quote_old_version_banner' => 'هذه نسخة قديمة من عرض السعر، تم تعديلها لاحقاً.',
     'quote_view_current_version' => 'عرض النسخة الحالية',
-    'quote_version_label' => 'النسخة :version',
     'quote_version_history' => 'سجل التعديلات',
     'quote_print_ar' => 'طباعة عربي',
     'quote_print_en' => 'طباعة انجليزي',
@@ -213,6 +212,7 @@ return [
     'no_installments'             => 'لا توجد دفعات محددة.',
     'quote_print_installments'    => 'جدول الدفعات',
     'installments_must_total_100' => 'مجموع نسب الدفعات يجب أن يكون 100%.',
+    'installments_total'          => 'الإجمالي',
     'quote_converted_badge'       => 'تم التحويل',
 
     // ── Variation Orders ──────────────────────────────────────────────────────

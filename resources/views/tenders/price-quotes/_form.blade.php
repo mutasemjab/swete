@@ -423,6 +423,12 @@
     installments: {{ Js::from(old('installments', $seedInstallments ?? [['description'=>'','percentage'=>'']])) }},
     addInstallment() { this.installments.push({ description: '', percentage: '' }); },
     removeInstallment(i) { this.installments.splice(i, 1); },
+    get installmentsTotal() {
+        return this.installments.reduce((sum, r) => sum + (parseFloat(r.percentage) || 0), 0);
+    },
+    get installmentsTotalOk() {
+        return this.installments.length === 0 || Math.round(this.installmentsTotal * 100) === 10000;
+    },
 }">
     <div class="card-header">
         <h3 class="font-bold text-slate-700 flex items-center gap-2">
@@ -470,6 +476,18 @@
                 </template>
             </tbody>
         </table>
+        <div x-show="installments.length > 0" class="px-5 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <span class="text-sm text-slate-500">{{ __('tenders.installments_total') }}:</span>
+            <span class="text-sm font-black" dir="ltr"
+                  :class="installmentsTotalOk ? 'text-emerald-600' : 'text-rose-600'"
+                  x-text="installmentsTotal.toFixed(2) + '%'"></span>
+            <span x-show="!installmentsTotalOk" class="text-xs text-rose-500">
+                <i class="fa-solid fa-triangle-exclamation"></i> {{ __('tenders.installments_must_total_100') }}
+            </span>
+            <span x-show="installmentsTotalOk" class="text-xs text-emerald-500">
+                <i class="fa-solid fa-circle-check"></i>
+            </span>
+        </div>
     </div>
 </div>
 
@@ -521,3 +539,24 @@
 </div>
 
 </div>
+
+@push('scripts')
+    <script>
+        // Belt-and-suspenders with the server-side check in PriceQuoteController::validated() —
+        // this one catches it live, before the round-trip, right at the point of submit.
+        document.addEventListener('submit', function (e) {
+            const percentageInputs = e.target.querySelectorAll ? e.target.querySelectorAll('input[name$="][percentage]"]') : null;
+            if (!percentageInputs || percentageInputs.length === 0) return;
+
+            const filled = Array.from(percentageInputs).filter((el) => el.value !== '');
+            if (filled.length === 0) return;
+
+            const total = filled.reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
+            if (Math.round(total * 100) !== 10000) {
+                e.preventDefault();
+                alert('{{ __('tenders.installments_must_total_100') }}');
+                percentageInputs[0].closest('.card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, true);
+    </script>
+@endpush

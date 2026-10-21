@@ -24,7 +24,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-title"><?php echo e($priceQuote->number); ?></h1>
-        <p class="page-subtitle"><?php echo e(__('tenders.price_quote')); ?> — <?php echo e(__('tenders.quote_version_label', ['version' => $priceQuote->version])); ?></p>
+        <p class="page-subtitle"><?php echo e(__('tenders.price_quote')); ?></p>
     </div>
     <div class="flex items-center gap-2">
         <?php if($priceQuote->invoice_id): ?>
@@ -53,7 +53,7 @@
             <?php echo e(__('tenders.quote_print_en')); ?>
 
         </a>
-        <?php if($priceQuote->is_current): ?>
+        <?php if($priceQuote->is_current && ! $priceQuote->isLocked()): ?>
             <a href="<?php echo e(route('price-quotes.edit', $priceQuote)); ?>" class="btn-secondary">
                 <i class="fa-solid fa-pen"></i>
                 <?php echo e(__('app.edit')); ?>
@@ -77,8 +77,7 @@
         <?php $__currentLoopData = $priceQuote->versions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $oldVersion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <span class="text-sm text-slate-600">
-                    <?php echo e(__('tenders.quote_version_label', ['version' => $oldVersion->version])); ?>
-
+                    <span class="font-mono font-bold" dir="ltr"><?php echo e($oldVersion->number); ?></span>
                     — <span dir="ltr"><?php echo e($oldVersion->updated_at->format('Y-m-d H:i')); ?></span>
                 </span>
                 <a href="<?php echo e(route('price-quotes.show', $oldVersion)); ?>" class="btn-secondary btn-sm">
