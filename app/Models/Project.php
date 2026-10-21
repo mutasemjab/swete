@@ -99,14 +99,24 @@ class Project extends Model
             ->unique();
     }
 
-    /** Every line item across the origin quote + any approved Variation Order quotes. */
+    /**
+     * Every line item across the origin quote + any Variation Order quote that isn't rejected —
+     * a Variation Order's items are assignable to employees from the moment it's created, not only
+     * once formally approved (approval still gates whether it counts toward financialSummary()).
+     */
     public function quoteItems()
     {
-        return PriceQuoteItem::whereIn('price_quote_id', $this->relevantQuoteIds())
+        $variationOrders = $this->variationOrders()->where('status', '!=', 'rejected')->get();
+        $voStatusByQuote = $variationOrders->pluck('status', 'price_quote_id');
+        $quoteIds = collect([$this->price_quote_id])->merge($voStatusByQuote->keys())->filter()->unique();
+
+        return PriceQuoteItem::whereIn('price_quote_id', $quoteIds)
             ->with(['material', 'assignments.assignee', 'priceQuote'])
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($voStatusByQuote) {
                 $item->setAttribute('quoteNumber', $item->priceQuote->number);
+                // null = this item belongs to the project's own origin quote, not a Variation Order.
+                $item->setAttribute('voStatus', $voStatusByQuote->get($item->price_quote_id));
 
                 return $item;
             });

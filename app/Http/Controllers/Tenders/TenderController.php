@@ -156,6 +156,12 @@ class TenderController extends ModuleController
     public function convertToProject(Request $request, PriceQuote $priceQuote)
     {
         abort_unless($priceQuote->tender_id, 404);
+        abort_unless(! $priceQuote->isLocked(), 403);
+
+        if ($priceQuote->hasPendingVariationOrder()) {
+            return back()->with('error', __('tenders.quote_already_pending_vo'));
+        }
+
         $tender = $priceQuote->tender;
 
         $activeProject = Project::where('tender_id', $tender->id)->where('status', 'active')->latest()->first();

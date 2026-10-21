@@ -214,6 +214,8 @@ return [
     'installments_must_total_100' => 'مجموع نسب الدفعات يجب أن يكون 100%.',
     'installments_total'          => 'الإجمالي',
     'quote_converted_badge'       => 'تم التحويل',
+    'quote_pending_vo_badge'      => 'قيد المراجعة (طلب تغيير)',
+    'quote_already_pending_vo'    => 'هذا العرض لديه طلب تغيير قيد المراجعة بالفعل.',
 
     // ── Variation Orders ──────────────────────────────────────────────────────
     'variation_order_created'  => 'تم إرسال عرض السعر كطلب تغيير (Variation Order) لقائمة المراجعة.',
@@ -223,7 +225,7 @@ return [
     'vo_rejected'               => 'تم رفض طلب التغيير.',
 
     // ── Project questions (Q&A to employees) ────────────────────────────────────
-    'project_questions_section'  => 'أسئلة للموظفين',
+    'project_questions_section'  => 'أسئلة تتعلق بالمشروع',
     'add_question'               => 'إضافة سؤال',
     'question_target_employee'   => 'الموظف المستهدف',
     'question_answer'            => 'الإجابة',
@@ -308,6 +310,7 @@ return [
     'quote_item_unit_price'       => 'سعر الوحدة',
     'quote_item_assigned_to'      => 'مسؤول عنه',
     'quote_item_assign'           => 'تعيين',
+    'quote_item_assignment_notes' => 'ملاحظات التعيين',
     'quote_item_unassigned'       => 'غير معيّن',
     'quote_item_mark_done'        => 'تم ✓',
     'quote_item_done'             => 'منجز',

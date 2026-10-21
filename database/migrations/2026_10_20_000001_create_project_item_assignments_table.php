@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
             $table->foreignId('price_quote_item_id')->constrained('price_quote_items')->cascadeOnDelete();
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+            $table->text('notes')->nullable();
             $table->boolean('is_done')->default(false);
             $table->timestamp('done_at')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();

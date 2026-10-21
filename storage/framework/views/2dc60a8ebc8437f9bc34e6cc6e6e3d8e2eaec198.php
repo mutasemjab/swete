@@ -170,6 +170,8 @@
                         <td class="px-5 py-3 text-end">
                             <?php if($quote->isLocked()): ?>
                                 <span class="badge bg-emerald-100 text-emerald-700"><?php echo e(__('tenders.quote_converted_badge')); ?></span>
+                            <?php elseif($quote->hasPendingVariationOrder()): ?>
+                                <span class="badge bg-amber-100 text-amber-700"><?php echo e(__('tenders.quote_pending_vo_badge')); ?></span>
                             <?php else: ?>
                                 <form action="<?php echo e(route('price-quotes.convert-to-project', $quote)); ?>" method="POST"
                                       @submit="if (! confirm('<?php echo e(__('tenders.convert_to_project_confirm')); ?>')) $event.preventDefault()">

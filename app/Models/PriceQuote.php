@@ -148,6 +148,12 @@ class PriceQuote extends Model
             || ProjectVariationOrder::where('price_quote_id', $this->id)->where('status', 'approved')->exists();
     }
 
+    /** Already submitted as a Variation Order and still awaiting a decision — converting it again would duplicate it. */
+    public function hasPendingVariationOrder(): bool
+    {
+        return ProjectVariationOrder::where('price_quote_id', $this->id)->where('status', 'pending')->exists();
+    }
+
     /** A brand-new, distinct quote always starts at revision R0. */
     public static function nextNumber(): string
     {

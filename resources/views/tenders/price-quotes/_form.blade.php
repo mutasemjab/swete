@@ -5,17 +5,19 @@
         old('items') ?? (
             $priceQuote?->items->map(fn ($i) => [
                 'material_id' => $i->material_id,
+                'unit_id'     => $i->unit_id,
                 'quantity'    => (float) $i->quantity,
                 'unit_price'  => (float) $i->unit_price,
                 'notes'       => $i->notes ?: [''],
             ])->values()
             ?? ($report?->materials->isNotEmpty() ? $report->materials->map(fn ($m) => [
                 'material_id' => $m->material_id,
+                'unit_id'     => $m->material?->unit_id,
                 'quantity'    => (float) $m->quantity,
                 'unit_price'  => 0,
                 'notes'       => [''],
             ])->values() : null)
-            ?? collect([['material_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
+            ?? collect([['material_id' => '', 'unit_id' => '', 'quantity' => '', 'unit_price' => '', 'notes' => ['']]])
         )
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp

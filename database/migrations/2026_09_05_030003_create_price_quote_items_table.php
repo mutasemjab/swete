@@ -12,6 +12,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('price_quote_id')->constrained('price_quotes')->cascadeOnDelete();
             $table->foreignId('material_id')->constrained('materials')->restrictOnDelete();
+            // Defaults to the material's own unit but is editable per line — the same material can
+            // be quoted in a different unit on different quotes (e.g. "box" vs "piece").
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->decimal('quantity', 14, 3);
             $table->decimal('unit_price', 14, 3)->default(0);
             $table->decimal('total', 14, 3)->default(0);

@@ -15,6 +15,7 @@ class ProjectItemAssignmentController extends Controller
         $validated = $request->validate([
             'price_quote_item_id' => ['required', 'integer'],
             'assigned_to'          => ['required', 'exists:users,id'],
+            'notes'                => ['nullable', 'string'],
         ]);
 
         $itemBelongsToProject = $project->quoteItems()->contains('id', $validated['price_quote_item_id']);
@@ -24,6 +25,7 @@ class ProjectItemAssignmentController extends Controller
             ['project_id' => $project->id, 'price_quote_item_id' => $validated['price_quote_item_id']],
             [
                 'assigned_to' => $validated['assigned_to'],
+                'notes'       => $validated['notes'] ?? null,
                 'is_done'     => false,
                 'done_at'     => null,
                 'created_by'  => $request->user()->id,

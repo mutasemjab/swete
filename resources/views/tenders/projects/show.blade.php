@@ -10,9 +10,7 @@
             {{ $project->number }}
             @php $statusColor = ['active' => 'emerald', 'under_review' => 'amber', 'completed' => 'indigo', 'cancelled' => 'slate'][$project->status] ?? 'slate'; @endphp
             <span class="badge bg-{{ $statusColor }}-100 text-{{ $statusColor }}-700">{{ __('tenders.project_status_' . $project->status) }}</span>
-            @if($project->variation_round > 0)
-                <span class="badge bg-purple-100 text-purple-700">P{{ $project->variation_round }}</span>
-            @endif
+            <span class="badge bg-purple-100 text-purple-700">P{{ $project->variation_round }}</span>
         </h1>
         <p class="page-subtitle">{{ $project->localized_title }}</p>
         @if($project->review_reason)
@@ -196,8 +194,13 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach($quoteItems as $item)
                     @php $assignment = $item->assignments->firstWhere('project_id', $project->id); @endphp
-                    <tr class="hover:bg-slate-50/50 transition-colors {{ $assignment && ! $assignment->is_done ? 'bg-amber-50' : ($assignment?->is_done ? 'bg-emerald-50' : '') }}">
-                        <td class="px-5 py-3 font-mono text-xs text-slate-500">{{ $item->quoteNumber }}</td>
+                    <tr class="transition-colors {{ $assignment && ! $assignment->is_done ? 'bg-amber-50 hover:bg-amber-100' : ($assignment?->is_done ? 'bg-emerald-50 hover:bg-emerald-100' : 'hover:bg-slate-50/50') }}">
+                        <td class="px-5 py-3 font-mono text-xs text-slate-500">
+                            {{ $item->quoteNumber }}
+                            @if($item->voStatus === 'pending')
+                                <span class="badge bg-amber-100 text-amber-700">{{ __('tenders.quote_pending_vo_badge') }}</span>
+                            @endif
+                        </td>
                         <td class="px-5 py-3 text-sm font-bold text-slate-800">{{ $item->material?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-sm text-slate-600" dir="ltr">{{ number_format($item->quantity, 3) }}</td>
                         <td class="px-5 py-3 text-sm text-slate-600" dir="ltr">{{ number_format($item->unit_price, 3) }}</td>
@@ -206,6 +209,9 @@
                                 <span class="font-bold text-slate-700">{{ $assignment->assignee?->name }}</span>
                                 @if($assignment->is_done)
                                     <span class="badge bg-emerald-100 text-emerald-700 ms-1">{{ __('tenders.quote_item_done') }}</span>
+                                @endif
+                                @if($assignment->notes)
+                                    <p class="text-xs text-slate-500 mt-0.5">{{ $assignment->notes }}</p>
                                 @endif
                             @else
                                 <span class="text-slate-400">{{ __('tenders.quote_item_unassigned') }}</span>
@@ -222,6 +228,8 @@
                                                 <option value="{{ $employee->id }}" @selected($assignment?->assigned_to == $employee->id)>{{ $employee->name }}</option>
                                             @endforeach
                                         </select>
+                                        <input type="text" name="notes" value="{{ $assignment?->notes }}"
+                                               placeholder="{{ __('tenders.quote_item_assignment_notes') }}" class="form-input" style="min-width:140px">
                                         <button type="submit" class="btn-secondary btn-sm">{{ __('tenders.quote_item_assign') }}</button>
                                     </form>
                                 @endif

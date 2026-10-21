@@ -9,9 +9,7 @@
 
             <?php $statusColor = ['active' => 'emerald', 'under_review' => 'amber', 'completed' => 'indigo', 'cancelled' => 'slate'][$project->status] ?? 'slate'; ?>
             <span class="badge bg-<?php echo e($statusColor); ?>-100 text-<?php echo e($statusColor); ?>-700"><?php echo e(__('tenders.project_status_' . $project->status)); ?></span>
-            <?php if($project->variation_round > 0): ?>
-                <span class="badge bg-purple-100 text-purple-700">P<?php echo e($project->variation_round); ?></span>
-            <?php endif; ?>
+            <span class="badge bg-purple-100 text-purple-700">P<?php echo e($project->variation_round); ?></span>
         </h1>
         <p class="page-subtitle"><?php echo e($project->localized_title); ?></p>
         <?php if($project->review_reason): ?>
@@ -203,8 +201,14 @@
                 <tbody class="divide-y divide-slate-100">
                     <?php $__currentLoopData = $quoteItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php $assignment = $item->assignments->firstWhere('project_id', $project->id); ?>
-                    <tr class="hover:bg-slate-50/50 transition-colors <?php echo e($assignment && ! $assignment->is_done ? 'bg-amber-50' : ($assignment?->is_done ? 'bg-emerald-50' : '')); ?>">
-                        <td class="px-5 py-3 font-mono text-xs text-slate-500"><?php echo e($item->quoteNumber); ?></td>
+                    <tr class="transition-colors <?php echo e($assignment && ! $assignment->is_done ? 'bg-amber-50 hover:bg-amber-100' : ($assignment?->is_done ? 'bg-emerald-50 hover:bg-emerald-100' : 'hover:bg-slate-50/50')); ?>">
+                        <td class="px-5 py-3 font-mono text-xs text-slate-500">
+                            <?php echo e($item->quoteNumber); ?>
+
+                            <?php if($item->voStatus === 'pending'): ?>
+                                <span class="badge bg-amber-100 text-amber-700"><?php echo e(__('tenders.quote_pending_vo_badge')); ?></span>
+                            <?php endif; ?>
+                        </td>
                         <td class="px-5 py-3 text-sm font-bold text-slate-800"><?php echo e($item->material?->localized_name ?? '—'); ?></td>
                         <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e(number_format($item->quantity, 3)); ?></td>
                         <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e(number_format($item->unit_price, 3)); ?></td>
@@ -213,6 +217,9 @@
                                 <span class="font-bold text-slate-700"><?php echo e($assignment->assignee?->name); ?></span>
                                 <?php if($assignment->is_done): ?>
                                     <span class="badge bg-emerald-100 text-emerald-700 ms-1"><?php echo e(__('tenders.quote_item_done')); ?></span>
+                                <?php endif; ?>
+                                <?php if($assignment->notes): ?>
+                                    <p class="text-xs text-slate-500 mt-0.5"><?php echo e($assignment->notes); ?></p>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <span class="text-slate-400"><?php echo e(__('tenders.quote_item_unassigned')); ?></span>
@@ -229,6 +236,8 @@
                                                 <option value="<?php echo e($employee->id); ?>" <?php if($assignment?->assigned_to == $employee->id): echo 'selected'; endif; ?>><?php echo e($employee->name); ?></option>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
+                                        <input type="text" name="notes" value="<?php echo e($assignment?->notes); ?>"
+                                               placeholder="<?php echo e(__('tenders.quote_item_assignment_notes')); ?>" class="form-input" style="min-width:140px">
                                         <button type="submit" class="btn-secondary btn-sm"><?php echo e(__('tenders.quote_item_assign')); ?></button>
                                     </form>
                                 <?php endif; ?>

@@ -162,6 +162,8 @@
                         <td class="px-5 py-3 text-end">
                             @if($quote->isLocked())
                                 <span class="badge bg-emerald-100 text-emerald-700">{{ __('tenders.quote_converted_badge') }}</span>
+                            @elseif($quote->hasPendingVariationOrder())
+                                <span class="badge bg-amber-100 text-amber-700">{{ __('tenders.quote_pending_vo_badge') }}</span>
                             @else
                                 <form action="{{ route('price-quotes.convert-to-project', $quote) }}" method="POST"
                                       @submit="if (! confirm('{{ __('tenders.convert_to_project_confirm') }}')) $event.preventDefault()">

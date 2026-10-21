@@ -11,6 +11,7 @@ class PriceQuoteItem extends Model
     protected $fillable = [
         'price_quote_id',
         'material_id',
+        'unit_id',
         'quantity',
         'unit_price',
         'total',
@@ -32,6 +33,11 @@ class PriceQuoteItem extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     /** Usually at most one row (one per project this item was ever assigned under) — see ProjectItemAssignment. */

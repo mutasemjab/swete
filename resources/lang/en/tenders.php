@@ -214,6 +214,8 @@ return [
     'installments_must_total_100' => 'Installment percentages must add up to 100%.',
     'installments_total'          => 'Total',
     'quote_converted_badge'       => 'Converted',
+    'quote_pending_vo_badge'      => 'Pending Review (Variation Order)',
+    'quote_already_pending_vo'    => 'This quote already has a pending Variation Order.',
 
     // ── Variation Orders ──────────────────────────────────────────────────────
     'variation_order_created'  => 'The price quote was sent as a Variation Order to the review queue.',
@@ -223,7 +225,7 @@ return [
     'vo_rejected'               => 'Variation Order rejected.',
 
     // ── Project questions (Q&A to employees) ────────────────────────────────────
-    'project_questions_section'  => 'Questions for Employees',
+    'project_questions_section'  => 'Questions for Project',
     'add_question'               => 'Add Question',
     'question_target_employee'   => 'Target Employee',
     'question_answer'            => 'Answer',
@@ -308,6 +310,7 @@ return [
     'quote_item_unit_price'       => 'Unit Price',
     'quote_item_assigned_to'      => 'Assigned To',
     'quote_item_assign'           => 'Assign',
+    'quote_item_assignment_notes' => 'Assignment Notes',
     'quote_item_unassigned'       => 'Unassigned',
     'quote_item_mark_done'        => 'Done ✓',
     'quote_item_done'             => 'Done',

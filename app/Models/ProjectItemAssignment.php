@@ -11,6 +11,7 @@ class ProjectItemAssignment extends Model
         'project_id',
         'price_quote_item_id',
         'assigned_to',
+        'notes',
         'is_done',
         'done_at',
         'created_by',
