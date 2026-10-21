@@ -216,8 +216,8 @@
                 <td class="num">{{ $index + 1 }}</td>
                 <td>
                     {{ $item->material?->localized_name }}
-                    @if($item->material?->unit?->symbol)
-                        <span style="color:#777;"> ({{ $item->material->unit->symbol }})</span>
+                    @if($item->unit?->symbol)
+                        <span style="color:#777;"> ({{ $item->unit->symbol }})</span>
                     @endif
                 </td>
                 <td class="amount">{{ number_format($item->quantity, 3) }}</td>

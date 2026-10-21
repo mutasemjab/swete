@@ -32,7 +32,9 @@
         _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
         items: {{ $seedItems->toJson() }},
-        addItem() { this.items.push({ material_id: '', quantity: '', unit_price: '', notes: [''], _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ material_id: '', unit_id: '', quantity: '', unit_price: '', notes: [''], _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
+        // Defaults a row's unit to the newly-picked material's own unit — still freely editable afterward.
+        onMaterialChange(item) { item.unit_id = materialUnitIds[item.material_id] || ''; },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         // Materials created via the quick-add modal mid-form — the modal's own x-data scope has no
         // access to this one, so it reaches us through a window event instead (see
@@ -40,7 +42,7 @@
         // after a quick-add can still select it (the static materials option list below was baked
         // at page load and doesn't know about it).
         quickAddedMaterials: [],
-        materialUnits: {{ $materials->mapWithKeys(fn ($m) => [$m->id => $m->unit?->localized_name ?? ''])->toJson() }},
+        materialUnitIds: {{ $materials->mapWithKeys(fn ($m) => [$m->id => $m->unit_id])->toJson() }},
         discountType: '{{ old('discount_type', $priceQuote?->discount_type ?? 'amount') }}',
         discountValue: {{ (float) old('discount_value', $priceQuote?->discount_value ?? 0) }},
         get subtotal() { return this.items.reduce((sum, i) => sum + (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0), 0); },
@@ -83,9 +85,9 @@
       x-init="$nextTick(() => window.initSelect2())"
       x-on:material-quick-added.window="
         quickAddedMaterials.push($event.detail);
-        materialUnits[String($event.detail.id)] = $event.detail.unit;
-        if (items.length === 1 && !items[0].material_id) { items[0].material_id = String($event.detail.id); }
-        else { addItem(); items[items.length - 1].material_id = String($event.detail.id); }
+        materialUnitIds[String($event.detail.id)] = $event.detail.unitId;
+        if (items.length === 1 && !items[0].material_id) { items[0].material_id = String($event.detail.id); items[0].unit_id = $event.detail.unitId || ''; }
+        else { addItem(); items[items.length - 1].material_id = String($event.detail.id); items[items.length - 1].unit_id = $event.detail.unitId || ''; }
         $nextTick(() => window.initSelect2());
       ">
 
@@ -286,6 +288,7 @@
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.material') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('warehouse.voucher_item_quantity') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('tenders.quote_item_unit') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('accounting.invoice_item_unit_price') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-72">{{ __('tenders.quote_item_notes') }}</th>
                     <th class="px-5 py-3 w-10"></th>
@@ -295,7 +298,7 @@
                 <template x-for="(item, index) in items" :key="item._key">
                     <tr>
                         <td class="px-5 py-2.5">
-                            <select :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select" required>
+                            <select :name="`items[${index}][material_id]`" x-model="item.material_id" @change="onMaterialChange(item)" class="js-select2 form-select" required>
                                 <option value="">{{ __('app.select') }}</option>
                                 @foreach($materials as $material)
                                     <option value="{{ $material->id }}">{{ $material->localized_name }} ({{ $material->code }})</option>
@@ -333,9 +336,16 @@
                                    step="0.001" min="0.001" dir="ltr" class="form-input" required>
                         </td>
                         <td class="px-5 py-2.5">
+                            <select :name="`items[${index}][unit_id]`" x-model="item.unit_id" class="js-select2 form-select" required>
+                                <option value="">{{ __('app.select') }}</option>
+                                @foreach($units as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->localized_name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td class="px-5 py-2.5">
                             <input type="number" :name="`items[${index}][unit_price]`" x-model="item.unit_price"
                                    step="0.001" min="0" dir="ltr" class="form-input" required>
-                            <p class="mt-1 text-[11px] text-slate-400" x-show="materialUnits[item.material_id]" x-text="materialUnits[item.material_id]"></p>
                         </td>
                         <td class="px-5 py-2.5">
                             <div class="space-y-1">

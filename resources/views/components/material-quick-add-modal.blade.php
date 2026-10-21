@@ -20,7 +20,6 @@
         name: '',
         categoryId: '',
         unitId: '',
-        units: {{ $units->mapWithKeys(fn ($u) => [$u->id => $u->localized_name])->toJson() }},
         submit() {
             this.saving = true;
             this.error = '';
@@ -53,7 +52,7 @@
                         detail: {
                             id: data.id,
                             label: data.name + ' (' + data.code + ')',
-                            unit: this.units[this.unitId] || '',
+                            unitId: this.unitId,
                         },
                     }));
                     this.open = false;

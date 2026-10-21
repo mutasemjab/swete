@@ -114,6 +114,7 @@ return [
     'quote_tender'            => 'Tender',
     'quote_date'              => 'Date',
     'quote_items'             => 'Quote Items',
+    'quote_item_unit'         => 'Unit',
     'quote_item_notes'        => 'Item Notes',
     'quote_item_note_placeholder' => 'Note',
     'quote_add_item_note'     => 'Add note',

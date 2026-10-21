@@ -164,6 +164,7 @@
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.material') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_quantity') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_item_unit') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.invoice_item_unit_price') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.invoice_item_total') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_item_notes') }}</th>
@@ -174,9 +175,9 @@
                 <tr>
                     <td class="px-5 py-3">
                         <span class="font-bold text-slate-800">{{ $item->material?->localized_name }}</span>
-                        <span class="text-xs text-slate-400 ms-1">{{ $item->material?->unit?->symbol }}</span>
                     </td>
                     <td class="px-5 py-3 text-slate-700">{{ number_format($item->quantity, 3) }}</td>
+                    <td class="px-5 py-3 text-slate-700">{{ $item->unit?->localized_name ?? '—' }}</td>
                     <td class="px-5 py-3 text-slate-700">{{ number_format($item->unit_price, 3) }}</td>
                     <td class="px-5 py-3 font-bold text-slate-800">{{ number_format($item->total, 3) }}</td>
                     <td class="px-5 py-3 text-xs text-slate-600">

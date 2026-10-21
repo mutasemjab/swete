@@ -114,6 +114,7 @@ return [
     'quote_tender'            => 'العطاء',
     'quote_date'              => 'التاريخ',
     'quote_items'             => 'بنود عرض السعر',
+    'quote_item_unit'         => 'الوحدة',
     'quote_item_notes'        => 'ملاحظات البند',
     'quote_item_note_placeholder' => 'ملاحظة',
     'quote_add_item_note'     => 'إضافة ملاحظة',

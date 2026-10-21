@@ -104,7 +104,7 @@ class PriceQuoteController extends ModuleController
     {
         $priceQuote->load([
             'customer', 'tender', 'creator', 'branch', 'currency', 'supplyScope', 'deliveryTerm',
-            'items.material.unit', 'assignee', 'invoice', 'installments', 'versions', 'root',
+            'items.material', 'items.unit', 'assignee', 'invoice', 'installments', 'versions', 'root',
         ]);
 
         return $this->moduleView('tenders.price-quotes.show', compact('priceQuote'));
@@ -170,7 +170,7 @@ class PriceQuoteController extends ModuleController
 
         $priceQuote->load([
             'branch', 'currency', 'customer', 'tender', 'supplyScope', 'deliveryTerm',
-            'items.material.unit', 'installments',
+            'items.material', 'items.unit', 'installments',
         ]);
 
         return view('tenders.price-quotes.print', compact('priceQuote'));
