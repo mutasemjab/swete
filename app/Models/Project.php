@@ -27,6 +27,14 @@ class Project extends Model
         'review_reason',
         'variation_round',
         'created_by',
+        'is_current',
+        'version',
+        'root_id',
+    ];
+
+    protected $casts = [
+        'is_current' => 'boolean',
+        'version'    => 'integer',
     ];
 
     public function tender(): BelongsTo
@@ -38,6 +46,18 @@ class Project extends Model
     public function priceQuote(): BelongsTo
     {
         return $this->belongsTo(PriceQuote::class);
+    }
+
+    /** Only meaningful on a frozen/archived row — the still-live project it was split off from. */
+    public function root(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'root_id');
+    }
+
+    /** Only meaningful on the live (is_current=true) row — its frozen split history, newest first. */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(self::class, 'root_id')->orderByDesc('version');
     }
 
     public function variationOrders(): HasMany
@@ -90,51 +110,76 @@ class Project extends Model
         return $this->hasMany(ProjectQuestion::class);
     }
 
-    /** This project's own origin quote, plus any Variation Order quote that's been approved. */
-    private function relevantQuoteIds()
-    {
-        return collect([$this->price_quote_id])
-            ->merge($this->variationOrders()->where('status', 'approved')->pluck('price_quote_id'))
-            ->filter()
-            ->unique();
-    }
-
     /**
-     * Every line item across the origin quote + any Variation Order quote that isn't rejected —
-     * a Variation Order's items are assignable to employees from the moment it's created, not only
-     * once formally approved (approval still gates whether it counts toward financialSummary()).
+     * Every line item on the live origin quote, plus any still-PENDING Variation Order's quote —
+     * assignable to employees from the moment a Variation Order is submitted, not only once
+     * approved. An APPROVED Variation Order no longer needs merging here at all: approving one
+     * splits the project (see archiveCurrentVersion()) instead, so the live row's own price_quote_id
+     * already points straight at it afterward.
      */
     public function quoteItems()
     {
-        $variationOrders = $this->variationOrders()->where('status', '!=', 'rejected')->get();
-        $voStatusByQuote = $variationOrders->pluck('status', 'price_quote_id');
-        $quoteIds = collect([$this->price_quote_id])->merge($voStatusByQuote->keys())->filter()->unique();
+        $pendingVoQuoteIds = $this->variationOrders()->where('status', 'pending')->pluck('price_quote_id');
+        $quoteIds = collect([$this->price_quote_id])->merge($pendingVoQuoteIds)->filter()->unique();
 
         return PriceQuoteItem::whereIn('price_quote_id', $quoteIds)
             ->with(['material', 'assignments.assignee', 'priceQuote'])
             ->get()
-            ->map(function ($item) use ($voStatusByQuote) {
+            ->map(function ($item) {
                 $item->setAttribute('quoteNumber', $item->priceQuote->number);
-                // null = this item belongs to the project's own origin quote, not a Variation Order.
-                $item->setAttribute('voStatus', $voStatusByQuote->get($item->price_quote_id));
+                // null = this item belongs to the project's own live origin quote, not a pending Variation Order.
+                $item->setAttribute('voStatus', $item->price_quote_id === $this->price_quote_id ? null : 'pending');
 
                 return $item;
             });
     }
 
-    /** Project value (origin + approved VO quotes' totals) vs. what's actually been received against their invoices. */
+    /** Project value vs. what's actually been received against the live origin quote's invoice. */
     public function financialSummary(): array
     {
-        $quotes = PriceQuote::whereIn('id', $this->relevantQuoteIds())->with('invoice.receipts')->get();
+        $quote = $this->priceQuote?->load('invoice.receipts');
 
-        $value = (float) $quotes->sum('total');
-        $paid  = (float) $quotes->sum(fn ($quote) => $quote->invoice?->paid_amount ?? 0);
+        $value = (float) ($quote?->total ?? 0);
+        $paid  = (float) ($quote?->invoice?->paid_amount ?? 0);
 
         return [
             'value' => $value,
             'paid'  => $paid,
             'due'   => max($value - $paid, 0),
         ];
+    }
+
+    /** The stable "PRJ-YYYY-00001" part of the number, with its "-P{n}" revision suffix stripped off. */
+    public function getBaseNumberAttribute(): string
+    {
+        return preg_replace('/-P\d+$/', '', $this->number);
+    }
+
+    /**
+     * Freezes the current state (header only — no child rows to clone, unlike PriceQuote, since a
+     * Project's "content" is just price_quote_id, a plain column) into a new, read-only row and
+     * returns it. The live row (this one, same id throughout) moves onto its next "-P{n}" number
+     * first, freeing up the old number for the frozen clone to take over — same ordering as
+     * PriceQuote::archiveCurrentVersion(), needed because `number` is unique.
+     */
+    public function archiveCurrentVersion(): self
+    {
+        $oldNumber  = $this->number;
+        $oldVersion = $this->version;
+
+        $this->update([
+            'number'  => $this->base_number . '-P' . $oldVersion,
+            'version' => $oldVersion + 1,
+        ]);
+
+        $archive = $this->replicate(['root_id']);
+        $archive->number     = $oldNumber;
+        $archive->is_current = false;
+        $archive->version    = $oldVersion;
+        $archive->root_id    = $this->id;
+        $archive->save();
+
+        return $archive;
     }
 
     public function getLocalizedTitleAttribute(): string
@@ -149,7 +194,7 @@ class Project extends Model
         $year  = now()->format('Y');
         $count = static::whereYear('created_at', $year)->count() + 1;
 
-        return sprintf('PRJ-%s-%05d', $year, $count);
+        return sprintf('PRJ-%s-%05d-P0', $year, $count);
     }
 
     public function getActivitylogOptions(): LogOptions

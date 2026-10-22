@@ -109,6 +109,11 @@
     table.pq-summary td.amount { text-align: end; font-weight: 700; }
     table.pq-summary tr.total td { border-bottom: 0; background: var(--pq-red); color: #fff; font-weight: 800; font-size: 13px; }
 
+    table.pq-installments { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 11px; }
+    table.pq-installments th, table.pq-installments td { border: 1px solid var(--pq-border); padding: 5px 8px; }
+    table.pq-installments th { background: var(--pq-red); color: #fff; font-weight: 700; }
+    table.pq-installments td.amount { text-align: end; font-weight: 700; }
+
     .pq-notes-title { font-size: 13px; font-weight: 800; color: var(--pq-red); margin: 0 0 8px; }
     .pq-notes-list { margin: 0; padding-inline-start: 18px; font-size: 11.5px; line-height: 1.8; }
 
@@ -123,6 +128,13 @@
 </style>
 </head>
 <body>
+
+<?php if (! ($priceQuote->is_current)): ?>
+    <div style="background:#fef3c7; border:2px solid #f59e0b; color:#92400e; font-weight:800; text-align:center; padding:10px; margin-bottom:10px;">
+        <?php echo e(__('tenders.quote_old_version_print_mark', ['version' => $priceQuote->version])); ?>
+
+    </div>
+<?php endif; ?>
 
 <div class="pq-toolbar">
     <button type="button" onclick="window.print()">
@@ -206,8 +218,8 @@
                 <td>
                     <?php echo e($item->material?->localized_name); ?>
 
-                    <?php if($item->material?->unit?->symbol): ?>
-                        <span style="color:#777;"> (<?php echo e($item->material->unit->symbol); ?>)</span>
+                    <?php if($item->unit?->symbol): ?>
+                        <span style="color:#777;"> (<?php echo e($item->unit->symbol); ?>)</span>
                     <?php endif; ?>
                 </td>
                 <td class="amount"><?php echo e(number_format($item->quantity, 3)); ?></td>
@@ -249,6 +261,26 @@
             <td class="amount"><?php echo e(number_format($priceQuote->total, 3)); ?> <?php echo e($priceQuote->currency?->code); ?></td>
         </tr>
     </table>
+
+    <?php if($priceQuote->installments->isNotEmpty()): ?>
+    <p class="pq-notes-title"><?php echo e(__('tenders.quote_print_installments')); ?></p>
+    <table class="pq-installments">
+        <thead>
+            <tr>
+                <th><?php echo e(__('tenders.installment_description')); ?></th>
+                <th class="amount" style="width:110px"><?php echo e(__('tenders.installment_percentage')); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php $__currentLoopData = $priceQuote->installments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $installment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <tr>
+                <td><?php echo e($installment->description ?: ''); ?></td>
+                <td class="amount" dir="ltr"><?php echo e(number_format($installment->percentage, 2)); ?>%</td>
+            </tr>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </tbody>
+    </table>
+    <?php endif; ?>
 
     <div>
         <p class="pq-notes-title"><?php echo e(__('tenders.quote_print_very_important_notes')); ?></p>

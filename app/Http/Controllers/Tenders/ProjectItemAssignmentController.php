@@ -12,6 +12,8 @@ class ProjectItemAssignmentController extends Controller
     /** Assign (or reassign) one of the project's current price-quote line items to an employee. */
     public function store(Request $request, Project $project)
     {
+        abort_unless($project->is_current, 404);
+
         $validated = $request->validate([
             'price_quote_item_id' => ['required', 'integer'],
             'assigned_to'          => ['required', 'exists:users,id'],
@@ -38,6 +40,7 @@ class ProjectItemAssignmentController extends Controller
     /** The assignee marks their own item done; anyone with project-edit rights may also mark it on their behalf. */
     public function markDone(Request $request, Project $project, ProjectItemAssignment $assignment)
     {
+        abort_unless($project->is_current, 404);
         abort_unless($assignment->project_id === $project->id, 404);
         abort_unless(
             $request->user()->id === $assignment->assigned_to || $request->user()->can('projects.edit') || $request->user()->can('tenders.projects.edit'),

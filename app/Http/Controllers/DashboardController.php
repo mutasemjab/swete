@@ -38,6 +38,7 @@ class DashboardController extends Controller
         // Projects this employee manages, still open (under review or active).
         $myManagedProjects = Project::where('manager_id', auth()->id())
             ->whereIn('status', ['under_review', 'active'])
+            ->where('is_current', true)
             ->latest()
             ->get();
 

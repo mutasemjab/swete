@@ -297,6 +297,9 @@ return [
     'convert_to_project'         => 'تحويل إلى مشروع',
     'convert_to_project_confirm' => 'هل أنت متأكد من تحويل هذا العطاء إلى مشروع؟',
     'project_review_reason_notice' => 'تمت إعادة هذا المشروع لقائمة المراجعة لأن:',
+    'project_old_version_banner'    => 'هذه نسخة قديمة من هذا المشروع، تم تحديثها لاحقاً.',
+    'project_view_current_version'  => 'عرض النسخة الحالية',
+    'project_version_history'       => 'سجل النسخ',
 
     // ── Tenders index: converted vs not-converted filter ───────────────────────
     'tenders_not_converted' => 'لم تتحول لمشروع',

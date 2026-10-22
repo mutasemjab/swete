@@ -35,9 +35,18 @@ return new class extends Migration
             // Unused going forward (the whole-project auto-revert this backed was replaced by the
             // Variation Order flow — see project_variation_orders) — kept rather than dropped mid-session.
             $table->text('review_reason')->nullable();
-            // "P{n}" — incremented each time a Variation Order is created for this project (see
-            // Tenders\TenderController@convertToProject).
+            // Unused going forward — superseded by the real is_current/version/root_id versioning
+            // below (the project's own number now carries "-P{n}" directly, like price quotes'
+            // "-R{n}") — kept rather than dropped mid-session.
             $table->unsignedInteger('variation_round')->default(0);
+            // Versioning: approving a Variation Order never merges it into the live row — it freezes
+            // the pre-change state into a new, read-only row (is_current=false, number keeps its old
+            // "-P{n}" suffix, root_id points back at the live row) and the live row (same id) moves
+            // forward to the next "-P{n+1}" number, now driven solely by the newly-approved quote.
+            // Exact mirror of price_quotes' own versioning columns — see PriceQuote::archiveCurrentVersion().
+            $table->boolean('is_current')->default(true);
+            $table->unsignedInteger('version')->default(1);
+            $table->foreignId('root_id')->nullable()->constrained('projects')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });

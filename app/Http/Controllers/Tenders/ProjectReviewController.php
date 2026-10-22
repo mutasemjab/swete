@@ -22,7 +22,7 @@ class ProjectReviewController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = Project::with(['customer', 'tender'])->where('status', 'under_review');
+        $query = Project::with(['customer', 'tender'])->where('status', 'under_review')->where('is_current', true);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -69,9 +69,18 @@ class ProjectReviewController extends ModuleController
             ->with('success', __('tenders.project_rejected'));
     }
 
+    /**
+     * Approving a Variation Order splits the project: the pre-change state freezes as its own
+     * read-only "-P{n}" page, and the live row (same id) moves to "-P{n+1}", now driven solely by
+     * the newly-approved quote — see Project::archiveCurrentVersion().
+     */
     public function approveVariationOrder(Request $request, ProjectVariationOrder $variationOrder)
     {
         abort_unless($variationOrder->status === 'pending', 404);
+
+        $project = $variationOrder->project;
+        $project->archiveCurrentVersion();
+        $project->update(['price_quote_id' => $variationOrder->price_quote_id]);
 
         $variationOrder->update([
             'status'      => 'approved',

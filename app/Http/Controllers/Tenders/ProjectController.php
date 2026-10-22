@@ -16,7 +16,7 @@ class ProjectController extends ModuleController
         // Newly-converted tenders land in their own "Projects Under Review" module/queue first
         // (see Tenders\ProjectReviewController) — they don't clutter the real projects list
         // until approved.
-        $query = Project::with(['customer', 'tender'])->where('status', '!=', 'under_review');
+        $query = Project::with(['customer', 'tender'])->where('status', '!=', 'under_review')->where('is_current', true);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -38,6 +38,7 @@ class ProjectController extends ModuleController
         $project->load([
             'customer', 'tender', 'creator', 'manager', 'engineer', 'foreman',
             'purchaseRequests.supplier', 'attachments.creator', 'agreements', 'questions.askedTo', 'questions.askedBy',
+            'versions',
         ]);
         $employees = User::where('status', true)->orderBy('name')->get();
         $quoteItems = $project->quoteItems();
@@ -48,6 +49,7 @@ class ProjectController extends ModuleController
 
     public function edit(Project $project)
     {
+        abort_unless($project->is_current, 404);
         $this->module = $project->status === 'under_review' ? 'projects_under_review' : 'projects';
 
         return $this->moduleView('tenders.projects.edit', compact('project'));
@@ -55,6 +57,8 @@ class ProjectController extends ModuleController
 
     public function update(Request $request, Project $project)
     {
+        abort_unless($project->is_current, 404);
+
         $validated = $request->validate([
             'title'      => ['required', 'string', 'max:255'],
             'title_en'   => ['nullable', 'string', 'max:255'],
@@ -71,6 +75,8 @@ class ProjectController extends ModuleController
     /** The project manager is picked by whoever has edit rights — from the project's own show page, not edit. */
     public function assignManager(Request $request, Project $project)
     {
+        abort_unless($project->is_current, 404);
+
         $validated = $request->validate([
             'manager_id' => ['nullable', 'exists:users,id'],
         ]);
@@ -91,6 +97,7 @@ class ProjectController extends ModuleController
     /** Only the project's own manager may set its engineer/foreman — enforced here, not via a permission string. */
     public function assignTeam(Request $request, Project $project)
     {
+        abort_unless($project->is_current, 404);
         abort_unless($request->user()->id === $project->manager_id, 403, __('tenders.project_team_unauthorized'));
 
         $validated = $request->validate([

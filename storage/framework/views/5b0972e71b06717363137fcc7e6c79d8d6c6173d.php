@@ -57,7 +57,6 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-4">
                             <a href="<?php echo e(route('projects.show', $project)); ?>" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm"><?php echo e($project->number); ?></a>
-                            <span class="badge bg-purple-100 text-purple-700">P<?php echo e($project->variation_round); ?></span>
                         </td>
                         <td class="px-5 py-4">
                             <p class="font-bold text-slate-800"><?php echo e($project->localized_title); ?></p>
@@ -152,7 +151,6 @@
                 <tr class="hover:bg-slate-50/50 transition-colors bg-purple-50/30">
                     <td class="px-5 py-4">
                         <a href="<?php echo e(route('projects.show', $vo->project)); ?>" class="font-mono font-bold text-slate-700 hover:text-indigo-600 transition-colors bg-slate-100 px-2 py-1 rounded-lg text-sm"><?php echo e($vo->project->number); ?></a>
-                        <span class="badge bg-purple-100 text-purple-700">P<?php echo e($vo->project->variation_round); ?></span>
                         <span class="badge bg-purple-100 text-purple-700"><?php echo e(__('tenders.variation_order_badge')); ?></span>
                     </td>
                     <td class="px-5 py-4">

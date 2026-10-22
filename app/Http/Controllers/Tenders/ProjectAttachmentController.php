@@ -14,6 +14,8 @@ class ProjectAttachmentController extends ModuleController
     /** Accepts one or more {name, file} rows in a single submit — see projects/show.blade.php's dynamic-row form. */
     public function store(Request $request, Project $project)
     {
+        abort_unless($project->is_current, 404);
+
         $validated = $request->validate([
             'attachments'          => ['nullable', 'array'],
             'attachments.*.name'   => ['nullable', 'string', 'max:150'],

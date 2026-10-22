@@ -9,7 +9,9 @@
 
             <?php $statusColor = ['active' => 'emerald', 'under_review' => 'amber', 'completed' => 'indigo', 'cancelled' => 'slate'][$project->status] ?? 'slate'; ?>
             <span class="badge bg-<?php echo e($statusColor); ?>-100 text-<?php echo e($statusColor); ?>-700"><?php echo e(__('tenders.project_status_' . $project->status)); ?></span>
-            <span class="badge bg-purple-100 text-purple-700">P<?php echo e($project->variation_round); ?></span>
+            <?php if (! ($project->is_current)): ?>
+                <span class="badge bg-slate-100 text-slate-500"><?php echo e(__('tenders.project_old_version_banner')); ?></span>
+            <?php endif; ?>
         </h1>
         <p class="page-subtitle"><?php echo e($project->localized_title); ?></p>
         <?php if($project->review_reason): ?>
@@ -17,30 +19,37 @@
         <?php endif; ?>
     </div>
     <div class="flex items-center gap-2">
-        <?php if($project->status === 'under_review'): ?>
-            <form action="<?php echo e(route('project-reviews.approve', $project)); ?>" method="POST">
-                <?php echo csrf_field(); ?>
-                <button type="submit" class="btn-primary">
-                    <i class="fa-solid fa-check"></i>
-                    <?php echo e(__('tenders.project_approve')); ?>
+        <?php if($project->is_current): ?>
+            <?php if($project->status === 'under_review'): ?>
+                <form action="<?php echo e(route('project-reviews.approve', $project)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-check"></i>
+                        <?php echo e(__('tenders.project_approve')); ?>
 
-                </button>
-            </form>
-            <form action="<?php echo e(route('project-reviews.reject', $project)); ?>" method="POST"
-                  @submit="if (! confirm('<?php echo e(__('tenders.project_reject_confirm')); ?>')) $event.preventDefault()">
-                <?php echo csrf_field(); ?>
-                <button type="submit" class="btn-danger">
-                    <i class="fa-solid fa-xmark"></i>
-                    <?php echo e(__('tenders.project_reject')); ?>
+                    </button>
+                </form>
+                <form action="<?php echo e(route('project-reviews.reject', $project)); ?>" method="POST"
+                      @submit="if (! confirm('<?php echo e(__('tenders.project_reject_confirm')); ?>')) $event.preventDefault()">
+                    <?php echo csrf_field(); ?>
+                    <button type="submit" class="btn-danger">
+                        <i class="fa-solid fa-xmark"></i>
+                        <?php echo e(__('tenders.project_reject')); ?>
 
-                </button>
-            </form>
+                    </button>
+                </form>
+            <?php endif; ?>
+            <a href="<?php echo e(route('projects.edit', $project)); ?>" class="btn-secondary">
+                <i class="fa-solid fa-pen"></i>
+                <?php echo e(__('app.edit')); ?>
+
+            </a>
+        <?php else: ?>
+            <a href="<?php echo e(route('projects.show', $project->root_id)); ?>" class="btn-secondary">
+                <?php echo e(__('tenders.project_view_current_version')); ?>
+
+            </a>
         <?php endif; ?>
-        <a href="<?php echo e(route('projects.edit', $project)); ?>" class="btn-secondary">
-            <i class="fa-solid fa-pen"></i>
-            <?php echo e(__('app.edit')); ?>
-
-        </a>
         <a href="<?php echo e($project->status === 'under_review' ? route('project-reviews.index') : route('projects.index')); ?>" class="btn-secondary">
             <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
             <?php echo e(__('app.back_to_list')); ?>
@@ -112,8 +121,8 @@
     </div>
     <div class="px-6 py-5">
         <?php
-            $canAssignTeam = auth()->id() === $project->manager_id;
-            $canAssignManager = auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit');
+            $canAssignTeam = $project->is_current && auth()->id() === $project->manager_id;
+            $canAssignManager = $project->is_current && (auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit'));
         ?>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm">
             <div>
@@ -227,25 +236,27 @@
                         </td>
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-2">
-                                <?php if(! $assignment?->is_done): ?>
-                                    <form action="<?php echo e(route('projects.item-assignments.store', $project)); ?>" method="POST" class="flex items-center gap-1.5">
-                                        <?php echo csrf_field(); ?>
-                                        <input type="hidden" name="price_quote_item_id" value="<?php echo e($item->id); ?>">
-                                        <select name="assigned_to" class="js-select2 form-select" style="min-width:140px">
-                                            <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <option value="<?php echo e($employee->id); ?>" <?php if($assignment?->assigned_to == $employee->id): echo 'selected'; endif; ?>><?php echo e($employee->name); ?></option>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </select>
-                                        <input type="text" name="notes" value="<?php echo e($assignment?->notes); ?>"
-                                               placeholder="<?php echo e(__('tenders.quote_item_assignment_notes')); ?>" class="form-input" style="min-width:140px">
-                                        <button type="submit" class="btn-secondary btn-sm"><?php echo e(__('tenders.quote_item_assign')); ?></button>
-                                    </form>
-                                <?php endif; ?>
-                                <?php if($assignment && ! $assignment->is_done): ?>
-                                    <form action="<?php echo e(route('projects.item-assignments.mark-done', [$project, $assignment])); ?>" method="POST">
-                                        <?php echo csrf_field(); ?>
-                                        <button type="submit" class="btn-primary btn-sm"><?php echo e(__('tenders.quote_item_mark_done')); ?></button>
-                                    </form>
+                                <?php if($project->is_current): ?>
+                                    <?php if(! $assignment?->is_done): ?>
+                                        <form action="<?php echo e(route('projects.item-assignments.store', $project)); ?>" method="POST" class="flex items-center gap-1.5">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="price_quote_item_id" value="<?php echo e($item->id); ?>">
+                                            <select name="assigned_to" class="js-select2 form-select" style="min-width:140px">
+                                                <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($employee->id); ?>" <?php if($assignment?->assigned_to == $employee->id): echo 'selected'; endif; ?>><?php echo e($employee->name); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </select>
+                                            <input type="text" name="notes" value="<?php echo e($assignment?->notes); ?>"
+                                                   placeholder="<?php echo e(__('tenders.quote_item_assignment_notes')); ?>" class="form-input" style="min-width:140px">
+                                            <button type="submit" class="btn-secondary btn-sm"><?php echo e(__('tenders.quote_item_assign')); ?></button>
+                                        </form>
+                                    <?php endif; ?>
+                                    <?php if($assignment && ! $assignment->is_done): ?>
+                                        <form action="<?php echo e(route('projects.item-assignments.mark-done', [$project, $assignment])); ?>" method="POST">
+                                            <?php echo csrf_field(); ?>
+                                            <button type="submit" class="btn-primary btn-sm"><?php echo e(__('tenders.quote_item_mark_done')); ?></button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -279,7 +290,7 @@
                         <p class="text-xs text-emerald-600 font-bold mb-0.5"><?php echo e(__('tenders.question_answer')); ?></p>
                         <p class="text-sm text-slate-700"><?php echo e($question->answer); ?></p>
                     </div>
-                <?php elseif(auth()->id() === $question->asked_to || auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit')): ?>
+                <?php elseif($project->is_current && (auth()->id() === $question->asked_to || auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit'))): ?>
                     <form action="<?php echo e(route('projects.questions.answer', [$project, $question])); ?>" method="POST" class="mt-2 flex items-end gap-2 flex-wrap">
                         <?php echo csrf_field(); ?>
                         <div class="flex-1 min-w-48">
@@ -293,6 +304,7 @@
             <p class="text-sm text-slate-400 mb-4"><?php echo e(__('tenders.no_questions')); ?></p>
         <?php endif; ?>
 
+        <?php if($project->is_current): ?>
         <form action="<?php echo e(route('projects.questions.store', $project)); ?>" method="POST" class="mt-4 pt-4 border-t border-slate-100 flex items-end gap-3 flex-wrap">
             <?php echo csrf_field(); ?>
             <div class="flex-1 min-w-56">
@@ -314,17 +326,20 @@
 
             </button>
         </form>
+        <?php endif; ?>
     </div>
 </div>
 
 <div class="card overflow-hidden mb-5">
     <div class="card-header flex items-center justify-between">
         <h3 class="font-bold text-slate-700"><?php echo e(__('tenders.project_agreements_section')); ?></h3>
+        <?php if($project->is_current): ?>
         <a href="<?php echo e(route('agreements.create', ['project_id' => $project->id])); ?>" class="btn-secondary btn-sm">
             <i class="fa-solid fa-plus"></i>
             <?php echo e(__('tenders.add_project_agreement')); ?>
 
         </a>
+        <?php endif; ?>
     </div>
     <div class="px-6 py-5">
         <?php $__empty_1 = true; $__currentLoopData = $project->agreements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $agreement): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
@@ -368,6 +383,7 @@
             <p class="text-sm text-slate-400 mb-4"><?php echo e(__('tenders.no_project_attachments')); ?></p>
         <?php endif; ?>
 
+        <?php if($project->is_current): ?>
         <form action="<?php echo e(route('projects.attachments.store', $project)); ?>" method="POST" enctype="multipart/form-data"
               class="mt-4 pt-4 border-t border-slate-100 space-y-3"
               x-data="{
@@ -406,8 +422,31 @@
                 </button>
             </div>
         </form>
+        <?php endif; ?>
     </div>
 </div>
+
+<?php if($project->is_current && $project->versions->isNotEmpty()): ?>
+<div class="card overflow-hidden mt-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700"><?php echo e(__('tenders.project_version_history')); ?></h3>
+    </div>
+    <div class="px-6 py-4">
+        <?php $__currentLoopData = $project->versions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $oldVersion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span class="text-sm text-slate-600">
+                    <span class="font-mono font-bold" dir="ltr"><?php echo e($oldVersion->number); ?></span>
+                    — <span dir="ltr"><?php echo e($oldVersion->updated_at->format('Y-m-d H:i')); ?></span>
+                </span>
+                <a href="<?php echo e(route('projects.show', $oldVersion)); ?>" class="btn-secondary btn-sm">
+                    <i class="fa-solid fa-eye"></i> <?php echo e(__('app.view')); ?>
+
+                </a>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+</div>
+<?php endif; ?>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\swete\resources\views/tenders/projects/show.blade.php ENDPATH**/ ?>

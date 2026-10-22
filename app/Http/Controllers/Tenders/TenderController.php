@@ -164,7 +164,7 @@ class TenderController extends ModuleController
 
         $tender = $priceQuote->tender;
 
-        $activeProject = Project::where('tender_id', $tender->id)->where('status', 'active')->latest()->first();
+        $activeProject = Project::where('tender_id', $tender->id)->where('status', 'active')->where('is_current', true)->latest()->first();
 
         if ($activeProject) {
             $activeProject->increment('variation_round');

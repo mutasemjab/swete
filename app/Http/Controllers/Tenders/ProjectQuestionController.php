@@ -11,6 +11,8 @@ class ProjectQuestionController extends Controller
 {
     public function store(Request $request, Project $project)
     {
+        abort_unless($project->is_current, 404);
+
         $validated = $request->validate([
             'question' => ['required', 'string'],
             'asked_to' => ['nullable', 'exists:users,id'],
@@ -27,6 +29,7 @@ class ProjectQuestionController extends Controller
     /** The target employee answers their own question; anyone with project-edit rights may also answer on their behalf. */
     public function answer(Request $request, Project $project, ProjectQuestion $question)
     {
+        abort_unless($project->is_current, 404);
         abort_unless($question->project_id === $project->id, 404);
         abort_unless(
             $request->user()->id === $question->asked_to || $request->user()->can('projects.edit') || $request->user()->can('tenders.projects.edit'),

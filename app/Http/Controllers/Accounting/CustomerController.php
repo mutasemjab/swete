@@ -78,7 +78,7 @@ class CustomerController extends ModuleController
         $customer->load('contacts');
         $groups       = CustomerGroup::orderBy('name')->get();
         $extraFields  = ClientExtraField::forCustomers()->active()->orderBy('sort_order')->get();
-        $seedContacts = $customer->contacts->map(fn ($c) => [
+        $seedContacts = $customer->contactes->map(fn ($c) => [
             'name'      => $c->name,
             'phone'     => $c->phone ?? '',
             'job_title' => $c->job_title ?? '',

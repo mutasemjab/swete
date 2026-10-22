@@ -297,6 +297,9 @@ return [
     'convert_to_project'         => 'Convert to Project',
     'convert_to_project_confirm' => 'Are you sure you want to convert this tender into a project?',
     'project_review_reason_notice' => 'This project was sent back to review because:',
+    'project_old_version_banner'    => 'This is an old version of this project — it was later updated.',
+    'project_view_current_version'  => 'View Current Version',
+    'project_version_history'       => 'Version History',
 
     // ── Tenders index: converted vs not-converted filter ───────────────────────
     'tenders_not_converted' => 'Not Converted to Project',
