@@ -214,24 +214,39 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
-    // ANALYSES MODULE  ← CIAT discounts + price analyses moved out of tenders
+    // CIAT DISCOUNTS MODULE  ← split out of the former combined "Analyses" module
     // ──────────────────────────────────────────────────────────────────────────
-    'analyses' => [
-        'name'        => 'analyses.module_name',
-        'description' => 'analyses.module_desc',
-        'icon'        => 'chart-line',
+    'ciat_discounts' => [
+        'name'        => 'analyses.ciat_discounts_module_name',
+        'description' => 'analyses.ciat_discounts_module_desc',
+        'icon'        => 'percent',
         'color'       => 'cyan',
-        'route'       => 'price-analyses.index',
+        'route'       => 'ciat-discounts.index',
         'permission'  => 'analyses.view',
         'gradient'    => 'from-cyan-500 to-cyan-700',
         'sections'    => [
             [
                 'label' => 'tenders.section_ciat_discounts',
                 'items' => [
-                    ['label' => 'tenders.nav_ciat_discounts_list', 'route' => 'ciat-discounts.index',  'icon' => 'percent',    'permission' => 'analyses.view'],
-                    ['label' => 'tenders.nav_ciat_discounts_add',  'route' => 'ciat-discounts.create', 'icon' => 'plus',       'permission' => 'analyses.ciat_discounts.create'],
+                    ['label' => 'tenders.nav_ciat_discounts_list', 'route' => 'ciat-discounts.index',  'icon' => 'percent', 'permission' => 'analyses.view'],
+                    ['label' => 'tenders.nav_ciat_discounts_add',  'route' => 'ciat-discounts.create', 'icon' => 'plus',    'permission' => 'analyses.ciat_discounts.create'],
                 ],
             ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // PRICE ANALYSES MODULE  ← split out of the former combined "Analyses" module
+    // ──────────────────────────────────────────────────────────────────────────
+    'price_analyses' => [
+        'name'        => 'analyses.price_analyses_module_name',
+        'description' => 'analyses.price_analyses_module_desc',
+        'icon'        => 'chart-line',
+        'color'       => 'cyan',
+        'route'       => 'price-analyses.index',
+        'permission'  => 'analyses.view',
+        'gradient'    => 'from-cyan-500 to-cyan-700',
+        'sections'    => [
             [
                 'label' => 'tenders.section_price_analysis',
                 'items' => [

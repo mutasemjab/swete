@@ -4,22 +4,60 @@
 @section('breadcrumb', $analysis->number)
 
 @section('content')
+
+@unless($analysis->is_current)
+    <div class="card !bg-amber-50 !border-amber-200 px-5 py-4 mb-5 flex items-center justify-between gap-3">
+        <p class="font-bold text-amber-800">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ __('tenders.analysis_old_version_banner') }}
+        </p>
+        @if($analysis->root)
+            <a href="{{ route('price-analyses.show', $analysis->root) }}" class="btn-secondary btn-sm">
+                {{ __('tenders.analysis_view_current_version') }}
+            </a>
+        @endif
+    </div>
+@endunless
+
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ $analysis->number }}</h1>
         <p class="page-subtitle">{{ $analysis->branch?->localized_name }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('price-analyses.edit', $analysis) }}" class="btn-secondary">
-            <i class="fa-solid fa-pen"></i>
-            {{ __('app.edit') }}
-        </a>
+        @if($analysis->is_current)
+            <a href="{{ route('price-analyses.edit', $analysis) }}" class="btn-secondary">
+                <i class="fa-solid fa-pen"></i>
+                {{ __('app.edit') }}
+            </a>
+        @endif
         <a href="{{ route('price-analyses.index') }}" class="btn-secondary">
             <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
             {{ __('app.back_to_list') }}
         </a>
     </div>
 </div>
+
+@if($analysis->is_current && $analysis->versions->isNotEmpty())
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.analysis_version_history') }}</h3>
+    </div>
+    <div class="px-6 py-4">
+        @foreach($analysis->versions as $oldVersion)
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span class="text-sm text-slate-600">
+                    <span class="font-mono font-bold" dir="ltr">{{ $oldVersion->number }}</span>
+                    — <span dir="ltr">{{ $oldVersion->updated_at->format('Y-m-d H:i') }}</span>
+                </span>
+                <a href="{{ route('price-analyses.show', $oldVersion) }}" class="btn-secondary btn-sm">
+                    <i class="fa-solid fa-eye"></i> {{ __('app.view') }}
+                </a>
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
 
 <div class="card px-6 py-5 mb-5">
     <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
@@ -35,6 +73,18 @@
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.analysis_jd_rate') }}</dt>
             <dd class="font-bold text-slate-800" dir="ltr">{{ rtrim(rtrim(number_format($analysis->jd_rate, 4), '0'), '.') }}</dd>
         </div>
+        @if($analysis->linked)
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.analysis_linked_type') }}</dt>
+            <dd class="font-bold text-slate-800">
+                @if($analysis->linked_type === 'project')
+                    <a href="{{ route('projects.show', $analysis->linked) }}" class="text-indigo-600 hover:underline">{{ $analysis->linked->number }} — {{ $analysis->linked->localized_title }}</a>
+                @else
+                    <a href="{{ route('price-quotes.show', $analysis->linked) }}" class="text-indigo-600 hover:underline">{{ $analysis->linked->number }}</a>
+                @endif
+            </dd>
+        </div>
+        @endif
         @if($analysis->notes)
         <div class="sm:col-span-3">
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.analysis_notes') }}</dt>
@@ -56,7 +106,6 @@
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_model') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_quantity') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_list_price') }}</th>
-                    <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_price_percent') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_cost') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_profit') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_total_profit') }}</th>
@@ -73,7 +122,6 @@
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ $item->ciat_model }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->quantity, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->list_price, 3) }}</td>
-                    <td class="px-3 py-3 text-slate-600" dir="ltr">{{ rtrim(rtrim(number_format($item->price_percent, 2), '0'), '.') }}%</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->cost, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->profit, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->total_profit, 3) }}</td>

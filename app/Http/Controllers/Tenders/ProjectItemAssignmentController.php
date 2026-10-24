@@ -17,7 +17,6 @@ class ProjectItemAssignmentController extends Controller
         $validated = $request->validate([
             'price_quote_item_id' => ['required', 'integer'],
             'assigned_to'          => ['required', 'exists:users,id'],
-            'notes'                => ['nullable', 'string'],
         ]);
 
         $itemBelongsToProject = $project->quoteItems()->contains('id', $validated['price_quote_item_id']);
@@ -27,7 +26,6 @@ class ProjectItemAssignmentController extends Controller
             ['project_id' => $project->id, 'price_quote_item_id' => $validated['price_quote_item_id']],
             [
                 'assigned_to' => $validated['assigned_to'],
-                'notes'       => $validated['notes'] ?? null,
                 'is_done'     => false,
                 'done_at'     => null,
                 'created_by'  => $request->user()->id,
@@ -50,5 +48,27 @@ class ProjectItemAssignmentController extends Controller
         $assignment->update(['is_done' => true, 'done_at' => now()]);
 
         return back()->with('success', __('tenders.item_marked_done_success'));
+    }
+
+    /** Facebook-style thread: the assignee, or anyone with project-edit rights, may post a comment on the item. */
+    public function storeComment(Request $request, Project $project, ProjectItemAssignment $assignment)
+    {
+        abort_unless($project->is_current, 404);
+        abort_unless($assignment->project_id === $project->id, 404);
+        abort_unless(
+            $request->user()->id === $assignment->assigned_to || $request->user()->can('projects.edit') || $request->user()->can('tenders.projects.edit'),
+            403
+        );
+
+        $validated = $request->validate([
+            'body' => ['required', 'string'],
+        ]);
+
+        $assignment->comments()->create([
+            'user_id' => $request->user()->id,
+            'body'    => $validated['body'],
+        ]);
+
+        return back()->with('success', __('tenders.comment_added'));
     }
 }

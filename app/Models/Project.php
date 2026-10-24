@@ -110,6 +110,17 @@ class Project extends Model
         return $this->hasMany(ProjectQuestion::class);
     }
 
+    public function devices(): HasMany
+    {
+        return $this->hasMany(ProjectDevice::class);
+    }
+
+    /** Price Analyses explicitly linked to this project from the Analysis's own form — see PriceAnalysis::linked(). */
+    public function analyses(): HasMany
+    {
+        return $this->hasMany(PriceAnalysis::class, 'linked_id')->where('linked_type', 'project');
+    }
+
     /**
      * Every line item on the live origin quote, plus any still-PENDING Variation Order's quote —
      * assignable to employees from the moment a Variation Order is submitted, not only once
@@ -123,7 +134,7 @@ class Project extends Model
         $quoteIds = collect([$this->price_quote_id])->merge($pendingVoQuoteIds)->filter()->unique();
 
         return PriceQuoteItem::whereIn('price_quote_id', $quoteIds)
-            ->with(['material', 'assignments.assignee', 'priceQuote'])
+            ->with(['material', 'assignments.assignee', 'assignments.comments.user', 'priceQuote'])
             ->get()
             ->map(function ($item) {
                 $item->setAttribute('quoteNumber', $item->priceQuote->number);

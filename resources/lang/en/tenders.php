@@ -217,6 +217,7 @@ return [
     'quote_converted_badge'       => 'Converted',
     'quote_pending_vo_badge'      => 'Pending Review (Variation Order)',
     'quote_already_pending_vo'    => 'This quote already has a pending Variation Order.',
+    'quote_customer_mismatch'     => 'Cannot convert a price quote belonging to a different customer than the current project.',
 
     // ── Variation Orders ──────────────────────────────────────────────────────
     'variation_order_created'  => 'The price quote was sent as a Variation Order to the review queue.',
@@ -322,6 +323,24 @@ return [
     'item_assigned_success'       => 'Item assigned successfully.',
     'item_marked_done_success'    => 'Item marked as done.',
 
+    // ── Facebook-style comments on an item assignment ───────────────────────────
+    'quote_item_comments_section' => 'Comments',
+    'view_comments'               => 'Comments',
+    'no_comments'                 => 'No comments yet',
+    'comment_placeholder'         => 'Write a comment...',
+    'add_comment'                 => 'Add Comment',
+    'comment_added'               => 'Comment added successfully.',
+
+    // ── Project devices ──────────────────────────────────────────────────────────
+    'project_devices_section'     => 'Devices',
+    'no_devices'                  => 'No devices registered on this project yet',
+    'device_supply_date'          => 'Supply date',
+    'device_installation_date'    => 'Installation date',
+    'device_warranty_start_date'  => 'Warranty start date',
+    'add_device'                  => 'Add device',
+    'device_added'                => 'Device registered successfully.',
+    'device_deleted'              => 'Device deleted successfully.',
+
     // ── Project team: manager / engineer / foreman ──────────────────────────────
     'project_manager'          => 'Project Manager',
     'project_engineer'         => 'Project Engineer',
@@ -381,6 +400,7 @@ return [
     'ciat_type'                 => 'CIAT Type',
     'ciat_model'                => 'CIAT Model',
     'ciat_discount_percent'     => 'Discount %',
+    'ciat_min_profit_percent'   => 'Minimum profit %',
     'no_ciat_discounts'         => 'No CIAT discounts yet',
     'add_first_ciat_discount'   => 'Add First Discount',
     'ciat_discount_added'       => 'Discount added successfully.',
@@ -427,5 +447,24 @@ return [
     'price_analysis_updated'    => 'Price analysis updated successfully.',
     'price_analysis_deleted'    => 'Price analysis deleted successfully.',
     'no_ciat_discounts_available' => 'No CIAT discounts yet — add one first.',
+
+    // ── Analysis product source ─────────────────────────────────────────────
+    'analysis_source_type'       => 'Product Source',
+    'analysis_source_ciat'       => 'CIAT Discounts',
+    'analysis_source_warehouse'  => 'Warehouse Materials',
+
+    // ── Linking an analysis to a price quote or project ─────────────────────
+    'analysis_linked_type'        => 'Linked To',
+    'analysis_linked_none'        => 'Not Linked',
+    'analysis_linked_price_quote' => 'Price Quote',
+    'analysis_linked_project'     => 'Project',
+
+    // ── Analysis revisions ───────────────────────────────────────────────────
+    'analysis_version_history'       => 'Analysis Version History',
+    'analysis_old_version_banner'    => 'This is an old version of the analysis — read-only.',
+    'analysis_view_current_version'  => 'View Current Version',
+
+    // ── Analyses linked to a project ─────────────────────────────────────────
+    'project_linked_analyses_section' => 'Linked Price Analyses',
 
 ];

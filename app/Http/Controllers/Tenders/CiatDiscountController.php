@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 /** Dynamic/manageable list of CIAT product discounts — looked up when building a Price Analysis line. */
 class CiatDiscountController extends ModuleController
 {
-    protected string $module = 'analyses';
+    protected string $module = 'ciat_discounts';
 
     public function index()
     {
@@ -85,8 +85,9 @@ class CiatDiscountController extends ModuleController
     private function validated(Request $request): array
     {
         return $request->validate([
-            'material_id'      => ['required', 'exists:materials,id'],
-            'discount_percent' => ['required', 'numeric', 'min:0', 'max:100'],
+            'material_id'        => ['required', 'exists:materials,id'],
+            'discount_percent'   => ['required', 'numeric', 'min:0', 'max:100'],
+            'min_profit_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
     }
 }

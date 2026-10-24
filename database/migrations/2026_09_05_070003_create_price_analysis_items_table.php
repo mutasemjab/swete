@@ -17,8 +17,9 @@ return new class extends Migration
             $table->foreignId('ciat_discount_id')->nullable()->constrained('ciat_discounts')->nullOnDelete();
             $table->foreignId('material_id')->nullable()->constrained('materials')->nullOnDelete();
             // The specific CIAT model — typed per line, not looked up (only the material + its
-            // discount % come from ciat_discounts).
-            $table->string('ciat_model');
+            // discount % come from ciat_discounts). Nullable since a warehouse-sourced line (see
+            // PriceAnalysis::source_type) has no CIAT model at all.
+            $table->string('ciat_model')->nullable();
             $table->decimal('quantity', 14, 3);
             $table->decimal('list_price', 14, 3);
             $table->decimal('discount_percent', 5, 2);

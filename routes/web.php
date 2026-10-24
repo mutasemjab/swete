@@ -35,6 +35,7 @@ use App\Http\Controllers\Tenders\CiatDiscountController;
 use App\Http\Controllers\Tenders\PriceAnalysisController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
+use App\Http\Controllers\Tenders\ProjectDeviceController;
 use App\Http\Controllers\Tenders\ProjectItemAssignmentController;
 use App\Http\Controllers\Tenders\ProjectQuestionController;
 use App\Http\Controllers\Tenders\ProjectReviewController;
@@ -350,10 +351,14 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     // No extra permission string — the row's own `assigned_to`/`manager_id` ownership check inside
     // the controller is the real gate here, same precedent as ApprovalController's approve/reject.
     Route::post('projects/{project}/item-assignments/{assignment}/mark-done', [ProjectItemAssignmentController::class, 'markDone'])->name('projects.item-assignments.mark-done');
+    // No extra permission string — same ownership-check-as-gate precedent as mark-done above.
+    Route::post('projects/{project}/item-assignments/{assignment}/comments', [ProjectItemAssignmentController::class, 'storeComment'])->name('projects.item-assignments.comments.store');
     Route::post('projects/{project}/assign-team', [ProjectController::class, 'assignTeam'])->name('projects.assign-team');
     Route::post('projects/{project}/assign-manager', [ProjectController::class, 'assignManager'])->name('projects.assign-manager')->middleware('permission:projects.edit|tenders.projects.edit');
     Route::post('projects/{project}/questions', [ProjectQuestionController::class, 'store'])->name('projects.questions.store')->middleware('permission:projects.edit|tenders.projects.edit');
     Route::post('projects/{project}/questions/{question}/answer', [ProjectQuestionController::class, 'answer'])->name('projects.questions.answer');
+    Route::post('projects/{project}/devices', [ProjectDeviceController::class, 'store'])->name('projects.devices.store')->middleware('permission:projects.edit|tenders.projects.edit');
+    Route::delete('projects/{project}/devices/{device}', [ProjectDeviceController::class, 'destroy'])->name('projects.devices.destroy')->middleware('permission:projects.edit|tenders.projects.edit');
 
     // ── Projects Under Review (new standalone module — tenders land here before approval) ─────
     Route::get('project-reviews', [ProjectReviewController::class, 'index'])->name('project-reviews.index')->middleware('permission:projects_under_review.view');

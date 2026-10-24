@@ -38,7 +38,7 @@ class ProjectController extends ModuleController
         $project->load([
             'customer', 'tender', 'creator', 'manager', 'engineer', 'foreman',
             'purchaseRequests.supplier', 'attachments.creator', 'agreements', 'questions.askedTo', 'questions.askedBy',
-            'versions',
+            'versions', 'devices.item.material', 'devices.creator', 'analyses',
         ]);
         $employees = User::where('status', true)->orderBy('name')->get();
         $quoteItems = $project->quoteItems();

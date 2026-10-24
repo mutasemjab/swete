@@ -188,6 +188,43 @@
     </div>
 </div>
 
+<?php if($project->analyses->isNotEmpty()): ?>
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700"><?php echo e(__('tenders.project_linked_analyses_section')); ?></h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.analysis_number')); ?></th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.analysis_branch')); ?></th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('app.created_at')); ?></th>
+                    <th class="px-5 py-3 w-20"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <?php $__currentLoopData = $project->analyses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $linkedAnalysis): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <tr class="hover:bg-slate-50/50">
+                    <td class="px-5 py-3 font-mono font-bold text-indigo-600">
+                        <a href="<?php echo e(route('price-analyses.show', $linkedAnalysis)); ?>" class="hover:underline"><?php echo e($linkedAnalysis->number); ?></a>
+                    </td>
+                    <td class="px-5 py-3 text-sm text-slate-600"><?php echo e($linkedAnalysis->branch?->localized_name); ?></td>
+                    <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e($linkedAnalysis->created_at->format('Y-m-d')); ?></td>
+                    <td class="px-5 py-3 text-end">
+                        <a href="<?php echo e(route('price-analyses.show', $linkedAnalysis)); ?>" class="btn-secondary btn-sm">
+                            <i class="fa-solid fa-eye"></i> <?php echo e(__('app.view')); ?>
+
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="card overflow-hidden mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700"><?php echo e(__('tenders.project_quote_items_section')); ?></h3>
@@ -227,9 +264,44 @@
                                 <?php if($assignment->is_done): ?>
                                     <span class="badge bg-emerald-100 text-emerald-700 ms-1"><?php echo e(__('tenders.quote_item_done')); ?></span>
                                 <?php endif; ?>
-                                <?php if($assignment->notes): ?>
-                                    <p class="text-xs text-slate-500 mt-0.5"><?php echo e($assignment->notes); ?></p>
-                                <?php endif; ?>
+                                <div x-data="{ open: false }" class="mt-1">
+                                    <button type="button" @click="open = true" class="text-xs text-indigo-600 hover:underline">
+                                        <i class="fa-solid fa-comment-dots"></i>
+                                        <?php echo e(__('tenders.view_comments')); ?> (<?php echo e($assignment->comments->count()); ?>)
+                                    </button>
+                                    <div x-show="open" x-cloak class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+                                        <div @click.outside="open = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col">
+                                            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                                                <h3 class="font-bold text-slate-800"><?php echo e(__('tenders.quote_item_comments_section')); ?></h3>
+                                                <button type="button" @click="open = false" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
+                                            <div class="px-6 py-4 overflow-y-auto flex-1 space-y-3">
+                                                <?php $__empty_1 = true; $__currentLoopData = $assignment->comments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $comment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                                    <div class="bg-slate-50 rounded-xl px-4 py-2.5">
+                                                        <div class="flex items-center justify-between gap-2">
+                                                            <span class="font-bold text-slate-800 text-sm"><?php echo e($comment->user?->name); ?></span>
+                                                            <span class="text-xs text-slate-400" dir="ltr"><?php echo e($comment->created_at->format('Y-m-d H:i')); ?></span>
+                                                        </div>
+                                                        <p class="text-sm text-slate-700 mt-1"><?php echo e($comment->body); ?></p>
+                                                    </div>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                                    <p class="text-sm text-slate-400 text-center py-6"><?php echo e(__('tenders.no_comments')); ?></p>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php if($project->is_current): ?>
+                                            <div class="px-6 py-4 border-t border-slate-100">
+                                                <form action="<?php echo e(route('projects.item-assignments.comments.store', [$project, $assignment])); ?>" method="POST" class="flex items-end gap-2">
+                                                    <?php echo csrf_field(); ?>
+                                                    <textarea name="body" rows="2" required placeholder="<?php echo e(__('tenders.comment_placeholder')); ?>" class="form-input flex-1"></textarea>
+                                                    <button type="submit" class="btn-primary btn-sm"><?php echo e(__('tenders.add_comment')); ?></button>
+                                                </form>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php else: ?>
                                 <span class="text-slate-400"><?php echo e(__('tenders.quote_item_unassigned')); ?></span>
                             <?php endif; ?>
@@ -246,8 +318,6 @@
                                                     <option value="<?php echo e($employee->id); ?>" <?php if($assignment?->assigned_to == $employee->id): echo 'selected'; endif; ?>><?php echo e($employee->name); ?></option>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
-                                            <input type="text" name="notes" value="<?php echo e($assignment?->notes); ?>"
-                                                   placeholder="<?php echo e(__('tenders.quote_item_assignment_notes')); ?>" class="form-input" style="min-width:140px">
                                             <button type="submit" class="btn-secondary btn-sm"><?php echo e(__('tenders.quote_item_assign')); ?></button>
                                         </form>
                                     <?php endif; ?>
@@ -265,6 +335,79 @@
                 </tbody>
             </table>
         </div>
+    <?php endif; ?>
+</div>
+
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700"><?php echo e(__('tenders.project_devices_section')); ?></h3>
+    </div>
+    <?php if($project->devices->isEmpty()): ?>
+        <p class="px-6 py-6 text-sm text-slate-400"><?php echo e(__('tenders.no_devices')); ?></p>
+    <?php else: ?>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.quote_item_material')); ?></th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.device_supply_date')); ?></th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.device_installation_date')); ?></th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider"><?php echo e(__('tenders.device_warranty_start_date')); ?></th>
+                        <th class="px-5 py-3 w-20"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <?php $__currentLoopData = $project->devices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $device): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-5 py-3 text-sm font-bold text-slate-800"><?php echo e($device->item?->material?->localized_name ?? '—'); ?></td>
+                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e($device->supply_date?->format('Y-m-d') ?? '—'); ?></td>
+                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e($device->installation_date?->format('Y-m-d') ?? '—'); ?></td>
+                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr"><?php echo e($device->warranty_start_date?->format('Y-m-d') ?? '—'); ?></td>
+                        <td class="px-5 py-3 text-end">
+                            <?php if($project->is_current): ?>
+                                <form action="<?php echo e(route('projects.devices.destroy', [$project, $device])); ?>" method="POST">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
+                                    <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                        <i class="fa-solid fa-trash text-sm"></i>
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+    <?php if($project->is_current): ?>
+        <?php $undevicedItems = $quoteItems->whereNotIn('id', $project->devices->pluck('price_quote_item_id')); ?>
+        <?php if($undevicedItems->isNotEmpty()): ?>
+            <form action="<?php echo e(route('projects.devices.store', $project)); ?>" method="POST" class="px-6 py-4 border-t border-slate-100 flex items-end gap-2 flex-wrap">
+                <?php echo csrf_field(); ?>
+                <div>
+                    <label class="form-label"><?php echo e(__('tenders.quote_item_material')); ?></label>
+                    <select name="price_quote_item_id" class="js-select2 form-select" style="min-width:220px" required>
+                        <?php $__currentLoopData = $undevicedItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($item->id); ?>"><?php echo e($item->material?->localized_name ?? '—'); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label"><?php echo e(__('tenders.device_supply_date')); ?></label>
+                    <input type="date" name="supply_date" class="form-input">
+                </div>
+                <div>
+                    <label class="form-label"><?php echo e(__('tenders.device_installation_date')); ?></label>
+                    <input type="date" name="installation_date" class="form-input">
+                </div>
+                <div>
+                    <label class="form-label"><?php echo e(__('tenders.device_warranty_start_date')); ?></label>
+                    <input type="date" name="warranty_start_date" class="form-input">
+                </div>
+                <button type="submit" class="btn-primary btn-sm"><?php echo e(__('tenders.add_device')); ?></button>
+            </form>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 

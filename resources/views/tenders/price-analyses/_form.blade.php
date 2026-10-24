@@ -2,15 +2,17 @@
     $analysis = $analysis ?? null;
     $seedItems = (
         $analysis?->items->map(fn ($i) => [
-            'ciat_discount_id' => $i->ciat_discount_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
+            'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
             'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
         ])->values()
-        ?? collect([['ciat_discount_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+        ?? collect([['ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp
 <div x-data="{
         branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson() }},
         ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent])->values()->toJson() }},
+        sourceType: '{{ old('source_type', $analysis?->source_type ?? 'ciat') }}',
+        linkedType: '{{ old('linked_type', $analysis?->linked_type ?? '') }}',
         branchId: '{{ old('branch_id', $analysis?->branch_id) }}',
         taxRate: {{ (float) old('tax_rate', $analysis?->tax_rate ?? 16) }},
         jdRate: {{ (float) old('jd_rate', $analysis?->jd_rate ?? 0.82) }},
@@ -19,6 +21,7 @@
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             if (b) { this.taxRate = b.taxRate; this.jdRate = b.jdRate; }
         },
+        onSourceTypeChange() { this.$nextTick(() => window.initSelect2()); },
         // _key is a stable per-row identity for Alpine's x-for :key — NOT array index. Keying by
         // index broke the select2 widget bound to whichever row shifted position after a delete
         // (select2's own injected DOM stays bound to a position, not the row's actual data, once
@@ -30,12 +33,15 @@
         _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
         items: {{ $seedItems->toJson() }},
-        addItem() { this.items.push({ ciat_discount_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ ciat_discount_id: '', material_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
-        discountFor(id) { const d = this.ciatDiscounts.find(x => String(x.id) === String(id)); return d ? d.discount : 0; },
+        discountFor(item) {
+            if (this.sourceType === 'warehouse') return 0;
+            const d = this.ciatDiscounts.find(x => String(x.id) === String(item.ciat_discount_id));
+            return d ? d.discount : 0;
+        },
         calc(item) {
-            const discount = this.discountFor(item.ciat_discount_id);
-            const pricePercent = 100 - discount;
+            const discount = this.discountFor(item);
             const qty = parseFloat(item.quantity) || 0;
             const listPrice = parseFloat(item.list_price) || 0;
             const profitPercent = parseFloat(item.profit_percent) || 0;
@@ -44,7 +50,7 @@
             const profit = cost * profitPercent / 100;
             const price = cost + profit;
             const toJd = price * this.jdRate;
-            return { discount, pricePercent, cost, profit, totalProfit: profit * qty, price, toJd, subtotal: toJd + shipping };
+            return { discount, cost, profit, totalProfit: profit * qty, price, toJd, subtotal: toJd + shipping };
         },
         get subtotal() { return this.items.reduce((sum, item) => sum + this.calc(item).subtotal, 0); },
         get totalWithTax() { return this.subtotal * (1 + (this.taxRate / 100)); },
@@ -61,6 +67,15 @@
         </div>
         <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
+                <label class="form-label">{{ __('tenders.analysis_source_type') }} <span class="text-rose-500">*</span></label>
+                <select name="source_type" x-model="sourceType" @change="onSourceTypeChange()" class="form-select @error('source_type') is-invalid @enderror">
+                    <option value="ciat">{{ __('tenders.analysis_source_ciat') }}</option>
+                    <option value="warehouse">{{ __('tenders.analysis_source_warehouse') }}</option>
+                </select>
+                @error('source_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
                 <label class="form-label">{{ __('tenders.analysis_branch') }} <span class="text-rose-500">*</span></label>
                 <select name="branch_id" x-model="branchId" @change="onBranchChange()" class="js-select2 form-select @error('branch_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
@@ -69,6 +84,42 @@
                     @endforeach
                 </select>
                 @error('branch_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('tenders.analysis_linked_type') }}</label>
+                <select name="linked_type" x-model="linkedType" class="form-select @error('linked_type') is-invalid @enderror">
+                    <option value="">{{ __('tenders.analysis_linked_none') }}</option>
+                    <option value="price_quote">{{ __('tenders.analysis_linked_price_quote') }}</option>
+                    <option value="project">{{ __('tenders.analysis_linked_project') }}</option>
+                </select>
+                @error('linked_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <template x-if="linkedType === 'price_quote'">
+                    <div>
+                        <label class="form-label">{{ __('tenders.analysis_linked_price_quote') }}</label>
+                        <select name="linked_id" class="js-select2 form-select @error('linked_id') is-invalid @enderror">
+                            <option value="">{{ __('app.select') }}</option>
+                            @foreach($priceQuotes as $priceQuote)
+                                <option value="{{ $priceQuote->id }}" @selected(old('linked_id', $analysis?->linked_type === 'price_quote' ? $analysis?->linked_id : null) == $priceQuote->id)>{{ $priceQuote->number }} — {{ $priceQuote->customer?->localized_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </template>
+                <template x-if="linkedType === 'project'">
+                    <div>
+                        <label class="form-label">{{ __('tenders.analysis_linked_project') }}</label>
+                        <select name="linked_id" class="js-select2 form-select @error('linked_id') is-invalid @enderror">
+                            <option value="">{{ __('app.select') }}</option>
+                            @foreach($projects as $project)
+                                <option value="{{ $project->id }}" @selected(old('linked_id', $analysis?->linked_type === 'project' ? $analysis?->linked_id : null) == $project->id)>{{ $project->number }} — {{ $project->localized_title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </template>
+                @error('linked_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             <div class="flex items-center">
@@ -119,7 +170,6 @@
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.ciat_model') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_quantity') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.analysis_item_list_price') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-16">{{ __('tenders.analysis_item_price_percent') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_cost') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_profit_percent') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_profit') }}</th>
@@ -135,16 +185,26 @@
                     <template x-for="(item, index) in items" :key="item._key">
                         <tr>
                             <td class="px-3 py-2.5">
-                                <select :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" required>
-                                    <option value="">{{ __('app.select') }}</option>
-                                    @foreach($ciatDiscounts as $ciatDiscount)
-                                        <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
-                                    @endforeach
-                                </select>
+                                <template x-if="sourceType === 'ciat'">
+                                    <select :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" required>
+                                        <option value="">{{ __('app.select') }}</option>
+                                        @foreach($ciatDiscounts as $ciatDiscount)
+                                            <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
+                                        @endforeach
+                                    </select>
+                                </template>
+                                <template x-if="sourceType === 'warehouse'">
+                                    <select :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select !text-xs" required>
+                                        <option value="">{{ __('app.select') }}</option>
+                                        @foreach($materials as $material)
+                                            <option value="{{ $material->id }}">{{ $material->localized_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </template>
                             </td>
-                            <td class="px-3 py-2.5">
+                            <td class="px-3 py-2.5" x-show="sourceType === 'ciat'">
                                 <input type="text" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
-                                       dir="ltr" class="form-input !text-xs" required>
+                                       dir="ltr" class="form-input !text-xs" :required="sourceType === 'ciat'">
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"
@@ -154,7 +214,6 @@
                                 <input type="number" :name="`items[${index}][list_price]`" x-model="item.list_price"
                                        step="0.001" min="0" dir="ltr" class="form-input !text-xs" required>
                             </td>
-                            <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="calc(item).pricePercent + '%'"></td>
                             <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="fmt(calc(item).cost)"></td>
                             <td class="px-3 py-2.5">
                                 <div class="relative">

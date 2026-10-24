@@ -166,6 +166,10 @@ class TenderController extends ModuleController
 
         $activeProject = Project::where('tender_id', $tender->id)->where('status', 'active')->where('is_current', true)->latest()->first();
 
+        if ($activeProject && $activeProject->customer_id !== $priceQuote->customer_id) {
+            return back()->with('error', __('tenders.quote_customer_mismatch'));
+        }
+
         if ($activeProject) {
             $activeProject->increment('variation_round');
 

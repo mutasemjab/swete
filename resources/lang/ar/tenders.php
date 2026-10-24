@@ -217,6 +217,7 @@ return [
     'quote_converted_badge'       => 'تم التحويل',
     'quote_pending_vo_badge'      => 'قيد المراجعة (طلب تغيير)',
     'quote_already_pending_vo'    => 'هذا العرض لديه طلب تغيير قيد المراجعة بالفعل.',
+    'quote_customer_mismatch'     => 'لا يمكن تحويل عرض سعر لعميل مختلف عن عميل المشروع الحالي.',
 
     // ── Variation Orders ──────────────────────────────────────────────────────
     'variation_order_created'  => 'تم إرسال عرض السعر كطلب تغيير (Variation Order) لقائمة المراجعة.',
@@ -322,6 +323,24 @@ return [
     'item_assigned_success'       => 'تم تعيين البند بنجاح.',
     'item_marked_done_success'    => 'تم وضع علامة إنجاز على البند.',
 
+    // ── Facebook-style comments on an item assignment ───────────────────────────
+    'quote_item_comments_section' => 'التعليقات',
+    'view_comments'               => 'التعليقات',
+    'no_comments'                 => 'لا توجد تعليقات بعد',
+    'comment_placeholder'         => 'اكتب تعليقاً...',
+    'add_comment'                 => 'إضافة تعليق',
+    'comment_added'               => 'تمت إضافة التعليق بنجاح.',
+
+    // ── Project devices ──────────────────────────────────────────────────────────
+    'project_devices_section'     => 'الأجهزة',
+    'no_devices'                  => 'لا توجد أجهزة مسجلة على هذا المشروع',
+    'device_supply_date'          => 'تاريخ التوريد',
+    'device_installation_date'    => 'تاريخ التركيب',
+    'device_warranty_start_date'  => 'تاريخ بداية الكفالة',
+    'add_device'                  => 'إضافة جهاز',
+    'device_added'                => 'تم تسجيل الجهاز بنجاح.',
+    'device_deleted'              => 'تم حذف الجهاز بنجاح.',
+
     // ── Project team: manager / engineer / foreman ──────────────────────────────
     'project_manager'          => 'مدير المشروع',
     'project_engineer'         => 'مهندس المشروع',
@@ -381,6 +400,7 @@ return [
     'ciat_type'                 => 'CIAT Type',
     'ciat_model'                => 'CIAT Model',
     'ciat_discount_percent'     => 'نسبة الخصم %',
+    'ciat_min_profit_percent'   => 'أقل نسبة ربح',
     'no_ciat_discounts'         => 'لا توجد خصومات بعد',
     'add_first_ciat_discount'   => 'إضافة أول خصم',
     'ciat_discount_added'       => 'تم إضافة الخصم بنجاح.',
@@ -427,5 +447,24 @@ return [
     'price_analysis_updated'    => 'تم تحديث تحليل السعر بنجاح.',
     'price_analysis_deleted'    => 'تم حذف تحليل السعر بنجاح.',
     'no_ciat_discounts_available' => 'لا توجد خصومات CIAT بعد — أضف واحداً أولاً.',
+
+    // ── مصدر منتج التحليل ────────────────────────────────────────────────────
+    'analysis_source_type'       => 'مصدر المنتج',
+    'analysis_source_ciat'       => 'خصومات CIAT',
+    'analysis_source_warehouse'  => 'منتجات المستودع',
+
+    // ── ربط التحليل بعرض سعر أو مشروع ───────────────────────────────────────
+    'analysis_linked_type'        => 'مرتبط بـ',
+    'analysis_linked_none'        => 'بدون ربط',
+    'analysis_linked_price_quote' => 'عرض سعر',
+    'analysis_linked_project'     => 'مشروع',
+
+    // ── نسخ التحليل ───────────────────────────────────────────────────────────
+    'analysis_version_history'       => 'سجل نسخ التحليل',
+    'analysis_old_version_banner'    => 'هذه نسخة قديمة من التحليل — غير قابلة للتعديل.',
+    'analysis_view_current_version'  => 'عرض النسخة الحالية',
+
+    // ── التحليل المرتبط بالمشروع ─────────────────────────────────────────────
+    'project_linked_analyses_section' => 'تحليلات الأسعار المرتبطة',
 
 ];

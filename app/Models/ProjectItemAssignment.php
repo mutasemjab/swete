@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProjectItemAssignment extends Model
 {
@@ -40,5 +41,11 @@ class ProjectItemAssignment extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Facebook-style comment thread on this assignment — replaces the old single `notes` field. */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ProjectItemComment::class)->orderBy('created_at');
     }
 }

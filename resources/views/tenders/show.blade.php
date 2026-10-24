@@ -146,6 +146,7 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_number') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('accounting.customer') }}</th>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_date') }}</th>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.quote_total') }}</th>
                         <th class="px-5 py-3 w-48"></th>
@@ -157,6 +158,7 @@
                         <td class="px-5 py-3">
                             <a href="{{ route('price-quotes.show', $quote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $quote->number }}</a>
                         </td>
+                        <td class="px-5 py-3 text-slate-700">{{ $quote->customer?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-slate-600">{{ $quote->date->format('Y-m-d') }}</td>
                         <td class="px-5 py-3 font-bold text-slate-800">{{ number_format($quote->total, 3) }}</td>
                         <td class="px-5 py-3 text-end">

@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('price_analyses', function (Blueprint $table) {
             $table->id();
             $table->string('number')->unique();
+            $table->enum('source_type', ['ciat', 'warehouse'])->default('ciat');
             $table->foreignId('branch_id')->constrained('branches')->restrictOnDelete();
             // Snapshotted from the branch at creation time — a later change to the branch's own
             // defaults must never alter an already-saved analysis (same spirit as maintenance report templates).
@@ -18,6 +19,13 @@ return new class extends Migration
             $table->decimal('jd_rate', 8, 4);
             $table->boolean('with_tax')->default(false);
             $table->text('notes')->nullable();
+            // Optional link to the PriceQuote/Project this analysis was made for — same
+            // polymorphic-by-convention shape as Agreement::party_type/party_id, not a real morph.
+            $table->enum('linked_type', ['price_quote', 'project'])->nullable();
+            $table->unsignedBigInteger('linked_id')->nullable();
+            $table->boolean('is_current')->default(true);
+            $table->unsignedInteger('version')->default(1);
+            $table->foreignId('root_id')->nullable()->constrained('price_analyses')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });

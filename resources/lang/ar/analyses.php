@@ -2,8 +2,10 @@
 
 return [
 
-    // ── Module ───────────────────────────────────────────────────────────────
-    'module_name' => 'خصومات CIAT وتحليل الأسعار',
-    'module_desc' => 'إدارة خصومات CIAT وتحليلات الأسعار',
+    // ── Modules ──────────────────────────────────────────────────────────────
+    'ciat_discounts_module_name' => 'خصومات CIAT',
+    'ciat_discounts_module_desc' => 'إدارة خصومات CIAT',
+    'price_analyses_module_name' => 'تحليل الأسعار',
+    'price_analyses_module_desc' => 'إدارة تحليلات الأسعار',
 
 ];

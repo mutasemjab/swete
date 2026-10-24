@@ -14,6 +14,7 @@ return new class extends Migration
             // here; the specific model is typed per line when building a Price Analysis instead.
             $table->foreignId('material_id')->constrained('materials')->restrictOnDelete();
             $table->decimal('discount_percent', 5, 2);
+            $table->decimal('min_profit_percent', 5, 2)->nullable();
             $table->boolean('status')->default(true);
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();

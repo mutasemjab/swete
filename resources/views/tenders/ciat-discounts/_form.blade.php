@@ -35,6 +35,13 @@
             @error('discount_percent')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div>
+            <label class="form-label">{{ __('tenders.ciat_min_profit_percent') }}</label>
+            <input type="number" step="0.01" min="0" max="100" name="min_profit_percent" value="{{ old('min_profit_percent', $discount?->min_profit_percent) }}" dir="ltr"
+                   class="form-input @error('min_profit_percent') is-invalid @enderror">
+            @error('min_profit_percent')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
         @if($discount)
         <div class="flex items-center">
             <label class="relative inline-flex items-center cursor-pointer" dir="ltr">

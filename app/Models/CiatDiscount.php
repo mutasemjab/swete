@@ -16,13 +16,15 @@ class CiatDiscount extends Model
     protected $fillable = [
         'material_id',
         'discount_percent',
+        'min_profit_percent',
         'status',
         'created_by',
     ];
 
     protected $casts = [
-        'discount_percent' => 'decimal:2',
-        'status'           => 'boolean',
+        'discount_percent'   => 'decimal:2',
+        'min_profit_percent' => 'decimal:2',
+        'status'             => 'boolean',
     ];
 
     public function material(): BelongsTo
