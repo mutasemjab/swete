@@ -53,6 +53,7 @@ return [
     'customers_subtitle' => 'إدارة بيانات العملاء',
     'suppliers_subtitle'  => 'إدارة بيانات الموردين',
     'add_customer'       => 'إضافة عميل',
+    'add_customer_quick'  => 'عميل جديد',
     'add_supplier'        => 'إضافة مورد',
     'import_excel' => 'استيراد من إكسل',
     'import_customers' => 'استيراد العملاء من إكسل',

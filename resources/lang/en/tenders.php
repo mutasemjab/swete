@@ -216,6 +216,7 @@ return [
     'installments_total'          => 'Total',
     'quote_converted_badge'       => 'Converted',
     'quote_pending_vo_badge'      => 'Pending Review (Variation Order)',
+    'quote_old_version_badge'     => 'Old Version',
     'quote_already_pending_vo'    => 'This quote already has a pending Variation Order.',
     'quote_customer_mismatch'     => 'Cannot convert a price quote belonging to a different customer than the current project.',
 

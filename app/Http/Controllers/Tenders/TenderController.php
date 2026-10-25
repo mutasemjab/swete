@@ -88,7 +88,9 @@ class TenderController extends ModuleController
     {
         $tender->load([
             'party', 'statusRef', 'governorate', 'country', 'creator',
-            'priceQuotes' => fn ($query) => $query->where('is_current', true)->with('customer'),
+            // Every revision shown, not just the current one — so any of them can still be
+            // converted to a project from here (not only the latest edit of each quote).
+            'priceQuotes' => fn ($query) => $query->with('customer')->orderBy('tender_sequence')->orderBy('version'),
             'projects', 'extraFieldValues.field', 'analyses',
         ]);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();

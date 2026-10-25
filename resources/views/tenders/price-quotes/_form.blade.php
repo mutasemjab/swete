@@ -99,22 +99,34 @@
         </h3>
     </div>
     <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
-        @if($tender)
         <div class="sm:col-span-2">
             <label class="form-label">{{ __('tenders.quote_tender') }}</label>
-            <p class="font-bold text-slate-800">{{ $tender->number }} — {{ $tender->localized_title }}</p>
+            <select name="tender_id" class="js-select2 form-select @error('tender_id') is-invalid @enderror">
+                <option value="">{{ __('app.select') }}</option>
+                @foreach($tenders as $t)
+                    <option value="{{ $t->id }}" @selected(old('tender_id', $priceQuote?->tender_id ?? $tender?->id) == $t->id)>{{ $t->number }} — {{ $t->localized_title }}</option>
+                @endforeach
+            </select>
+            @error('tender_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
-        @endif
 
         <div>
             <label class="form-label">{{ __('accounting.customer') }} <span class="text-rose-500">*</span></label>
-            <select name="customer_id" x-model="customerId" class="js-select2 form-select @error('customer_id') is-invalid @enderror">
-                <option value="">{{ __('app.select') }}</option>
-                @foreach($customers as $customer)
-                    <option value="{{ $customer->id }}" @selected(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id ?? $report?->customer_id) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
-                @endforeach
-            </select>
-            @error('customer_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            <div class="flex items-start gap-2">
+                <div class="flex-1">
+                    <select id="quote_customer_id" name="customer_id" x-model="customerId" class="js-select2 form-select @error('customer_id') is-invalid @enderror">
+                        <option value="">{{ __('app.select') }}</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}" @selected(old('customer_id', $priceQuote?->customer_id ?? $tender?->party_id ?? $report?->customer_id) == $customer->id)>{{ $customer->localized_name }} ({{ $customer->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('customer_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+                </div>
+                @include('components.customer-quick-add-modal', [
+                    'targetSelector' => '#quote_customer_id',
+                    'label'          => __('accounting.add_customer_quick'),
+                ])
+            </div>
         </div>
 
         <div class="sm:col-span-2" x-show="customerId" x-cloak>

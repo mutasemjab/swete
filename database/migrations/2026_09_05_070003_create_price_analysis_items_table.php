@@ -26,6 +26,9 @@ return new class extends Migration
             $table->decimal('quantity', 14, 3);
             $table->decimal('list_price', 14, 3);
             $table->decimal('discount_percent', 5, 2);
+            // Snapshotted from the CiatDiscount at save time (0 for a warehouse-sourced line) —
+            // feeds directly into `cost` below, same reasoning as discount_percent.
+            $table->decimal('min_profit_percent', 5, 2)->default(0);
             $table->decimal('cost', 14, 3);
             // Profit is entered as a % markup on cost, not a flat amount — `profit` below is the
             // computed flat amount (still what total_profit/price/to_jd are built from).

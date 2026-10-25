@@ -199,6 +199,9 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-3">
                             <a href="{{ route('price-quotes.show', $quote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $quote->number }}</a>
+                            @unless($quote->is_current)
+                                <span class="badge bg-slate-100 text-slate-500">{{ __('tenders.quote_old_version_badge') }}</span>
+                            @endunless
                         </td>
                         <td class="px-5 py-3 text-slate-700">{{ $quote->customer?->localized_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-slate-600">{{ $quote->date->format('Y-m-d') }}</td>

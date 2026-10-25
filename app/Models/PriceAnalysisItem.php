@@ -16,6 +16,7 @@ class PriceAnalysisItem extends Model
         'quantity',
         'list_price',
         'discount_percent',
+        'min_profit_percent',
         'cost',
         'profit_percent',
         'profit',
@@ -26,16 +27,17 @@ class PriceAnalysisItem extends Model
     ];
 
     protected $casts = [
-        'quantity'         => 'decimal:3',
-        'list_price'       => 'decimal:3',
-        'discount_percent' => 'decimal:2',
-        'cost'             => 'decimal:3',
-        'profit_percent'   => 'decimal:2',
-        'profit'           => 'decimal:3',
-        'total_profit'     => 'decimal:3',
-        'price'            => 'decimal:3',
-        'to_jd'            => 'decimal:3',
-        'shipping'         => 'decimal:3',
+        'quantity'           => 'decimal:3',
+        'list_price'         => 'decimal:3',
+        'discount_percent'   => 'decimal:2',
+        'min_profit_percent' => 'decimal:2',
+        'cost'               => 'decimal:3',
+        'profit_percent'     => 'decimal:2',
+        'profit'             => 'decimal:3',
+        'total_profit'       => 'decimal:3',
+        'price'              => 'decimal:3',
+        'to_jd'              => 'decimal:3',
+        'shipping'           => 'decimal:3',
     ];
 
     public function priceAnalysis(): BelongsTo
@@ -65,13 +67,14 @@ class PriceAnalysisItem extends Model
     }
 
     /**
-     * cost = list price after the CIAT discount; profit = cost × profit % (a markup, not a flat
-     * amount typed directly — see the 2026-10-04 change); total_profit = per-unit profit ×
-     * quantity; price = cost + profit.
+     * cost = list price after the CIAT discount, inflated by the discount's own enforced minimum
+     * profit % (0 for a warehouse-sourced line, which has neither); profit = cost × profit % (a
+     * markup, not a flat amount typed directly — see the 2026-10-04 change); total_profit =
+     * per-unit profit × quantity; price = cost + profit.
      */
-    public static function calculate(float $listPrice, float $discountPercent, float $profitPercent, float $quantity, float $jdRate): array
+    public static function calculate(float $listPrice, float $discountPercent, float $minProfitPercent, float $profitPercent, float $quantity, float $jdRate): array
     {
-        $cost   = round($listPrice * (1 - $discountPercent / 100), 3);
+        $cost   = round($listPrice * (1 - $discountPercent / 100) * (1 + $minProfitPercent / 100), 3);
         $profit = round($cost * $profitPercent / 100, 3);
         $price  = round($cost + $profit, 3);
 

@@ -65,7 +65,7 @@ class PriceQuoteController extends ModuleController
 
         return $this->moduleView('tenders.price-quotes.create', [
             ...$this->formOptions(),
-            ...$this->historyData(),
+            ...$this->historyData(null, $tender),
             'priceQuote'        => null,
             'tender'            => $tender,
             'report'            => $report,
@@ -143,6 +143,14 @@ class PriceQuoteController extends ModuleController
         abort_unless(! $priceQuote->isLocked(), 403);
 
         $validated = $this->validated($request);
+
+        // The tender picker is now freely editable here too — if it actually changed, this quote's
+        // sequence number needs recomputing against its NEW tender (or cleared if detached).
+        if (($validated['tender_id'] ?? null) !== $priceQuote->tender_id) {
+            $validated['tender_sequence'] = ($validated['tender_id'] ?? null)
+                ? (int) PriceQuote::where('tender_id', $validated['tender_id'])->max('tender_sequence') + 1
+                : null;
+        }
 
         // Freeze the pre-edit state into a new read-only row before touching anything — this also
         // moves the live row (this one, same id) forward onto its next revision number itself.
@@ -260,6 +268,7 @@ class PriceQuoteController extends ModuleController
     {
         return [
             'customers'      => Customer::where('status', true)->orderBy('name')->get(),
+            'tenders'        => Tender::orderByDesc('created_at')->get(),
             // Deliberately NOT ->confirmed() here — a quote must still show its own draft
             // materials (quick-added before the tender was won) in the picker.
             'materials'      => Material::where('status', true)->orderBy('name')->get(),
@@ -279,7 +288,7 @@ class PriceQuoteController extends ModuleController
      * material: quotes previously sent to this customer, this material's unit price on other
      * quotes, and how much of it is currently on hand across all warehouses.
      */
-    private function historyData(?PriceQuote $current = null): array
+    private function historyData(?PriceQuote $current = null, ?Tender $tender = null): array
     {
         $quotesQuery = PriceQuote::with('currency')->orderByDesc('date');
 
@@ -320,7 +329,16 @@ class PriceQuoteController extends ModuleController
         // So a quote item can be added straight from a saved Price Analysis line: its per-unit price
         // is the analysis line's final total (To JD + shipping) divided back out over its quantity,
         // since the analysis only ever multiplies quantity into the profit figure, not the totals.
-        $priceAnalyses = PriceAnalysis::with('items.material')->latest()->take(50)->get()
+        // Scoped to THIS quote's own tender only — an analysis made for a different tender has
+        // nothing to do with this quote, so it's never offered here.
+        $tenderId = $tender?->id ?? $current?->tender_id;
+
+        $priceAnalyses = $tenderId
+            ? PriceAnalysis::where('linked_type', 'tender')->where('linked_id', $tenderId)
+                ->with('items.material')->latest()->take(50)->get()
+            : collect();
+
+        $priceAnalyses = $priceAnalyses
             ->map(fn ($analysis) => [
                 'id'     => $analysis->id,
                 'number' => $analysis->number,

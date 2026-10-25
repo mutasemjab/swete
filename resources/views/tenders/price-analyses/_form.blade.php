@@ -1,17 +1,21 @@
 @php
     $analysis = $analysis ?? null;
     $tender = $tender ?? null;
-    $seedItems = (
-        $analysis?->items->map(fn ($i) => [
-            'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
-            'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
-        ])->values()
-        ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+    // old('items') must win on a validation-failure redisplay — otherwise every row the user typed
+    // is silently lost and they have to start the whole item table over from scratch.
+    $seedItems = collect(
+        old('items') ?? (
+            $analysis?->items->map(fn ($i) => [
+                'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
+                'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
+            ])->values()
+            ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+        )
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp
 <div x-data="{
         branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson() }},
-        ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent])->values()->toJson() }},
+        ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent, 'minProfit' => (float) ($d->min_profit_percent ?? 0)])->values()->toJson() }},
         branchId: '{{ old('branch_id', $analysis?->branch_id) }}',
         taxRate: {{ (float) old('tax_rate', $analysis?->tax_rate ?? 16) }},
         jdRate: {{ (float) old('jd_rate', $analysis?->jd_rate ?? 0.82) }},
@@ -39,17 +43,23 @@
             const d = this.ciatDiscounts.find(x => String(x.id) === String(item.ciat_discount_id));
             return d ? d.discount : 0;
         },
+        minProfitFor(item) {
+            if (item.source_type === 'warehouse') return 0;
+            const d = this.ciatDiscounts.find(x => String(x.id) === String(item.ciat_discount_id));
+            return d ? d.minProfit : 0;
+        },
         calc(item) {
             const discount = this.discountFor(item);
+            const minProfit = this.minProfitFor(item);
             const qty = parseFloat(item.quantity) || 0;
             const listPrice = parseFloat(item.list_price) || 0;
-            const profitPercent = parseFloat(item.profit_percent) || 0;
+            const profitPercent = Math.max(parseFloat(item.profit_percent) || 0, 0);
             const shipping = parseFloat(item.shipping) || 0;
-            const cost = listPrice * (1 - discount / 100);
+            const cost = listPrice * (1 - discount / 100) * (1 + minProfit / 100);
             const profit = cost * profitPercent / 100;
             const price = cost + profit;
             const toJd = price * this.jdRate;
-            return { discount, cost, profit, totalProfit: profit * qty, price, toJd, subtotal: toJd + shipping };
+            return { discount, minProfit, cost, profit, totalProfit: profit * qty, price, toJd, subtotal: toJd + shipping };
         },
         get subtotal() { return this.items.reduce((sum, item) => sum + this.calc(item).subtotal, 0); },
         get totalWithTax() { return this.subtotal * (1 + (this.taxRate / 100)); },
@@ -188,9 +198,10 @@
                                     </select>
                                 </template>
                             </td>
-                            <td class="px-3 py-2.5" x-show="item.source_type === 'ciat'">
-                                <input type="text" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
+                            <td class="px-3 py-2.5">
+                                <input type="text" x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
                                        dir="ltr" class="form-input !text-xs" :required="item.source_type === 'ciat'">
+                                <span x-show="item.source_type !== 'ciat'" class="text-slate-300 text-xs">—</span>
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"
@@ -204,7 +215,7 @@
                             <td class="px-3 py-2.5">
                                 <div class="relative">
                                     <input type="number" :name="`items[${index}][profit_percent]`" x-model="item.profit_percent"
-                                           step="0.01" dir="ltr" class="form-input !text-xs !pe-5" required>
+                                           step="0.01" min="0" dir="ltr" class="form-input !text-xs !pe-5" required>
                                     <span class="absolute top-1/2 -translate-y-1/2 end-2 text-slate-400 text-xs">%</span>
                                 </div>
                             </td>

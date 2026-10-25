@@ -216,6 +216,7 @@ return [
     'installments_total'          => 'الإجمالي',
     'quote_converted_badge'       => 'تم التحويل',
     'quote_pending_vo_badge'      => 'قيد المراجعة (طلب تغيير)',
+    'quote_old_version_badge'     => 'نسخة قديمة',
     'quote_already_pending_vo'    => 'هذا العرض لديه طلب تغيير قيد المراجعة بالفعل.',
     'quote_customer_mismatch'     => 'لا يمكن تحويل عرض سعر لعميل مختلف عن عميل المشروع الحالي.',
 

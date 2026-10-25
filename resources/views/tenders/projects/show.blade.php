@@ -4,6 +4,12 @@
 @section('breadcrumb', $project->number)
 
 @section('content')
+@php
+    // Shared across every mutating control on this page — every one of them is gated by this
+    // AND $project->is_current, never by is_current alone (a viewer without edit rights should
+    // never see a button that would 403 on click).
+    $canEditProject = auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit');
+@endphp
 <div class="page-header">
     <div>
         <h1 class="page-title flex items-center gap-3">
@@ -22,6 +28,7 @@
     <div class="flex items-center gap-2">
         @if($project->is_current)
             @if($project->status === 'under_review')
+                @can('projects_under_review.approve')
                 <form action="{{ route('project-reviews.approve', $project) }}" method="POST">
                     @csrf
                     <button type="submit" class="btn-primary">
@@ -29,6 +36,8 @@
                         {{ __('tenders.project_approve') }}
                     </button>
                 </form>
+                @endcan
+                @can('projects_under_review.reject')
                 <form action="{{ route('project-reviews.reject', $project) }}" method="POST"
                       @submit="if (! confirm('{{ __('tenders.project_reject_confirm') }}')) $event.preventDefault()">
                     @csrf
@@ -37,11 +46,14 @@
                         {{ __('tenders.project_reject') }}
                     </button>
                 </form>
+                @endcan
             @endif
+            @if($canEditProject)
             <a href="{{ route('projects.edit', $project) }}" class="btn-secondary">
                 <i class="fa-solid fa-pen"></i>
                 {{ __('app.edit') }}
             </a>
+            @endif
         @else
             <a href="{{ route('projects.show', $project->root_id) }}" class="btn-secondary">
                 {{ __('tenders.project_view_current_version') }}
@@ -280,7 +292,7 @@
                                                     <p class="text-sm text-slate-400 text-center py-6">{{ __('tenders.no_comments') }}</p>
                                                 @endforelse
                                             </div>
-                                            @if($project->is_current)
+                                            @if($project->is_current && ($canEditProject || auth()->id() === $assignment->assigned_to))
                                             <div class="px-6 py-4 border-t border-slate-100">
                                                 <form action="{{ route('projects.item-assignments.comments.store', [$project, $assignment]) }}" method="POST" class="flex items-end gap-2">
                                                     @csrf
@@ -299,7 +311,7 @@
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-2">
                                 @if($project->is_current)
-                                    @if(! $assignment?->is_done)
+                                    @if(! $assignment?->is_done && $canEditProject)
                                         <form action="{{ route('projects.item-assignments.store', $project) }}" method="POST" class="flex items-center gap-1.5">
                                             @csrf
                                             <input type="hidden" name="price_quote_item_id" value="{{ $item->id }}">
@@ -311,7 +323,7 @@
                                             <button type="submit" class="btn-secondary btn-sm">{{ __('tenders.quote_item_assign') }}</button>
                                         </form>
                                     @endif
-                                    @if($assignment && ! $assignment->is_done)
+                                    @if($assignment && ! $assignment->is_done && ($canEditProject || auth()->id() === $assignment->assigned_to))
                                         <form action="{{ route('projects.item-assignments.mark-done', [$project, $assignment]) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn-primary btn-sm">{{ __('tenders.quote_item_mark_done') }}</button>
@@ -348,20 +360,49 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($project->devices as $device)
-                    <tr class="hover:bg-slate-50/50">
+                    <tr class="hover:bg-slate-50/50" x-data="{ editing: false }">
                         <td class="px-5 py-3 text-sm font-bold text-slate-800">{{ $device->item?->material?->localized_name ?? '—' }}</td>
-                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr">{{ $device->supply_date?->format('Y-m-d') ?? '—' }}</td>
-                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr">{{ $device->installation_date?->format('Y-m-d') ?? '—' }}</td>
-                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr">{{ $device->warranty_start_date?->format('Y-m-d') ?? '—' }}</td>
-                        <td class="px-5 py-3 text-end">
-                            @if($project->is_current)
-                                <form action="{{ route('projects.devices.destroy', [$project, $device]) }}" method="POST">
+                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr" x-show="!editing">{{ $device->supply_date?->format('Y-m-d') ?? '—' }}</td>
+                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr" x-show="!editing">{{ $device->installation_date?->format('Y-m-d') ?? '—' }}</td>
+                        <td class="px-5 py-3 text-sm text-slate-600" dir="ltr" x-show="!editing">{{ $device->warranty_start_date?->format('Y-m-d') ?? '—' }}</td>
+                        @if($project->is_current && $canEditProject)
+                        <template x-if="editing">
+                            <td colspan="4" class="px-5 py-3">
+                                <form action="{{ route('projects.devices.store', $project) }}" method="POST" class="flex items-end gap-2 flex-wrap">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
-                                        <i class="fa-solid fa-trash text-sm"></i>
-                                    </button>
+                                    <input type="hidden" name="price_quote_item_id" value="{{ $device->price_quote_item_id }}">
+                                    <div>
+                                        <label class="form-label">{{ __('tenders.device_supply_date') }}</label>
+                                        <input type="date" name="supply_date" value="{{ $device->supply_date?->format('Y-m-d') }}" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">{{ __('tenders.device_installation_date') }}</label>
+                                        <input type="date" name="installation_date" value="{{ $device->installation_date?->format('Y-m-d') }}" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">{{ __('tenders.device_warranty_start_date') }}</label>
+                                        <input type="date" name="warranty_start_date" value="{{ $device->warranty_start_date?->format('Y-m-d') }}" class="form-input">
+                                    </div>
+                                    <button type="submit" class="btn-primary btn-sm">{{ __('app.save') }}</button>
+                                    <button type="button" @click="editing = false" class="btn-secondary btn-sm">{{ __('app.cancel') }}</button>
                                 </form>
+                            </td>
+                        </template>
+                        @endif
+                        <td class="px-5 py-3 text-end" x-show="!editing">
+                            @if($project->is_current && $canEditProject)
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <button type="button" @click="editing = true" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all">
+                                        <i class="fa-solid fa-pen text-sm"></i>
+                                    </button>
+                                    <form action="{{ route('projects.devices.destroy', [$project, $device]) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                            <i class="fa-solid fa-trash text-sm"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </td>
                     </tr>
@@ -370,7 +411,7 @@
             </table>
         </div>
     @endif
-    @if($project->is_current)
+    @if($project->is_current && $canEditProject)
         @php $undevicedItems = $quoteItems->whereNotIn('id', $project->devices->pluck('price_quote_item_id')); @endphp
         @if($undevicedItems->isNotEmpty())
             <form action="{{ route('projects.devices.store', $project) }}" method="POST" class="px-6 py-4 border-t border-slate-100 flex items-end gap-2 flex-wrap">
@@ -422,7 +463,7 @@
                         <p class="text-xs text-emerald-600 font-bold mb-0.5">{{ __('tenders.question_answer') }}</p>
                         <p class="text-sm text-slate-700">{{ $question->answer }}</p>
                     </div>
-                @elseif($project->is_current && (auth()->id() === $question->asked_to || auth()->user()->can('projects.edit') || auth()->user()->can('tenders.projects.edit')))
+                @elseif($project->is_current && ($canEditProject || auth()->id() === $question->asked_to))
                     <form action="{{ route('projects.questions.answer', [$project, $question]) }}" method="POST" class="mt-2 flex items-end gap-2 flex-wrap">
                         @csrf
                         <div class="flex-1 min-w-48">
@@ -436,7 +477,7 @@
             <p class="text-sm text-slate-400 mb-4">{{ __('tenders.no_questions') }}</p>
         @endforelse
 
-        @if($project->is_current)
+        @if($project->is_current && $canEditProject)
         <form action="{{ route('projects.questions.store', $project) }}" method="POST" class="mt-4 pt-4 border-t border-slate-100 flex items-end gap-3 flex-wrap">
             @csrf
             <div class="flex-1 min-w-56">
@@ -465,10 +506,12 @@
     <div class="card-header flex items-center justify-between">
         <h3 class="font-bold text-slate-700">{{ __('tenders.project_agreements_section') }}</h3>
         @if($project->is_current)
-        <a href="{{ route('agreements.create', ['project_id' => $project->id]) }}" class="btn-secondary btn-sm">
-            <i class="fa-solid fa-plus"></i>
-            {{ __('tenders.add_project_agreement') }}
-        </a>
+            @can('agreements.create')
+            <a href="{{ route('agreements.create', ['project_id' => $project->id]) }}" class="btn-secondary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                {{ __('tenders.add_project_agreement') }}
+            </a>
+            @endcan
         @endif
     </div>
     <div class="px-6 py-5">
@@ -499,6 +542,7 @@
                     <i class="fa-solid fa-paperclip"></i>
                     {{ $attachment->name }}
                 </a>
+                @if($project->is_current && $canEditProject)
                 <form action="{{ route('projects.attachments.destroy', [$project, $attachment]) }}" method="POST">
                     @csrf
                     @method('DELETE')
@@ -506,12 +550,13 @@
                         <i class="fa-solid fa-trash text-sm"></i>
                     </button>
                 </form>
+                @endif
             </div>
         @empty
             <p class="text-sm text-slate-400 mb-4">{{ __('tenders.no_project_attachments') }}</p>
         @endforelse
 
-        @if($project->is_current)
+        @if($project->is_current && $canEditProject)
         <form action="{{ route('projects.attachments.store', $project) }}" method="POST" enctype="multipart/form-data"
               class="mt-4 pt-4 border-t border-slate-100 space-y-3"
               x-data="{

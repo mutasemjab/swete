@@ -42,6 +42,19 @@ class ProjectController extends ModuleController
         ]);
         $employees = User::where('status', true)->orderBy('name')->get();
         $quoteItems = $project->quoteItems();
+
+        // Anyone without project-edit rights only ever sees the line item(s) actually assigned to
+        // THEM — they're not the one doing any assigning. Super-admin bypasses every permission
+        // check already (see AuthServiceProvider), so it and anyone holding projects.edit/
+        // tenders.projects.edit (who assign items to others) still see the full list.
+        if (! auth()->user()->can('projects.edit') && ! auth()->user()->can('tenders.projects.edit')) {
+            $quoteItems = $quoteItems->filter(function ($item) use ($project) {
+                $assignment = $item->assignments->firstWhere('project_id', $project->id);
+
+                return $assignment && $assignment->assigned_to === auth()->id();
+            })->values();
+        }
+
         $financialSummary = $project->financialSummary();
 
         return $this->moduleView('tenders.projects.show', compact('project', 'employees', 'quoteItems', 'financialSummary'));

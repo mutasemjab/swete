@@ -53,6 +53,7 @@ return [
     'customers_subtitle' => 'Manage customer records',
     'suppliers_subtitle'  => 'Manage supplier records',
     'add_customer'       => 'Add Customer',
+    'add_customer_quick'  => 'New Customer',
     'add_supplier'        => 'Add Supplier',
     'import_excel' => 'Import from Excel',
     'import_customers' => 'Import Customers from Excel',

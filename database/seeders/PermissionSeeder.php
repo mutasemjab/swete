@@ -176,6 +176,19 @@ class PermissionSeeder extends Seeder
             'maintenance.reports.create',
         ]);
 
+        // Every permission under the Tenders, Quotations, and Analyses modules — kept as a live
+        // filter (not a hardcoded list) so this role automatically keeps "all of them" as new
+        // permissions are added to those three modules later, matching what was actually asked for.
+        $projectManager = Role::firstOrCreate(['name' => 'project_manager', 'guard_name' => 'web']);
+        $projectManager->syncPermissions(
+            Permission::where('guard_name', 'web')
+                ->where(fn ($query) => $query
+                    ->where('name', 'like', 'tenders.%')
+                    ->orWhere('name', 'like', 'quotations.%')
+                    ->orWhere('name', 'like', 'analyses.%'))
+                ->get()
+        );
+
         // ── Default Super Admin User ──────────────────────────────────────────────
 
         $admin = User::firstOrCreate(
