@@ -24,7 +24,19 @@
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             if (b) { this.taxRate = b.taxRate; this.jdRate = b.jdRate; }
         },
-        onItemSourceChange() { this.$nextTick(() => window.initSelect2()); },
+        // Both the ciat_discount_id and material_id selects for this row already exist in the DOM
+        // (toggled with x-show, never torn down) and were select2-initialized once at page load —
+        // window.initSelect2()'s own guard skips anything already initialized, so merely calling it
+        // again would leave the newly-shown select stuck with whatever (possibly zero/wrong) width
+        // it measured while still hidden. Destroy + reinit explicitly instead, so it's measured
+        // fresh at the moment it actually becomes visible.
+        onItemSourceChange(sourceSelectEl) {
+            this.$nextTick(() => {
+                const row = sourceSelectEl.closest('tr');
+                $(row).find('.js-select2.select2-hidden-accessible').select2('destroy');
+                window.initSelect2(row);
+            });
+        },
         // _key is a stable per-row identity for Alpine's x-for :key — NOT array index. Keying by
         // index broke the select2 widget bound to whichever row shifted position after a delete
         // (select2's own injected DOM stays bound to a position, not the row's actual data, once
@@ -175,28 +187,30 @@
                     <template x-for="(item, index) in items" :key="item._key">
                         <tr>
                             <td class="px-3 py-2.5">
-                                <select :name="`items[${index}][source_type]`" x-model="item.source_type" @change="onItemSourceChange()" class="form-select !text-xs">
+                                <select :name="`items[${index}][source_type]`" x-model="item.source_type" @change="onItemSourceChange($event.target)" class="form-select !text-xs">
                                     <option value="ciat">{{ __('tenders.analysis_source_ciat') }}</option>
                                     <option value="warehouse">{{ __('tenders.analysis_source_warehouse') }}</option>
                                 </select>
                             </td>
                             <td class="px-3 py-2.5">
-                                <template x-if="item.source_type === 'ciat'">
-                                    <select :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" required>
-                                        <option value="">{{ __('app.select') }}</option>
-                                        @foreach($ciatDiscounts as $ciatDiscount)
-                                            <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
-                                        @endforeach
-                                    </select>
-                                </template>
-                                <template x-if="item.source_type === 'warehouse'">
-                                    <select :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select !text-xs" required>
-                                        <option value="">{{ __('app.select') }}</option>
-                                        @foreach($materials as $material)
-                                            <option value="{{ $material->id }}">{{ $material->localized_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </template>
+                                {{-- Two PERSISTENT selects toggled with x-show, never torn down/recreated via x-if —
+                                     select2 doesn't reliably re-measure a freshly (re)inserted element inside a
+                                     table cell (same class of bug as the ciat_model column below: a widget that's
+                                     added/removed from the DOM on every toggle ends up rendered with the wrong
+                                     width, visually breaking the row). The inactive select's value is simply
+                                     ignored server-side (syncItems() branches on source_type already). --}}
+                                <select x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" :required="item.source_type === 'ciat'">
+                                    <option value="">{{ __('app.select') }}</option>
+                                    @foreach($ciatDiscounts as $ciatDiscount)
+                                        <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
+                                    @endforeach
+                                </select>
+                                <select x-show="item.source_type === 'warehouse'" :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select !text-xs" :required="item.source_type === 'warehouse'">
+                                    <option value="">{{ __('app.select') }}</option>
+                                    @foreach($materials as $material)
+                                        <option value="{{ $material->id }}">{{ $material->localized_name }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="text" x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
