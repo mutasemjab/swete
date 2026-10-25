@@ -24,6 +24,7 @@
                     'categories'     => $materialCategories,
                     'units'          => $units,
                     'label'          => __('warehouse.add_material_quick'),
+                    'asCiat'         => true,
                 ])
             </div>
         </div>

@@ -1,4 +1,5 @@
 
+<?php $asCiat = $asCiat ?? false; ?>
 <div x-data="{
         open: false,
         saving: false,
@@ -20,6 +21,7 @@
                     name: this.name,
                     category_id: this.categoryId,
                     unit_id: this.unitId,
+                    is_ciat: <?php echo e($asCiat ? 'true' : 'false'); ?>,
                 }),
             })
                 .then(async (res) => {

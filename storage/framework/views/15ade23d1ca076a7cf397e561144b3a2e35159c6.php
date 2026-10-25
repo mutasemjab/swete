@@ -39,6 +39,7 @@ unset($__errorArgs, $__bag); ?>
                     'categories'     => $materialCategories,
                     'units'          => $units,
                     'label'          => __('warehouse.add_material_quick'),
+                    'asCiat'         => true,
                 ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             </div>
         </div>

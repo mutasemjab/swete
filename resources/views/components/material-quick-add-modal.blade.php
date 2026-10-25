@@ -1,18 +1,26 @@
 {{--
-    Reusable "quick add a material" modal — for the Price Quote and CIAT Discount screens, where a
-    material referenced before its tender is actually won shouldn't yet exist in the real Warehouse
-    catalog. Creates the material via AJAX as a DRAFT (Warehouse\MaterialController@quickStore,
-    always is_draft=true), then injects the new option into every matching <select> on the page
-    (there can be several material pickers at once — one per Price Quote item row) without leaving
-    the current page. A draft material is promoted to a real one automatically once its tender
-    converts to a project — see Tender::convertToProject().
+    Reusable "quick add a material" modal — for the Price Quote, Split Unit, and CIAT Discount
+    screens. Creates the material via AJAX (Warehouse\MaterialController@quickStore), then injects
+    the new option into every matching <select> on the page (there can be several material pickers
+    at once — one per item row) without leaving the current page.
+
+    On the Price Quote/Split Unit screens (the default, $asCiat=false), a material referenced
+    before its tender is actually won shouldn't yet exist in the real Warehouse catalog, so it's
+    created as a DRAFT (is_draft=true) — promoted to a real one automatically once its tender
+    converts to a project, see Tender::convertToProject().
+
+    On the CIAT Discount screen ($asCiat=true), the material IS the real thing being added to the
+    warehouse, so it's created as a real, non-draft material flagged `is_ciat` instead — never
+    dropped into "السلع المؤقتة" (draft cleanup).
 
     Props:
     - $targetSelector  CSS selector matching every <select> to inject the new option into,
                         e.g. 'select[name$="[material_id]"]' or '#ciat_material_id'
     - $categories, $units  for the minimal required fields
     - $label           button/modal label, e.g. __('warehouse.add_material_quick')
+    - $asCiat          optional, default false — see above
 --}}
+@php $asCiat = $asCiat ?? false; @endphp
 <div x-data="{
         open: false,
         saving: false,
@@ -34,6 +42,7 @@
                     name: this.name,
                     category_id: this.categoryId,
                     unit_id: this.unitId,
+                    is_ciat: {{ $asCiat ? 'true' : 'false' }},
                 }),
             })
                 .then(async (res) => {

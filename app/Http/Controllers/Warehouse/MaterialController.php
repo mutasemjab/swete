@@ -71,20 +71,33 @@ class MaterialController extends ModuleController
         return back()->with('success', $message);
     }
 
-    /** AJAX quick-add from the Price Quote / CIAT Discount screens — always creates a draft, never a real catalog material. */
+    /**
+     * AJAX quick-add shared by the Price Quote, Split Unit, and CIAT Discount screens.
+     * Price Quote/Split Unit callers (the default) get a DRAFT — not yet a real catalog material,
+     * since the tender it's priced for may never actually be won.
+     * The CIAT Discount screen passes `is_ciat: true` instead: that material IS the real thing
+     * being added to the warehouse (just for use in a CIAT discount), so it's created as a real,
+     * non-draft material flagged `is_ciat`, never dropped into "السلع المؤقتة" (draft cleanup).
+     */
     public function quickStore(Request $request)
     {
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:150'],
             'category_id' => ['required', 'exists:material_categories,id'],
             'unit_id'     => ['required', 'exists:units,id'],
+            'is_ciat'     => ['boolean'],
         ]);
 
+        $isCiat = $request->boolean('is_ciat');
+
         $material = Material::create([
-            ...$validated,
-            'code'     => Material::nextDraftCode(),
-            'status'   => true,
-            'is_draft' => true,
+            'name'        => $validated['name'],
+            'category_id' => $validated['category_id'],
+            'unit_id'     => $validated['unit_id'],
+            'code'        => $isCiat ? Material::nextCiatCode() : Material::nextDraftCode(),
+            'status'      => true,
+            'is_draft'    => ! $isCiat,
+            'is_ciat'     => $isCiat,
         ]);
 
         return response()->json(['id' => $material->id, 'name' => $material->localized_name, 'code' => $material->code]);

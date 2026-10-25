@@ -91,9 +91,21 @@ class Material extends Model
      *  typed real material code since those don't use this prefix. */
     public static function nextDraftCode(): string
     {
-        $count = static::where('code', 'like', 'DFT-%')->count() + 1;
+        return static::nextCode('DFT');
+    }
 
-        return sprintf('DFT-%05d', $count);
+    /** CIAT-00001-style code for a material quick-added straight from the CIAT Discount screen —
+     *  a real catalog material from the start, not a draft, so it needs its own non-colliding prefix. */
+    public static function nextCiatCode(): string
+    {
+        return static::nextCode('CIAT');
+    }
+
+    private static function nextCode(string $prefix): string
+    {
+        $count = static::where('code', 'like', "{$prefix}-%")->count() + 1;
+
+        return sprintf('%s-%05d', $prefix, $count);
     }
 
     public function stockIn(string $warehouseId): float
