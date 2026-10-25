@@ -75,14 +75,22 @@
         </div>
         @if($analysis->linked)
         <div>
-            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.analysis_linked_type') }}</dt>
-            <dd class="font-bold text-slate-800">
-                @if($analysis->linked_type === 'project')
+            @if($analysis->linked_type === 'tender')
+                <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.tender') }}</dt>
+                <dd class="font-bold text-slate-800">
+                    <a href="{{ route('tenders.show', $analysis->linked) }}" class="text-indigo-600 hover:underline">{{ $analysis->linked->number }} — {{ $analysis->linked->localized_title }}</a>
+                </dd>
+            @elseif($analysis->linked_type === 'project')
+                <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.project') }}</dt>
+                <dd class="font-bold text-slate-800">
                     <a href="{{ route('projects.show', $analysis->linked) }}" class="text-indigo-600 hover:underline">{{ $analysis->linked->number }} — {{ $analysis->linked->localized_title }}</a>
-                @else
+                </dd>
+            @else
+                <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.quote_number') }}</dt>
+                <dd class="font-bold text-slate-800">
                     <a href="{{ route('price-quotes.show', $analysis->linked) }}" class="text-indigo-600 hover:underline">{{ $analysis->linked->number }}</a>
-                @endif
-            </dd>
+                </dd>
+            @endif
         </div>
         @endif
         @if($analysis->notes)
@@ -102,6 +110,7 @@
         <table class="w-full">
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
+                    <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_source') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_type') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_model') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_quantity') }}</th>
@@ -118,6 +127,11 @@
             <tbody class="divide-y divide-slate-100">
                 @foreach($analysis->items as $item)
                 <tr>
+                    <td class="px-3 py-3">
+                        <span class="badge {{ $item->source_type === 'ciat' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-100 text-slate-600' }}">
+                            {{ $item->source_type === 'ciat' ? __('tenders.analysis_source_ciat') : __('tenders.analysis_source_warehouse') }}
+                        </span>
+                    </td>
                     <td class="px-3 py-3 font-bold text-slate-800">{{ $item->material?->localized_name }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ $item->ciat_model }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->quantity, 3) }}</td>

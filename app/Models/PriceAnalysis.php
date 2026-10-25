@@ -14,7 +14,6 @@ class PriceAnalysis extends Model
 
     protected $fillable = [
         'number',
-        'source_type',
         'branch_id',
         'tax_rate',
         'jd_rate',
@@ -63,12 +62,14 @@ class PriceAnalysis extends Model
         return $this->hasMany(self::class, 'root_id')->orderByDesc('version');
     }
 
-    /** `linked_type` ('price_quote'|'project') says which table `linked_id` points into — same convention as Agreement::party(). */
+    /** `linked_type` ('tender'|'price_quote'|'project') says which table `linked_id` points into — same convention as Agreement::party(). */
     public function linked(): BelongsTo
     {
-        return $this->linked_type === 'project'
-            ? $this->belongsTo(Project::class, 'linked_id')
-            : $this->belongsTo(PriceQuote::class, 'linked_id');
+        return match ($this->linked_type) {
+            'tender'  => $this->belongsTo(Tender::class, 'linked_id'),
+            'project' => $this->belongsTo(Project::class, 'linked_id'),
+            default   => $this->belongsTo(PriceQuote::class, 'linked_id'),
+        };
     }
 
     /** The stable "PA-YYYY-00001" part of the number, with its "-A{n}" revision suffix stripped off. */

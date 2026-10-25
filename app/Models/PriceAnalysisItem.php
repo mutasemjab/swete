@@ -9,6 +9,7 @@ class PriceAnalysisItem extends Model
 {
     protected $fillable = [
         'price_analysis_id',
+        'source_type',
         'ciat_discount_id',
         'material_id',
         'ciat_model',

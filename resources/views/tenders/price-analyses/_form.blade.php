@@ -1,18 +1,17 @@
 @php
     $analysis = $analysis ?? null;
+    $tender = $tender ?? null;
     $seedItems = (
         $analysis?->items->map(fn ($i) => [
-            'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
+            'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
             'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
         ])->values()
-        ?? collect([['ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+        ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp
 <div x-data="{
         branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson() }},
         ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent])->values()->toJson() }},
-        sourceType: '{{ old('source_type', $analysis?->source_type ?? 'ciat') }}',
-        linkedType: '{{ old('linked_type', $analysis?->linked_type ?? '') }}',
         branchId: '{{ old('branch_id', $analysis?->branch_id) }}',
         taxRate: {{ (float) old('tax_rate', $analysis?->tax_rate ?? 16) }},
         jdRate: {{ (float) old('jd_rate', $analysis?->jd_rate ?? 0.82) }},
@@ -21,7 +20,7 @@
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
             if (b) { this.taxRate = b.taxRate; this.jdRate = b.jdRate; }
         },
-        onSourceTypeChange() { this.$nextTick(() => window.initSelect2()); },
+        onItemSourceChange() { this.$nextTick(() => window.initSelect2()); },
         // _key is a stable per-row identity for Alpine's x-for :key — NOT array index. Keying by
         // index broke the select2 widget bound to whichever row shifted position after a delete
         // (select2's own injected DOM stays bound to a position, not the row's actual data, once
@@ -33,10 +32,10 @@
         _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
         items: {{ $seedItems->toJson() }},
-        addItem() { this.items.push({ ciat_discount_id: '', material_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ source_type: 'ciat', ciat_discount_id: '', material_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(item) {
-            if (this.sourceType === 'warehouse') return 0;
+            if (item.source_type === 'warehouse') return 0;
             const d = this.ciatDiscounts.find(x => String(x.id) === String(item.ciat_discount_id));
             return d ? d.discount : 0;
         },
@@ -65,16 +64,32 @@
                 {{ __('tenders.price_analyses_list') }}
             </h3>
         </div>
-        <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-                <label class="form-label">{{ __('tenders.analysis_source_type') }} <span class="text-rose-500">*</span></label>
-                <select name="source_type" x-model="sourceType" @change="onSourceTypeChange()" class="form-select @error('source_type') is-invalid @enderror">
-                    <option value="ciat">{{ __('tenders.analysis_source_ciat') }}</option>
-                    <option value="warehouse">{{ __('tenders.analysis_source_warehouse') }}</option>
-                </select>
-                @error('source_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        {{--
+            The analysis is linked to whatever entity it was created FROM (a tender's own "تحليل
+            جديد" button, currently the only entry point) — never a manual picker on this form.
+            On create, $tender carries the brand-new link; on edit, the analysis's own already-saved
+            link is shown read-only the same way. No UI ever lets this be changed here.
+        --}}
+        @php $linkedEntity = $tender ?? $analysis?->linked; @endphp
+        @if($linkedEntity)
+            <input type="hidden" name="linked_type" value="{{ $tender ? 'tender' : $analysis->linked_type }}">
+            <input type="hidden" name="linked_id" value="{{ $linkedEntity->id }}">
+            <div class="px-6 pt-5">
+                <p class="text-sm text-slate-500">
+                    @if($tender || $analysis->linked_type === 'tender')
+                        <i class="fa-solid fa-gavel"></i>
+                        {{ __('tenders.tender') }}: <span class="font-bold text-slate-700">{{ $linkedEntity->number }} — {{ $linkedEntity->localized_title }}</span>
+                    @elseif($analysis->linked_type === 'project')
+                        <i class="fa-solid fa-diagram-project"></i>
+                        {{ __('tenders.project') }}: <span class="font-bold text-slate-700">{{ $linkedEntity->number }} — {{ $linkedEntity->localized_title }}</span>
+                    @else
+                        <i class="fa-solid fa-file-invoice"></i>
+                        {{ __('tenders.quote_number') }}: <span class="font-bold text-slate-700">{{ $linkedEntity->number }}</span>
+                    @endif
+                </p>
             </div>
-
+        @endif
+        <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
                 <label class="form-label">{{ __('tenders.analysis_branch') }} <span class="text-rose-500">*</span></label>
                 <select name="branch_id" x-model="branchId" @change="onBranchChange()" class="js-select2 form-select @error('branch_id') is-invalid @enderror">
@@ -84,42 +99,6 @@
                     @endforeach
                 </select>
                 @error('branch_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <label class="form-label">{{ __('tenders.analysis_linked_type') }}</label>
-                <select name="linked_type" x-model="linkedType" class="form-select @error('linked_type') is-invalid @enderror">
-                    <option value="">{{ __('tenders.analysis_linked_none') }}</option>
-                    <option value="price_quote">{{ __('tenders.analysis_linked_price_quote') }}</option>
-                    <option value="project">{{ __('tenders.analysis_linked_project') }}</option>
-                </select>
-                @error('linked_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <template x-if="linkedType === 'price_quote'">
-                    <div>
-                        <label class="form-label">{{ __('tenders.analysis_linked_price_quote') }}</label>
-                        <select name="linked_id" class="js-select2 form-select @error('linked_id') is-invalid @enderror">
-                            <option value="">{{ __('app.select') }}</option>
-                            @foreach($priceQuotes as $priceQuote)
-                                <option value="{{ $priceQuote->id }}" @selected(old('linked_id', $analysis?->linked_type === 'price_quote' ? $analysis?->linked_id : null) == $priceQuote->id)>{{ $priceQuote->number }} — {{ $priceQuote->customer?->localized_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </template>
-                <template x-if="linkedType === 'project'">
-                    <div>
-                        <label class="form-label">{{ __('tenders.analysis_linked_project') }}</label>
-                        <select name="linked_id" class="js-select2 form-select @error('linked_id') is-invalid @enderror">
-                            <option value="">{{ __('app.select') }}</option>
-                            @foreach($projects as $project)
-                                <option value="{{ $project->id }}" @selected(old('linked_id', $analysis?->linked_type === 'project' ? $analysis?->linked_id : null) == $project->id)>{{ $project->number }} — {{ $project->localized_title }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </template>
-                @error('linked_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             <div class="flex items-center">
@@ -166,6 +145,7 @@
             <table class="w-full">
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('tenders.analysis_item_source') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_product') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.ciat_model') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_quantity') }}</th>
@@ -185,7 +165,13 @@
                     <template x-for="(item, index) in items" :key="item._key">
                         <tr>
                             <td class="px-3 py-2.5">
-                                <template x-if="sourceType === 'ciat'">
+                                <select :name="`items[${index}][source_type]`" x-model="item.source_type" @change="onItemSourceChange()" class="form-select !text-xs">
+                                    <option value="ciat">{{ __('tenders.analysis_source_ciat') }}</option>
+                                    <option value="warehouse">{{ __('tenders.analysis_source_warehouse') }}</option>
+                                </select>
+                            </td>
+                            <td class="px-3 py-2.5">
+                                <template x-if="item.source_type === 'ciat'">
                                     <select :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" required>
                                         <option value="">{{ __('app.select') }}</option>
                                         @foreach($ciatDiscounts as $ciatDiscount)
@@ -193,7 +179,7 @@
                                         @endforeach
                                     </select>
                                 </template>
-                                <template x-if="sourceType === 'warehouse'">
+                                <template x-if="item.source_type === 'warehouse'">
                                     <select :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select !text-xs" required>
                                         <option value="">{{ __('app.select') }}</option>
                                         @foreach($materials as $material)
@@ -202,9 +188,9 @@
                                     </select>
                                 </template>
                             </td>
-                            <td class="px-3 py-2.5" x-show="sourceType === 'ciat'">
+                            <td class="px-3 py-2.5" x-show="item.source_type === 'ciat'">
                                 <input type="text" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
-                                       dir="ltr" class="form-input !text-xs" :required="sourceType === 'ciat'">
+                                       dir="ltr" class="form-input !text-xs" :required="item.source_type === 'ciat'">
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"

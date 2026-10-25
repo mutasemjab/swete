@@ -131,6 +131,48 @@
 </div>
 @endif
 
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.analysis_section') }}</h3>
+        <a href="{{ route('price-analyses.create', ['tender_id' => $tender->id]) }}" class="btn-primary btn-sm">
+            <i class="fa-solid fa-plus"></i>
+            {{ __('tenders.new_analysis') }}
+        </a>
+    </div>
+    @if($tender->analyses->isNotEmpty())
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_number') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_branch') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.created_at') }}</th>
+                        <th class="px-5 py-3 w-20"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach($tender->analyses as $analysis)
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-5 py-3 font-mono font-bold text-indigo-600">
+                            <a href="{{ route('price-analyses.show', $analysis) }}" class="hover:underline">{{ $analysis->number }}</a>
+                        </td>
+                        <td class="px-5 py-3 text-slate-600">{{ $analysis->branch?->localized_name }}</td>
+                        <td class="px-5 py-3 text-slate-600" dir="ltr">{{ $analysis->created_at->format('Y-m-d') }}</td>
+                        <td class="px-5 py-3 text-end">
+                            <a href="{{ route('price-analyses.show', $analysis) }}" class="btn-secondary btn-sm">
+                                <i class="fa-solid fa-eye"></i> {{ __('app.view') }}
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <p class="px-6 py-6 text-sm text-slate-400">{{ __('tenders.no_analyses') }}</p>
+    @endif
+</div>
+
 <div class="card overflow-hidden">
     <div class="card-header">
         <h3 class="font-bold text-slate-700">{{ __('tenders.price_quotes') }}</h3>

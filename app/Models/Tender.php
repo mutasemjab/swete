@@ -94,6 +94,12 @@ class Tender extends Model
         return $this->hasMany(Project::class);
     }
 
+    /** Price Analyses created straight from this tender's own page, before any price quote exists yet. */
+    public function analyses(): HasMany
+    {
+        return $this->hasMany(PriceAnalysis::class, 'linked_id')->where('linked_type', 'tender');
+    }
+
     public function extraFieldValues(): HasMany
     {
         return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')

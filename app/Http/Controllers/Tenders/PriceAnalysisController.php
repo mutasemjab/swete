@@ -8,9 +8,9 @@ use App\Models\CiatDiscount;
 use App\Models\Material;
 use App\Models\PriceAnalysis;
 use App\Models\PriceAnalysisItem;
-use App\Models\PriceQuote;
-use App\Models\Project;
+use App\Models\Tender;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class PriceAnalysisController extends ModuleController
 {
@@ -30,10 +30,15 @@ class PriceAnalysisController extends ModuleController
         return $this->moduleView('tenders.price-analyses.index', compact('analyses', 'branches'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        // Reached from a Tender's own "تحليل جديد" button (?tender_id=X) — the link is set here,
+        // automatically, never via a picker on the analysis's own form.
+        $tender = $request->filled('tender_id') ? Tender::find($request->input('tender_id')) : null;
+
         return $this->moduleView('tenders.price-analyses.create', [
             'analysis' => null,
+            'tender'   => $tender,
             ...$this->formOptions(),
         ]);
     }
@@ -46,7 +51,6 @@ class PriceAnalysisController extends ModuleController
 
         $analysis = PriceAnalysis::create([
             'number'      => PriceAnalysis::nextNumber(),
-            'source_type' => $validated['source_type'],
             'branch_id'   => $branch->id,
             'tax_rate'    => $branch->ciat_tax_rate,
             'jd_rate'     => $branch->ciat_jd_rate,
@@ -64,7 +68,10 @@ class PriceAnalysisController extends ModuleController
 
     public function show(PriceAnalysis $priceAnalysis)
     {
-        $priceAnalysis->load(['branch', 'creator', 'items.ciatDiscount', 'items.material', 'versions', 'linked']);
+        $priceAnalysis->load(['branch', 'creator', 'items.ciatDiscount', 'items.material', 'versions']);
+        // linked() isn't a real polymorphic relation (same convention as Agreement::party()), so it
+        // can't be eager-loaded with ->load() — set it individually instead.
+        $priceAnalysis->setRelation('linked', $priceAnalysis->linked()->first());
 
         return $this->moduleView('tenders.price-analyses.show', ['analysis' => $priceAnalysis]);
     }
@@ -73,6 +80,7 @@ class PriceAnalysisController extends ModuleController
     {
         abort_unless($priceAnalysis->is_current, 404);
         $priceAnalysis->load('items');
+        $priceAnalysis->setRelation('linked', $priceAnalysis->linked()->first());
 
         return $this->moduleView('tenders.price-analyses.edit', [
             'analysis' => $priceAnalysis,
@@ -99,7 +107,6 @@ class PriceAnalysisController extends ModuleController
         $priceAnalysis->archiveCurrentVersion();
 
         $priceAnalysis->update([
-            'source_type' => $validated['source_type'],
             'branch_id'   => $branch->id,
             ...$rates,
             'with_tax'    => $request->boolean('with_tax'),
@@ -128,29 +135,43 @@ class PriceAnalysisController extends ModuleController
             'ciatDiscounts' => CiatDiscount::where('status', true)->with('material')->get()
                 ->sortBy(fn ($discount) => $discount->material?->localized_name)->values(),
             'materials'     => Material::where('status', true)->orderBy('name')->get(),
-            'priceQuotes'   => PriceQuote::where('is_current', true)->with('customer')->latest()->get(),
-            'projects'      => Project::where('is_current', true)->with('customer')->latest()->get(),
         ];
     }
 
     private function validated(Request $request): array
     {
-        return $request->validate([
-            'source_type'                => ['required', 'in:ciat,warehouse'],
+        $validated = $request->validate([
             'branch_id'                  => ['required', 'exists:branches,id'],
             'with_tax'                   => ['boolean'],
             'notes'                      => ['nullable', 'string'],
-            'linked_type'                => ['nullable', 'in:price_quote,project'],
+            'linked_type'                => ['nullable', 'in:tender,price_quote,project'],
             'linked_id'                  => ['nullable', 'required_with:linked_type', 'integer'],
             'items'                      => ['required', 'array', 'min:1'],
-            'items.*.ciat_discount_id'   => ['nullable', 'required_if:source_type,ciat', 'exists:ciat_discounts,id'],
-            'items.*.material_id'        => ['nullable', 'required_if:source_type,warehouse', 'exists:materials,id'],
-            'items.*.ciat_model'         => ['nullable', 'required_if:source_type,ciat', 'string', 'max:100'],
+            'items.*.source_type'        => ['required', 'in:ciat,warehouse'],
+            'items.*.ciat_discount_id'   => ['nullable', 'exists:ciat_discounts,id'],
+            'items.*.material_id'        => ['nullable', 'exists:materials,id'],
+            'items.*.ciat_model'         => ['nullable', 'string', 'max:100'],
             'items.*.quantity'           => ['required', 'numeric', 'min:0.001'],
             'items.*.list_price'         => ['required', 'numeric', 'min:0'],
             'items.*.profit_percent'     => ['required', 'numeric'],
             'items.*.shipping'           => ['nullable', 'numeric', 'min:0'],
         ]);
+
+        // Each line's required fields depend on ITS OWN source_type — not expressible as a single
+        // static rule once source_type lives per-item, so it's enforced here instead.
+        foreach ($validated['items'] as $index => $item) {
+            if ($item['source_type'] === 'ciat' && empty($item['ciat_discount_id'])) {
+                throw ValidationException::withMessages(["items.{$index}.ciat_discount_id" => __('tenders.analysis_item_ciat_required')]);
+            }
+            if ($item['source_type'] === 'ciat' && empty($item['ciat_model'])) {
+                throw ValidationException::withMessages(["items.{$index}.ciat_model" => __('tenders.analysis_item_ciat_model_required')]);
+            }
+            if ($item['source_type'] === 'warehouse' && empty($item['material_id'])) {
+                throw ValidationException::withMessages(["items.{$index}.material_id" => __('tenders.analysis_item_material_required')]);
+            }
+        }
+
+        return $validated;
     }
 
     /** `linked_id` is only ever meaningful alongside a `linked_type` — otherwise always null, never a stray leftover id. */
@@ -167,7 +188,7 @@ class PriceAnalysisController extends ModuleController
         $analysis->items()->delete();
 
         foreach ($items as $item) {
-            if ($analysis->source_type === 'warehouse') {
+            if ($item['source_type'] === 'warehouse') {
                 $materialId      = $item['material_id'];
                 $discountPercent = 0.0;
                 $ciatDiscountId  = null;
@@ -189,6 +210,7 @@ class PriceAnalysisController extends ModuleController
             );
 
             $analysis->items()->create([
+                'source_type'      => $item['source_type'],
                 'ciat_discount_id' => $ciatDiscountId,
                 'material_id'      => $materialId,
                 'ciat_model'       => $ciatModel,

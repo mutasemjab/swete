@@ -448,10 +448,14 @@ return [
     'price_analysis_deleted'    => 'Price analysis deleted successfully.',
     'no_ciat_discounts_available' => 'No CIAT discounts yet — add one first.',
 
-    // ── Analysis product source ─────────────────────────────────────────────
+    // ── Analysis item product source (per line, not a whole-analysis setting) ──
     'analysis_source_type'       => 'Product Source',
     'analysis_source_ciat'       => 'CIAT Discounts',
     'analysis_source_warehouse'  => 'Warehouse Materials',
+    'analysis_item_source'       => 'Source',
+    'analysis_item_ciat_required'       => 'Choose a CIAT discount for this line.',
+    'analysis_item_ciat_model_required' => 'Enter a CIAT model for this line.',
+    'analysis_item_material_required'   => 'Choose a warehouse material for this line.',
 
     // ── Linking an analysis to a price quote or project ─────────────────────
     'analysis_linked_type'        => 'Linked To',
@@ -466,5 +470,10 @@ return [
 
     // ── Analyses linked to a project ─────────────────────────────────────────
     'project_linked_analyses_section' => 'Linked Price Analyses',
+
+    // ── Analysis section on the tender page (before price quotes) ───────────
+    'analysis_section' => 'Analysis',
+    'new_analysis'      => 'New Analysis',
+    'no_analyses'       => 'No price analyses yet',
 
 ];
