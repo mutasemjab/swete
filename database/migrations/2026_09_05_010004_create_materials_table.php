@@ -23,6 +23,9 @@ return new class extends Migration
             // is actually won — see App\Models\Material::scopeConfirmed() and
             // Tenders\TenderController::convertToProject() (where promotion happens).
             $table->boolean('is_draft')->default(false);
+            // Marked here so the CIAT Discount create/edit screens can offer only materials the
+            // warehouse has actually flagged as CIAT products, instead of the entire catalog.
+            $table->boolean('is_ciat')->default(false);
             $table->timestamps();
         });
     }

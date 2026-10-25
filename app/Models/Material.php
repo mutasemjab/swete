@@ -24,12 +24,14 @@ class Material extends Model
         'min_stock_level',
         'status',
         'is_draft',
+        'is_ciat',
     ];
 
     protected $casts = [
         'min_stock_level' => 'decimal:3',
         'status'          => 'boolean',
         'is_draft'        => 'boolean',
+        'is_ciat'         => 'boolean',
     ];
 
     public function category(): BelongsTo
@@ -77,6 +79,12 @@ class Material extends Model
     public function scopeConfirmed(Builder $query): Builder
     {
         return $query->where('is_draft', false);
+    }
+
+    /** Only materials the warehouse has flagged as CIAT products — see the CIAT Discount create/edit screens. */
+    public function scopeCiat(Builder $query): Builder
+    {
+        return $query->where('is_ciat', true);
     }
 
     /** DFT-00001-style code for a quick-added draft material — never collides with a manually

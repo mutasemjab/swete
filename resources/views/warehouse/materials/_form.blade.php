@@ -91,5 +91,19 @@
                 <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('app.active') }}</span>
             </label>
         </div>
+
+        <div class="flex items-center">
+            <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
+                <input type="hidden" name="is_ciat" value="0">
+                <input type="checkbox" name="is_ciat" value="1" class="sr-only peer"
+                       @checked(old('is_ciat', $material?->is_ciat ?? false))>
+                <div class="w-11 h-6 bg-slate-200 peer-focus:ring-2 peer-focus:ring-indigo-400 rounded-full peer
+                            peer-checked:bg-indigo-600 transition-all
+                            after:content-[''] after:absolute after:top-0.5 after:start-[2px]
+                            after:bg-white after:rounded-full after:h-5 after:w-5
+                            after:transition-all peer-checked:after:translate-x-full"></div>
+                <span class="ms-3 text-sm font-semibold text-slate-700">{{ __('warehouse.material_is_ciat') }}</span>
+            </label>
+        </div>
     </div>
 </div>

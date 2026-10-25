@@ -88,6 +88,7 @@
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.material_name') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden md:table-cell">{{ __('warehouse.material_category') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('warehouse.material_unit') }}</th>
+                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider hidden lg:table-cell">{{ __('warehouse.material_is_ciat') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.status') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                     </tr>
@@ -105,6 +106,13 @@
                         </td>
                         <td class="px-5 py-4 hidden md:table-cell text-sm text-slate-600">{{ $material->category?->localized_name }}</td>
                         <td class="px-5 py-4 hidden lg:table-cell text-sm text-slate-600">{{ $material->unit?->localized_name }}</td>
+                        <td class="px-5 py-4 hidden lg:table-cell">
+                            @if($material->is_ciat)
+                                <span class="badge bg-cyan-100 text-cyan-700">CIAT</span>
+                            @else
+                                <span class="text-slate-300">—</span>
+                            @endif
+                        </td>
                         <td class="px-5 py-4">
                             @if($material->status)
                                 <span class="badge bg-emerald-100 text-emerald-700">

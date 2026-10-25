@@ -27,7 +27,8 @@ class CiatDiscountController extends ModuleController
         return $this->moduleView('tenders.ciat-discounts.create', [
             'discount'           => null,
             // Deliberately NOT ->confirmed() — a discount must still be settable on a draft material.
-            'materials'          => Material::where('status', true)->orderBy('name')->get(),
+            // Only materials the warehouse has checked "ضمن خصومات CIAT" on — not the whole catalog.
+            'materials'          => Material::where('status', true)->where('is_ciat', true)->orderBy('name')->get(),
             'materialCategories' => MaterialCategory::orderBy('name')->get(),
             'units'              => Unit::where('status', true)->orderBy('name')->get(),
         ]);
@@ -49,9 +50,15 @@ class CiatDiscountController extends ModuleController
 
     public function edit(CiatDiscount $ciatDiscount)
     {
+        // Only CIAT-flagged materials, plus this discount's own material even if it was later
+        // unflagged — otherwise its currently selected option would silently disappear from the list.
+        $materials = Material::where('status', true)
+            ->where(fn ($q) => $q->where('is_ciat', true)->orWhere('id', $ciatDiscount->material_id))
+            ->orderBy('name')->get();
+
         return $this->moduleView('tenders.ciat-discounts.edit', [
             'discount'           => $ciatDiscount,
-            'materials'          => Material::where('status', true)->orderBy('name')->get(),
+            'materials'          => $materials,
             'materialCategories' => MaterialCategory::orderBy('name')->get(),
             'units'              => Unit::where('status', true)->orderBy('name')->get(),
         ]);

@@ -109,6 +109,7 @@ class MaterialController extends ModuleController
             ...$validated,
             'status'   => $request->boolean('status', true),
             'is_draft' => false,
+            'is_ciat'  => $request->boolean('is_ciat'),
         ]);
 
         return redirect()->route('warehouse.materials.index')
@@ -138,7 +139,8 @@ class MaterialController extends ModuleController
 
         $material->update([
             ...$validated,
-            'status' => $request->boolean('status'),
+            'status'  => $request->boolean('status'),
+            'is_ciat' => $request->boolean('is_ciat'),
         ]);
 
         return redirect()->route('warehouse.materials.index')
@@ -165,6 +167,7 @@ class MaterialController extends ModuleController
             'photo'            => ['nullable', 'image', 'max:5120'],
             'min_stock_level'  => ['nullable', 'numeric', 'min:0'],
             'status'           => ['boolean'],
+            'is_ciat'          => ['boolean'],
         ]);
     }
 }

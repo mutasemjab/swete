@@ -95,6 +95,7 @@ return [
     'material_description'  => 'الوصف',
     'material_photo'        => 'صورة المادة',
     'material_photo_hint'   => 'تظهر أول صورتين لأول بندين بعرض السعر على صفحة الطباعة الأولى بدل صور الفرع الثابتة.',
+    'material_is_ciat'      => 'ضمن خصومات CIAT',
     'min_stock_level'       => 'الحد الأدنى للمخزون',
     'min_stock_level_hint'  => 'يُستخدم للتنبيه عند انخفاض الكمية عن هذا الحد',
     'stock_by_warehouse'    => 'الرصيد حسب المستودع',

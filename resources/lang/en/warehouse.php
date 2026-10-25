@@ -95,6 +95,7 @@ return [
     'material_description'  => 'Description',
     'material_photo'        => 'Material Photo',
     'material_photo_hint'   => 'The first two quote items\' own photos show on the price quote print\'s first page instead of the fixed branch images.',
+    'material_is_ciat'      => 'CIAT Discount Eligible',
     'min_stock_level'       => 'Minimum Stock Level',
     'min_stock_level_hint'  => 'Used to flag low stock once quantity falls below this level',
     'stock_by_warehouse'    => 'Balance by Warehouse',
