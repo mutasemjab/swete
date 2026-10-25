@@ -106,10 +106,13 @@ return [
     'material_updated'      => 'Material updated successfully.',
     'material_deleted'      => 'Material deleted successfully.',
 
-    // ── Quick-add + draft materials (quick-added from Price Quote / CIAT Discount screens
+    // ── Quick-add + draft materials (quick-added from Price Quote / Split Unit screens
     // before a tender is won — hidden from the real catalog until then) ──────────────────
     'add_material_quick'      => 'Add New Material',
     'add_material_quick_hint' => 'Saved as a draft until your tender is won — won\'t show in the normal materials catalog until then.',
+    // Shown instead of the hint above when quick-adding from the CIAT Discount screen — there the
+    // material is saved immediately as a real warehouse item, not a draft.
+    'add_material_quick_hint_ciat' => 'Saved immediately as a real warehouse material, flagged as CIAT discount eligible.',
     'nav_draft_materials'     => 'Draft Materials',
     'draft_materials'         => 'Draft Materials',
     'draft_materials_subtitle' => 'Materials added from price quotes or discounts before a project was won — automatically become real materials once it is, or delete them here manually if no longer needed.',

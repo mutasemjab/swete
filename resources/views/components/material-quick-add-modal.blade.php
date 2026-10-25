@@ -84,7 +84,7 @@
          @keydown.escape.window="open = false">
         <div @click.outside="open = false" class="bg-white rounded-3xl shadow-2xl shadow-slate-900/20 p-6 max-w-sm w-full">
             <h3 class="text-lg font-black text-slate-800 mb-1.5">{{ $label }}</h3>
-            <p class="text-xs text-slate-400 mb-4">{{ __('warehouse.add_material_quick_hint') }}</p>
+            <p class="text-xs text-slate-400 mb-4">{{ __($asCiat ? 'warehouse.add_material_quick_hint_ciat' : 'warehouse.add_material_quick_hint') }}</p>
 
             <label class="form-label">{{ __('warehouse.material_name') }}</label>
             <input type="text" x-model="name" @keydown.enter.prevent="submit()" class="form-input mb-3">

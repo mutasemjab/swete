@@ -106,10 +106,13 @@ return [
     'material_updated'      => 'تم تحديث بيانات المادة بنجاح.',
     'material_deleted'      => 'تم حذف المادة بنجاح.',
 
-    // ── Quick-add + draft materials (quick-added from Price Quote / CIAT Discount screens
+    // ── Quick-add + draft materials (quick-added from Price Quote / Split Unit screens
     // before a tender is won — hidden from the real catalog until then) ──────────────────
     'add_material_quick'      => 'إضافة مادة جديدة',
     'add_material_quick_hint' => 'بتتسجل كمادة مؤقتة لحد ما يرسى عليك العطاء، وما بتظهر بقائمة المستودع العادية لحد هيك.',
+    // Shown instead of the hint above when quick-adding from the CIAT Discount screen — there the
+    // material is saved immediately as a real warehouse item, not a draft.
+    'add_material_quick_hint_ciat' => 'بتتسجل مباشرة كمادة حقيقية في المستودع، ومعلّمة أنها ضمن خصومات CIAT.',
     'nav_draft_materials'     => 'السلع المؤقتة',
     'draft_materials'         => 'السلع المؤقتة',
     'draft_materials_subtitle' => 'سلع أُضيفت من عروض الأسعار أو الخصومات قبل ما يرسى المشروع — بتتحول تلقائياً لسلع حقيقية بالمستودع لما يرسى، أو احذفها يدوياً هون إذا ما عاد فيها داعي.',
