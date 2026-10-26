@@ -120,6 +120,26 @@ class PriceAnalysisController extends ModuleController
             ->with('success', __('tenders.price_analysis_updated'));
     }
 
+    /**
+     * Quick, non-versioned edit of a single item's required-discount-% / notes — surfaced in the
+     * "X8" table on the Tender's own show page, outside the full Price Analysis edit flow.
+     * Deliberately does NOT call archiveCurrentVersion(): these two fields are admin annotations,
+     * not part of the priced analysis itself, so editing them shouldn't spawn a new revision.
+     */
+    public function updateItemFields(Request $request, PriceAnalysisItem $item)
+    {
+        abort_unless($item->priceAnalysis->is_current, 404);
+
+        $validated = $request->validate([
+            'required_discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'notes'                     => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $item->update($validated);
+
+        return back()->with('success', __('tenders.analysis_item_updated'));
+    }
+
     public function destroy(PriceAnalysis $priceAnalysis)
     {
         $priceAnalysis->delete();
@@ -187,9 +207,16 @@ class PriceAnalysisController extends ModuleController
 
     private function syncItems(PriceAnalysis $analysis, array $items, float $jdRate): void
     {
+        // required_discount_percent/notes are set independently, later, from the Tender page's
+        // own quick-edit table (see TenderController::updateAnalysisItem()) — never through this
+        // form. Since every save here deletes and recreates all items from scratch, preserve those
+        // two fields across the rebuild by matching old->new items positionally (best-effort: exact
+        // when the line count/order is unchanged, lost only if lines are added/removed/reordered).
+        $oldPreserved = $analysis->items()->orderBy('id')->get(['required_discount_percent', 'notes'])->values();
+
         $analysis->items()->delete();
 
-        foreach ($items as $item) {
+        foreach ($items as $index => $item) {
             if ($item['source_type'] === 'warehouse') {
                 $materialId       = $item['material_id'];
                 $discountPercent  = 0.0;
@@ -225,6 +252,8 @@ class PriceAnalysisController extends ModuleController
                 'min_profit_percent' => $minProfitPercent,
                 'profit_percent'     => $item['profit_percent'],
                 'shipping'           => $item['shipping'] ?? 0,
+                'required_discount_percent' => $oldPreserved->get($index)?->required_discount_percent,
+                'notes'              => $oldPreserved->get($index)?->notes,
                 ...$computed,
             ]);
         }

@@ -38,6 +38,10 @@ return new class extends Migration
             $table->decimal('price', 14, 3);
             $table->decimal('to_jd', 14, 3);
             $table->decimal('shipping', 14, 3)->default(0);
+            // Quick-edit fields surfaced on the Tender's own show page (outside the versioned
+            // Price Analysis edit flow) — edited directly in place, no archiving/versioning.
+            $table->decimal('required_discount_percent', 5, 2)->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

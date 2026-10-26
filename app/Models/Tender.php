@@ -97,7 +97,7 @@ class Tender extends Model
     /** Price Analyses created straight from this tender's own page, before any price quote exists yet. */
     public function analyses(): HasMany
     {
-        return $this->hasMany(PriceAnalysis::class, 'linked_id')->where('linked_type', 'tender');
+        return $this->hasMany(PriceAnalysis::class, 'linked_id')->where('linked_type', 'tender')->where('is_current', true);
     }
 
     public function extraFieldValues(): HasMany

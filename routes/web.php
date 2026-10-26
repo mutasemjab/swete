@@ -331,6 +331,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['index', 'show'])->middleware('permission:analyses.view|tenders.view');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['edit', 'update'])->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['destroy'])->middleware('permission:analyses.price_analyses.delete|tenders.price_analyses.delete');
+    Route::patch('price-analysis-items/{item}', [PriceAnalysisController::class, 'updateItemFields'])->name('price-analysis-items.update')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
 
     // ── Price Quotes (now standalone quotations module — still accessible from tenders/maintenance flows) ──
     Route::get('price-quotes/{priceQuote}/print', [PriceQuoteController::class, 'printDocument'])->name('price-quotes.print')->middleware('permission:quotations.view|tenders.view|maintenance.view');

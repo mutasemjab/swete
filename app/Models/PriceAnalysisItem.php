@@ -24,6 +24,8 @@ class PriceAnalysisItem extends Model
         'price',
         'to_jd',
         'shipping',
+        'required_discount_percent',
+        'notes',
     ];
 
     protected $casts = [
@@ -38,6 +40,7 @@ class PriceAnalysisItem extends Model
         'price'              => 'decimal:3',
         'to_jd'              => 'decimal:3',
         'shipping'           => 'decimal:3',
+        'required_discount_percent' => 'decimal:2',
     ];
 
     public function priceAnalysis(): BelongsTo

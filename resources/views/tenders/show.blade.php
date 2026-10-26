@@ -173,6 +173,72 @@
     @endif
 </div>
 
+@php
+    $canEditAnalysisItems = auth()->user()->can('analyses.price_analyses.edit') || auth()->user()->can('tenders.price_analyses.edit');
+    $analysisItems = $tender->analyses->flatMap(fn ($analysis) => $analysis->items);
+@endphp
+<div class="card overflow-hidden mb-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.analysis_items_section') }}</h3>
+    </div>
+    @if($analysisItems->isEmpty())
+        <p class="px-6 py-6 text-sm text-slate-400">{{ __('tenders.no_analysis_items') }}</p>
+    @else
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_model') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_quantity') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_list_price') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_required_discount') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.notes') }}</th>
+                        <th class="px-5 py-3 w-20"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach($analysisItems as $item)
+                    <tr class="hover:bg-slate-50/50 transition-colors" x-data="{ editing: false }">
+                        <td class="px-5 py-3 font-bold text-slate-800">{{ $item->ciat_model ?: $item->material?->localized_name ?: '—' }}</td>
+                        <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->quantity, 3) }}</td>
+                        <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->list_price, 3) }}</td>
+                        <td class="px-5 py-3 text-slate-600" dir="ltr" x-show="!editing">{{ $item->required_discount_percent !== null ? number_format((float) $item->required_discount_percent, 2) . '%' : '—' }}</td>
+                        <td class="px-5 py-3 text-slate-600" x-show="!editing">{{ $item->notes ?: '—' }}</td>
+                        @if($canEditAnalysisItems)
+                        <template x-if="editing">
+                            <td colspan="3" class="px-5 py-3">
+                                <form action="{{ route('price-analysis-items.update', $item) }}" method="POST" class="flex items-end gap-2 flex-wrap">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div>
+                                        <label class="form-label">{{ __('tenders.analysis_item_required_discount') }}</label>
+                                        <input type="number" step="0.01" min="0" max="100" name="required_discount_percent" value="{{ $item->required_discount_percent }}" class="form-input w-28">
+                                    </div>
+                                    <div class="flex-1 min-w-[160px]">
+                                        <label class="form-label">{{ __('app.notes') }}</label>
+                                        <input type="text" name="notes" value="{{ $item->notes }}" class="form-input w-full">
+                                    </div>
+                                    <button type="submit" class="btn-primary btn-sm">{{ __('app.save') }}</button>
+                                    <button type="button" @click="editing = false" class="btn-secondary btn-sm">{{ __('app.cancel') }}</button>
+                                </form>
+                            </td>
+                        </template>
+                        @endif
+                        <td class="px-5 py-3 text-end" x-show="!editing">
+                            @if($canEditAnalysisItems)
+                                <button type="button" @click="editing = true" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all">
+                                    <i class="fa-solid fa-pen text-sm"></i>
+                                </button>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+</div>
+
 <div class="card overflow-hidden">
     <div class="card-header">
         <h3 class="font-bold text-slate-700">{{ __('tenders.price_quotes') }}</h3>
