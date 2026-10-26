@@ -421,7 +421,7 @@ return [
     'analysis_with_tax_hint_before' => 'When on, adds the branch\'s tax rate (',
     'analysis_with_tax_hint_after'  => '%) on top of the total.',
     'analysis_notes'            => 'Notes',
-    'analysis_item_product'     => 'CIAT Product',
+    'analysis_item_product'     => 'Product',
     'analysis_item_quantity'    => 'Qty.',
     'analysis_item_list_price'  => 'L.P',
     'analysis_item_price_percent' => 'Price %',

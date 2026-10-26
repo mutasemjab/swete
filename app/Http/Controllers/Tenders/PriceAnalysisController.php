@@ -152,7 +152,6 @@ class PriceAnalysisController extends ModuleController
             'items.*.source_type'        => ['required', 'in:ciat,warehouse'],
             'items.*.ciat_discount_id'   => ['nullable', 'exists:ciat_discounts,id'],
             'items.*.material_id'        => ['nullable', 'exists:materials,id'],
-            'items.*.ciat_model'         => ['nullable', 'string', 'max:100'],
             'items.*.quantity'           => ['required', 'numeric', 'min:0.001'],
             'items.*.list_price'         => ['required', 'numeric', 'min:0'],
             'items.*.profit_percent'     => ['required', 'numeric', 'min:0'],
@@ -164,9 +163,6 @@ class PriceAnalysisController extends ModuleController
         foreach ($validated['items'] as $index => $item) {
             if ($item['source_type'] === 'ciat' && empty($item['ciat_discount_id'])) {
                 throw ValidationException::withMessages(["items.{$index}.ciat_discount_id" => __('tenders.analysis_item_ciat_required')]);
-            }
-            if ($item['source_type'] === 'ciat' && empty($item['ciat_model'])) {
-                throw ValidationException::withMessages(["items.{$index}.ciat_model" => __('tenders.analysis_item_ciat_model_required')]);
             }
             if ($item['source_type'] === 'warehouse' && empty($item['material_id'])) {
                 throw ValidationException::withMessages(["items.{$index}.material_id" => __('tenders.analysis_item_material_required')]);
@@ -195,14 +191,12 @@ class PriceAnalysisController extends ModuleController
                 $discountPercent  = 0.0;
                 $minProfitPercent = 0.0;
                 $ciatDiscountId   = null;
-                $ciatModel        = $item['ciat_model'] ?? null;
             } else {
                 $discount         = CiatDiscount::findOrFail($item['ciat_discount_id']);
                 $materialId       = $discount->material_id;
                 $discountPercent  = (float) $discount->discount_percent;
                 $minProfitPercent = (float) ($discount->min_profit_percent ?? 0);
                 $ciatDiscountId   = $discount->id;
-                $ciatModel        = $item['ciat_model'];
             }
 
             $computed = PriceAnalysisItem::calculate(
@@ -218,7 +212,6 @@ class PriceAnalysisController extends ModuleController
                 'source_type'        => $item['source_type'],
                 'ciat_discount_id'   => $ciatDiscountId,
                 'material_id'        => $materialId,
-                'ciat_model'         => $ciatModel,
                 'quantity'           => $item['quantity'],
                 'list_price'         => $item['list_price'],
                 'discount_percent'   => $discountPercent,

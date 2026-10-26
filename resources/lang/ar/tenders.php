@@ -421,7 +421,7 @@ return [
     'analysis_with_tax_hint_before' => 'عند التفعيل، تُضاف نسبة ضريبة الفرع (',
     'analysis_with_tax_hint_after'  => '%) على الإجمالي.',
     'analysis_notes'            => 'ملاحظات',
-    'analysis_item_product'     => 'منتج CIAT',
+    'analysis_item_product'     => 'المنتج',
     'analysis_item_quantity'    => 'الكمية',
     'analysis_item_list_price'  => 'L.P',
     'analysis_item_price_percent' => 'نسبة السعر %',

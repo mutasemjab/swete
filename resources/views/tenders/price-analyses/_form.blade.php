@@ -1,24 +1,28 @@
 @php
     $analysis = $analysis ?? null;
     $tender = $tender ?? null;
+    // Defaults the branch picker to the main branch on a brand-new analysis — only when there's
+    // nothing more specific to prefer already (an existing analysis's own branch, or old() input
+    // from a failed save).
+    $defaultBranch = $analysis?->branch_id ? null : $branches->firstWhere('is_main', true);
     // old('items') must win on a validation-failure redisplay — otherwise every row the user typed
     // is silently lost and they have to start the whole item table over from scratch.
     $seedItems = collect(
         old('items') ?? (
             $analysis?->items->map(fn ($i) => [
-                'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
+                'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'quantity' => (float) $i->quantity,
                 'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
             ])->values()
-            ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+            ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
         )
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp
 <div x-data="{
         branches: {{ $branches->map(fn ($b) => ['id' => $b->id, 'taxRate' => (float) $b->ciat_tax_rate, 'jdRate' => (float) $b->ciat_jd_rate])->values()->toJson() }},
         ciatDiscounts: {{ $ciatDiscounts->map(fn ($d) => ['id' => $d->id, 'label' => $d->label, 'discount' => (float) $d->discount_percent, 'minProfit' => (float) ($d->min_profit_percent ?? 0)])->values()->toJson() }},
-        branchId: '{{ old('branch_id', $analysis?->branch_id) }}',
-        taxRate: {{ (float) old('tax_rate', $analysis?->tax_rate ?? 16) }},
-        jdRate: {{ (float) old('jd_rate', $analysis?->jd_rate ?? 0.82) }},
+        branchId: '{{ old('branch_id', $analysis?->branch_id ?? $defaultBranch?->id) }}',
+        taxRate: {{ (float) old('tax_rate', $analysis?->tax_rate ?? $defaultBranch?->ciat_tax_rate ?? 16) }},
+        jdRate: {{ (float) old('jd_rate', $analysis?->jd_rate ?? $defaultBranch?->ciat_jd_rate ?? 0.82) }},
         withTax: {{ old('with_tax', $analysis?->with_tax) ? 'true' : 'false' }},
         onBranchChange() {
             const b = this.branches.find(x => String(x.id) === String(this.branchId));
@@ -48,7 +52,7 @@
         _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
         items: {{ $seedItems->toJson() }},
-        addItem() { this.items.push({ source_type: 'ciat', ciat_discount_id: '', material_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ source_type: 'ciat', ciat_discount_id: '', material_id: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(item) {
             if (item.source_type === 'warehouse') return 0;
@@ -117,7 +121,7 @@
                 <select name="branch_id" x-model="branchId" @change="onBranchChange()" class="js-select2 form-select @error('branch_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" @selected(old('branch_id', $analysis?->branch_id) == $branch->id)>{{ $branch->localized_name }}</option>
+                        <option value="{{ $branch->id }}" @selected(old('branch_id', $analysis?->branch_id ?? $defaultBranch?->id) == $branch->id)>{{ $branch->localized_name }}</option>
                     @endforeach
                 </select>
                 @error('branch_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -169,7 +173,6 @@
                     <tr>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('tenders.analysis_item_source') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_product') }}</th>
-                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.ciat_model') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_quantity') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.analysis_item_list_price') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_cost') }}</th>
@@ -195,10 +198,10 @@
                             <td class="px-3 py-2.5">
                                 {{-- Two PERSISTENT selects toggled with x-show, never torn down/recreated via x-if —
                                      select2 doesn't reliably re-measure a freshly (re)inserted element inside a
-                                     table cell (same class of bug as the ciat_model column below: a widget that's
-                                     added/removed from the DOM on every toggle ends up rendered with the wrong
-                                     width, visually breaking the row). The inactive select's value is simply
-                                     ignored server-side (syncItems() branches on source_type already).
+                                     table cell (a widget that's added/removed from the DOM on every toggle ends up
+                                     rendered with the wrong width, visually breaking the row). The inactive
+                                     select's value is simply ignored server-side (syncItems() branches on
+                                     source_type already).
                                      x-show is on a wrapping <div>, NOT the <select> itself — select2 hides the
                                      raw <select> with its own CSS and renders the visible widget as a SIBLING
                                      .select2-container, which Alpine's x-show never touches if it's bound to the
@@ -219,11 +222,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                            </td>
-                            <td class="px-3 py-2.5">
-                                <input type="text" x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
-                                       dir="ltr" class="form-input !text-xs" :required="item.source_type === 'ciat'">
-                                <span x-show="item.source_type !== 'ciat'" class="text-slate-300 text-xs">—</span>
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"

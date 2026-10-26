@@ -112,7 +112,6 @@
                 <tr>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_source') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_type') }}</th>
-                    <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.ciat_model') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_quantity') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_list_price') }}</th>
                     <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_cost') }}</th>
@@ -133,7 +132,6 @@
                         </span>
                     </td>
                     <td class="px-3 py-3 font-bold text-slate-800">{{ $item->material?->localized_name }}</td>
-                    <td class="px-3 py-3 text-slate-600" dir="ltr">{{ $item->ciat_model }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->quantity, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->list_price, 3) }}</td>
                     <td class="px-3 py-3 text-slate-600" dir="ltr">{{ number_format($item->cost, 3) }}</td>
