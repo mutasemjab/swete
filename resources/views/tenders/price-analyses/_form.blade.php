@@ -198,19 +198,27 @@
                                      table cell (same class of bug as the ciat_model column below: a widget that's
                                      added/removed from the DOM on every toggle ends up rendered with the wrong
                                      width, visually breaking the row). The inactive select's value is simply
-                                     ignored server-side (syncItems() branches on source_type already). --}}
-                                <select x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" :required="item.source_type === 'ciat'">
-                                    <option value="">{{ __('app.select') }}</option>
-                                    @foreach($ciatDiscounts as $ciatDiscount)
-                                        <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
-                                    @endforeach
-                                </select>
-                                <select x-show="item.source_type === 'warehouse'" :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select !text-xs" :required="item.source_type === 'warehouse'">
-                                    <option value="">{{ __('app.select') }}</option>
-                                    @foreach($materials as $material)
-                                        <option value="{{ $material->id }}">{{ $material->localized_name }}</option>
-                                    @endforeach
-                                </select>
+                                     ignored server-side (syncItems() branches on source_type already).
+                                     x-show is on a wrapping <div>, NOT the <select> itself — select2 hides the
+                                     raw <select> with its own CSS and renders the visible widget as a SIBLING
+                                     .select2-container, which Alpine's x-show never touches if it's bound to the
+                                     (already invisible) select alone; both widgets stayed visible together. --}}
+                                <div x-show="item.source_type === 'ciat'">
+                                    <select :name="`items[${index}][ciat_discount_id]`" x-model="item.ciat_discount_id" class="js-select2 form-select !text-xs" :required="item.source_type === 'ciat'">
+                                        <option value="">{{ __('app.select') }}</option>
+                                        @foreach($ciatDiscounts as $ciatDiscount)
+                                            <option value="{{ $ciatDiscount->id }}">{{ $ciatDiscount->label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div x-show="item.source_type === 'warehouse'">
+                                    <select :name="`items[${index}][material_id]`" x-model="item.material_id" class="js-select2 form-select !text-xs" :required="item.source_type === 'warehouse'">
+                                        <option value="">{{ __('app.select') }}</option>
+                                        @foreach($materials as $material)
+                                            <option value="{{ $material->id }}">{{ $material->localized_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="text" x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
