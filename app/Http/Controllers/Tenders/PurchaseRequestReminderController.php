@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class PurchaseRequestReminderController extends ModuleController
 {
-    protected string $module = 'tenders';
+    protected string $module = 'projects';
 
     public function index()
     {
@@ -93,9 +93,22 @@ class PurchaseRequestReminderController extends ModuleController
 
     private function formOptions(): array
     {
+        $projects = Project::where('status', 'active')->orderByDesc('created_at')->get();
+
         return [
-            'projects'  => Project::where('status', 'active')->orderByDesc('created_at')->get(),
+            'projects'  => $projects,
             'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
+            // So the create/edit form can offer "pick from this project's own line items" instead
+            // of making the requester re-type materials the project already has priced — keyed by
+            // project id, read reactively once the project select changes (see _form.blade.php).
+            'projectItems' => $projects->mapWithKeys(fn ($project) => [
+                $project->id => $project->quoteItems()->map(fn ($item) => [
+                    'material_id' => $item->material_id,
+                    'name'        => $item->material?->localized_name,
+                    'quantity'    => (float) $item->quantity,
+                    'unit_price'  => (float) $item->unit_price,
+                ])->values(),
+            ]),
         ];
     }
 

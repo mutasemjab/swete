@@ -81,8 +81,11 @@ class PriceAnalysis extends Model
     /** A brand-new, distinct analysis always starts at revision A0. */
     public static function nextNumber(): string
     {
-        $year  = now()->format('Y');
-        $count = static::whereYear('created_at', $year)->count() + 1;
+        $year = now()->format('Y');
+        // Counting ONLY genesis rows (root_id IS NULL) — same fix as PriceQuote/Project::nextNumber():
+        // an archived revision clone (root_id set by archiveCurrentVersion()) must never inflate
+        // this count, or the next brand-new analysis skips a number.
+        $count = static::whereYear('created_at', $year)->whereNull('root_id')->count() + 1;
 
         return sprintf('PA-%s-%05d-A0', $year, $count);
     }

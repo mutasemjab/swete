@@ -10,10 +10,10 @@
     $seedItems = collect(
         old('items') ?? (
             $analysis?->items->map(fn ($i) => [
-                'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'quantity' => (float) $i->quantity,
+                'source_type' => $i->source_type, 'ciat_discount_id' => $i->ciat_discount_id, 'material_id' => $i->material_id, 'ciat_model' => $i->ciat_model, 'quantity' => (float) $i->quantity,
                 'list_price' => (float) $i->list_price, 'profit_percent' => (float) $i->profit_percent, 'shipping' => (float) $i->shipping,
             ])->values()
-            ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
+            ?? collect([['source_type' => 'ciat', 'ciat_discount_id' => '', 'material_id' => '', 'ciat_model' => '', 'quantity' => 1, 'list_price' => '', 'profit_percent' => '', 'shipping' => 0]])
         )
     )->map(fn ($item, $i) => array_merge($item, ['_key' => $i + 1]))->values();
 @endphp
@@ -52,7 +52,7 @@
         _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
         items: {{ $seedItems->toJson() }},
-        addItem() { this.items.push({ source_type: 'ciat', ciat_discount_id: '', material_id: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
+        addItem() { this.items.push({ source_type: 'ciat', ciat_discount_id: '', material_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(item) {
             if (item.source_type === 'warehouse') return 0;
@@ -173,6 +173,7 @@
                     <tr>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('tenders.analysis_item_source') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_product') }}</th>
+                        <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.ciat_model') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-20">{{ __('tenders.analysis_item_quantity') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('tenders.analysis_item_list_price') }}</th>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-24">{{ __('tenders.analysis_item_cost') }}</th>
@@ -222,6 +223,11 @@
                                         @endforeach
                                     </select>
                                 </div>
+                            </td>
+                            <td class="px-3 py-2.5">
+                                <input type="text" x-show="item.source_type === 'ciat'" :name="`items[${index}][ciat_model]`" x-model="item.ciat_model"
+                                       dir="ltr" class="form-input !text-xs" :required="item.source_type === 'ciat'">
+                                <span x-show="item.source_type !== 'ciat'" class="text-slate-300 text-xs">—</span>
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"

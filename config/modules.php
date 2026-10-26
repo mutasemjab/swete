@@ -173,13 +173,6 @@ return [
                 ],
             ],
             [
-                'label' => 'tenders.section_reminders',
-                'items' => [
-                    ['label' => 'tenders.nav_reminders_list', 'route' => 'purchase-request-reminders.index',  'icon' => 'bell', 'permission' => 'tenders.view'],
-                    ['label' => 'tenders.nav_reminders_add',  'route' => 'purchase-request-reminders.create', 'icon' => 'plus', 'permission' => 'tenders.purchase_request_reminders.create'],
-                ],
-            ],
-            [
                 'label' => 'tenders.section_settings',
                 'items' => [
                     ['label' => 'tenders.nav_statuses',            'route' => 'tender-statuses.index',    'icon' => 'list-check',    'permission' => 'tenders.view'],
@@ -273,6 +266,13 @@ return [
                 'label' => 'projects.section_projects',
                 'items' => [
                     ['label' => 'projects.nav_list', 'route' => 'projects.index', 'icon' => 'diagram-project', 'permission' => 'projects.view'],
+                ],
+            ],
+            [
+                'label' => 'projects.section_reminders',
+                'items' => [
+                    ['label' => 'projects.nav_reminders_list', 'route' => 'purchase-request-reminders.index',  'icon' => 'bell', 'permission' => 'tenders.view'],
+                    ['label' => 'projects.nav_reminders_add',  'route' => 'purchase-request-reminders.create', 'icon' => 'plus', 'permission' => 'tenders.purchase_request_reminders.create'],
                 ],
             ],
         ],

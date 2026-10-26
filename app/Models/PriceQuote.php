@@ -154,11 +154,41 @@ class PriceQuote extends Model
         return ProjectVariationOrder::where('price_quote_id', $this->id)->where('status', 'pending')->exists();
     }
 
-    /** A brand-new, distinct quote always starts at revision R0. */
-    public static function nextNumber(): string
+    /**
+     * A brand-new, distinct quote always starts at revision R0.
+     *
+     * $tenderSequence is the Nth quote ever created against $tender (1 for the first, 2 for the
+     * second, …) — pass the SAME value about to be saved into this quote's own `tender_sequence`
+     * column, computed by the caller (see PriceQuoteController::store()), so the number embedded
+     * here and the column never drift apart.
+     *
+     * Tender-linked: reuses the tender's own number digits directly (e.g. tender TND-2026-00007 →
+     * quote PQ-2026-00007-R0) — the quote is visually traceable back to its tender at a glance,
+     * and needs no separate counter of its own. A second/third quote under the SAME tender
+     * (tender_sequence > 1) appends "-{sequence}" so the base number stays unique.
+     *
+     * Standalone (no tender): falls back to a plain year-scoped counter — counting ONLY genesis
+     * rows (root_id IS NULL). Archived revision clones (root_id set by archiveCurrentVersion())
+     * must never inflate this count, or the next brand-new quote skips a number (e.g. quote #1
+     * gets revised to R1, leaving 2 rows total for just one logical quote — counting both would
+     * make the next NEW quote become "#3" instead of "#2").
+     */
+    public static function nextNumber(?Tender $tender = null, int $tenderSequence = 1): string
     {
-        $year  = now()->format('Y');
-        $count = static::whereYear('created_at', $year)->count() + 1;
+        $year = now()->format('Y');
+
+        if ($tender) {
+            preg_match('/(\d{5})$/', $tender->number, $matches);
+            $base = $matches[1] ?? sprintf('%05d', $tender->id);
+            $suffix = $tenderSequence > 1 ? '-' . $tenderSequence : '';
+
+            return sprintf('PQ-%s-%s%s-R0', $year, $base, $suffix);
+        }
+
+        // Scoped to OTHER standalone quotes only — a tender-linked quote never uses this counter
+        // at all (it reuses its tender's own digits above), so mixing it into this count would
+        // just make the standalone sequence skip numbers for no visible reason.
+        $count = static::whereYear('created_at', $year)->whereNull('tender_id')->whereNull('root_id')->count() + 1;
 
         return sprintf('PQ-%s-%05d-R0', $year, $count);
     }

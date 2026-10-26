@@ -202,8 +202,12 @@ class Project extends Model
 
     public static function nextNumber(): string
     {
-        $year  = now()->format('Y');
-        $count = static::whereYear('created_at', $year)->count() + 1;
+        $year = now()->format('Y');
+        // Counting ONLY genesis rows (root_id IS NULL) — an archived revision clone (root_id set
+        // by archiveCurrentVersion()) must never inflate this count, or the next brand-new project
+        // skips a number (e.g. project #1 gets revised to P1, leaving 2 rows total for just one
+        // logical project — counting both would make the next NEW project become "#3" instead of "#2").
+        $count = static::whereYear('created_at', $year)->whereNull('root_id')->count() + 1;
 
         return sprintf('PRJ-%s-%05d-P0', $year, $count);
     }

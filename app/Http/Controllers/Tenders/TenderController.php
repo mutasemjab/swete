@@ -150,10 +150,17 @@ class TenderController extends ModuleController
     }
 
     /**
-     * Turn a specific won price quote into a project. If its tender already has an ACTIVE project
-     * (i.e. this isn't the first quote converted for it), this is a mid-project change requested by
-     * the customer — a Variation Order queued for its own review, never touching the live project's
-     * status. Only the very first conversion for a tender creates the project itself.
+     * Turn a specific won price quote into a project.
+     *
+     * - No project at all yet for this tender → this conversion creates the project itself.
+     * - An ACTIVE (already-approved) project exists → this is a mid-project change requested by
+     *   the customer: a Variation Order queued for its own review, never touching the live
+     *   project's status directly. Blocked outright for a different customer — once approved,
+     *   that's final.
+     * - An UNDER-REVIEW (not yet approved) project exists → nothing has been decided yet, so
+     *   silently picking "add a Variation Order" or blocking a different customer would be
+     *   guessing. Requires an explicit `mode` ('add'|'replace') from the user instead — see the
+     *   Add/Replace prompt on the tender page (resources/views/tenders/show.blade.php).
      */
     public function convertToProject(Request $request, PriceQuote $priceQuote)
     {
@@ -167,12 +174,13 @@ class TenderController extends ModuleController
         $tender = $priceQuote->tender;
 
         $activeProject = Project::where('tender_id', $tender->id)->where('status', 'active')->where('is_current', true)->latest()->first();
-
-        if ($activeProject && $activeProject->customer_id !== $priceQuote->customer_id) {
-            return back()->with('error', __('tenders.quote_customer_mismatch'));
-        }
+        $underReviewProject = Project::where('tender_id', $tender->id)->where('status', 'under_review')->where('is_current', true)->latest()->first();
 
         if ($activeProject) {
+            if ($activeProject->customer_id !== $priceQuote->customer_id) {
+                return back()->with('error', __('tenders.quote_customer_mismatch'));
+            }
+
             $activeProject->increment('variation_round');
 
             ProjectVariationOrder::create([
@@ -186,6 +194,42 @@ class TenderController extends ModuleController
 
             return redirect()->route('project-reviews.index')
                 ->with('success', __('tenders.variation_order_created'));
+        }
+
+        if ($underReviewProject) {
+            $mode = $request->input('mode');
+
+            if (! in_array($mode, ['add', 'replace'], true)) {
+                return back()->with('error', __('tenders.quote_conversion_choice_required'));
+            }
+
+            if ($mode === 'add') {
+                $underReviewProject->increment('variation_round');
+
+                ProjectVariationOrder::create([
+                    'project_id'     => $underReviewProject->id,
+                    'price_quote_id' => $priceQuote->id,
+                    'status'         => 'pending',
+                    'created_by'     => $request->user()->id,
+                ]);
+
+                $this->promoteDraftMaterials($tender);
+
+                return redirect()->route('project-reviews.index')
+                    ->with('success', __('tenders.variation_order_created'));
+            }
+
+            // $mode === 'replace': the project hasn't been approved yet, so there's nothing to
+            // "split" — just swap its own origin quote (and customer, if it differs) outright.
+            $underReviewProject->update([
+                'price_quote_id' => $priceQuote->id,
+                'customer_id'    => $priceQuote->customer_id,
+            ]);
+
+            $this->promoteDraftMaterials($tender);
+
+            return redirect()->route('projects.show', $underReviewProject)
+                ->with('success', __('tenders.quote_replaced_on_project'));
         }
 
         $project = Project::create([

@@ -219,6 +219,16 @@ return [
     'quote_old_version_badge'     => 'نسخة قديمة',
     'quote_already_pending_vo'    => 'هذا العرض لديه طلب تغيير قيد المراجعة بالفعل.',
     'quote_customer_mismatch'     => 'لا يمكن تحويل عرض سعر لعميل مختلف عن عميل المشروع الحالي.',
+    'quote_conversion_choice_required' => 'الرجاء اختيار إضافة أو استبدال.',
+    'quote_replaced_on_project'   => 'تم استبدال عرض السعر الأساسي للمشروع بنجاح.',
+
+    // ── إضافة أو استبدال عند تحويل عرض سعر لمشروع قيد المراجعة ──────────────
+    'quote_conversion_modal_title'  => 'المشروع لسا قيد المراجعة',
+    'quote_conversion_modal_body'   => 'يوجد مشروع قيد المراجعة لهذا العطاء بالفعل. شو بدك تعمل بعرض السعر هذا؟',
+    'quote_conversion_add_vo'       => 'إضافة كطلب تغيير (Variation Order)',
+    'quote_conversion_add_vo_hint'  => 'يضاف هذا العرض كطلب تغيير منفصل بانتظار المراجعة، وبنود المشروع الحالية تبقى كما هي.',
+    'quote_conversion_replace'      => 'استبدال عرض السعر الحالي بالكامل',
+    'quote_conversion_replace_hint' => 'يستبدل هذا العرض عرض السعر الأساسي للمشروع بالكامل (والعميل إذا كان مختلفاً) — دون طلب تغيير منفصل.',
 
     // ── Variation Orders ──────────────────────────────────────────────────────
     'variation_order_created'  => 'تم إرسال عرض السعر كطلب تغيير (Variation Order) لقائمة المراجعة.',
@@ -386,6 +396,8 @@ return [
     'reminder_drive_url'        => 'رابط جوجل درايف',
     'reminder_drive_link_label' => 'رابط جوجل درايف (من طلب الشراء المطلوب)',
     'reminder_items'            => 'المواد المطلوبة',
+    'reminder_choose_from_project' => 'اختيار من بنود المشروع',
+    'reminder_project_no_items'    => 'لا توجد بنود عروض أسعار على هذا المشروع.',
     'reminder_added'            => 'تم إرسال الطلب بنجاح، وسيصل إشعار للمسؤولين عن طلبات الشراء.',
     'reminder_status_pending'   => 'بانتظار الإنشاء',
     'reminder_status_fulfilled' => 'تم الإنشاء',
@@ -413,7 +425,7 @@ return [
     'price_analyses_list'       => 'تحليلات الأسعار',
     'price_analyses_subtitle'   => 'تفصيل التكلفة وسعر البيع لعروض أسعار CIAT',
     'add_price_analysis'        => 'تحليل جديد',
-    'add_price_analysis_subtitle' => 'اختر الفرع، ثم أضف كل بند منتج CIAT',
+    'add_price_analysis_subtitle' => 'اختر الفرع، ثم أضف كل بند منتج',
     'edit_price_analysis'       => 'تعديل تحليل',
     'analysis_number'           => 'رقم التحليل',
     'analysis_branch'           => 'الفرع',

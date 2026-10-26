@@ -219,6 +219,16 @@ return [
     'quote_old_version_badge'     => 'Old Version',
     'quote_already_pending_vo'    => 'This quote already has a pending Variation Order.',
     'quote_customer_mismatch'     => 'Cannot convert a price quote belonging to a different customer than the current project.',
+    'quote_conversion_choice_required' => 'Please choose to add or replace.',
+    'quote_replaced_on_project'   => 'The project\'s origin price quote was replaced successfully.',
+
+    // ── Add-or-replace when converting a quote onto a project still under review ────
+    'quote_conversion_modal_title'  => 'Project Still Under Review',
+    'quote_conversion_modal_body'   => 'A project under review already exists for this tender. What do you want to do with this quote?',
+    'quote_conversion_add_vo'       => 'Add as a Variation Order',
+    'quote_conversion_add_vo_hint'  => 'This quote is added as a separate Variation Order awaiting review — the project\'s current items stay as they are.',
+    'quote_conversion_replace'      => 'Replace the Current Quote Entirely',
+    'quote_conversion_replace_hint' => 'This quote fully replaces the project\'s origin quote (and its customer, if different) — no separate Variation Order.',
 
     // ── Variation Orders ──────────────────────────────────────────────────────
     'variation_order_created'  => 'The price quote was sent as a Variation Order to the review queue.',
@@ -386,6 +396,8 @@ return [
     'reminder_drive_url'        => 'Google Drive Link',
     'reminder_drive_link_label' => 'Google Drive Link (from the requested purchase)',
     'reminder_items'            => 'Requested Materials',
+    'reminder_choose_from_project' => 'Choose From Project Items',
+    'reminder_project_no_items'    => 'No price quote items on this project.',
     'reminder_added'            => 'Request sent successfully — the purchase request officers will be notified.',
     'reminder_status_pending'   => 'Awaiting Creation',
     'reminder_status_fulfilled' => 'Created',
@@ -413,7 +425,7 @@ return [
     'price_analyses_list'       => 'Price Analyses',
     'price_analyses_subtitle'   => 'Cost and selling-price breakdown for CIAT quotations',
     'add_price_analysis'        => 'New Analysis',
-    'add_price_analysis_subtitle' => 'Choose the branch, then add each CIAT product line',
+    'add_price_analysis_subtitle' => 'Choose the branch, then add each product line',
     'edit_price_analysis'       => 'Edit Analysis',
     'analysis_number'           => 'Analysis No.',
     'analysis_branch'           => 'Branch',

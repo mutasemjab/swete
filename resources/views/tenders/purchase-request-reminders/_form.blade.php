@@ -12,6 +12,19 @@
         )->toJson() }},
         addItem() { this.items.push({ material_id: '', quantity: '', ercd: '', unit_price: '', features: [''] }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
+        projectId: '{{ old('project_id', $reminder?->project_id) }}',
+        projectItems: {{ $projectItems->toJson() }},
+        showProjectItemsPicker: false,
+        get selectedProjectItems() { return this.projectItems[this.projectId] || []; },
+        addFromProject(projectItem) {
+            const newItem = { material_id: projectItem.material_id, quantity: projectItem.quantity, ercd: '', unit_price: projectItem.unit_price, features: [''] };
+            if (this.items.length === 1 && !this.items[0].material_id) {
+                this.items[0] = newItem;
+            } else {
+                this.items.push(newItem);
+            }
+            this.$nextTick(() => window.initSelect2());
+        },
       }"
       x-init="$nextTick(() => window.initSelect2())">
 
@@ -25,7 +38,7 @@
         <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
                 <label class="form-label">{{ __('tenders.project') }} <span class="text-rose-500">*</span></label>
-                <select name="project_id" class="js-select2 form-select @error('project_id') is-invalid @enderror">
+                <select name="project_id" x-model="projectId" class="js-select2 form-select @error('project_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($projects as $project)
                         <option value="{{ $project->id }}" @selected(old('project_id', $reminder?->project_id) == $project->id)>{{ $project->number }} — {{ $project->localized_title }}</option>
@@ -50,10 +63,16 @@
                 <i class="fa-solid fa-list text-orange-500 text-sm"></i>
                 {{ __('tenders.reminder_items') }}
             </h3>
-            <button type="button" @click="addItem()" class="btn-secondary btn-sm">
-                <i class="fa-solid fa-plus"></i>
-                {{ __('accounting.invoice_add_item') }}
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="showProjectItemsPicker = true" x-show="projectId" x-cloak class="btn-secondary btn-sm">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    {{ __('tenders.reminder_choose_from_project') }}
+                </button>
+                <button type="button" @click="addItem()" class="btn-secondary btn-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    {{ __('accounting.invoice_add_item') }}
+                </button>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -119,5 +138,42 @@
             </table>
         </div>
         @error('items')<p class="form-error px-5 py-3"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+    </div>
+
+    {{-- "Choose from this project's own items" modal — adds a reminder-item row pre-filled from
+         one of the selected project's already-priced quote items, instead of re-typing materials
+         the project already has. --}}
+    <div x-show="showProjectItemsPicker" x-cloak
+         class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div @click.outside="showProjectItemsPicker = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-800">{{ __('tenders.reminder_choose_from_project') }}</h3>
+                <button type="button" @click="showProjectItemsPicker = false" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="px-6 py-4 overflow-y-auto flex-1">
+                <template x-if="selectedProjectItems.length === 0">
+                    <p class="text-sm text-slate-400 text-center py-6">{{ __('tenders.reminder_project_no_items') }}</p>
+                </template>
+                <div class="space-y-2">
+                    <template x-for="(projectItem, pIndex) in selectedProjectItems" :key="pIndex">
+                        <div class="flex items-center justify-between gap-3 border border-slate-200 rounded-xl px-4 py-2.5">
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm" x-text="projectItem.name"></p>
+                                <p class="text-xs text-slate-400" dir="ltr" x-text="'Qty: ' + projectItem.quantity"></p>
+                            </div>
+                            <button type="button" @click="addFromProject(projectItem)" class="btn-secondary btn-sm flex-shrink-0">
+                                <i class="fa-solid fa-plus"></i>
+                                {{ __('app.add') }}
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end">
+                <button type="button" @click="showProjectItemsPicker = false" class="btn-secondary">{{ __('app.close') }}</button>
+            </div>
+        </div>
     </div>
 </div>

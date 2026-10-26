@@ -79,13 +79,16 @@ class PriceQuoteController extends ModuleController
 
         $validated = $this->validated($request);
 
+        $tender = ($validated['tender_id'] ?? null) ? Tender::find($validated['tender_id']) : null;
+        $tenderSequence = $tender
+            ? (int) PriceQuote::where('tender_id', $tender->id)->max('tender_sequence') + 1
+            : null;
+
         $priceQuote = PriceQuote::create([
             ...$validated,
-            'number'          => PriceQuote::nextNumber(),
+            'number'          => PriceQuote::nextNumber($tender, $tenderSequence ?? 1),
             'status'          => 'draft',
-            'tender_sequence' => ($validated['tender_id'] ?? null)
-                ? (int) PriceQuote::where('tender_id', $validated['tender_id'])->max('tender_sequence') + 1
-                : null,
+            'tender_sequence' => $tenderSequence,
             'created_by' => $request->user()->id,
         ]);
 

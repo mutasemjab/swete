@@ -195,8 +195,16 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
+                    @php
+                        // Whenever a project for this tender is still awaiting its first approval,
+                        // converting ANY quote (a later revision of the one already linked, a
+                        // different customer, whatever) is never silently auto-decided — the user
+                        // explicitly picks "add as Variation Order" or "replace entirely" instead.
+                        // An ACTIVE (already-approved) project keeps the old, unprompted behavior.
+                        $underReviewProject = $tender->projects->first(fn ($p) => $p->is_current && $p->status === 'under_review');
+                    @endphp
                     @foreach($tender->priceQuotes as $quote)
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    <tr class="hover:bg-slate-50/50 transition-colors" @if($underReviewProject && ! $quote->isLocked() && ! $quote->hasPendingVariationOrder()) x-data="{ showConversionModal: false }" @endif>
                         <td class="px-5 py-3">
                             <a href="{{ route('price-quotes.show', $quote) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $quote->number }}</a>
                             @unless($quote->is_current)
@@ -211,6 +219,47 @@
                                 <span class="badge bg-emerald-100 text-emerald-700">{{ __('tenders.quote_converted_badge') }}</span>
                             @elseif($quote->hasPendingVariationOrder())
                                 <span class="badge bg-amber-100 text-amber-700">{{ __('tenders.quote_pending_vo_badge') }}</span>
+                            @elseif($underReviewProject)
+                                <button type="button" @click="showConversionModal = true" class="btn-primary btn-sm">
+                                    <i class="fa-solid fa-diagram-project"></i>
+                                    {{ __('tenders.convert_to_project') }}
+                                </button>
+                                <div x-show="showConversionModal" x-cloak class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+                                    <div @click.outside="showConversionModal = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+                                        <div class="px-6 py-5 border-b border-slate-100">
+                                            <h3 class="font-bold text-slate-800">{{ __('tenders.quote_conversion_modal_title') }}</h3>
+                                            <p class="text-sm text-slate-500 mt-1">{{ __('tenders.quote_conversion_modal_body') }}</p>
+                                        </div>
+                                        <div class="px-6 py-5 space-y-3">
+                                            <form action="{{ route('price-quotes.convert-to-project', $quote) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="mode" value="add">
+                                                <button type="submit" class="btn-secondary w-full justify-start text-start">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                    <span>
+                                                        <span class="block font-bold">{{ __('tenders.quote_conversion_add_vo') }}</span>
+                                                        <span class="block text-xs text-slate-400 font-normal mt-0.5">{{ __('tenders.quote_conversion_add_vo_hint') }}</span>
+                                                    </span>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('price-quotes.convert-to-project', $quote) }}" method="POST"
+                                                  @submit="if (! confirm('{{ __('tenders.convert_to_project_confirm') }}')) $event.preventDefault()">
+                                                @csrf
+                                                <input type="hidden" name="mode" value="replace">
+                                                <button type="submit" class="btn-danger w-full justify-start text-start">
+                                                    <i class="fa-solid fa-right-left"></i>
+                                                    <span>
+                                                        <span class="block font-bold">{{ __('tenders.quote_conversion_replace') }}</span>
+                                                        <span class="block text-xs text-rose-100 font-normal mt-0.5">{{ __('tenders.quote_conversion_replace_hint') }}</span>
+                                                    </span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <div class="px-6 py-4 border-t border-slate-100 flex justify-end">
+                                            <button type="button" @click="showConversionModal = false" class="btn-secondary">{{ __('app.cancel') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
                             @else
                                 <form action="{{ route('price-quotes.convert-to-project', $quote) }}" method="POST"
                                       @submit="if (! confirm('{{ __('tenders.convert_to_project_confirm') }}')) $event.preventDefault()">
