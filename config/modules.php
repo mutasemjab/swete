@@ -300,6 +300,27 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
+    // X8 MODULE  ← new module: global approval queue for every tender-linked analysis item
+    // ──────────────────────────────────────────────────────────────────────────
+    'x8' => [
+        'name'        => 'x8.module_name',
+        'description' => 'x8.module_desc',
+        'icon'        => 'square-check',
+        'color'       => 'fuchsia',
+        'route'       => 'x8.index',
+        'permission'  => 'x8.view',
+        'gradient'    => 'from-fuchsia-500 to-fuchsia-700',
+        'sections'    => [
+            [
+                'label' => 'x8.section_x8',
+                'items' => [
+                    ['label' => 'x8.nav_x8_list', 'route' => 'x8.index', 'icon' => 'square-check', 'permission' => 'x8.view'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
     // SPLIT UNIT MODULE  ← new module, separate quotations for split AC units
     // ──────────────────────────────────────────────────────────────────────────
     'split_units' => [

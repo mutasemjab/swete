@@ -76,6 +76,17 @@ class PriceAnalysisItem extends Model
     }
 
     /**
+     * "X8" module's Cost Price column — L.P × the discount % this line's CIAT discount actually
+     * carried when it was added (0 for a warehouse-sourced line, which has no discount at all).
+     * Deliberately NOT the same as `cost` above (which also folds in min_profit_percent) — the
+     * user asked for this specific, simpler figure under its own name.
+     */
+    public function getCostPriceAttribute(): float
+    {
+        return round((float) $this->list_price * (float) $this->discount_percent / 100, 3);
+    }
+
+    /**
      * cost = list price after the CIAT discount, inflated by the discount's own enforced minimum
      * profit % (0 for a warehouse-sourced line, which has neither); profit = cost × profit % (a
      * markup, not a flat amount typed directly — see the 2026-10-04 change); total_profit =

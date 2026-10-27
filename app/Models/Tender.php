@@ -100,6 +100,12 @@ class Tender extends Model
         return $this->hasMany(PriceAnalysis::class, 'linked_id')->where('linked_type', 'tender')->where('is_current', true);
     }
 
+    /** General attachments for the whole "X8" (Analysis Items) section — not per item. */
+    public function analysisAttachments(): HasMany
+    {
+        return $this->hasMany(TenderAnalysisAttachment::class);
+    }
+
     public function extraFieldValues(): HasMany
     {
         return $this->hasMany(ClientExtraFieldValue::class, 'entity_id')

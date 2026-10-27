@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenders;
 
 use App\Http\Controllers\ModuleController;
+use App\Models\PriceAnalysisItem;
 use App\Models\Project;
 use App\Models\ProjectVariationOrder;
 use App\Models\TenderStatus;
@@ -37,7 +38,24 @@ class ProjectReviewController extends ModuleController
             ->latest()
             ->get();
 
-        return $this->moduleView('tenders.project-reviews.index', compact('projects', 'variationOrders'));
+        // Pending X8 items — approved/rejected ones don't belong in a review queue, and an item
+        // with no x8 row at all has never been decided on, so it counts as pending too.
+        $pendingX8Items = PriceAnalysisItem::query()
+            ->whereHas('priceAnalysis', fn ($q) => $q->where('is_current', true)->where('linked_type', 'tender'))
+            ->where(fn ($q) => $q->whereDoesntHave('x8')->orWhereHas('x8', fn ($q2) => $q2->where('approval_status', 'pending')))
+            ->with(['x8', 'material', 'priceAnalysis'])
+            ->latest('id')
+            ->get();
+
+        // PriceAnalysis::linked() is convention-based (branches on linked_type), not eager-loadable
+        // via with() — set manually, same fix as X8Controller::index().
+        $pendingX8Items->each(function ($item) {
+            if ($item->priceAnalysis) {
+                $item->priceAnalysis->setRelation('linked', $item->priceAnalysis->linked()->first());
+            }
+        });
+
+        return $this->moduleView('tenders.project-reviews.index', compact('projects', 'variationOrders', 'pendingX8Items'));
     }
 
     public function approve(Project $project)

@@ -98,7 +98,7 @@ class PriceAnalysis extends Model
      */
     public function archiveCurrentVersion(): self
     {
-        $this->loadMissing('items');
+        $this->loadMissing('items.x8');
 
         $oldNumber  = $this->number;
         $oldVersion = $this->version;
@@ -116,7 +116,19 @@ class PriceAnalysis extends Model
         $archive->save();
 
         foreach ($this->items as $item) {
-            $archive->items()->create($item->toArray());
+            $archivedItem = $archive->items()->create($item->toArray());
+
+            // Clone the "X8" companion row too, so the frozen snapshot still shows exactly what
+            // the required-discount/notes/approval decision was AT that point in time — X8 isn't
+            // part of $item's own table, so the create() above never carries it over by itself.
+            if ($item->x8) {
+                X8::create([
+                    'price_analysis_item_id'    => $archivedItem->id,
+                    'required_discount_percent' => $item->x8->required_discount_percent,
+                    'notes'                      => $item->x8->notes,
+                    'approval_status'            => $item->x8->approval_status,
+                ]);
+            }
         }
 
         return $archive;

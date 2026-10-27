@@ -91,6 +91,9 @@ class PermissionSeeder extends Seeder
             // Projects Under Review (new standalone module — approval queue before a converted tender becomes a real project)
             'projects_under_review.view', 'projects_under_review.approve', 'projects_under_review.reject',
 
+            // X8 (new standalone module — global approval queue for tender-linked analysis items)
+            'x8.view', 'x8.approve',
+
             // Split Units (new module — separate quotations for split AC units)
             'split_units.view',
             'split_units.create', 'split_units.edit', 'split_units.delete', 'split_units.print',
@@ -185,7 +188,8 @@ class PermissionSeeder extends Seeder
                 ->where(fn ($query) => $query
                     ->where('name', 'like', 'tenders.%')
                     ->orWhere('name', 'like', 'quotations.%')
-                    ->orWhere('name', 'like', 'analyses.%'))
+                    ->orWhere('name', 'like', 'analyses.%')
+                    ->orWhere('name', 'like', 'x8.%'))
                 ->get()
         );
 

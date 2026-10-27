@@ -38,8 +38,10 @@ return new class extends Migration
             $table->decimal('price', 14, 3);
             $table->decimal('to_jd', 14, 3);
             $table->decimal('shipping', 14, 3)->default(0);
-            // Quick-edit fields surfaced on the Tender's own show page (outside the versioned
-            // Price Analysis edit flow) — edited directly in place, no archiving/versioning.
+            // Deprecated in place (never dropped mid-development — same precedent as elsewhere in
+            // this app): superseded by the dedicated `x8` table/model, which is now the only thing
+            // actually read for required-discount/notes. syncItems() below still writes here too,
+            // positionally preserved across a full-form edit, but nothing displays these columns.
             $table->decimal('required_discount_percent', 5, 2)->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

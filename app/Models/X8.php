@@ -13,6 +13,7 @@ class X8 extends Model
         'price_analysis_item_id',
         'required_discount_percent',
         'notes',
+        'approval_status',
     ];
 
     protected $casts = [

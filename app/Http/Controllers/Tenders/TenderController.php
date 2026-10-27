@@ -91,7 +91,7 @@ class TenderController extends ModuleController
             // Every revision shown, not just the current one — so any of them can still be
             // converted to a project from here (not only the latest edit of each quote).
             'priceQuotes' => fn ($query) => $query->with('customer')->orderBy('tender_sequence')->orderBy('version'),
-            'projects', 'extraFieldValues.field', 'analyses.items.material', 'analyses.items.x8',
+            'projects', 'extraFieldValues.field', 'analyses.items.material', 'analyses.items.x8', 'analysisAttachments',
         ]);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 

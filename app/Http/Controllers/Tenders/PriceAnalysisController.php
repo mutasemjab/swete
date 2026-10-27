@@ -130,7 +130,11 @@ class PriceAnalysisController extends ModuleController
         return $this->moduleView('tenders.price-analyses.x8', ['analysis' => $priceAnalysis]);
     }
 
-    /** Saves the whole X8 form in one go — one upsert per item row. */
+    /**
+     * Saves the whole X8 form in one go — one upsert per item row. Always archives the analysis
+     * first (same unconditional-on-every-save rule as update() above), so every required-discount
+     * change is its own full revision, not just the ones made through approve()/reject() below.
+     */
     public function saveX8(Request $request, PriceAnalysis $priceAnalysis)
     {
         abort_unless($priceAnalysis->is_current, 404);
@@ -141,6 +145,8 @@ class PriceAnalysisController extends ModuleController
             'x8.*.required_discount_percent'      => ['nullable', 'numeric', 'min:0', 'max:100'],
             'x8.*.notes'                          => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $priceAnalysis->archiveCurrentVersion();
 
         foreach ($request->input('x8', []) as $row) {
             X8::updateOrCreate(

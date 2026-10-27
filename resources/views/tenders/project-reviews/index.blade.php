@@ -182,4 +182,70 @@
     </div>
 </div>
 @endif
+
+@if($pendingX8Items->isNotEmpty())
+<div class="card overflow-hidden mt-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-square-check text-fuchsia-500 text-sm"></i>
+            {{ __('x8.pending_section') }}
+        </h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_tender') }}</th>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_model') }}</th>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_required_discount') }}</th>
+                    <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @foreach($pendingX8Items as $item)
+                @php $tender = $item->priceAnalysis?->linked; @endphp
+                <tr class="hover:bg-slate-50/50 transition-colors bg-fuchsia-50/30" x-data="{ rejecting: false }">
+                    <td class="px-5 py-4">
+                        @if($tender)
+                            <a href="{{ route('tenders.show', $tender) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $tender->number }}</a>
+                        @else
+                            —
+                        @endif
+                    </td>
+                    <td class="px-5 py-4 font-bold text-slate-800">{{ $item->ciat_model ?: $item->material?->localized_name ?: '—' }}</td>
+                    <td class="px-5 py-4 text-slate-600" dir="ltr" x-show="!rejecting">{{ $item->x8?->required_discount_percent !== null ? number_format((float) $item->x8->required_discount_percent, 2) . '%' : '—' }}</td>
+                    <td class="px-5 py-4" x-show="!rejecting">
+                        <div class="flex items-center justify-end gap-2">
+                            <form action="{{ route('project-reviews.x8.approve', $item) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-primary btn-sm">
+                                    <i class="fa-solid fa-check"></i> {{ __('x8.approve') }}
+                                </button>
+                            </form>
+                            <button type="button" @click="rejecting = true" class="btn-danger btn-sm">
+                                <i class="fa-solid fa-xmark"></i> {{ __('x8.reject') }}
+                            </button>
+                        </div>
+                    </td>
+                    <template x-if="rejecting">
+                        <td colspan="2" class="px-5 py-4">
+                            <form action="{{ route('project-reviews.x8.reject', $item) }}" method="POST" class="flex items-end gap-2 flex-wrap">
+                                @csrf
+                                <div>
+                                    <label class="form-label">{{ __('x8.reject_new_discount_label') }}</label>
+                                    <input type="number" step="0.01" min="0" max="100" name="required_discount_percent"
+                                           value="{{ $item->x8?->required_discount_percent }}" class="form-input w-32" required>
+                                </div>
+                                <button type="submit" class="btn-danger btn-sm">{{ __('x8.reject_submit') }}</button>
+                                <button type="button" @click="rejecting = false" class="btn-secondary btn-sm">{{ __('app.cancel') }}</button>
+                            </form>
+                        </td>
+                    </template>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 @endsection

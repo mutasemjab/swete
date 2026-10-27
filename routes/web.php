@@ -35,6 +35,8 @@ use App\Http\Controllers\Tenders\CiatDiscountController;
 use App\Http\Controllers\Tenders\PriceAnalysisController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
+use App\Http\Controllers\Tenders\TenderAnalysisAttachmentController;
+use App\Http\Controllers\X8Controller;
 use App\Http\Controllers\Tenders\ProjectDeviceController;
 use App\Http\Controllers\Tenders\ProjectItemAssignmentController;
 use App\Http\Controllers\Tenders\ProjectQuestionController;
@@ -368,6 +370,18 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('project-reviews/{project}/reject', [ProjectReviewController::class, 'reject'])->name('project-reviews.reject')->middleware('permission:projects_under_review.reject');
     Route::post('project-reviews/variation-orders/{variationOrder}/approve', [ProjectReviewController::class, 'approveVariationOrder'])->name('project-reviews.variation-orders.approve')->middleware('permission:projects_under_review.approve');
     Route::post('project-reviews/variation-orders/{variationOrder}/reject', [ProjectReviewController::class, 'rejectVariationOrder'])->name('project-reviews.variation-orders.reject')->middleware('permission:projects_under_review.reject');
+    // Same approve/reject actions as the X8 module below — reachable from this page's own pending-X8 section too.
+    Route::post('project-reviews/x8/{item}/approve', [X8Controller::class, 'approve'])->name('project-reviews.x8.approve')->middleware('permission:x8.approve|projects_under_review.approve');
+    Route::post('project-reviews/x8/{item}/reject', [X8Controller::class, 'reject'])->name('project-reviews.x8.reject')->middleware('permission:x8.approve|projects_under_review.reject');
+
+    // ── X8 (new standalone module — global approval queue for tender-linked analysis items) ────
+    Route::get('x8', [X8Controller::class, 'index'])->name('x8.index')->middleware('permission:x8.view');
+    Route::post('x8/{item}/approve', [X8Controller::class, 'approve'])->name('x8.approve')->middleware('permission:x8.approve');
+    Route::post('x8/{item}/reject', [X8Controller::class, 'reject'])->name('x8.reject')->middleware('permission:x8.approve');
+
+    // ── Tender "X8" section attachments (general, not per-item) ────────────────────────────────
+    Route::post('tenders/{tender}/analysis-attachments', [TenderAnalysisAttachmentController::class, 'store'])->name('tenders.analysis-attachments.store')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
+    Route::delete('tenders/{tender}/analysis-attachments/{attachment}', [TenderAnalysisAttachmentController::class, 'destroy'])->name('tenders.analysis-attachments.destroy')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
 
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['create', 'store'])->middleware('permission:tenders.purchase_request_reminders.create');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'show'])->middleware('permission:tenders.view');
