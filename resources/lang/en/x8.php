@@ -17,6 +17,7 @@ return [
     'col_number'      => 'X8 Number',
     'col_item_count'  => 'Items',
     'col_tender'      => 'Tender',
+    'col_product'     => 'Product',
     'col_model'       => 'Model',
     'col_quantity'    => 'Quantity',
     'col_list_price'  => 'L.P',

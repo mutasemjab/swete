@@ -133,9 +133,21 @@ class PriceAnalysis extends Model
         // Clone the whole "X8" header + its items too, so the frozen snapshot still shows exactly
         // what every required-discount/notes/approval decision was AT that point in time — X8
         // isn't part of $item's own table, so the items-cloning loop above never carries it over.
+        // The header gets its own revision suffix here too, same scheme as this analysis's own
+        // number just above: the live header moves onto its next "-R{n}" number, the archived
+        // clone keeps the OLD one.
         if ($this->x8) {
+            $oldX8Number  = $this->x8->number;
+            $oldX8Version = $this->x8->version;
+
+            $this->x8->update([
+                'number'  => $this->x8->base_number . '-R' . $oldX8Version,
+                'version' => $oldX8Version + 1,
+            ]);
+
             $archivedX8 = X8::create([
-                'number'             => $this->x8->number,
+                'number'             => $oldX8Number,
+                'version'            => $oldX8Version,
                 'price_analysis_id'  => $archive->id,
                 'created_by'         => $this->x8->created_by,
             ]);

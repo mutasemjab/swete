@@ -13,8 +13,13 @@ class X8 extends Model
 
     protected $fillable = [
         'number',
+        'version',
         'price_analysis_id',
         'created_by',
+    ];
+
+    protected $casts = [
+        'version' => 'integer',
     ];
 
     /**
@@ -34,7 +39,13 @@ class X8 extends Model
             ->whereHas('priceAnalysis', fn ($q) => $q->where('is_current', true))
             ->count() + 1;
 
-        return sprintf('X8-%s-%05d', $year, $count);
+        return sprintf('X8-%s-%05d-R0', $year, $count);
+    }
+
+    /** The stable "X8-YYYY-00001" part of the number, with its "-R{n}" revision suffix stripped off. */
+    public function getBaseNumberAttribute(): string
+    {
+        return preg_replace('/-R\d+$/', '', $this->number);
     }
 
     /** Gets this analysis's existing X8 header, or creates one (with a fresh number) if it has none yet. */

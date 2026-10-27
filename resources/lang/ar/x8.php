@@ -17,6 +17,7 @@ return [
     'col_number'      => 'رقم X8',
     'col_item_count'  => 'عدد البنود',
     'col_tender'      => 'العطاء',
+    'col_product'     => 'المنتج',
     'col_model'       => 'Model',
     'col_quantity'    => 'الكمية',
     'col_list_price'  => 'L.P',

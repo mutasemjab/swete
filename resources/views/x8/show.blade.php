@@ -32,6 +32,7 @@
         <table class="w-full">
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
+                    <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_product') }}</th>
                     <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_model') }}</th>
                     <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_quantity') }}</th>
                     <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_list_price') }}</th>
@@ -45,9 +46,8 @@
                 @foreach($x8->priceAnalysis->items as $item)
                 @php $status = $item->x8?->approval_status ?? 'pending'; @endphp
                 <tr class="hover:bg-slate-50/50 transition-colors" x-data="{ rejecting: false }">
-                    <td class="px-5 py-4">
-                        <span class="font-bold text-slate-800">{{ $item->ciat_model ?: $item->material?->localized_name ?: '—' }}</span>
-                    </td>
+                    <td class="px-5 py-4 font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</td>
+                    <td class="px-5 py-4 text-slate-600" dir="ltr">{{ $item->ciat_model ?: '—' }}</td>
                     <td class="px-5 py-4 text-slate-600" dir="ltr">{{ number_format((float) $item->quantity, 3) }}</td>
                     <td class="px-5 py-4 text-slate-600" dir="ltr">{{ number_format((float) $item->list_price, 3) }}</td>
                     <td class="px-5 py-4 text-slate-600" dir="ltr">{{ number_format((float) $item->cost_price, 3) }}</td>

@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('x8', function (Blueprint $table) {
             $table->id();
-            // NOT unique at the DB level: PriceAnalysis::archiveCurrentVersion() clones this header
-            // (and its number, unchanged) onto every archived revision, so the same number
-            // legitimately exists on more than one row once an analysis has been revised.
+            // NOT unique at the DB level: every archived revision clone KEEPS the number it had at
+            // the moment it was frozen (e.g. "X8-2026-00001-R0"), while the live header moves onto
+            // its own next revision number ("-R1", "-R2", ...) — same base-number+suffix scheme as
+            // PriceAnalysis/PriceQuote, just without their own is_current/root_id columns, since
+            // whether a given X8 row is "live" or archived is already fully determined by whether
+            // its price_analysis_id points at an is_current analysis or not.
             $table->string('number');
+            $table->unsignedInteger('version')->default(1);
             $table->foreignId('price_analysis_id')->unique()->constrained('price_analyses')->cascadeOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
