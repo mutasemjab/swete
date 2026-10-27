@@ -377,6 +377,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     // ── X8 (new standalone module — global approval queue for tender-linked analysis items) ────
     Route::get('x8', [X8Controller::class, 'index'])->name('x8.index')->middleware('permission:x8.view');
+    Route::get('x8/{x8}', [X8Controller::class, 'show'])->name('x8.show')->middleware('permission:x8.view');
     Route::post('x8/{item}/approve', [X8Controller::class, 'approve'])->name('x8.approve')->middleware('permission:x8.approve');
     Route::post('x8/{item}/reject', [X8Controller::class, 'reject'])->name('x8.reject')->middleware('permission:x8.approve');
 

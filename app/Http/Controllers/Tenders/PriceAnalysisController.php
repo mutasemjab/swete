@@ -64,6 +64,12 @@ class PriceAnalysisController extends ModuleController
 
         $this->syncItems($analysis, $validated['items'], (float) $branch->ciat_jd_rate);
 
+        // Every tender-linked analysis gets its "X8" header (and number) right away, same as any
+        // other entity in the system — not conjured up lazily on the first approve/reject/save.
+        if ($analysis->linked_type === 'tender') {
+            X8::getOrCreateFor($analysis, $request->user()->id);
+        }
+
         return redirect()->route('price-analyses.show', $analysis)
             ->with('success', __('tenders.price_analysis_added'));
     }
@@ -160,10 +166,7 @@ class PriceAnalysisController extends ModuleController
 
         $priceAnalysis->archiveCurrentVersion();
 
-        $header = X8::firstOrCreate(
-            ['price_analysis_id' => $priceAnalysis->id],
-            ['created_by' => $request->user()->id],
-        );
+        $header = X8::getOrCreateFor($priceAnalysis, $request->user()->id);
 
         foreach ($request->input('x8', []) as $row) {
             X8Item::updateOrCreate(

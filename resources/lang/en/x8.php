@@ -12,8 +12,10 @@ return [
 
     // ── Index page ───────────────────────────────────────────────────────────
     'index_title'    => 'X8 Items',
-    'index_subtitle' => 'Every tender-linked analysis item — approve or reject its required discount %',
-    'no_items'        => 'No X8 items yet.',
+    'index_subtitle' => 'Every X8 record for a tender-linked price analysis — open one to approve or reject its items',
+    'no_items'        => 'No X8 records yet.',
+    'col_number'      => 'X8 Number',
+    'col_item_count'  => 'Items',
     'col_tender'      => 'Tender',
     'col_model'       => 'Model',
     'col_quantity'    => 'Quantity',

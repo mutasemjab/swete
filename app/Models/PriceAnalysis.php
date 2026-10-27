@@ -135,8 +135,9 @@ class PriceAnalysis extends Model
         // isn't part of $item's own table, so the items-cloning loop above never carries it over.
         if ($this->x8) {
             $archivedX8 = X8::create([
-                'price_analysis_id' => $archive->id,
-                'created_by'        => $this->x8->created_by,
+                'number'             => $this->x8->number,
+                'price_analysis_id'  => $archive->id,
+                'created_by'         => $this->x8->created_by,
             ]);
 
             foreach ($this->x8->items as $x8Item) {

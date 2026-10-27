@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('x8', function (Blueprint $table) {
             $table->id();
+            // NOT unique at the DB level: PriceAnalysis::archiveCurrentVersion() clones this header
+            // (and its number, unchanged) onto every archived revision, so the same number
+            // legitimately exists on more than one row once an analysis has been revised.
+            $table->string('number');
             $table->foreignId('price_analysis_id')->unique()->constrained('price_analyses')->cascadeOnDelete();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
