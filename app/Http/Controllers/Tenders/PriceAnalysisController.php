@@ -121,26 +121,39 @@ class PriceAnalysisController extends ModuleController
             ->with('success', __('tenders.price_analysis_updated'));
     }
 
-    /**
-     * Quick, non-versioned edit of a single item's X8 fields (required-discount-% / notes) —
-     * surfaced on the Tender's own show page. Stored in the dedicated x8 table, not on
-     * price_analysis_items, so editing never touches the versioned analysis record itself.
-     */
-    public function updateX8(Request $request, PriceAnalysisItem $item)
+    /** Dedicated page: shows all items for this analysis with editable X8 fields. */
+    public function editX8(PriceAnalysis $priceAnalysis)
     {
-        abort_unless($item->priceAnalysis->is_current, 404);
+        abort_unless($priceAnalysis->is_current, 404);
+        $priceAnalysis->load(['branch', 'items.material', 'items.x8']);
 
-        $validated = $request->validate([
-            'required_discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'notes'                     => ['nullable', 'string', 'max:1000'],
+        return $this->moduleView('tenders.price-analyses.x8', ['analysis' => $priceAnalysis]);
+    }
+
+    /** Saves the whole X8 form in one go — one upsert per item row. */
+    public function saveX8(Request $request, PriceAnalysis $priceAnalysis)
+    {
+        abort_unless($priceAnalysis->is_current, 404);
+
+        $request->validate([
+            'x8'                                  => ['nullable', 'array'],
+            'x8.*.price_analysis_item_id'         => ['required', 'exists:price_analysis_items,id'],
+            'x8.*.required_discount_percent'      => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'x8.*.notes'                          => ['nullable', 'string', 'max:1000'],
         ]);
 
-        X8::updateOrCreate(
-            ['price_analysis_item_id' => $item->id],
-            $validated,
-        );
+        foreach ($request->input('x8', []) as $row) {
+            X8::updateOrCreate(
+                ['price_analysis_item_id' => $row['price_analysis_item_id']],
+                [
+                    'required_discount_percent' => $row['required_discount_percent'] ?? null,
+                    'notes'                     => $row['notes'] ?? null,
+                ],
+            );
+        }
 
-        return back()->with('success', __('tenders.analysis_item_updated'));
+        return redirect()->route('price-analyses.x8.edit', $priceAnalysis)
+            ->with('success', __('tenders.x8_saved'));
     }
 
     public function destroy(PriceAnalysis $priceAnalysis)

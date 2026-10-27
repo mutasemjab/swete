@@ -441,6 +441,8 @@ return [
     'analysis_item_model'       => 'Model',
     'analysis_item_required_discount' => 'نسبة الخصم المطلوبة',
     'analysis_item_updated'     => 'تم تحديث البند بنجاح.',
+    'x8_edit'                   => 'تعديل بنود التحليل',
+    'x8_saved'                  => 'تم حفظ بيانات التحليل بنجاح.',
     'no_analysis_items'         => 'لا توجد بنود تحليل بعد.',
     'quote_choose_from_analysis' => 'اختر من التحليل',
     'quote_select_analysis_first' => 'اختر تحليل سعر أولاً.',
