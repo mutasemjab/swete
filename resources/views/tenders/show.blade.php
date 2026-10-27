@@ -202,21 +202,21 @@
                         <td class="px-5 py-3 font-bold text-slate-800">{{ $item->ciat_model ?: $item->material?->localized_name ?: '—' }}</td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->quantity, 3) }}</td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->list_price, 3) }}</td>
-                        <td class="px-5 py-3 text-slate-600" dir="ltr" x-show="!editing">{{ $item->required_discount_percent !== null ? number_format((float) $item->required_discount_percent, 2) . '%' : '—' }}</td>
-                        <td class="px-5 py-3 text-slate-600" x-show="!editing">{{ $item->notes ?: '—' }}</td>
+                        <td class="px-5 py-3 text-slate-600" dir="ltr" x-show="!editing">{{ $item->x8?->required_discount_percent !== null ? number_format((float) $item->x8->required_discount_percent, 2) . '%' : '—' }}</td>
+                        <td class="px-5 py-3 text-slate-600" x-show="!editing">{{ $item->x8?->notes ?: '—' }}</td>
                         @if($canEditAnalysisItems)
                         <template x-if="editing">
                             <td colspan="3" class="px-5 py-3">
-                                <form action="{{ route('price-analysis-items.update', $item) }}" method="POST" class="flex items-end gap-2 flex-wrap">
+                                <form action="{{ route('price-analysis-items.x8.update', $item) }}" method="POST" class="flex items-end gap-2 flex-wrap">
                                     @csrf
                                     @method('PATCH')
                                     <div>
                                         <label class="form-label">{{ __('tenders.analysis_item_required_discount') }}</label>
-                                        <input type="number" step="0.01" min="0" max="100" name="required_discount_percent" value="{{ $item->required_discount_percent }}" class="form-input w-28">
+                                        <input type="number" step="0.01" min="0" max="100" name="required_discount_percent" value="{{ $item->x8?->required_discount_percent }}" class="form-input w-28">
                                     </div>
                                     <div class="flex-1 min-w-[160px]">
                                         <label class="form-label">{{ __('app.notes') }}</label>
-                                        <input type="text" name="notes" value="{{ $item->notes }}" class="form-input w-full">
+                                        <input type="text" name="notes" value="{{ $item->x8?->notes }}" class="form-input w-full">
                                     </div>
                                     <button type="submit" class="btn-primary btn-sm">{{ __('app.save') }}</button>
                                     <button type="button" @click="editing = false" class="btn-secondary btn-sm">{{ __('app.cancel') }}</button>

@@ -9,6 +9,7 @@ use App\Models\Material;
 use App\Models\PriceAnalysis;
 use App\Models\PriceAnalysisItem;
 use App\Models\Tender;
+use App\Models\X8;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -121,12 +122,11 @@ class PriceAnalysisController extends ModuleController
     }
 
     /**
-     * Quick, non-versioned edit of a single item's required-discount-% / notes — surfaced in the
-     * "X8" table on the Tender's own show page, outside the full Price Analysis edit flow.
-     * Deliberately does NOT call archiveCurrentVersion(): these two fields are admin annotations,
-     * not part of the priced analysis itself, so editing them shouldn't spawn a new revision.
+     * Quick, non-versioned edit of a single item's X8 fields (required-discount-% / notes) —
+     * surfaced on the Tender's own show page. Stored in the dedicated x8 table, not on
+     * price_analysis_items, so editing never touches the versioned analysis record itself.
      */
-    public function updateItemFields(Request $request, PriceAnalysisItem $item)
+    public function updateX8(Request $request, PriceAnalysisItem $item)
     {
         abort_unless($item->priceAnalysis->is_current, 404);
 
@@ -135,7 +135,10 @@ class PriceAnalysisController extends ModuleController
             'notes'                     => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $item->update($validated);
+        X8::updateOrCreate(
+            ['price_analysis_item_id' => $item->id],
+            $validated,
+        );
 
         return back()->with('success', __('tenders.analysis_item_updated'));
     }

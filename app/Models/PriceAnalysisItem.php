@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PriceAnalysisItem extends Model
 {
@@ -46,6 +47,11 @@ class PriceAnalysisItem extends Model
     public function priceAnalysis(): BelongsTo
     {
         return $this->belongsTo(PriceAnalysis::class);
+    }
+
+    public function x8(): HasOne
+    {
+        return $this->hasOne(X8::class, 'price_analysis_item_id');
     }
 
     public function ciatDiscount(): BelongsTo
