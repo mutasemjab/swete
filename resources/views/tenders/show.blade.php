@@ -161,15 +161,10 @@
                         </td>
                         <td class="px-5 py-3 text-slate-600">{{ $analysis->branch?->localized_name }}</td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ $analysis->created_at->format('Y-m-d') }}</td>
-                        <td class="px-5 py-3 text-end flex items-center justify-end gap-2">
+                        <td class="px-5 py-3 text-end">
                             <a href="{{ route('price-analyses.show', $analysis) }}" class="btn-secondary btn-sm">
                                 <i class="fa-solid fa-eye"></i> {{ __('app.view') }}
                             </a>
-                            @if($canEditAnalysisItems && $analysis->is_current)
-                            <a href="{{ route('price-analyses.x8.edit', $analysis) }}" class="btn-secondary btn-sm">
-                                <i class="fa-solid fa-table-list"></i> X8
-                            </a>
-                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -187,6 +182,13 @@
 <div class="card overflow-hidden mb-5">
     <div class="card-header">
         <h3 class="font-bold text-slate-700">{{ __('tenders.analysis_items_section') }}</h3>
+        @if($canEditAnalysisItems)
+            @foreach($tender->analyses->where('is_current', true) as $currentAnalysis)
+            <a href="{{ route('price-analyses.x8.edit', $currentAnalysis) }}" class="btn-secondary btn-sm">
+                <i class="fa-solid fa-table-list"></i> X8
+            </a>
+            @endforeach
+        @endif
     </div>
     @if($analysisItems->isEmpty())
         <p class="px-6 py-6 text-sm text-slate-400">{{ __('tenders.no_analysis_items') }}</p>
@@ -205,7 +207,12 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach($analysisItems as $item)
                     <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-5 py-3 font-bold text-slate-800">{{ $item->ciat_model ?: $item->material?->localized_name ?: '—' }}</td>
+                        <td class="px-5 py-3">
+                            <div class="font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</div>
+                            @if($item->ciat_model)
+                            <div class="text-xs text-slate-400 mt-0.5" dir="ltr">{{ $item->ciat_model }}</div>
+                            @endif
+                        </td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->quantity, 3) }}</td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->list_price, 3) }}</td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ $item->x8?->required_discount_percent !== null ? number_format((float) $item->x8->required_discount_percent, 2) . '%' : '—' }}</td>
