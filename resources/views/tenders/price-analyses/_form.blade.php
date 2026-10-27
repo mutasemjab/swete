@@ -231,17 +231,17 @@
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"
-                                       step="0.001" min="0.001" dir="ltr" class="form-input !text-xs" required>
+                                       step="0.001" min="0.001" dir="ltr" class="form-input" required>
                             </td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][list_price]`" x-model="item.list_price"
-                                       step="0.001" min="0" dir="ltr" class="form-input !text-xs" required>
+                                       step="0.001" min="0" dir="ltr" class="form-input" required>
                             </td>
                             <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="fmt(calc(item).cost)"></td>
                             <td class="px-3 py-2.5">
                                 <div class="relative">
                                     <input type="number" :name="`items[${index}][profit_percent]`" x-model="item.profit_percent"
-                                           step="0.01" min="0" dir="ltr" class="form-input !text-xs !pe-5" required>
+                                           step="0.01" min="0" dir="ltr" class="form-input !pe-6" required>
                                     <span class="absolute top-1/2 -translate-y-1/2 end-2 text-slate-400 text-xs">%</span>
                                 </div>
                             </td>
@@ -251,7 +251,7 @@
                             <td class="px-3 py-2.5 text-xs text-slate-600" dir="ltr" x-text="fmt(calc(item).toJd)"></td>
                             <td class="px-3 py-2.5">
                                 <input type="number" :name="`items[${index}][shipping]`" x-model="item.shipping"
-                                       step="0.001" min="0" dir="ltr" class="form-input !text-xs">
+                                       step="0.001" min="0" dir="ltr" class="form-input">
                             </td>
                             <td class="px-3 py-2.5 text-xs font-bold text-orange-700" dir="ltr" x-text="fmt(calc(item).subtotal)"></td>
                             <td class="px-3 py-2.5 text-center">

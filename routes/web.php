@@ -333,7 +333,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['index', 'show'])->middleware('permission:analyses.view|tenders.view');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['edit', 'update'])->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['destroy'])->middleware('permission:analyses.price_analyses.delete|tenders.price_analyses.delete');
-    Route::get('price-analyses/{priceAnalysis}/x8', [PriceAnalysisController::class, 'editX8'])->name('price-analyses.x8.edit')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
+    Route::get('price-analyses/{priceAnalysis}/x8', [PriceAnalysisController::class, 'showX8'])->name('price-analyses.x8.show')->middleware('permission:analyses.view|tenders.view');
+    Route::get('price-analyses/{priceAnalysis}/x8/edit', [PriceAnalysisController::class, 'editX8'])->name('price-analyses.x8.edit')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
     Route::post('price-analyses/{priceAnalysis}/x8', [PriceAnalysisController::class, 'saveX8'])->name('price-analyses.x8.save')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
 
     // ── Price Quotes (now standalone quotations module — still accessible from tenders/maintenance flows) ──

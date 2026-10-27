@@ -6,17 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    // "x8" is the HEADER — one per Price Analysis (the whole X8 page for that one analysis), not
+    // one per item. Its line-by-line data lives in x8_items (see create_x8_items_table), the same
+    // header/items split as price_analyses/price_analysis_items.
     public function up(): void
     {
         Schema::create('x8', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('price_analysis_item_id')->unique()->constrained('price_analysis_items')->cascadeOnDelete();
-            $table->decimal('required_discount_percent', 5, 2)->nullable();
-            $table->text('notes')->nullable();
-            // Approval workflow for the "X8" module — rejecting always pairs with a new proposed
-            // required_discount_percent (a counter-offer), so the item goes back to 'pending'
-            // rather than parking as a dead-end 'rejected' state.
-            $table->enum('approval_status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->foreignId('price_analysis_id')->unique()->constrained('price_analyses')->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });
     }

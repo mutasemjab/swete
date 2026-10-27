@@ -441,6 +441,7 @@ return [
     'analysis_item_model'       => 'Model',
     'analysis_item_required_discount' => 'Required Discount %',
     'analysis_item_updated'     => 'Item updated successfully.',
+    'x8_show'                   => 'X8 Analysis Items',
     'x8_edit'                   => 'Edit Analysis Items',
     'x8_saved'                  => 'Analysis items saved successfully.',
     'no_analysis_items'         => 'No analysis items yet.',

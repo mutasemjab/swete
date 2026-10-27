@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -48,6 +49,12 @@ class PriceAnalysis extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PriceAnalysisItem::class);
+    }
+
+    /** The "X8" page's header for this analysis (one per analysis — its items live on X8::items()). */
+    public function x8(): HasOne
+    {
+        return $this->hasOne(X8::class);
     }
 
     /** Only meaningful on a frozen/archived row — the still-editable live analysis it was cloned from. */
@@ -98,7 +105,7 @@ class PriceAnalysis extends Model
      */
     public function archiveCurrentVersion(): self
     {
-        $this->loadMissing('items.x8');
+        $this->loadMissing(['items', 'x8.items']);
 
         $oldNumber  = $this->number;
         $oldVersion = $this->version;
@@ -115,18 +122,34 @@ class PriceAnalysis extends Model
         $archive->root_id    = $this->id;
         $archive->save();
 
+        // Track old item id -> archived item id, so the X8 header's line items (keyed by
+        // price_analysis_item_id) below can be re-pointed at their archived counterparts.
+        $itemIdMap = [];
         foreach ($this->items as $item) {
             $archivedItem = $archive->items()->create($item->toArray());
+            $itemIdMap[$item->id] = $archivedItem->id;
+        }
 
-            // Clone the "X8" companion row too, so the frozen snapshot still shows exactly what
-            // the required-discount/notes/approval decision was AT that point in time — X8 isn't
-            // part of $item's own table, so the create() above never carries it over by itself.
-            if ($item->x8) {
-                X8::create([
-                    'price_analysis_item_id'    => $archivedItem->id,
-                    'required_discount_percent' => $item->x8->required_discount_percent,
-                    'notes'                      => $item->x8->notes,
-                    'approval_status'            => $item->x8->approval_status,
+        // Clone the whole "X8" header + its items too, so the frozen snapshot still shows exactly
+        // what every required-discount/notes/approval decision was AT that point in time — X8
+        // isn't part of $item's own table, so the items-cloning loop above never carries it over.
+        if ($this->x8) {
+            $archivedX8 = X8::create([
+                'price_analysis_id' => $archive->id,
+                'created_by'        => $this->x8->created_by,
+            ]);
+
+            foreach ($this->x8->items as $x8Item) {
+                if (! isset($itemIdMap[$x8Item->price_analysis_item_id])) {
+                    continue;
+                }
+
+                X8Item::create([
+                    'x8_id'                      => $archivedX8->id,
+                    'price_analysis_item_id'     => $itemIdMap[$x8Item->price_analysis_item_id],
+                    'required_discount_percent'  => $x8Item->required_discount_percent,
+                    'notes'                       => $x8Item->notes,
+                    'approval_status'             => $x8Item->approval_status,
                 ]);
             }
         }

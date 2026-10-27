@@ -10,6 +10,7 @@ use App\Models\PriceAnalysis;
 use App\Models\PriceAnalysisItem;
 use App\Models\Tender;
 use App\Models\X8;
+use App\Models\X8Item;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -121,19 +122,30 @@ class PriceAnalysisController extends ModuleController
             ->with('success', __('tenders.price_analysis_updated'));
     }
 
-    /** Dedicated page: shows all items for this analysis with editable X8 fields. */
+    /** Read-only "X8" page: this analysis's header + every item's current decision. */
+    public function showX8(PriceAnalysis $priceAnalysis)
+    {
+        $priceAnalysis->load(['branch', 'items.material', 'items.x8']);
+        $this->loadLinkedTenderForX8($priceAnalysis);
+
+        return $this->moduleView('tenders.price-analyses.x8-show', ['analysis' => $priceAnalysis]);
+    }
+
+    /** Dedicated edit form for the same "X8" header, with the editable fields. */
     public function editX8(PriceAnalysis $priceAnalysis)
     {
         abort_unless($priceAnalysis->is_current, 404);
         $priceAnalysis->load(['branch', 'items.material', 'items.x8']);
+        $this->loadLinkedTenderForX8($priceAnalysis);
 
         return $this->moduleView('tenders.price-analyses.x8', ['analysis' => $priceAnalysis]);
     }
 
     /**
-     * Saves the whole X8 form in one go — one upsert per item row. Always archives the analysis
-     * first (same unconditional-on-every-save rule as update() above), so every required-discount
-     * change is its own full revision, not just the ones made through approve()/reject() below.
+     * Saves the whole X8 form in one go — one header (X8) per analysis, one upsert per item row
+     * (X8Item). Always archives the analysis first (same unconditional-on-every-save rule as
+     * update() above), so every required-discount change is its own full revision, not just the
+     * ones made through X8Controller::approve()/reject().
      */
     public function saveX8(Request $request, PriceAnalysis $priceAnalysis)
     {
@@ -148,9 +160,14 @@ class PriceAnalysisController extends ModuleController
 
         $priceAnalysis->archiveCurrentVersion();
 
+        $header = X8::firstOrCreate(
+            ['price_analysis_id' => $priceAnalysis->id],
+            ['created_by' => $request->user()->id],
+        );
+
         foreach ($request->input('x8', []) as $row) {
-            X8::updateOrCreate(
-                ['price_analysis_item_id' => $row['price_analysis_item_id']],
+            X8Item::updateOrCreate(
+                ['x8_id' => $header->id, 'price_analysis_item_id' => $row['price_analysis_item_id']],
                 [
                     'required_discount_percent' => $row['required_discount_percent'] ?? null,
                     'notes'                     => $row['notes'] ?? null,
@@ -158,7 +175,7 @@ class PriceAnalysisController extends ModuleController
             );
         }
 
-        return redirect()->route('price-analyses.x8.edit', $priceAnalysis)
+        return redirect()->route('price-analyses.x8.show', $priceAnalysis)
             ->with('success', __('tenders.x8_saved'));
     }
 
@@ -168,6 +185,20 @@ class PriceAnalysisController extends ModuleController
 
         return redirect()->route('price-analyses.index')
             ->with('success', __('tenders.price_analysis_deleted'));
+    }
+
+    /**
+     * linked() isn't a real relation (see show()/edit() above) — set manually. The attachments
+     * card on both X8 pages is tender-scoped (general to the WHOLE X8 section of that tender, not
+     * this one analysis), so it only renders when this analysis is actually linked to a tender.
+     */
+    private function loadLinkedTenderForX8(PriceAnalysis $priceAnalysis): void
+    {
+        $priceAnalysis->setRelation('linked', $priceAnalysis->linked()->first());
+
+        if ($priceAnalysis->linked_type === 'tender' && $priceAnalysis->linked) {
+            $priceAnalysis->linked->load('analysisAttachments');
+        }
     }
 
     private function formOptions(): array

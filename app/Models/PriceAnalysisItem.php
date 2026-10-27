@@ -49,9 +49,10 @@ class PriceAnalysisItem extends Model
         return $this->belongsTo(PriceAnalysis::class);
     }
 
+    /** The X8-module decision (required discount %, notes, approval status) for THIS specific item. */
     public function x8(): HasOne
     {
-        return $this->hasOne(X8::class, 'price_analysis_item_id');
+        return $this->hasOne(X8Item::class, 'price_analysis_item_id');
     }
 
     public function ciatDiscount(): BelongsTo

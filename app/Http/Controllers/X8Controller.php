@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PriceAnalysis;
 use App\Models\PriceAnalysisItem;
 use App\Models\X8;
+use App\Models\X8Item;
 use Illuminate\Http\Request;
 
 /**
@@ -49,17 +51,14 @@ class X8Controller extends ModuleController
         return $this->moduleView('x8.index', compact('items'));
     }
 
-    public function approve(PriceAnalysisItem $item)
+    public function approve(Request $request, PriceAnalysisItem $item)
     {
         $analysis = $item->priceAnalysis;
         abort_unless($analysis->is_current, 404);
 
         $analysis->archiveCurrentVersion();
 
-        X8::updateOrCreate(
-            ['price_analysis_item_id' => $item->id],
-            ['approval_status' => 'approved'],
-        );
+        $this->itemRow($analysis, $item, $request)->update(['approval_status' => 'approved']);
 
         return back()->with('success', __('x8.item_approved'));
     }
@@ -75,14 +74,22 @@ class X8Controller extends ModuleController
 
         $analysis->archiveCurrentVersion();
 
-        X8::updateOrCreate(
-            ['price_analysis_item_id' => $item->id],
-            [
-                'approval_status'           => 'pending',
-                'required_discount_percent' => $validated['required_discount_percent'],
-            ],
-        );
+        $this->itemRow($analysis, $item, $request)->update([
+            'approval_status'           => 'pending',
+            'required_discount_percent' => $validated['required_discount_percent'],
+        ]);
 
         return back()->with('success', __('x8.item_rejected'));
+    }
+
+    /** Gets (or creates) this analysis's X8 header, then this item's own row under it. */
+    private function itemRow(PriceAnalysis $analysis, PriceAnalysisItem $item, Request $request): X8Item
+    {
+        $header = X8::firstOrCreate(
+            ['price_analysis_id' => $analysis->id],
+            ['created_by' => $request->user()->id],
+        );
+
+        return X8Item::firstOrCreate(['x8_id' => $header->id, 'price_analysis_item_id' => $item->id]);
     }
 }

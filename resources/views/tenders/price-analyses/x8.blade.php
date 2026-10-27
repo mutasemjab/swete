@@ -10,9 +10,9 @@
         <p class="page-subtitle">{{ $analysis->number }} — {{ $analysis->branch?->localized_name }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('price-analyses.show', $analysis) }}" class="btn-secondary">
+        <a href="{{ route('price-analyses.x8.show', $analysis) }}" class="btn-secondary">
             <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-            {{ __('app.back_to_list') }}
+            {{ __('app.cancel') }}
         </a>
     </div>
 </div>
@@ -82,7 +82,7 @@
     </div>
 
     <div class="flex justify-end gap-2 mb-5">
-        <a href="{{ route('price-analyses.show', $analysis) }}" class="btn-secondary">
+        <a href="{{ route('price-analyses.x8.show', $analysis) }}" class="btn-secondary">
             {{ __('app.cancel') }}
         </a>
         <button type="submit" class="btn-primary">
