@@ -208,9 +208,9 @@
                     @foreach($analysisItems as $item)
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-5 py-3">
-                            <div class="font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</div>
+                            <span class="font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</span>
                             @if($item->ciat_model)
-                            <div class="text-xs text-slate-400 mt-0.5" dir="ltr">{{ $item->ciat_model }}</div>
+                            <span class="text-slate-400 text-sm ms-1" dir="ltr">({{ $item->ciat_model }})</span>
                             @endif
                         </td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->quantity, 3) }}</td>
