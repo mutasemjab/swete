@@ -39,9 +39,12 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach($analysis->items as $index => $item)
                     <tr class="hover:bg-slate-50/50 transition-colors">
-                        <input type="hidden" name="x8[{{ $index }}][price_analysis_item_id]" value="{{ $item->id }}">
-                        <td class="px-5 py-3 font-bold text-slate-800">
-                            {{ $item->ciat_model ?: $item->material?->localized_name ?: '—' }}
+                        <td class="px-5 py-3">
+                            <input type="hidden" name="x8[{{ $index }}][price_analysis_item_id]" value="{{ $item->id }}">
+                            <div class="font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</div>
+                            @if($item->ciat_model)
+                            <div class="text-xs text-slate-400 mt-0.5" dir="ltr">{{ $item->ciat_model }}</div>
+                            @endif
                         </td>
                         <td class="px-5 py-3 text-slate-600" dir="ltr">
                             {{ number_format((float) $item->quantity, 3) }}
