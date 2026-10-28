@@ -148,32 +148,35 @@ class PriceAnalysisController extends ModuleController
     }
 
     /**
-     * Saves the whole X8 form in one go — one header (X8) per analysis, one upsert per item row
-     * (X8Item). Always archives the analysis first (same unconditional-on-every-save rule as
-     * update() above), so every required-discount change is its own full revision, not just the
-     * ones made through X8Controller::approve()/reject().
+     * Saves the whole X8 form in one go — one upsert per item row (X8Item), under the analysis's
+     * current X8 header. Always archives the HEADER first (same unconditional-on-every-save rule
+     * as update() above), so every required-discount change is its own full revision — but this
+     * only versions X8 itself, never the underlying PriceAnalysis (see X8::archiveCurrentVersion()).
      */
     public function saveX8(Request $request, PriceAnalysis $priceAnalysis)
     {
         abort_unless($priceAnalysis->is_current, 404);
 
-        $request->validate([
+        $validated = $request->validate([
             'x8'                                  => ['nullable', 'array'],
             'x8.*.price_analysis_item_id'         => ['required', 'exists:price_analysis_items,id'],
             'x8.*.required_discount_percent'      => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'x8.*.notes'                          => ['nullable', 'string', 'max:1000'],
+            'x8.*.notes'                          => ['nullable', 'array'],
+            'x8.*.notes.*'                        => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $priceAnalysis->archiveCurrentVersion();
-
         $header = X8::getOrCreateFor($priceAnalysis, $request->user()->id);
+        $header->archiveCurrentVersion();
 
-        foreach ($request->input('x8', []) as $row) {
+        foreach ($validated['x8'] ?? [] as $row) {
+            // Drop blank note lines (an empty trailing input left over from the "add note" UI).
+            $notes = collect($row['notes'] ?? [])->map(fn ($n) => trim($n))->filter()->values()->all();
+
             X8Item::updateOrCreate(
                 ['x8_id' => $header->id, 'price_analysis_item_id' => $row['price_analysis_item_id']],
                 [
                     'required_discount_percent' => $row['required_discount_percent'] ?? null,
-                    'notes'                     => $row['notes'] ?? null,
+                    'notes'                     => $notes ?: null,
                 ],
             );
         }

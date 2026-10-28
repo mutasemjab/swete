@@ -35,6 +35,7 @@
         <table class="w-full">
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('x8.col_product') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_model') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('tenders.analysis_item_quantity') }}</th>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">L.P</th>
@@ -47,16 +48,18 @@
                 @foreach($analysis->items as $item)
                 @php $status = $item->x8?->approval_status ?? 'pending'; @endphp
                 <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="px-5 py-3">
-                        <span class="font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</span>
-                        @if($item->ciat_model)
-                        <span class="text-slate-400 text-sm ms-1" dir="ltr">({{ $item->ciat_model }})</span>
-                        @endif
-                    </td>
+                    <td class="px-5 py-3 font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</td>
+                    <td class="px-5 py-3 text-slate-600" dir="ltr">{{ $item->ciat_model ?: '—' }}</td>
                     <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->quantity, 3) }}</td>
                     <td class="px-5 py-3 text-slate-600" dir="ltr">{{ number_format((float) $item->list_price, 3) }}</td>
                     <td class="px-5 py-3 text-slate-600" dir="ltr">{{ $item->x8?->required_discount_percent !== null ? number_format((float) $item->x8->required_discount_percent, 2) . '%' : '—' }}</td>
-                    <td class="px-5 py-3 text-slate-600">{{ $item->x8?->notes ?: '—' }}</td>
+                    <td class="px-5 py-3 text-slate-600">
+                        @forelse($item->x8?->notes ?? [] as $note)
+                            <div class="text-sm">{{ $note }}</div>
+                        @empty
+                            —
+                        @endforelse
+                    </td>
                     <td class="px-5 py-3">
                         @if($status === 'approved')
                             <span class="badge bg-emerald-100 text-emerald-700">{{ __('x8.status_approved') }}</span>

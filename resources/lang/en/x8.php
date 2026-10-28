@@ -42,4 +42,7 @@ return [
     // ── Pending section on "Projects Under Review" ──────────────────────────
     'pending_section'  => 'Pending X8 Items',
 
+    // ── Version history ──────────────────────────────────────────────────────
+    'version_history'  => 'X8 Version History',
+
 ];

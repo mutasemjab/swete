@@ -42,4 +42,7 @@ return [
     // ── Pending section on "Projects Under Review" ──────────────────────────
     'pending_section'  => 'بنود X8 قيد الانتظار',
 
+    // ── Version history ──────────────────────────────────────────────────────
+    'version_history'  => 'سجل نسخ X8',
+
 ];

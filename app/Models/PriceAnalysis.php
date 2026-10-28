@@ -51,10 +51,14 @@ class PriceAnalysis extends Model
         return $this->hasMany(PriceAnalysisItem::class);
     }
 
-    /** The "X8" page's header for this analysis (one per analysis — its items live on X8::items()). */
+    /**
+     * The "X8" page's CURRENT header for this analysis (its items live on X8::items()) — scoped to
+     * is_current since X8 keeps its own independent revision history, so more than one X8 row can
+     * point at the same (never-cloned-for-this-reason) analysis over time.
+     */
     public function x8(): HasOne
     {
-        return $this->hasOne(X8::class);
+        return $this->hasOne(X8::class)->where('is_current', true);
     }
 
     /** Only meaningful on a frozen/archived row — the still-editable live analysis it was cloned from. */
@@ -105,7 +109,7 @@ class PriceAnalysis extends Model
      */
     public function archiveCurrentVersion(): self
     {
-        $this->loadMissing(['items', 'x8.items']);
+        $this->loadMissing('items');
 
         $oldNumber  = $this->number;
         $oldVersion = $this->version;
@@ -122,49 +126,8 @@ class PriceAnalysis extends Model
         $archive->root_id    = $this->id;
         $archive->save();
 
-        // Track old item id -> archived item id, so the X8 header's line items (keyed by
-        // price_analysis_item_id) below can be re-pointed at their archived counterparts.
-        $itemIdMap = [];
         foreach ($this->items as $item) {
-            $archivedItem = $archive->items()->create($item->toArray());
-            $itemIdMap[$item->id] = $archivedItem->id;
-        }
-
-        // Clone the whole "X8" header + its items too, so the frozen snapshot still shows exactly
-        // what every required-discount/notes/approval decision was AT that point in time — X8
-        // isn't part of $item's own table, so the items-cloning loop above never carries it over.
-        // The header gets its own revision suffix here too, same scheme as this analysis's own
-        // number just above: the live header moves onto its next "-R{n}" number, the archived
-        // clone keeps the OLD one.
-        if ($this->x8) {
-            $oldX8Number  = $this->x8->number;
-            $oldX8Version = $this->x8->version;
-
-            $this->x8->update([
-                'number'  => $this->x8->base_number . '-R' . $oldX8Version,
-                'version' => $oldX8Version + 1,
-            ]);
-
-            $archivedX8 = X8::create([
-                'number'             => $oldX8Number,
-                'version'            => $oldX8Version,
-                'price_analysis_id'  => $archive->id,
-                'created_by'         => $this->x8->created_by,
-            ]);
-
-            foreach ($this->x8->items as $x8Item) {
-                if (! isset($itemIdMap[$x8Item->price_analysis_item_id])) {
-                    continue;
-                }
-
-                X8Item::create([
-                    'x8_id'                      => $archivedX8->id,
-                    'price_analysis_item_id'     => $itemIdMap[$x8Item->price_analysis_item_id],
-                    'required_discount_percent'  => $x8Item->required_discount_percent,
-                    'notes'                       => $x8Item->notes,
-                    'approval_status'             => $x8Item->approval_status,
-                ]);
-            }
+            $archive->items()->create($item->toArray());
         }
 
         return $archive;

@@ -38,7 +38,8 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($analysis->items as $index => $item)
-                    <tr class="hover:bg-slate-50/50 transition-colors">
+                    @php $existingNotes = old('x8.'.$index.'.notes', $item->x8?->notes ?: ['']); @endphp
+                    <tr class="hover:bg-slate-50/50 transition-colors" x-data="{ notes: {{ json_encode($existingNotes) }} }">
                         <td class="px-5 py-3">
                             <input type="hidden" name="x8[{{ $index }}][price_analysis_item_id]" value="{{ $item->id }}">
                             <span class="font-bold text-slate-800">{{ $item->material?->localized_name ?: '—' }}</span>
@@ -66,13 +67,22 @@
                             @enderror
                         </td>
                         <td class="px-5 py-3">
-                            <input type="text"
-                                   name="x8[{{ $index }}][notes]"
-                                   value="{{ old('x8.'.$index.'.notes', $item->x8?->notes) }}"
-                                   class="form-input w-full @error('x8.'.$index.'.notes') is-invalid @enderror">
-                            @error('x8.'.$index.'.notes')
-                                <p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>
-                            @enderror
+                            <div class="space-y-1">
+                                <template x-for="(note, nIndex) in notes" :key="nIndex">
+                                    <div class="flex items-center gap-1">
+                                        <input type="text" :name="`x8[{{ $index }}][notes][${nIndex}]`" x-model="notes[nIndex]"
+                                               class="form-input !py-1 !text-xs" placeholder="{{ __('tenders.quote_item_note_placeholder') }}">
+                                        <button type="button" @click="notes.splice(nIndex, 1)"
+                                                class="p-1 text-slate-300 hover:text-rose-600 flex-shrink-0">
+                                            <i class="fa-solid fa-xmark text-xs"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                                <button type="button" @click="notes.push('')"
+                                        class="text-xs font-semibold text-indigo-600 hover:underline">
+                                    <i class="fa-solid fa-plus"></i> {{ __('tenders.quote_add_item_note') }}
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @endforeach

@@ -19,6 +19,7 @@ class X8Item extends Model
 
     protected $casts = [
         'required_discount_percent' => 'decimal:2',
+        'notes'                     => 'array',
     ];
 
     public function x8(): BelongsTo

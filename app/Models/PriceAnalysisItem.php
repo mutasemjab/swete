@@ -49,10 +49,15 @@ class PriceAnalysisItem extends Model
         return $this->belongsTo(PriceAnalysis::class);
     }
 
-    /** The X8-module decision (required discount %, notes, approval status) for THIS specific item. */
+    /**
+     * The X8-module decision (required discount %, notes, approval status) for THIS specific item,
+     * under X8's CURRENT (is_current=true) header — X8 keeps its own revision history, so more
+     * than one X8Item row can exist for the same price_analysis_item_id over time.
+     */
     public function x8(): HasOne
     {
-        return $this->hasOne(X8Item::class, 'price_analysis_item_id');
+        return $this->hasOne(X8Item::class, 'price_analysis_item_id')
+            ->whereHas('x8', fn ($q) => $q->where('is_current', true));
     }
 
     public function ciatDiscount(): BelongsTo
@@ -77,14 +82,14 @@ class PriceAnalysisItem extends Model
     }
 
     /**
-     * "X8" module's Cost Price column — L.P × the discount % this line's CIAT discount actually
-     * carried when it was added (0 for a warehouse-sourced line, which has no discount at all).
-     * Deliberately NOT the same as `cost` above (which also folds in min_profit_percent) — the
-     * user asked for this specific, simpler figure under its own name.
+     * "X8" module's Cost Price column — L.P net of the discount % this line's CIAT discount
+     * actually carried when it was added (0% discount for a warehouse-sourced line, so Cost Price
+     * there just equals list_price). Deliberately NOT the same as `cost` above (which also folds
+     * in min_profit_percent) — the user asked for this specific, simpler figure under its own name.
      */
     public function getCostPriceAttribute(): float
     {
-        return round((float) $this->list_price * (float) $this->discount_percent / 100, 3);
+        return round((float) $this->list_price * (1 - (float) $this->discount_percent / 100), 3);
     }
 
     /**
