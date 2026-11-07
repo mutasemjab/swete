@@ -83,13 +83,6 @@
             @error('address')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
-        <div>
-            <label class="form-label">{{ __('accounting.party_opening_balance') }}</label>
-            <input type="number" name="opening_balance" value="{{ old('opening_balance', $customer?->opening_balance ?? 0) }}"
-                   step="0.001" dir="ltr" class="form-input @error('opening_balance') is-invalid @enderror">
-            @error('opening_balance')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-
         <div class="flex items-center">
             <label class="relative inline-flex items-center cursor-pointer" dir="ltr">
                 <input type="hidden" name="status" value="0">

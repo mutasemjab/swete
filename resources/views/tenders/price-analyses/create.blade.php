@@ -26,7 +26,7 @@
 @else
 <form action="{{ route('price-analyses.store') }}" method="POST">
     @csrf
-    @include('tenders.price-analyses._form', ['analysis' => null, 'branches' => $branches, 'ciatDiscounts' => $ciatDiscounts])
+    @include('tenders.price-analyses._form', ['analysis' => null, 'branches' => $branches, 'ciatDiscounts' => $ciatDiscounts, 'tenders' => $tenders, 'materialCategories' => $materialCategories, 'units' => $units])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

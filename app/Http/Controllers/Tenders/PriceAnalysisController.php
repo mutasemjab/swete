@@ -6,9 +6,11 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Branch;
 use App\Models\CiatDiscount;
 use App\Models\Material;
+use App\Models\MaterialCategory;
 use App\Models\PriceAnalysis;
 use App\Models\PriceAnalysisItem;
 use App\Models\Tender;
+use App\Models\Unit;
 use App\Models\X8;
 use App\Models\X8Item;
 use Illuminate\Http\Request;
@@ -34,13 +36,17 @@ class PriceAnalysisController extends ModuleController
 
     public function create(Request $request)
     {
-        // Reached from a Tender's own "تحليل جديد" button (?tender_id=X) — the link is set here,
-        // automatically, never via a picker on the analysis's own form.
+        // Reached from a Tender's own "تحليل جديد" button (?tender_id=X) — the link is set
+        // automatically in that case. Reached from the module's own index instead, with no tender
+        // context at all, a tender must still be picked manually — an analysis is always
+        // tender-linked, never created unlinked.
         $tender = $request->filled('tender_id') ? Tender::find($request->input('tender_id')) : null;
+        $tenders = $tender ? collect() : Tender::orderByDesc('id')->get();
 
         return $this->moduleView('tenders.price-analyses.create', [
             'analysis' => null,
             'tender'   => $tender,
+            'tenders'  => $tenders,
             ...$this->formOptions(),
         ]);
     }
@@ -214,8 +220,12 @@ class PriceAnalysisController extends ModuleController
             'ciatDiscounts' => CiatDiscount::where('status', true)->with('material')->get()
                 ->sortBy(fn ($discount) => $discount->material?->localized_name)->values(),
             // Excludes CIAT-flagged materials — those belong exclusively to the CIAT path above,
-            // never double-offered under "from warehouse" too.
+            // never double-offered under "from warehouse" too. Deliberately NOT ->confirmed() —
+            // keeps showing draft materials quick-added from this very form (see the "Add Material"
+            // button below), same as the Price Quote picker.
             'materials'     => Material::where('status', true)->where('is_ciat', false)->orderBy('name')->get(),
+            'materialCategories' => MaterialCategory::orderBy('name')->get(),
+            'units'              => Unit::where('status', true)->orderBy('name')->get(),
         ];
     }
 
@@ -225,8 +235,10 @@ class PriceAnalysisController extends ModuleController
             'branch_id'                  => ['required', 'exists:branches,id'],
             'with_tax'                   => ['boolean'],
             'notes'                      => ['nullable', 'string'],
-            'linked_type'                => ['nullable', 'in:tender,price_quote,project'],
-            'linked_id'                  => ['nullable', 'required_with:linked_type', 'integer'],
+            // Always required now — an analysis is never created unlinked (see create()'s own
+            // comment): either auto-set from a tender's own page, or picked manually on this form.
+            'linked_type'                => ['required', 'in:tender,price_quote,project'],
+            'linked_id'                  => ['required', 'integer'],
             'items'                      => ['required', 'array', 'min:1'],
             'items.*.source_type'        => ['required', 'in:ciat,warehouse'],
             'items.*.ciat_discount_id'   => ['nullable', 'exists:ciat_discounts,id'],

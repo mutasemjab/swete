@@ -18,7 +18,7 @@
 <form action="{{ route('price-analyses.update', $analysis) }}" method="POST">
     @csrf
     @method('PUT')
-    @include('tenders.price-analyses._form', ['analysis' => $analysis, 'branches' => $branches, 'ciatDiscounts' => $ciatDiscounts])
+    @include('tenders.price-analyses._form', ['analysis' => $analysis, 'branches' => $branches, 'ciatDiscounts' => $ciatDiscounts, 'materialCategories' => $materialCategories, 'units' => $units])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

@@ -1,6 +1,7 @@
 @php
     $analysis = $analysis ?? null;
     $tender = $tender ?? null;
+    $tenders = $tenders ?? collect();
     // Defaults the branch picker to the main branch on a brand-new analysis — only when there's
     // nothing more specific to prefer already (an existing analysis's own branch, or old() input
     // from a failed save).
@@ -52,6 +53,12 @@
         _keySeq: {{ $seedItems->count() }},
         nextKey() { return ++this._keySeq; },
         items: {{ $seedItems->toJson() }},
+        // Materials created via the quick-add modal mid-form — the modal's own x-data scope has no
+        // access to this one, so it reaches us through a window event instead (see
+        // components/material-quick-add-modal.blade.php). Needed so a row added with addItem()
+        // after a quick-add can still select it (the static materials option list below was baked
+        // at page load and doesn't know about it).
+        quickAddedMaterials: [],
         addItem() { this.items.push({ source_type: 'ciat', ciat_discount_id: '', material_id: '', ciat_model: '', quantity: 1, list_price: '', profit_percent: '', shipping: 0, _key: this.nextKey() }); this.$nextTick(() => window.initSelect2()); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
         discountFor(item) {
@@ -81,7 +88,26 @@
         get totalWithTax() { return this.subtotal * (1 + (this.taxRate / 100)); },
         fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
       }"
-      x-init="$nextTick(() => window.initSelect2())">
+      x-init="$nextTick(() => window.initSelect2())"
+      x-on:material-quick-added.window="
+        quickAddedMaterials.push($event.detail);
+        let targetIndex;
+        if (items.length === 1 && !items[0].material_id && !items[0].ciat_discount_id) {
+            items[0].source_type = 'warehouse';
+            items[0].material_id = String($event.detail.id);
+            targetIndex = 0;
+        } else {
+            addItem();
+            targetIndex = items.length - 1;
+            items[targetIndex].source_type = 'warehouse';
+            items[targetIndex].material_id = String($event.detail.id);
+        }
+        $nextTick(() => {
+            window.initSelect2();
+            const row = document.querySelectorAll('tbody tr')[targetIndex];
+            if (row) { $(row).find('.js-select2.select2-hidden-accessible').select2('destroy'); window.initSelect2(row); }
+        });
+      ">
 
     <div class="card mb-5">
         <div class="card-header">
@@ -92,9 +118,10 @@
         </div>
         {{--
             The analysis is linked to whatever entity it was created FROM (a tender's own "تحليل
-            جديد" button, currently the only entry point) — never a manual picker on this form.
-            On create, $tender carries the brand-new link; on edit, the analysis's own already-saved
-            link is shown read-only the same way. No UI ever lets this be changed here.
+            جديد" button) — never a manual picker on this form in THAT case. An analysis started
+            from the module's own index instead has no such context, so it picks a tender manually
+            right here — an analysis is always tender-linked, never created unlinked. Either way,
+            once saved, the link is immutable: edit always shows it read-only, never re-pickable.
         --}}
         @php $linkedEntity = $tender ?? $analysis?->linked; @endphp
         @if($linkedEntity)
@@ -113,6 +140,18 @@
                         {{ __('tenders.quote_number') }}: <span class="font-bold text-slate-700">{{ $linkedEntity->number }}</span>
                     @endif
                 </p>
+            </div>
+        @elseif(! $analysis)
+            <input type="hidden" name="linked_type" value="tender">
+            <div class="px-6 pt-5">
+                <label class="form-label">{{ __('tenders.tender') }} <span class="text-rose-500">*</span></label>
+                <select name="linked_id" class="js-select2 form-select w-full @error('linked_id') is-invalid @enderror" required>
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach($tenders as $t)
+                        <option value="{{ $t->id }}" @selected(old('linked_id') == $t->id)>{{ $t->number }} — {{ $t->localized_title }}</option>
+                    @endforeach
+                </select>
+                @error('linked_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
         @endif
         <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -162,13 +201,27 @@
                 <i class="fa-solid fa-list text-orange-500 text-sm"></i>
                 {{ __('tenders.analysis_item_product') }}
             </h3>
+            @include('components.material-quick-add-modal', [
+                'targetSelector' => 'select[name$="[material_id]"]',
+                'categories'     => $materialCategories,
+                'units'          => $units,
+                'label'          => __('warehouse.add_material_quick'),
+            ])
             <button type="button" @click="addItem()" class="btn-secondary btn-sm">
                 <i class="fa-solid fa-plus"></i>
                 {{ __('accounting.invoice_add_item') }}
             </button>
         </div>
+        {{--
+            min-w on the table is load-bearing, not cosmetic: a `w-full` table in table-auto layout
+            shrinks EVERY column proportionally to fit its container's 100% width, regardless of
+            each <th>'s own w-* hint — the overflow-x-auto wrapper below never actually triggers a
+            scrollbar because the table never exceeds the container in the first place. This was
+            the real reason two earlier widening passes (bumping individual w-20→w-28→w-32) didn't
+            fix the "fields too small to read" complaint — only forcing genuine overflow does.
+        --}}
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-[1900px]">
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-3 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('tenders.analysis_item_source') }}</th>
@@ -221,6 +274,9 @@
                                         @foreach($materials as $material)
                                             <option value="{{ $material->id }}">{{ $material->localized_name }}</option>
                                         @endforeach
+                                        <template x-for="m in quickAddedMaterials" :key="m.id">
+                                            <option :value="String(m.id)" x-text="m.label"></option>
+                                        </template>
                                     </select>
                                 </div>
                             </td>

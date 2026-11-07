@@ -160,16 +160,25 @@ class Project extends Model
         ];
     }
 
-    /** The stable "PRJ-YYYY-00001" part of the number, with its "-P{n}" revision suffix stripped off. */
+    /** The stable "PRJ-YYYY-00001" part of the number, with its "-V{n}" revision suffix stripped off. */
     public function getBaseNumberAttribute(): string
     {
-        return preg_replace('/-P\d+$/', '', $this->number);
+        return preg_replace('/-V\d+$/', '', $this->number);
+    }
+
+    /** Just the "V{n}" revision suffix on its own — e.g. "PRJ-2026-00001-V1" → "V1". Used to tag
+     *  this project's own current-baseline items with which revision they belong to. */
+    public function getRevisionLabelAttribute(): string
+    {
+        preg_match('/-V(\d+)$/', $this->number, $matches);
+
+        return 'V' . ($matches[1] ?? '0');
     }
 
     /**
      * Freezes the current state (header only — no child rows to clone, unlike PriceQuote, since a
      * Project's "content" is just price_quote_id, a plain column) into a new, read-only row and
-     * returns it. The live row (this one, same id throughout) moves onto its next "-P{n}" number
+     * returns it. The live row (this one, same id throughout) moves onto its next "-V{n}" number
      * first, freeing up the old number for the frozen clone to take over — same ordering as
      * PriceQuote::archiveCurrentVersion(), needed because `number` is unique.
      */
@@ -179,7 +188,7 @@ class Project extends Model
         $oldVersion = $this->version;
 
         $this->update([
-            'number'  => $this->base_number . '-P' . $oldVersion,
+            'number'  => $this->base_number . '-V' . $oldVersion,
             'version' => $oldVersion + 1,
         ]);
 
@@ -209,7 +218,7 @@ class Project extends Model
         // logical project — counting both would make the next NEW project become "#3" instead of "#2").
         $count = static::whereYear('created_at', $year)->whereNull('root_id')->count() + 1;
 
-        return sprintf('PRJ-%s-%05d-P0', $year, $count);
+        return sprintf('PRJ-%s-%05d-V0', $year, $count);
     }
 
     public function getActivitylogOptions(): LogOptions

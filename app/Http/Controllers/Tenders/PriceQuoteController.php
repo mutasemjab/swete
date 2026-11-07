@@ -332,14 +332,19 @@ class PriceQuoteController extends ModuleController
         // So a quote item can be added straight from a saved Price Analysis line: its per-unit price
         // is the analysis line's final total (To JD + shipping) divided back out over its quantity,
         // since the analysis only ever multiplies quantity into the profit figure, not the totals.
-        // Scoped to THIS quote's own tender only — an analysis made for a different tender has
-        // nothing to do with this quote, so it's never offered here.
+        // Scoped to THIS quote's own tender when there is one — an analysis made for a different
+        // tender has nothing to do with this quote, so it's not offered there. A quote with no
+        // tender at all (created standalone from the Quotations module, not from a tender's own
+        // page) has nothing to scope by, so it falls back to the most recent analyses overall
+        // instead of showing an empty picker — every analysis is tender-linked these days anyway,
+        // this just doesn't narrow it down to one specific tender.
         $tenderId = $tender?->id ?? $current?->tender_id;
 
-        $priceAnalyses = $tenderId
-            ? PriceAnalysis::where('linked_type', 'tender')->where('linked_id', $tenderId)
-                ->with('items.material')->latest()->take(50)->get()
-            : collect();
+        $priceAnalysesQuery = PriceAnalysis::where('linked_type', 'tender')->with('items.material')->latest();
+        if ($tenderId) {
+            $priceAnalysesQuery->where('linked_id', $tenderId);
+        }
+        $priceAnalyses = $priceAnalysesQuery->take(50)->get();
 
         $priceAnalyses = $priceAnalyses
             ->map(fn ($analysis) => [

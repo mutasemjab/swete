@@ -412,7 +412,7 @@ return [
     'edit_ciat_discount'        => 'تعديل خصم',
     'ciat_type'                 => 'CIAT Type',
     'ciat_model'                => 'CIAT Model',
-    'ciat_discount_percent'     => 'نسبة الخصم %',
+    'ciat_discount_percent'     => 'Factor Multiplier',
     'ciat_min_profit_percent'   => 'أقل نسبة ربح',
     'no_ciat_discounts'         => 'لا توجد خصومات بعد',
     'add_first_ciat_discount'   => 'إضافة أول خصم',

@@ -412,7 +412,7 @@ return [
     'edit_ciat_discount'        => 'Edit Discount',
     'ciat_type'                 => 'CIAT Type',
     'ciat_model'                => 'CIAT Model',
-    'ciat_discount_percent'     => 'Discount %',
+    'ciat_discount_percent'     => 'Factor Multiplier',
     'ciat_min_profit_percent'   => 'Minimum profit %',
     'no_ciat_discounts'         => 'No CIAT discounts yet',
     'add_first_ciat_discount'   => 'Add First Discount',

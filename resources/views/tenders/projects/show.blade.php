@@ -255,6 +255,11 @@
                             {{ $item->quoteNumber }}
                             @if($item->voStatus === 'pending')
                                 <span class="badge bg-amber-100 text-amber-700">{{ __('tenders.quote_pending_vo_badge') }}</span>
+                            @else
+                                {{-- Baseline item (not a still-pending VO) — tag it with the
+                                     project's own CURRENT revision, so items from before/after a
+                                     later-approved VO stay distinguishable at a glance. --}}
+                                <span class="badge bg-slate-100 text-slate-500">{{ $project->revision_label }}</span>
                             @endif
                         </td>
                         <td class="px-5 py-3 text-sm font-bold text-slate-800">{{ $item->material?->localized_name ?? '—' }}</td>
