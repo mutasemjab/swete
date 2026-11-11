@@ -36,8 +36,6 @@ class Tender extends Model
         'win_probability',
         'submission_deadline',
         'status_id',
-        'documents_url',
-        'design_documents_url',
         'notes',
         'created_by',
     ];
@@ -104,6 +102,23 @@ class Tender extends Model
     public function analysisAttachments(): HasMany
     {
         return $this->hasMany(TenderAnalysisAttachment::class);
+    }
+
+    /** All document attachments — both the 'documents' and 'design' lists mixed together; the
+     *  two convenience relations below are what views actually use. */
+    public function documentAttachments(): HasMany
+    {
+        return $this->hasMany(TenderDocumentAttachment::class);
+    }
+
+    public function tenderDocuments(): HasMany
+    {
+        return $this->documentAttachments()->where('kind', 'documents');
+    }
+
+    public function designDocuments(): HasMany
+    {
+        return $this->documentAttachments()->where('kind', 'design');
     }
 
     public function extraFieldValues(): HasMany

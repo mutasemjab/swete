@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -47,9 +48,9 @@ class MaintenanceContract extends Model
         return $this->hasMany(MaintenanceContractScheduledVisit::class, 'contract_id');
     }
 
-    public function getUrlAttribute(): string
+    public function getUrlAttribute(): ?string
     {
-        return asset($this->path);
+        return FileStorage::url($this->path);
     }
 
     public static function nextNumber(): string

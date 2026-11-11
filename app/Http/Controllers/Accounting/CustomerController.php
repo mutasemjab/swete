@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Accounting;
 
+use App\Exports\CustomersExport;
 use App\Exports\CustomersTemplateExport;
 use App\Http\Controllers\ModuleController;
 use App\Imports\CustomersImport;
@@ -9,6 +10,7 @@ use App\Models\ClientExtraField;
 use App\Models\ClientExtraFieldValue;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -63,7 +65,7 @@ class CustomerController extends ModuleController
         ]);
 
         $this->syncContacts($customer, $request->input('contacts', []));
-        $this->syncExtraFieldValues('customer', $customer->id, $request);
+        ClientExtraFieldValue::syncFor('customer', $customer->id, $request);
 
         if ($request->wantsJson()) {
             return response()->json(['id' => $customer->id, 'name' => $customer->localized_name, 'code' => $customer->code]);
@@ -110,7 +112,7 @@ class CustomerController extends ModuleController
         ]);
 
         $this->syncContacts($customer, $request->input('contacts', []));
-        $this->syncExtraFieldValues('customer', $customer->id, $request);
+        ClientExtraFieldValue::syncFor('customer', $customer->id, $request);
 
         return redirect()->route('accounting.customers.index')
             ->with('success', __('accounting.party_updated'));
@@ -127,6 +129,11 @@ class CustomerController extends ModuleController
     public function importTemplate()
     {
         return Excel::download(new CustomersTemplateExport(), 'customers-import-template.xlsx');
+    }
+
+    public function export()
+    {
+        return Excel::download(new CustomersExport(), 'customers.xlsx');
     }
 
     public function import(Request $request)
@@ -157,13 +164,13 @@ class CustomerController extends ModuleController
         ];
 
         if ($request->hasFile('commercial_registration_file')) {
-            $filename = uploadImage('assets/uploads/clients/documents', $request->file('commercial_registration_file'));
-            $paths['commercial_registration_path'] = 'assets/uploads/clients/documents/' . $filename;
+            FileStorage::delete($existing?->commercial_registration_path);
+            $paths['commercial_registration_path'] = FileStorage::store($request->file('commercial_registration_file'), 'clients/documents');
         }
 
         if ($request->hasFile('personal_id_file')) {
-            $filename = uploadImage('assets/uploads/clients/documents', $request->file('personal_id_file'));
-            $paths['personal_id_path'] = 'assets/uploads/clients/documents/' . $filename;
+            FileStorage::delete($existing?->personal_id_path);
+            $paths['personal_id_path'] = FileStorage::store($request->file('personal_id_file'), 'clients/documents');
         }
 
         return $paths;
@@ -188,31 +195,6 @@ class CustomerController extends ModuleController
         }
     }
 
-    private function syncExtraFieldValues(string $entityType, int $entityId, Request $request): void
-    {
-        $fields = ClientExtraField::where('entity_type', $entityType)->active()->get();
-
-        foreach ($fields as $field) {
-            if ($field->field_type === 'image') {
-                if ($request->hasFile("extra_fields_images.{$field->id}")) {
-                    $filename = uploadImage(
-                        'assets/uploads/clients/extra-fields',
-                        $request->file("extra_fields_images.{$field->id}")
-                    );
-                    ClientExtraFieldValue::updateOrCreate(
-                        ['field_id' => $field->id, 'entity_type' => $entityType, 'entity_id' => $entityId],
-                        ['file_path' => "assets/uploads/clients/extra-fields/{$filename}", 'value' => null]
-                    );
-                }
-            } else {
-                $value = $request->input("extra_fields.{$field->id}");
-                ClientExtraFieldValue::updateOrCreate(
-                    ['field_id' => $field->id, 'entity_type' => $entityType, 'entity_id' => $entityId],
-                    ['value' => $value ?: null, 'file_path' => null]
-                );
-            }
-        }
-    }
 
     private function validated(Request $request): array
     {

@@ -6,14 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    // Manufacturing-stage attachments — plain links (mirrors Tender::documents_url's
-    // style), not uploaded files. Repeatable, so its own table instead of one column.
+    // Manufacturing-stage attachments — real uploaded files, stored on Bunny (see
+    // App\Support\FileStorage). Repeatable, so its own table instead of one column.
     public function up(): void
     {
         Schema::create('purchase_request_attachments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('purchase_request_id')->constrained('purchase_requests')->cascadeOnDelete();
-            $table->string('url');
+            $table->string('path');
+            $table->string('original_name');
             $table->string('label')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();

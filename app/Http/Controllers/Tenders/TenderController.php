@@ -79,7 +79,7 @@ class TenderController extends ModuleController
             'created_by' => $request->user()->id,
         ]);
 
-        $this->syncExtraFieldValues($tender, $request);
+        ClientExtraFieldValue::syncFor('tender', $tender->id, $request);
 
         return redirect()->route('tenders.show', [$tender, 'back' => $request->input('back')])
             ->with('success', __('tenders.tender_added'));
@@ -93,6 +93,7 @@ class TenderController extends ModuleController
             // converted to a project from here (not only the latest edit of each quote).
             'priceQuotes' => fn ($query) => $query->with('customer')->orderBy('tender_sequence')->orderBy('version'),
             'projects', 'extraFieldValues.field', 'analyses.items.material', 'analyses.items.x8',
+            'tenderDocuments', 'designDocuments',
         ]);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 
@@ -126,7 +127,7 @@ class TenderController extends ModuleController
 
         $tender->update($validated);
 
-        $this->syncExtraFieldValues($tender, $request);
+        ClientExtraFieldValue::syncFor('tender', $tender->id, $request);
 
         return redirect()->route('tenders.show', [$tender, 'back' => $request->input('back')])
             ->with('success', __('tenders.tender_updated'));
@@ -271,40 +272,9 @@ class TenderController extends ModuleController
         }
     }
 
-    private function syncExtraFieldValues(Tender $tender, Request $request): void
-    {
-        $fields = ClientExtraField::forTenders()->active()->get();
-
-        foreach ($fields as $field) {
-            if ($field->field_type === 'image') {
-                if ($request->hasFile("extra_fields_images.{$field->id}")) {
-                    $filename = uploadImage(
-                        'assets/uploads/clients/extra-fields',
-                        $request->file("extra_fields_images.{$field->id}")
-                    );
-                    ClientExtraFieldValue::updateOrCreate(
-                        ['field_id' => $field->id, 'entity_type' => 'tender', 'entity_id' => $tender->id],
-                        ['file_path' => "assets/uploads/clients/extra-fields/{$filename}", 'value' => null]
-                    );
-                }
-            } else {
-                $value = $request->input("extra_fields.{$field->id}");
-                ClientExtraFieldValue::updateOrCreate(
-                    ['field_id' => $field->id, 'entity_type' => 'tender', 'entity_id' => $tender->id],
-                    ['value' => $value ?: null, 'file_path' => null]
-                );
-            }
-        }
-    }
 
     private function validated(Request $request): array
     {
-        // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
-        $request->merge([
-            'documents_url'        => normalizeUrl($request->input('documents_url')),
-            'design_documents_url' => normalizeUrl($request->input('design_documents_url')),
-        ]);
-
         $rules = [
             'party_id'             => ['nullable', 'exists:customers,id'],
             'sales_rep_id'         => ['nullable', 'exists:sales_representatives,id'],
@@ -324,8 +294,6 @@ class TenderController extends ModuleController
             'win_probability'      => ['nullable', 'integer', 'min:0', 'max:100'],
             'submission_deadline'  => ['required', 'date'],
             'status_id'            => ['required', 'exists:tender_statuses,id'],
-            'documents_url'        => ['nullable', 'url', 'max:255'],
-            'design_documents_url' => ['nullable', 'url', 'max:255'],
             'notes'                => ['nullable', 'string'],
             'extra_fields'          => ['nullable', 'array'],
             'extra_fields.*'        => ['nullable', 'string'],

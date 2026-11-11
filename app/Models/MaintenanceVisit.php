@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -127,7 +128,7 @@ class MaintenanceVisit extends Model
 
     public function getSignatureUrlAttribute(): ?string
     {
-        return $this->signature_path ? asset($this->signature_path) : null;
+        return FileStorage::url($this->signature_path);
     }
 
     /** Hours worked, formatted "Xh Ym" — null while the visit is still open. */

@@ -59,14 +59,6 @@
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('approvals.requested_by') }}</dt>
             <dd class="font-bold text-slate-800">{{ $reminder->requester?->name }} — {{ $reminder->created_at->format('Y-m-d') }}</dd>
         </div>
-        <div class="sm:col-span-3">
-            <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.reminder_drive_url') }}</dt>
-            <dd class="font-bold text-slate-800">
-                <a href="{{ $reminder->google_drive_url }}" target="_blank" rel="noopener" class="text-indigo-600 hover:underline break-all">
-                    <i class="fa-brands fa-google-drive"></i> {{ $reminder->google_drive_url }}
-                </a>
-            </dd>
-        </div>
         @if($reminder->status === 'fulfilled')
         <div class="sm:col-span-3">
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('tenders.reminder_fulfilled_by') }}</dt>
@@ -114,6 +106,29 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+</div>
+
+<div class="card overflow-hidden mt-5">
+    <div class="card-header">
+        <h3 class="font-bold text-slate-700">{{ __('tenders.reminder_attachments') }}</h3>
+    </div>
+    <div class="px-6 py-5">
+        @include('components.attachment-list', [
+            'attachments' => $reminder->attachments,
+            'emptyText'   => __('tenders.no_reminder_attachments'),
+            'canDelete'   => $reminder->isEditable(),
+            'destroyUrl'  => fn ($attachment) => route('purchase-request-reminders.attachments.destroy', [$reminder, $attachment]),
+        ])
+
+        @if($reminder->isEditable())
+            @include('components.attachment-upload-rows', [
+                'action'      => route('purchase-request-reminders.attachments.store', $reminder),
+                'addLabel'    => __('tenders.reminder_attachment_add_row'),
+                'uploadLabel' => __('tenders.reminder_attachment_upload'),
+                'fileLabel'   => __('tenders.reminder_attachment_file'),
+            ])
+        @endif
     </div>
 </div>
 @endsection

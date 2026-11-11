@@ -4,7 +4,7 @@
 @section('breadcrumb', __('warehouse.materials'))
 
 @section('content')
-<div class="page-header">
+<div class="page-header" x-data="{ showImport: false }">
     <div>
         <h1 class="page-title">{{ __('warehouse.materials_list') }}</h1>
         <p class="page-subtitle">{{ __('warehouse.materials_subtitle') }}</p>
@@ -17,10 +17,46 @@
                 <span class="badge bg-amber-100 text-amber-700">{{ $draftsCount }}</span>
             </a>
         @endif
+        <a href="{{ route('warehouse.materials.export') }}" class="btn-secondary">
+            <i class="fa-solid fa-file-export"></i>
+            {{ __('warehouse.export_excel') }}
+        </a>
+        @can('warehouse.materials.create')
+            <button type="button" @click="showImport = true" class="btn-secondary">
+                <i class="fa-solid fa-file-excel"></i>
+                {{ __('warehouse.import_excel') }}
+            </button>
+        @endcan
         <a href="{{ route('warehouse.materials.create') }}" class="btn-primary">
             <i class="fa-solid fa-plus"></i>
             {{ __('warehouse.add_material') }}
         </a>
+    </div>
+
+    <div x-show="showImport" x-cloak
+         class="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div @click.outside="showImport = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <form action="{{ route('warehouse.materials.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="px-6 py-5 border-b border-slate-100">
+                    <h3 class="font-bold text-slate-800">{{ __('warehouse.import_materials') }}</h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        {{ __('warehouse.import_materials_hint') }}
+                        <a href="{{ route('warehouse.materials.import-template') }}" class="text-indigo-600 hover:underline">{{ __('warehouse.download_template') }}</a>
+                    </p>
+                </div>
+                <div class="px-6 py-5">
+                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="form-input">
+                </div>
+                <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" @click="showImport = false" class="btn-secondary">{{ __('app.cancel') }}</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-upload"></i>
+                        {{ __('warehouse.import_excel') }}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

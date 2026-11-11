@@ -183,20 +183,6 @@
             @error('status_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
-        <div>
-            <label class="form-label">{{ __('tenders.tender_documents_url') }}</label>
-            <input type="text" name="documents_url" value="{{ old('documents_url', $tender?->documents_url) }}" dir="ltr"
-                   placeholder="https://..." class="form-input @error('documents_url') is-invalid @enderror">
-            @error('documents_url')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-
-        <div>
-            <label class="form-label">{{ __('tenders.tender_design_documents_url') }}</label>
-            <input type="text" name="design_documents_url" value="{{ old('design_documents_url', $tender?->design_documents_url) }}" dir="ltr"
-                   placeholder="https://..." class="form-input @error('design_documents_url') is-invalid @enderror">
-            @error('design_documents_url')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-
         <div class="sm:col-span-2">
             <label class="form-label">{{ __('tenders.tender_description') }}</label>
             <textarea name="description" rows="3" class="form-input @error('description') is-invalid @enderror">{{ old('description', $tender?->description) }}</textarea>
@@ -230,7 +216,7 @@
                 @elseif($field->field_type === 'image')
                     @if($efv?->file_path)
                         <div class="mb-2">
-                            <img src="{{ asset($efv->file_path) }}" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
+                            <img src="{{ $efv->file_url }}" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
                         </div>
                     @endif
                     <input type="file" name="extra_fields_images[{{ $field->id }}]"

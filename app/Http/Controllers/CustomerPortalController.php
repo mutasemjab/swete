@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MaintenanceContract;
 use App\Models\MaintenanceRequest;
 use App\Models\MaintenanceVisit;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class CustomerPortalController extends Controller
@@ -71,9 +72,7 @@ class CustomerPortalController extends Controller
             'signature' => ['required', 'image', 'max:2048'],
         ]);
 
-        $filename = uploadImage('assets/uploads/maintenance-visit-signatures', $validated['signature']);
-
-        $maintenanceVisit->sign('assets/uploads/maintenance-visit-signatures/' . $filename);
+        $maintenanceVisit->sign(FileStorage::store($validated['signature'], 'maintenance-visit-signatures'));
 
         return redirect()->route('customer-portal.visits.show', $maintenanceVisit)
             ->with('success', __('customer_portal.visit_signed'));

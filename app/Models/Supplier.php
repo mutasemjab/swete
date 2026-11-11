@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -75,12 +76,12 @@ class Supplier extends Model
 
     public function getCommercialRegistrationUrlAttribute(): ?string
     {
-        return $this->commercial_registration_path ? asset($this->commercial_registration_path) : null;
+        return FileStorage::url($this->commercial_registration_path);
     }
 
     public function getPersonalIdUrlAttribute(): ?string
     {
-        return $this->personal_id_path ? asset($this->personal_id_path) : null;
+        return FileStorage::url($this->personal_id_path);
     }
 
     public function getLocalizedNameAttribute(): string

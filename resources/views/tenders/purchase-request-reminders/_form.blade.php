@@ -47,14 +47,19 @@
                 @error('project_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
-            <div>
-                <label class="form-label">{{ __('tenders.reminder_drive_url') }} <span class="text-rose-500">*</span></label>
-                <input type="text" name="google_drive_url" value="{{ old('google_drive_url', $reminder?->google_drive_url) }}" dir="ltr"
-                       placeholder="https://drive.google.com/..."
-                       class="form-input @error('google_drive_url') is-invalid @enderror">
-                @error('google_drive_url')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-            </div>
         </div>
+
+        @unless($reminder)
+        <div class="px-6 pb-5">
+            <label class="form-label">{{ __('tenders.reminder_attachments') }} <span class="text-rose-500">*</span></label>
+            @include('components.attachment-rows', [
+                'fileLabel' => __('tenders.reminder_attachment_file'),
+                'addLabel'  => __('tenders.reminder_attachment_add_row'),
+                'required'  => true,
+            ])
+            @error('attachments')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+        @endunless
     </div>
 
     <div class="card mb-5">

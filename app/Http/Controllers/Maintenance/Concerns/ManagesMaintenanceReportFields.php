@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Maintenance\Concerns;
 use App\Models\MaintenanceReport;
 use App\Models\MaintenanceReportField;
 use App\Models\MaintenanceReportTemplateField;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
@@ -69,8 +70,7 @@ trait ManagesMaintenanceReportFields
         $paths = [];
 
         foreach ($files as $file) {
-            $filename = uploadImage('assets/uploads/maintenance-reports', $file);
-            $paths[]  = 'assets/uploads/maintenance-reports/' . $filename;
+            $paths[] = FileStorage::store($file, 'maintenance-reports');
         }
 
         return json_encode($paths);
@@ -79,9 +79,8 @@ trait ManagesMaintenanceReportFields
     /** Autosave: uploads exactly one new photo and appends it to an 'images' field's existing JSON path array. */
     protected function appendImageUpload(UploadedFile $file, ?string $existingAnswerJson): string
     {
-        $paths    = $existingAnswerJson ? (json_decode($existingAnswerJson, true) ?: []) : [];
-        $filename = uploadImage('assets/uploads/maintenance-reports', $file);
-        $paths[]  = 'assets/uploads/maintenance-reports/' . $filename;
+        $paths   = $existingAnswerJson ? (json_decode($existingAnswerJson, true) ?: []) : [];
+        $paths[] = FileStorage::store($file, 'maintenance-reports');
 
         return json_encode($paths);
     }
@@ -91,6 +90,8 @@ trait ManagesMaintenanceReportFields
     {
         $paths = $existingAnswerJson ? (json_decode($existingAnswerJson, true) ?: []) : [];
         $paths = array_values(array_filter($paths, fn ($p) => $p !== $path));
+
+        FileStorage::delete($path);
 
         return empty($paths) ? null : json_encode($paths);
     }

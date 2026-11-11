@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Warehouse;
 
+use App\Exports\MaterialsExport;
+use App\Exports\MaterialsTemplateExport;
 use App\Http\Controllers\ModuleController;
+use App\Imports\MaterialsImport;
 use App\Models\Material;
 use App\Models\MaterialCategory;
 use App\Models\Unit;
 use App\Support\BackNavigation;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MaterialController extends ModuleController
 {
@@ -72,6 +77,35 @@ class MaterialController extends ModuleController
         return back()->with('success', $message);
     }
 
+    public function importTemplate()
+    {
+        return Excel::download(new MaterialsTemplateExport(), 'materials-import-template.xlsx');
+    }
+
+    public function export()
+    {
+        return Excel::download(new MaterialsExport(), 'materials.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+        ]);
+
+        $import = new MaterialsImport();
+        Excel::import($import, $request->file('file'));
+
+        if ($import->failures()->isNotEmpty()) {
+            $rows = $import->failures()->map(fn ($f) => $f->row())->implode(', ');
+
+            return back()->with('error', __('warehouse.import_partial', ['rows' => $rows]));
+        }
+
+        return redirect()->route('warehouse.materials.index')
+            ->with('success', __('warehouse.import_success'));
+    }
+
     /**
      * AJAX quick-add shared by the Price Quote, Split Unit, and CIAT Discount screens.
      * Price Quote/Split Unit callers (the default) get a DRAFT — not yet a real catalog material,
@@ -116,7 +150,7 @@ class MaterialController extends ModuleController
         $validated = $this->validated($request);
 
         if ($request->hasFile('photo')) {
-            $validated['photo_path'] = 'assets/uploads/materials/' . uploadImage('assets/uploads/materials', $request->file('photo'));
+            $validated['photo_path'] = FileStorage::store($request->file('photo'), 'materials');
         }
 
         Material::create([
@@ -150,7 +184,8 @@ class MaterialController extends ModuleController
         $validated = $this->validated($request, $material->id);
 
         if ($request->hasFile('photo')) {
-            $validated['photo_path'] = 'assets/uploads/materials/' . uploadImage('assets/uploads/materials', $request->file('photo'));
+            FileStorage::delete($material->photo_path);
+            $validated['photo_path'] = FileStorage::store($request->file('photo'), 'materials');
         }
 
         $material->update([

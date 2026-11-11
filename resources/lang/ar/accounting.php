@@ -62,6 +62,7 @@ return [
     'download_template' => 'تحميل القالب',
     'import_success' => 'تم استيراد البيانات بنجاح.',
     'import_partial' => 'تم الاستيراد، لكن تم تجاوز الصفوف التالية لوجود خطأ فيها: :rows',
+    'export_excel' => 'تصدير إلى إكسل',
     'edit_customer'      => 'تعديل عميل',
     'edit_supplier'       => 'تعديل مورد',
     'supplier_location_scope' => 'موقع المورد',

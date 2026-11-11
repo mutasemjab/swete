@@ -177,8 +177,8 @@
         @forelse($purchaseRequest->attachments as $attachment)
             <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <a href="{{ $attachment->url }}" target="_blank" rel="noopener" class="text-indigo-600 hover:underline text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-link"></i>
-                    {{ $attachment->label ?: $attachment->url }}
+                    <i class="fa-solid fa-paperclip"></i>
+                    {{ $attachment->label ?: $attachment->original_name }}
                 </a>
                 <form action="{{ route('purchase-requests.attachments.destroy', [$purchaseRequest, $attachment]) }}" method="POST">
                     @csrf
@@ -192,11 +192,11 @@
             <p class="text-sm text-slate-400 mb-4">{{ __('external_purchases.no_attachments') }}</p>
         @endforelse
 
-        <form action="{{ route('purchase-requests.attachments.store', $purchaseRequest) }}" method="POST" class="flex items-end gap-3 flex-wrap mt-4 pt-4 border-t border-slate-100">
+        <form action="{{ route('purchase-requests.attachments.store', $purchaseRequest) }}" method="POST" enctype="multipart/form-data" class="flex items-end gap-3 flex-wrap mt-4 pt-4 border-t border-slate-100">
             @csrf
             <div class="flex-1 min-w-56">
-                <label class="form-label">{{ __('external_purchases.attachment_url') }}</label>
-                <input type="text" name="url" placeholder="https://..." dir="ltr" class="form-input">
+                <label class="form-label">{{ __('external_purchases.attachment_file') }}</label>
+                <input type="file" name="file" class="form-input">
             </div>
             <div class="flex-1 min-w-40">
                 <label class="form-label">{{ __('external_purchases.attachment_label') }}</label>

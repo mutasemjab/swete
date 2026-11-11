@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenders;
 use App\Http\Controllers\ModuleController;
 use App\Models\Project;
 use App\Models\ProjectAttachment;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class ProjectAttachmentController extends ModuleController
@@ -27,11 +28,9 @@ class ProjectAttachmentController extends ModuleController
                 continue;
             }
 
-            $filename = uploadImage('assets/uploads/projects', $row['file']);
-
             $project->attachments()->create([
                 'name'       => $row['name'] ?: $row['file']->getClientOriginalName(),
-                'path'       => 'assets/uploads/projects/' . $filename,
+                'path'       => FileStorage::store($row['file'], 'projects'),
                 'created_by' => $request->user()->id,
             ]);
         }
@@ -43,9 +42,7 @@ class ProjectAttachmentController extends ModuleController
     {
         abort_unless($attachment->project_id === $project->id, 404);
 
-        if (file_exists(base_path($attachment->path))) {
-            @unlink(base_path($attachment->path));
-        }
+        FileStorage::delete($attachment->path);
 
         $attachment->delete();
 

@@ -56,6 +56,20 @@ return [
             'throw' => false,
         ],
 
+        // Every file attachment in the app (materials, agreements, maintenance contracts,
+        // project/tender/purchase-request attachments, etc.) is stored here — see
+        // App\Support\FileStorage and App\Providers\HelperServiceProvider::boot().
+        'bunnycdn' => [
+            'driver' => 'bunnycdn',
+            'storage_zone' => env('BUNNYCDN_STORAGE_ZONE'),
+            'pull_zone' => env('BUNNYCDN_PULL_ZONE'),
+            'api_key' => env('BUNNYCDN_API_KEY'),
+            'region' => env('BUNNYCDN_REGION', \PlatformCommunity\Flysystem\BunnyCDN\BunnyCDNRegion::DEFAULT),
+            // Unlike the other disks here: a storage backend this central should fail loudly
+            // (an exception) rather than silently no-op if the zone/key aren't configured yet.
+            'throw' => true,
+        ],
+
     ],
 
     /*

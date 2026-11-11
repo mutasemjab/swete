@@ -7,6 +7,7 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\MaintenanceContract;
 use App\Support\BackNavigation;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class ContractController extends ModuleController
@@ -45,12 +46,10 @@ class ContractController extends ModuleController
             'notes'        => ['nullable', 'string'],
         ]);
 
-        $filename = uploadImage('assets/uploads/maintenance-contracts', $validated['file']);
-
         MaintenanceContract::create([
             'number'      => MaintenanceContract::nextNumber(),
             'customer_id' => $validated['customer_id'],
-            'path'        => 'assets/uploads/maintenance-contracts/' . $filename,
+            'path'        => FileStorage::store($validated['file'], 'maintenance-contracts'),
             'signed_date' => $validated['signed_date'],
             'expiry_date' => $validated['expiry_date'],
             'notes'       => $validated['notes'] ?? null,
@@ -98,11 +97,8 @@ class ContractController extends ModuleController
         $path = $maintenanceContract->path;
 
         if ($request->hasFile('file')) {
-            if (file_exists(base_path($path))) {
-                @unlink(base_path($path));
-            }
-
-            $path = 'assets/uploads/maintenance-contracts/' . uploadImage('assets/uploads/maintenance-contracts', $validated['file']);
+            FileStorage::delete($path);
+            $path = FileStorage::store($validated['file'], 'maintenance-contracts');
         }
 
         $maintenanceContract->update([
@@ -119,9 +115,7 @@ class ContractController extends ModuleController
 
     public function destroy(MaintenanceContract $maintenanceContract)
     {
-        if (file_exists(base_path($maintenanceContract->path))) {
-            @unlink(base_path($maintenanceContract->path));
-        }
+        FileStorage::delete($maintenanceContract->path);
 
         $maintenanceContract->delete();
 

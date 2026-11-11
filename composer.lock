@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aed7c633c224539079e771402530caf0",
+    "content-hash": "06d749594fe4b59098d426c02b2e2605",
     "packages": [
         {
             "name": "brick/math",
@@ -4625,6 +4625,62 @@
                 }
             ],
             "time": "2024-09-16T03:06:04+00:00"
+        },
+        {
+            "name": "platformcommunity/flysystem-bunnycdn",
+            "version": "v3.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PlatformCommunity/flysystem-bunnycdn.git",
+                "reference": "48e81974949be13270a9364a3d9276e378168401"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PlatformCommunity/flysystem-bunnycdn/zipball/48e81974949be13270a9364a3d9276e378168401",
+                "reference": "48e81974949be13270a9364a3d9276e378168401",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.4",
+                "league/flysystem": "^3.7",
+                "league/mime-type-detection": "^1.11"
+            },
+            "require-dev": {
+                "fzaninotto/faker": "^1.5",
+                "laravel/pint": "^0.2.3",
+                "league/flysystem-adapter-test-utilities": "^3",
+                "league/flysystem-memory": "^3.0",
+                "league/flysystem-path-prefixing": "^3.3",
+                "phpunit/phpunit": "@stable"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PlatformCommunity\\Flysystem\\BunnyCDN\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alex Sinnott",
+                    "email": "alex@platformapp.io"
+                }
+            ],
+            "description": "Flysystem adapter for BunnyCDN",
+            "support": {
+                "issues": "https://github.com/PlatformCommunity/flysystem-bunnycdn/issues",
+                "source": "https://github.com/PlatformCommunity/flysystem-bunnycdn/tree/v3.3.1"
+            },
+            "time": "2022-11-23T22:45:37+00:00"
         },
         {
             "name": "psr/cache",

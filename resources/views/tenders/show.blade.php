@@ -82,24 +82,40 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
     <div class="card px-6 py-5">
-        <h3 class="text-sm font-black text-slate-700 mb-2">{{ __('tenders.tender_documents_url') }}</h3>
-        @if($tender->documents_url)
-            <a href="{{ $tender->documents_url }}" target="_blank" rel="noopener" class="text-indigo-600 hover:underline break-all text-sm flex items-center gap-2">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>{{ $tender->documents_url }}
-            </a>
-        @else
-            <p class="text-sm text-slate-400">—</p>
-        @endif
+        <h3 class="text-sm font-black text-slate-700 mb-2">{{ __('tenders.tender_documents') }}</h3>
+        @include('components.attachment-list', [
+            'attachments' => $tender->tenderDocuments,
+            'emptyText'   => __('tenders.no_tender_documents'),
+            'canDelete'   => auth()->user()->can('tenders.edit'),
+            'destroyUrl'  => fn ($attachment) => route('tenders.document-attachments.destroy', [$tender, $attachment]),
+        ])
+        @can('tenders.edit')
+            @include('components.attachment-upload-rows', [
+                'action'      => route('tenders.document-attachments.store', $tender),
+                'addLabel'    => __('tenders.document_attachment_add_row'),
+                'uploadLabel' => __('tenders.document_attachment_upload'),
+                'fileLabel'   => __('tenders.document_attachment_file'),
+                'extraFields' => ['kind' => 'documents'],
+            ])
+        @endcan
     </div>
     <div class="card px-6 py-5">
-        <h3 class="text-sm font-black text-slate-700 mb-2">{{ __('tenders.tender_design_documents_url') }}</h3>
-        @if($tender->design_documents_url)
-            <a href="{{ $tender->design_documents_url }}" target="_blank" rel="noopener" class="text-indigo-600 hover:underline break-all text-sm flex items-center gap-2">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>{{ $tender->design_documents_url }}
-            </a>
-        @else
-            <p class="text-sm text-slate-400">—</p>
-        @endif
+        <h3 class="text-sm font-black text-slate-700 mb-2">{{ __('tenders.tender_design_documents') }}</h3>
+        @include('components.attachment-list', [
+            'attachments' => $tender->designDocuments,
+            'emptyText'   => __('tenders.no_tender_documents'),
+            'canDelete'   => auth()->user()->can('tenders.edit'),
+            'destroyUrl'  => fn ($attachment) => route('tenders.document-attachments.destroy', [$tender, $attachment]),
+        ])
+        @can('tenders.edit')
+            @include('components.attachment-upload-rows', [
+                'action'      => route('tenders.document-attachments.store', $tender),
+                'addLabel'    => __('tenders.document_attachment_add_row'),
+                'uploadLabel' => __('tenders.document_attachment_upload'),
+                'fileLabel'   => __('tenders.document_attachment_file'),
+                'extraFields' => ['kind' => 'design'],
+            ])
+        @endcan
     </div>
 </div>
 
@@ -115,8 +131,8 @@
             <dt class="text-slate-400 font-medium mb-0.5">{{ $efv->field?->localized_label }}</dt>
             <dd class="font-bold text-slate-800">
                 @if($efv->file_path)
-                    <a href="{{ asset($efv->file_path) }}" target="_blank" class="block">
-                        <img src="{{ asset($efv->file_path) }}" class="h-20 rounded-lg object-cover border border-slate-200">
+                    <a href="{{ $efv->file_url }}" target="_blank" class="block">
+                        <img src="{{ $efv->file_url }}" class="h-20 rounded-lg object-cover border border-slate-200">
                     </a>
                 @else
                     {{ $efv->value ?: '—' }}

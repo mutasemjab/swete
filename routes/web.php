@@ -38,12 +38,14 @@ use App\Http\Controllers\Tenders\PriceAnalysisController;
 use App\Http\Controllers\Tenders\ProjectController;
 use App\Http\Controllers\Tenders\ProjectAttachmentController;
 use App\Http\Controllers\Tenders\TenderAnalysisAttachmentController;
+use App\Http\Controllers\Tenders\TenderDocumentAttachmentController;
 use App\Http\Controllers\X8Controller;
 use App\Http\Controllers\Tenders\ProjectDeviceController;
 use App\Http\Controllers\Tenders\ProjectItemAssignmentController;
 use App\Http\Controllers\Tenders\ProjectQuestionController;
 use App\Http\Controllers\Tenders\ProjectReviewController;
 use App\Http\Controllers\Tenders\PurchaseRequestReminderController;
+use App\Http\Controllers\Tenders\PurchaseRequestReminderAttachmentController;
 use App\Http\Controllers\Crm\AppointmentController;
 use App\Http\Controllers\Crm\AppointmentTypeController;
 use App\Http\Controllers\Maintenance\ReportTemplateController;
@@ -212,6 +214,11 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         // Gated by quotations.view|tenders.view|split_units.view — only ever called from
         // Price Quote / CIAT Discount / Split Unit screens, already behind their own create permissions.
         Route::post('materials/quick-store', [MaterialController::class, 'quickStore'])->name('materials.quick-store')->middleware('permission:tenders.view|quotations.view|split_units.view');
+        Route::get('materials/export', [MaterialController::class, 'export'])->name('materials.export')->middleware('permission:warehouse.view');
+        Route::middleware('permission:warehouse.materials.create')->group(function () {
+            Route::get('materials/import-template', [MaterialController::class, 'importTemplate'])->name('materials.import-template');
+            Route::post('materials/import', [MaterialController::class, 'import'])->name('materials.import');
+        });
         Route::resource('materials', MaterialController::class)->only(['create', 'store'])->middleware('permission:warehouse.materials.create');
         Route::resource('materials', MaterialController::class)->only(['index', 'show'])->middleware('permission:warehouse.view');
         Route::resource('materials', MaterialController::class)->only(['edit', 'update'])->middleware('permission:warehouse.materials.edit');
@@ -278,6 +285,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
             Route::get('customers-import-template', [CustomerController::class, 'importTemplate'])->name('customers.import-template');
             Route::post('customers-import', [CustomerController::class, 'import'])->name('customers.import');
         });
+        Route::get('customers-export', [CustomerController::class, 'export'])->name('customers.export')->middleware('permission:clients.view|accounting.view');
 
         Route::resource('customer-groups', CustomerGroupController::class)->only(['index'])->middleware('permission:clients.view|accounting.view');
         Route::resource('customer-groups', CustomerGroupController::class)->only(['create', 'store'])->middleware('permission:clients.customer_groups.create|accounting.customer_groups.create');
@@ -295,6 +303,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
             Route::get('suppliers-import-template', [SupplierController::class, 'importTemplate'])->name('suppliers.import-template');
             Route::post('suppliers-import', [SupplierController::class, 'import'])->name('suppliers.import');
         });
+        Route::get('suppliers-export', [SupplierController::class, 'export'])->name('suppliers.export')->middleware('permission:clients.view|accounting.view');
 
         Route::resource('supplier-groups', SupplierGroupController::class)->only(['index'])->middleware('permission:clients.view|accounting.view');
         Route::resource('supplier-groups', SupplierGroupController::class)->only(['create', 'store'])->middleware('permission:clients.supplier_groups.create|accounting.supplier_groups.create');
@@ -396,10 +405,18 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('tenders/{tender}/analysis-attachments', [TenderAnalysisAttachmentController::class, 'store'])->name('tenders.analysis-attachments.store')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
     Route::delete('tenders/{tender}/analysis-attachments/{attachment}', [TenderAnalysisAttachmentController::class, 'destroy'])->name('tenders.analysis-attachments.destroy')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
 
+    // ── Tender document attachments (replaces the old documents_url/design_documents_url link fields) ──
+    Route::post('tenders/{tender}/document-attachments', [TenderDocumentAttachmentController::class, 'store'])->name('tenders.document-attachments.store')->middleware('permission:tenders.edit');
+    Route::delete('tenders/{tender}/document-attachments/{attachment}', [TenderDocumentAttachmentController::class, 'destroy'])->name('tenders.document-attachments.destroy')->middleware('permission:tenders.edit');
+
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['create', 'store'])->middleware('permission:tenders.purchase_request_reminders.create');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['index', 'show'])->middleware('permission:tenders.view');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['edit', 'update'])->middleware('permission:tenders.purchase_request_reminders.edit');
     Route::resource('purchase-request-reminders', PurchaseRequestReminderController::class)->only(['destroy'])->middleware('permission:tenders.purchase_request_reminders.delete');
+
+    // ── Purchase Request Reminder attachments (replaces the old google_drive_url link field) ──
+    Route::post('purchase-request-reminders/{purchaseRequestReminder}/attachments', [PurchaseRequestReminderAttachmentController::class, 'store'])->name('purchase-request-reminders.attachments.store')->middleware('permission:tenders.purchase_request_reminders.edit');
+    Route::delete('purchase-request-reminders/{purchaseRequestReminder}/attachments/{attachment}', [PurchaseRequestReminderAttachmentController::class, 'destroy'])->name('purchase-request-reminders.attachments.destroy')->middleware('permission:tenders.purchase_request_reminders.edit');
 
     // ── Split Units (new standalone module) ───────────────────────────────────
     // create/store MUST be registered before index/show — see the Agreements block's comment

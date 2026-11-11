@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,7 +69,7 @@ class Material extends Model
 
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->photo_path ? asset($this->photo_path) : null;
+        return FileStorage::url($this->photo_path);
     }
 
     /** Real, catalog-ready materials only — excludes drafts quick-added from a Price Quote/CIAT

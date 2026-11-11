@@ -14,7 +14,7 @@
     @include('components.back-link', ['url' => $backUrl])
 </div>
 
-<form action="{{ route('purchase-request-reminders.store') }}" method="POST">
+<form action="{{ route('purchase-request-reminders.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <input type="hidden" name="back" value="{{ $backUrl }}">
 

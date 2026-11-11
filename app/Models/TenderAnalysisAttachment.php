@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,8 +25,8 @@ class TenderAnalysisAttachment extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function getUrlAttribute(): string
+    public function getUrlAttribute(): ?string
     {
-        return asset($this->path);
+        return FileStorage::url($this->path);
     }
 }

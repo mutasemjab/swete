@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Accounting;
 
+use App\Exports\SuppliersExport;
 use App\Exports\SuppliersTemplateExport;
 use App\Http\Controllers\ModuleController;
 use App\Imports\SuppliersImport;
@@ -11,6 +12,7 @@ use App\Models\Country;
 use App\Models\Governorate;
 use App\Models\Supplier;
 use App\Models\SupplierGroup;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Mews\Purifier\Facades\Purifier;
@@ -60,7 +62,7 @@ class SupplierController extends ModuleController
         ]);
 
         $this->syncContacts($supplier, $request->input('contacts', []));
-        $this->syncExtraFieldValues('supplier', $supplier->id, $request);
+        ClientExtraFieldValue::syncFor('supplier', $supplier->id, $request);
 
         if ($request->wantsJson()) {
             return response()->json(['id' => $supplier->id, 'name' => $supplier->localized_name, 'code' => $supplier->code]);
@@ -102,7 +104,7 @@ class SupplierController extends ModuleController
         ]);
 
         $this->syncContacts($supplier, $request->input('contacts', []));
-        $this->syncExtraFieldValues('supplier', $supplier->id, $request);
+        ClientExtraFieldValue::syncFor('supplier', $supplier->id, $request);
 
         return redirect()->route('accounting.suppliers.index')
             ->with('success', __('accounting.party_updated'));
@@ -119,6 +121,11 @@ class SupplierController extends ModuleController
     public function importTemplate()
     {
         return Excel::download(new SuppliersTemplateExport(), 'suppliers-import-template.xlsx');
+    }
+
+    public function export()
+    {
+        return Excel::download(new SuppliersExport(), 'suppliers.xlsx');
     }
 
     public function import(Request $request)
@@ -145,11 +152,9 @@ class SupplierController extends ModuleController
     {
         $request->validate(['file' => ['required', 'image', 'max:4096']]);
 
-        $filename = uploadImage('assets/uploads/suppliers/shipping-instructions', $request->file('file'));
+        $path = FileStorage::store($request->file('file'), 'suppliers/shipping-instructions');
 
-        return response()->json([
-            'location' => asset('assets/uploads/suppliers/shipping-instructions/' . $filename),
-        ]);
+        return response()->json(['location' => FileStorage::url($path)]);
     }
 
     /** Uploads whichever of the two document photos were submitted; keeps the existing path (on edit) for whichever wasn't. */
@@ -161,13 +166,13 @@ class SupplierController extends ModuleController
         ];
 
         if ($request->hasFile('commercial_registration_file')) {
-            $filename = uploadImage('assets/uploads/clients/documents', $request->file('commercial_registration_file'));
-            $paths['commercial_registration_path'] = 'assets/uploads/clients/documents/' . $filename;
+            FileStorage::delete($existing?->commercial_registration_path);
+            $paths['commercial_registration_path'] = FileStorage::store($request->file('commercial_registration_file'), 'clients/documents');
         }
 
         if ($request->hasFile('personal_id_file')) {
-            $filename = uploadImage('assets/uploads/clients/documents', $request->file('personal_id_file'));
-            $paths['personal_id_path'] = 'assets/uploads/clients/documents/' . $filename;
+            FileStorage::delete($existing?->personal_id_path);
+            $paths['personal_id_path'] = FileStorage::store($request->file('personal_id_file'), 'clients/documents');
         }
 
         return $paths;
@@ -192,31 +197,6 @@ class SupplierController extends ModuleController
         }
     }
 
-    private function syncExtraFieldValues(string $entityType, int $entityId, Request $request): void
-    {
-        $fields = ClientExtraField::where('entity_type', $entityType)->active()->get();
-
-        foreach ($fields as $field) {
-            if ($field->field_type === 'image') {
-                if ($request->hasFile("extra_fields_images.{$field->id}")) {
-                    $filename = uploadImage(
-                        'assets/uploads/clients/extra-fields',
-                        $request->file("extra_fields_images.{$field->id}")
-                    );
-                    ClientExtraFieldValue::updateOrCreate(
-                        ['field_id' => $field->id, 'entity_type' => $entityType, 'entity_id' => $entityId],
-                        ['file_path' => "assets/uploads/clients/extra-fields/{$filename}", 'value' => null]
-                    );
-                }
-            } else {
-                $value = $request->input("extra_fields.{$field->id}");
-                ClientExtraFieldValue::updateOrCreate(
-                    ['field_id' => $field->id, 'entity_type' => $entityType, 'entity_id' => $entityId],
-                    ['value' => $value ?: null, 'file_path' => null]
-                );
-            }
-        }
-    }
 
     private function validated(Request $request): array
     {

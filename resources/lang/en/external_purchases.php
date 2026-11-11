@@ -113,7 +113,7 @@ return [
     // ── Attachments ──────────────────────────────────────────────────────────
     'attachments'         => 'Attachments',
     'no_attachments'      => 'No attachments yet.',
-    'attachment_url'      => 'Attachment URL',
+    'attachment_file'     => 'File',
     'attachment_label'    => 'Attachment Label',
     'attachment_add'      => 'Add',
     'attachment_added'    => 'Attachment added successfully.',

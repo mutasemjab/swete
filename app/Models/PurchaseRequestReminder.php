@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +16,6 @@ class PurchaseRequestReminder extends Model
 
     protected $fillable = [
         'project_id',
-        'google_drive_url',
         'status',
         'purchase_request_id',
         'requested_by',
@@ -52,13 +52,20 @@ class PurchaseRequestReminder extends Model
         return $this->hasMany(PurchaseRequestReminderItem::class);
     }
 
-    /** The PR was created from this reminder — link them, and carry the drive link over as a real PR attachment. */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestReminderAttachment::class);
+    }
+
     /** Locked once a purchase request has been created from it — the request is considered finalized at that point. */
     public function isEditable(): bool
     {
         return $this->status !== 'fulfilled';
     }
 
+    /** The PR was created from this reminder — link them, and copy this reminder's own
+     *  attachments onto the new PR too (each gets its own independent stored file, so deleting
+     *  one later never affects the other). */
     public function markFulfilled(PurchaseRequest $purchaseRequest, User $user): void
     {
         $this->update([
@@ -68,11 +75,14 @@ class PurchaseRequestReminder extends Model
             'fulfilled_at'        => now(),
         ]);
 
-        $purchaseRequest->attachments()->create([
-            'url'        => $this->google_drive_url,
-            'label'      => __('tenders.reminder_drive_link_label'),
-            'created_by' => $user->id,
-        ]);
+        foreach ($this->attachments as $attachment) {
+            $purchaseRequest->attachments()->create([
+                'path'          => FileStorage::copy($attachment->path, 'purchase-requests'),
+                'original_name' => $attachment->original_name,
+                'label'         => __('tenders.reminder_attachment_label'),
+                'created_by'    => $user->id,
+            ]);
+        }
     }
 
     public function getActivitylogOptions(): LogOptions

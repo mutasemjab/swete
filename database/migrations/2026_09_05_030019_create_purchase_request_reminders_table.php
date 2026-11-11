@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('purchase_request_reminders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained('projects')->restrictOnDelete();
-            $table->string('google_drive_url');
             $table->enum('status', ['pending', 'fulfilled'])->default('pending');
             $table->foreignId('purchase_request_id')->nullable()->constrained('purchase_requests')->nullOnDelete();
             $table->foreignId('requested_by')->constrained('users')->restrictOnDelete();

@@ -10,6 +10,10 @@
         <p class="page-subtitle">{{ __('accounting.customers_subtitle') }}</p>
     </div>
     <div class="flex items-center gap-2">
+        <a href="{{ route('accounting.customers.export') }}" class="btn-secondary">
+            <i class="fa-solid fa-file-export"></i>
+            {{ __('accounting.export_excel') }}
+        </a>
         <button type="button" @click="showImport = true" class="btn-secondary">
             <i class="fa-solid fa-file-excel"></i>
             {{ __('accounting.import_excel') }}

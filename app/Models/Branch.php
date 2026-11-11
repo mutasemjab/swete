@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\FormatsAddressLines;
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class Branch extends Model
@@ -62,21 +63,21 @@ class Branch extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo_path ? asset($this->logo_path) : null;
+        return FileStorage::url($this->logo_path);
     }
 
     public function getLogoSecondaryUrlAttribute(): ?string
     {
-        return $this->logo_secondary_path ? asset($this->logo_secondary_path) : null;
+        return FileStorage::url($this->logo_secondary_path);
     }
 
     /** Up to 3 header images for the price-quote print document — whichever are uploaded, in order, no gaps for missing ones. */
     public function getQuoteHeaderImagesAttribute(): array
     {
         return array_values(array_filter([
-            $this->quote_header_image1_path ? asset($this->quote_header_image1_path) : null,
-            $this->quote_header_image2_path ? asset($this->quote_header_image2_path) : null,
-            $this->quote_header_image3_path ? asset($this->quote_header_image3_path) : null,
+            FileStorage::url($this->quote_header_image1_path),
+            FileStorage::url($this->quote_header_image2_path),
+            FileStorage::url($this->quote_header_image3_path),
         ]));
     }
 
@@ -84,8 +85,8 @@ class Branch extends Model
     public function getQuoteBodyImagesAttribute(): array
     {
         return array_values(array_filter([
-            $this->quote_body_image1_path ? asset($this->quote_body_image1_path) : null,
-            $this->quote_body_image2_path ? asset($this->quote_body_image2_path) : null,
+            FileStorage::url($this->quote_body_image1_path),
+            FileStorage::url($this->quote_body_image2_path),
         ]));
     }
 }

@@ -33,9 +33,6 @@ return new class extends Migration
             $table->date('submission_deadline');
             $table->foreignId('status_id')->constrained('tender_statuses')->restrictOnDelete();
 
-            $table->string('documents_url')->nullable();
-            $table->string('design_documents_url')->nullable();
-
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
             $table->timestamps();

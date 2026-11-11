@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\ModuleController;
 use App\Models\Branch;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class BranchController extends ModuleController
@@ -128,15 +129,11 @@ class BranchController extends ModuleController
             return null;
         }
 
-        $filename = uploadImage('assets/uploads/branches', $request->file($field));
-
-        return 'assets/uploads/branches/' . $filename;
+        return FileStorage::store($request->file($field), 'branches');
     }
 
     private function deleteImageFile(?string $path): void
     {
-        if ($path && file_exists(base_path($path))) {
-            @unlink(base_path($path));
-        }
+        FileStorage::delete($path);
     }
 }

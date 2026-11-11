@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\Project;
 use App\Models\PurchaseRequestReminder;
 use App\Support\BackNavigation;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class PurchaseRequestReminderController extends ModuleController
@@ -31,14 +32,21 @@ class PurchaseRequestReminderController extends ModuleController
 
     public function store(Request $request)
     {
-        $validated = $this->validated($request);
+        $validated = $this->validated($request, true);
 
         $reminder = PurchaseRequestReminder::create([
-            'project_id'       => $validated['project_id'],
-            'google_drive_url' => $validated['google_drive_url'],
-            'status'           => 'pending',
-            'requested_by'     => $request->user()->id,
+            'project_id'   => $validated['project_id'],
+            'status'       => 'pending',
+            'requested_by' => $request->user()->id,
         ]);
+
+        foreach ($validated['attachments'] as $row) {
+            $reminder->attachments()->create([
+                'path'          => FileStorage::store($row['file'], 'purchase-request-reminders'),
+                'original_name' => $row['file']->getClientOriginalName(),
+                'created_by'    => $request->user()->id,
+            ]);
+        }
 
         $this->syncItems($reminder, $validated['items']);
 
@@ -48,7 +56,7 @@ class PurchaseRequestReminderController extends ModuleController
 
     public function show(Request $request, PurchaseRequestReminder $purchaseRequestReminder)
     {
-        $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit', 'items.features']);
+        $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit', 'items.features', 'attachments']);
 
         $backUrl = BackNavigation::url();
 
@@ -77,8 +85,7 @@ class PurchaseRequestReminderController extends ModuleController
         $validated = $this->validated($request);
 
         $purchaseRequestReminder->update([
-            'project_id'       => $validated['project_id'],
-            'google_drive_url' => $validated['google_drive_url'],
+            'project_id' => $validated['project_id'],
         ]);
 
         $this->syncItems($purchaseRequestReminder, $validated['items']);
@@ -118,14 +125,10 @@ class PurchaseRequestReminderController extends ModuleController
         ];
     }
 
-    private function validated(Request $request): array
+    private function validated(Request $request, bool $isCreate = false): array
     {
-        // A pasted link with no scheme would otherwise render as a relative href and silently fail to open.
-        $request->merge(['google_drive_url' => normalizeUrl($request->input('google_drive_url'))]);
-
-        return $request->validate([
+        $rules = [
             'project_id'              => ['required', 'exists:projects,id'],
-            'google_drive_url'        => ['required', 'url', 'max:500'],
             'items'                   => ['required', 'array', 'min:1'],
             'items.*.material_id'     => ['required', 'exists:materials,id'],
             'items.*.quantity'        => ['required', 'numeric', 'min:0.001'],
@@ -133,7 +136,18 @@ class PurchaseRequestReminderController extends ModuleController
             'items.*.unit_price'      => ['nullable', 'numeric', 'min:0'],
             'items.*.features'        => ['array'],
             'items.*.features.*'      => ['nullable', 'string', 'max:255'],
-        ]);
+        ];
+
+        // Attachments are only ever submitted bundled with the CREATE form — editing a reminder's
+        // attachments afterward goes through its own dedicated add/remove endpoint (see
+        // PurchaseRequestReminderAttachmentController), since a <input type="file"> can't be
+        // pre-filled with an already-uploaded file the way a text/url field could.
+        if ($isCreate) {
+            $rules['attachments']         = ['required', 'array', 'min:1'];
+            $rules['attachments.*.file']  = ['required', 'file', 'max:20480'];
+        }
+
+        return $request->validate($rules);
     }
 
     private function syncItems(PurchaseRequestReminder $reminder, array $items): void

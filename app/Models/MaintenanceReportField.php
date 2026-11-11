@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -54,7 +55,7 @@ class MaintenanceReportField extends Model
         }
 
         return collect(json_decode($this->answer, true) ?: [])
-            ->map(fn ($path) => asset($path))
+            ->map(fn ($path) => FileStorage::url($path))
             ->values()
             ->all();
     }

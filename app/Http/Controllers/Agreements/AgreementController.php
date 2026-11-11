@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Project;
 use App\Models\Supplier;
 use App\Support\BackNavigation;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class AgreementController extends ModuleController
@@ -51,14 +52,12 @@ class AgreementController extends ModuleController
     {
         $validated = $this->validated($request);
 
-        $filename = uploadImage('assets/uploads/agreements', $validated['file']);
-
         $agreement = Agreement::create([
             'number'     => Agreement::nextNumber(),
             'party_type' => $validated['party_type'],
             'party_id'   => $validated['party_id'],
             'project_id' => $validated['project_id'] ?? null,
-            'path'       => 'assets/uploads/agreements/' . $filename,
+            'path'       => FileStorage::store($validated['file'], 'agreements'),
             'notes'      => $validated['notes'] ?? null,
             'created_by' => $request->user()->id,
         ]);
@@ -103,11 +102,8 @@ class AgreementController extends ModuleController
         $path = $agreement->path;
 
         if ($request->hasFile('file')) {
-            if (file_exists(base_path($path))) {
-                @unlink(base_path($path));
-            }
-
-            $path = 'assets/uploads/agreements/' . uploadImage('assets/uploads/agreements', $validated['file']);
+            FileStorage::delete($path);
+            $path = FileStorage::store($validated['file'], 'agreements');
         }
 
         $agreement->update([
@@ -123,9 +119,7 @@ class AgreementController extends ModuleController
 
     public function destroy(Agreement $agreement)
     {
-        if (file_exists(base_path($agreement->path))) {
-            @unlink(base_path($agreement->path));
-        }
+        FileStorage::delete($agreement->path);
 
         $agreement->delete();
 

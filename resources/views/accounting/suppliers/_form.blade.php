@@ -180,7 +180,7 @@
                 @elseif($field->field_type === 'image')
                     @if($efv?->file_path)
                         <div class="mb-2">
-                            <img src="{{ asset($efv->file_path) }}" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
+                            <img src="{{ $efv->file_url }}" alt="" class="h-24 rounded-lg object-cover border border-slate-200">
                         </div>
                     @endif
                     <input type="file" name="extra_fields_images[{{ $field->id }}]"

@@ -62,6 +62,7 @@ return [
     'download_template' => 'Download Template',
     'import_success' => 'Data imported successfully.',
     'import_partial' => 'Imported, but these rows were skipped due to an error: :rows',
+    'export_excel' => 'Export to Excel',
     'edit_customer'      => 'Edit Customer',
     'edit_supplier'       => 'Edit Supplier',
     'supplier_location_scope' => 'Supplier Location',

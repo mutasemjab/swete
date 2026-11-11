@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenders;
 use App\Http\Controllers\ModuleController;
 use App\Models\Tender;
 use App\Models\TenderAnalysisAttachment;
+use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
 class TenderAnalysisAttachmentController extends ModuleController
@@ -25,11 +26,9 @@ class TenderAnalysisAttachmentController extends ModuleController
                 continue;
             }
 
-            $filename = uploadImage('assets/uploads/tenders', $row['file']);
-
             $tender->analysisAttachments()->create([
                 'name'       => $row['name'] ?: $row['file']->getClientOriginalName(),
-                'path'       => 'assets/uploads/tenders/' . $filename,
+                'path'       => FileStorage::store($row['file'], 'tenders'),
                 'created_by' => $request->user()->id,
             ]);
         }
@@ -41,9 +40,7 @@ class TenderAnalysisAttachmentController extends ModuleController
     {
         abort_unless($attachment->tender_id === $tender->id, 404);
 
-        if (file_exists(base_path($attachment->path))) {
-            @unlink(base_path($attachment->path));
-        }
+        FileStorage::delete($attachment->path);
 
         $attachment->delete();
 

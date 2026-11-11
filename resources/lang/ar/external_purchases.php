@@ -113,7 +113,7 @@ return [
     // ── Attachments ──────────────────────────────────────────────────────────
     'attachments'         => 'المرفقات',
     'no_attachments'      => 'لا توجد مرفقات بعد.',
-    'attachment_url'      => 'رابط المرفق',
+    'attachment_file'     => 'الملف',
     'attachment_label'    => 'وصف المرفق',
     'attachment_add'      => 'إضافة',
     'attachment_added'    => 'تم إضافة المرفق بنجاح.',
