@@ -21,10 +21,7 @@
         </p>
     </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('x8.index') }}" class="btn-secondary">
-            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-            {{ __('app.back_to_list') }}
-        </a>
+        @include('components.back-link', ['url' => $backUrl])
     </div>
 </div>
 

@@ -3,16 +3,15 @@
 @section('title', __('settings.add_branch'))
 @section('breadcrumb', __('settings.add_branch'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('settings.add_branch') }}</h1>
         <p class="page-subtitle">{{ __('settings.add_branch_subtitle') }}</p>
     </div>
-    <a href="{{ route('settings.branches.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('settings.branches.store') }}" method="POST" enctype="multipart/form-data">
@@ -246,7 +245,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('settings.add_branch') }}
         </button>
-        <a href="{{ route('settings.branches.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

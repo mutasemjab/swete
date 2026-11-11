@@ -3,16 +3,15 @@
 @section('title', __('external_purchases.send_to_shipping_companies'))
 @section('breadcrumb', __('external_purchases.send_to_shipping_companies'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('external_purchases.send_to_shipping_companies') }}</h1>
         <p class="page-subtitle">{{ __('external_purchases.ship_page_subtitle') }}</p>
     </div>
-    <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <p class="text-sm text-slate-500 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-5">
@@ -123,7 +122,7 @@
             <i class="fa-solid fa-paper-plane"></i>
             {{ __('external_purchases.send_now') }}
         </button>
-        <a href="{{ route('purchase-requests.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

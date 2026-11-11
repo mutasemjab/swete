@@ -3,17 +3,15 @@
 @section('title', __('app.edit') . ' — ' . $field->label_ar)
 @section('breadcrumb', __('app.edit'))
 
+@php($backUrl = \App\Support\BackNavigation::url([], 'client-extra-fields.' . $field->entity_type . 's'))
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('app.edit') }}</h1>
         <p class="page-subtitle">{{ $field->label_ar }}</p>
     </div>
-    <a href="{{ route('client-extra-fields.' . $field->entity_type . 's') }}"
-       class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('client-extra-fields.update', $field) }}" method="POST">
@@ -79,8 +77,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('client-extra-fields.' . $field->entity_type . 's') }}"
-           class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

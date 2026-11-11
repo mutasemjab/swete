@@ -6,6 +6,7 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\MaintenanceContract;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class ContractController extends ModuleController
@@ -64,18 +65,23 @@ class ContractController extends ModuleController
     {
         $maintenanceContract->load(['customer', 'creator', 'payments.currency', 'payments.assignee', 'payments.invoice']);
         $currencies = Currency::where('status', true)->orderBy('name')->get();
+        $backUrl = BackNavigation::url();
 
         return $this->moduleView('maintenance.contracts.show', [
             'contract'   => $maintenanceContract,
             'currencies' => $currencies,
+            'backUrl'    => $backUrl,
         ]);
     }
 
     public function edit(MaintenanceContract $maintenanceContract)
     {
+        $backUrl = BackNavigation::url([$maintenanceContract], 'maintenance-contracts.show');
+
         return $this->moduleView('maintenance.contracts.edit', [
             'contract'  => $maintenanceContract,
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
+            'backUrl'   => $backUrl,
         ]);
     }
 
@@ -107,7 +113,7 @@ class ContractController extends ModuleController
             'notes'       => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->route('maintenance-contracts.show', $maintenanceContract)
+        return redirect()->route('maintenance-contracts.show', [$maintenanceContract, 'back' => $request->input('back')])
             ->with('success', __('maintenance.contract_updated'));
     }
 

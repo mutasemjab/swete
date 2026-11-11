@@ -15,10 +15,7 @@
         </h1>
         <p class="page-subtitle">{{ $invoice->invoiceType?->localized_name }}</p>
     </div>
-    <a href="{{ route('accounting.invoices.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <div class="card px-6 py-5 mb-5">

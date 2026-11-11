@@ -9,10 +9,7 @@
         <h1 class="page-title">{{ __('maintenance.edit_report') }}</h1>
         <p class="page-subtitle">{{ $report->number }} — {{ $report->template_name }}</p>
     </div>
-    <a href="{{ route('maintenance-reports.show', $report) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('maintenance-reports.update', $report) }}" method="POST" enctype="multipart/form-data"
@@ -25,6 +22,7 @@
       x-init="$nextTick(() => window.initSelect2())">
     @csrf
     @method('PUT')
+    <input type="hidden" name="back" value="{{ $backUrl }}">
 
     <div class="card mb-5">
         <div class="card-header">
@@ -189,7 +187,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('maintenance-reports.show', $report) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

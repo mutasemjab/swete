@@ -10,9 +10,11 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * Shared header for the 3 real stock-movement voucher types: receipt, issue, transfer.
- * `warehouse_id` is the only warehouse involved for receipt/issue; for transfer it's the
- * source and `destination_warehouse_id` is the target.
+ * Shared header for the 4 stock-movement voucher types: receipt, issue, transfer, stocktake.
+ * `warehouse_id` is the only warehouse involved for receipt/issue/stocktake; for transfer it's
+ * the source and `destination_warehouse_id` is the target. `customer_id` is only ever set on an
+ * `issue` voucher issued directly to a customer — nullable, since `MaterialRequest::fulfill()`
+ * also auto-creates plain internal `issue` vouchers with no customer at all.
  */
 class StockVoucher extends Model
 {
@@ -23,6 +25,7 @@ class StockVoucher extends Model
         'number',
         'warehouse_id',
         'destination_warehouse_id',
+        'customer_id',
         'date',
         'reference_no',
         'notes',
@@ -45,6 +48,11 @@ class StockVoucher extends Model
     public function destinationWarehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class, 'destination_warehouse_id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function items(): HasMany
@@ -70,9 +78,10 @@ class StockVoucher extends Model
     public static function nextNumber(string $type): string
     {
         $prefix = match ($type) {
-            'receipt'  => 'REC',
-            'issue'    => 'ISS',
-            'transfer' => 'TRF',
+            'receipt'   => 'REC',
+            'issue'     => 'ISS',
+            'transfer'  => 'TRF',
+            'stocktake' => 'STK',
         };
 
         $year  = now()->format('Y');
@@ -83,8 +92,9 @@ class StockVoucher extends Model
 
     /**
      * Post a draft voucher: writes ledger movements and updates live balances.
-     * Issue/transfer are checked for sufficient stock first. Throws \RuntimeException
-     * (message is a translation key) if posting isn't possible.
+     * Issue/transfer are checked for sufficient stock first — stocktake never is, since counting
+     * down to a lower quantity than the system has is definitionally always valid. Throws
+     * \RuntimeException (message is a translation key) if posting isn't possible.
      */
     public function post(User $user): void
     {
@@ -94,7 +104,7 @@ class StockVoucher extends Model
 
         $items = $this->items()->with('material')->get();
 
-        if ($this->type !== 'receipt') {
+        if (! in_array($this->type, ['receipt', 'stocktake'], true)) {
             foreach ($items as $item) {
                 $available = MaterialStock::where('material_id', $item->material_id)
                     ->where('warehouse_id', $this->warehouse_id)
@@ -112,6 +122,21 @@ class StockVoucher extends Model
                     $this->applyMovement($item->material_id, $this->warehouse_id, 'in', $item->quantity);
                 } elseif ($this->type === 'issue') {
                     $this->applyMovement($item->material_id, $this->warehouse_id, 'out', $item->quantity);
+                } elseif ($this->type === 'stocktake') {
+                    // $item->quantity is the physically COUNTED amount, not a delta. The movement
+                    // amount is the difference against the live system balance — applying that
+                    // delta as a normal increment/decrement lands the balance exactly on the
+                    // counted figure, so no separate "set absolute" path is needed.
+                    $current = MaterialStock::where('material_id', $item->material_id)
+                        ->where('warehouse_id', $this->warehouse_id)
+                        ->value('quantity') ?? 0;
+                    $delta = $item->quantity - $current;
+
+                    if ($delta > 0) {
+                        $this->applyMovement($item->material_id, $this->warehouse_id, 'in', $delta);
+                    } elseif ($delta < 0) {
+                        $this->applyMovement($item->material_id, $this->warehouse_id, 'out', abs($delta));
+                    }
                 } else { // transfer
                     $this->applyMovement($item->material_id, $this->warehouse_id, 'out', $item->quantity);
                     $this->applyMovement($item->material_id, $this->destination_warehouse_id, 'in', $item->quantity);

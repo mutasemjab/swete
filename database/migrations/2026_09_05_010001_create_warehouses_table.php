@@ -13,7 +13,6 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
             $table->string('name');
             $table->string('name_en')->nullable();
-            $table->string('code')->unique();
             $table->boolean('is_main')->default(false);
             $table->boolean('status')->default(true);
             $table->timestamps();

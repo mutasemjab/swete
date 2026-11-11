@@ -3,16 +3,15 @@
 @section('title', __('warehouse.draft_materials'))
 @section('breadcrumb', __('warehouse.draft_materials'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('warehouse.draft_materials') }}</h1>
         <p class="page-subtitle">{{ __('warehouse.draft_materials_subtitle') }}</p>
     </div>
-    <a href="{{ route('warehouse.materials.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <div class="card overflow-hidden" x-data="{

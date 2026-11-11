@@ -7,6 +7,7 @@ use App\Models\Agreement;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\Supplier;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class AgreementController extends ModuleController
@@ -71,20 +72,25 @@ class AgreementController extends ModuleController
             ->with('success', __('agreements.agreement_added'));
     }
 
-    public function show(Agreement $agreement)
+    public function show(Request $request, Agreement $agreement)
     {
         $agreement->load('creator');
         $agreement->setRelation('party', $agreement->party()->first());
 
-        return $this->moduleView('agreements.show', ['agreement' => $agreement]);
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('agreements.show', ['agreement' => $agreement, 'backUrl' => $backUrl]);
     }
 
-    public function edit(Agreement $agreement)
+    public function edit(Request $request, Agreement $agreement)
     {
         $agreement->setRelation('party', $agreement->party()->first());
 
+        $backUrl = BackNavigation::url([$agreement], 'agreements.show');
+
         return $this->moduleView('agreements.edit', [
             'agreement' => $agreement,
+            'backUrl'   => $backUrl,
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
             'suppliers' => Supplier::where('status', true)->orderBy('name')->get(),
         ]);
@@ -111,7 +117,7 @@ class AgreementController extends ModuleController
             'notes'      => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->route('agreements.show', $agreement)
+        return redirect()->route('agreements.show', [$agreement, 'back' => $request->input('back')])
             ->with('success', __('agreements.agreement_updated'));
     }
 

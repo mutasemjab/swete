@@ -59,10 +59,7 @@
                 {{ __('tenders.project_view_current_version') }}
             </a>
         @endif
-        <a href="{{ $project->status === 'under_review' ? route('project-reviews.index') : route('projects.index') }}" class="btn-secondary">
-            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-            {{ __('app.back_to_list') }}
-        </a>
+        @include('components.back-link', ['url' => $backUrl])
     </div>
 </div>
 

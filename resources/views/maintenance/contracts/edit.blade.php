@@ -9,14 +9,12 @@
         <h1 class="page-title">{{ __('maintenance.edit_contract') }}</h1>
         <p class="page-subtitle">{{ $contract->number }}</p>
     </div>
-    <a href="{{ route('maintenance-contracts.show', $contract) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('maintenance-contracts.update', $contract) }}" method="POST" enctype="multipart/form-data">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @method('PUT')
     <div class="card mb-5">
         <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -69,7 +67,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('maintenance-contracts.show', $contract) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

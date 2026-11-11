@@ -45,7 +45,6 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.warehouse_name') }}</th>
-                        <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.warehouse_code') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.warehouse_branch') }}</th>
                         <th class="px-5 py-3.5 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.status') }}</th>
                         <th class="px-5 py-3.5 text-end text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
@@ -61,9 +60,6 @@
                                     <span class="badge bg-emerald-100 text-emerald-700 text-[10px]">{{ __('warehouse.is_main_warehouse') }}</span>
                                 @endif
                             </div>
-                        </td>
-                        <td class="px-5 py-4">
-                            <span class="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-lg text-sm">{{ $warehouse->code }}</span>
                         </td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $warehouse->branch?->localized_name }}</td>
                         <td class="px-5 py-4">

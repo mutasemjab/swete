@@ -18,6 +18,8 @@ use App\Http\Controllers\Warehouse\UnitController;
 use App\Http\Controllers\Warehouse\MaterialController;
 use App\Http\Controllers\Warehouse\StockVoucherController;
 use App\Http\Controllers\Warehouse\MaterialRequestController;
+use App\Http\Controllers\Warehouse\PurchaseOrderController;
+use App\Http\Controllers\Warehouse\PurchaseInvoiceController;
 use App\Http\Controllers\Warehouse\WarehouseReportController;
 use App\Http\Controllers\Accounting\CustomerController;
 use App\Http\Controllers\Accounting\CustomerGroupController;
@@ -222,7 +224,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::post('material-requests/{materialRequest}/fulfill', [MaterialRequestController::class, 'fulfill'])
             ->name('material-requests.fulfill')->middleware('permission:warehouse.material_requests.fulfill');
 
-        Route::prefix('vouchers/{type}')->where(['type' => 'receipt|issue|transfer'])->name('vouchers.')->group(function () {
+        Route::prefix('vouchers/{type}')->where(['type' => 'receipt|issue|transfer|stocktake'])->name('vouchers.')->group(function () {
             Route::get('/',        [StockVoucherController::class, 'index'])->name('index')->middleware('permission:warehouse.view');
             Route::get('create',   [StockVoucherController::class, 'create'])->name('create')->middleware('permission:warehouse.vouchers.create');
             Route::post('/',       [StockVoucherController::class, 'store'])->name('store')->middleware('permission:warehouse.vouchers.create');
@@ -236,6 +238,15 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         });
 
     });
+
+    // ── Purchase Orders / Purchase Invoices (warehouse-local purchasing — top-level route
+    //    names like every other tenders/quotations resource, even though it lives in the
+    //    Warehouse module's own nav) ──────────────────────────────────────────────────────
+    Route::resource('purchase-orders', PurchaseOrderController::class)->only(['create', 'store'])->middleware('permission:warehouse.purchase_orders.create');
+    Route::resource('purchase-orders', PurchaseOrderController::class)->only(['edit', 'update'])->middleware('permission:warehouse.purchase_orders.edit');
+    Route::resource('purchase-orders', PurchaseOrderController::class)->only(['index', 'show'])->middleware('permission:warehouse.view');
+    Route::resource('purchase-invoices', PurchaseInvoiceController::class)->only(['create', 'store'])->middleware('permission:warehouse.purchase_invoices.create');
+    Route::resource('purchase-invoices', PurchaseInvoiceController::class)->only(['index', 'show'])->middleware('permission:warehouse.view');
 
     // ── Accounting (invoices and invoice types only) ───────────────────────────
     Route::prefix('accounting')->name('accounting.')->group(function () {

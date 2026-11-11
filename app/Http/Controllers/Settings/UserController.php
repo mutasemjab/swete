@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\ModuleController;
 use App\Models\User;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -81,13 +82,15 @@ class UserController extends ModuleController
     public function show(User $user)
     {
         $user->load('roles.permissions');
-        return $this->moduleView('settings.users.show', compact('user'));
+        $backUrl = BackNavigation::url();
+        return $this->moduleView('settings.users.show', compact('user', 'backUrl'));
     }
 
     public function edit(User $user)
     {
         $roles = Role::orderBy('name')->get();
-        return $this->moduleView('settings.users.edit', compact('user', 'roles'));
+        $backUrl = BackNavigation::url();
+        return $this->moduleView('settings.users.edit', compact('user', 'roles', 'backUrl'));
     }
 
     public function update(Request $request, User $user)

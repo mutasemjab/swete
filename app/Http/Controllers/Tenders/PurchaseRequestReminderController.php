@@ -6,6 +6,7 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Material;
 use App\Models\Project;
 use App\Models\PurchaseRequestReminder;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class PurchaseRequestReminderController extends ModuleController
@@ -41,26 +42,31 @@ class PurchaseRequestReminderController extends ModuleController
 
         $this->syncItems($reminder, $validated['items']);
 
-        return redirect()->route('purchase-request-reminders.show', $reminder)
+        return redirect()->route('purchase-request-reminders.show', [$reminder, 'back' => $request->input('back')])
             ->with('success', __('tenders.reminder_added'));
     }
 
-    public function show(PurchaseRequestReminder $purchaseRequestReminder)
+    public function show(Request $request, PurchaseRequestReminder $purchaseRequestReminder)
     {
         $purchaseRequestReminder->load(['project.customer', 'requester', 'fulfiller', 'purchaseRequest', 'items.material.unit', 'items.features']);
 
-        return $this->moduleView('tenders.purchase-request-reminders.show', ['reminder' => $purchaseRequestReminder]);
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('tenders.purchase-request-reminders.show', ['reminder' => $purchaseRequestReminder, 'backUrl' => $backUrl]);
     }
 
-    public function edit(PurchaseRequestReminder $purchaseRequestReminder)
+    public function edit(Request $request, PurchaseRequestReminder $purchaseRequestReminder)
     {
         abort_unless($purchaseRequestReminder->isEditable(), 403, __('tenders.reminder_locked'));
 
         $purchaseRequestReminder->load('items.features');
 
+        $backUrl = BackNavigation::url([$purchaseRequestReminder], 'purchase-request-reminders.show');
+
         return $this->moduleView('tenders.purchase-request-reminders.edit', [
             ...$this->formOptions(),
             'reminder' => $purchaseRequestReminder,
+            'backUrl'  => $backUrl,
         ]);
     }
 
@@ -77,7 +83,7 @@ class PurchaseRequestReminderController extends ModuleController
 
         $this->syncItems($purchaseRequestReminder, $validated['items']);
 
-        return redirect()->route('purchase-request-reminders.show', $purchaseRequestReminder)
+        return redirect()->route('purchase-request-reminders.show', [$purchaseRequestReminder, 'back' => $request->input('back')])
             ->with('success', __('tenders.reminder_updated'));
     }
 

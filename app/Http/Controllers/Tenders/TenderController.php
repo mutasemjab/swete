@@ -16,6 +16,7 @@ use App\Models\ProjectVariationOrder;
 use App\Models\SalesRepresentative;
 use App\Models\Tender;
 use App\Models\TenderStatus;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class TenderController extends ModuleController
@@ -80,11 +81,11 @@ class TenderController extends ModuleController
 
         $this->syncExtraFieldValues($tender, $request);
 
-        return redirect()->route('tenders.show', $tender)
+        return redirect()->route('tenders.show', [$tender, 'back' => $request->input('back')])
             ->with('success', __('tenders.tender_added'));
     }
 
-    public function show(Tender $tender)
+    public function show(Request $request, Tender $tender)
     {
         $tender->load([
             'party', 'statusRef', 'governorate', 'country', 'creator',
@@ -95,10 +96,12 @@ class TenderController extends ModuleController
         ]);
         $unlinkedQuotes = PriceQuote::whereNull('tender_id')->orderByDesc('date')->get();
 
-        return $this->moduleView('tenders.show', compact('tender', 'unlinkedQuotes'));
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('tenders.show', compact('tender', 'unlinkedQuotes', 'backUrl'));
     }
 
-    public function edit(Tender $tender)
+    public function edit(Request $request, Tender $tender)
     {
         $customers = Customer::where('status', true)->orderBy('name')->get();
         $statuses  = TenderStatus::where('status', true)->orderBy('name')->get();
@@ -112,8 +115,9 @@ class TenderController extends ModuleController
             ->keyBy('field_id');
 
         $governorates = Governorate::selectable($tender->governorate_id);
+        $backUrl = BackNavigation::url([$tender], 'tenders.show');
 
-        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps', 'extraFields', 'extraFieldValues'));
+        return $this->moduleView('tenders.edit', compact('tender', 'customers', 'statuses', 'countries', 'currencies', 'governorates', 'salesReps', 'extraFields', 'extraFieldValues', 'backUrl'));
     }
 
     public function update(Request $request, Tender $tender)
@@ -124,7 +128,7 @@ class TenderController extends ModuleController
 
         $this->syncExtraFieldValues($tender, $request);
 
-        return redirect()->route('tenders.show', $tender)
+        return redirect()->route('tenders.show', [$tender, 'back' => $request->input('back')])
             ->with('success', __('tenders.tender_updated'));
     }
 

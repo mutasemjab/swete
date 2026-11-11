@@ -3,20 +3,20 @@
 @section('title', __('split_units.add'))
 @section('breadcrumb', __('split_units.add'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('split_units.add') }}</h1>
         <p class="page-subtitle">{{ __('split_units.add_subtitle') }}</p>
     </div>
-    <a href="{{ route('split-units.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('split-units.store') }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
 
     @include('split-units._form')
 
@@ -25,7 +25,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('split_units.add') }}
         </button>
-        <a href="{{ route('split-units.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

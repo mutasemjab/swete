@@ -23,13 +23,6 @@
         </div>
 
         <div>
-            <label class="form-label">{{ __('warehouse.warehouse_code') }} <span class="text-rose-500">*</span></label>
-            <input type="text" name="code" value="{{ old('code', $warehouse?->code) }}" dir="ltr"
-                   class="form-input @error('code') is-invalid @enderror">
-            @error('code')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
-        </div>
-
-        <div>
             <label class="form-label">{{ __('warehouse.warehouse_branch') }} <span class="text-rose-500">*</span></label>
             <select name="branch_id" class="form-select @error('branch_id') is-invalid @enderror">
                 <option value="">{{ __('app.select') }}</option>

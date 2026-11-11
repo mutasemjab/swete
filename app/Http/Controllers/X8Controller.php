@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PriceAnalysisItem;
 use App\Models\X8;
 use App\Models\X8Item;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 /**
@@ -51,7 +52,9 @@ class X8Controller extends ModuleController
         $x8->load(['priceAnalysis.items.material', 'items', 'versions']);
         $this->resolveLinkedTenders(collect([$x8]));
 
-        return $this->moduleView('x8.show', ['x8' => $x8]);
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('x8.show', ['x8' => $x8, 'backUrl' => $backUrl]);
     }
 
     public function approve(Request $request, PriceAnalysisItem $item)

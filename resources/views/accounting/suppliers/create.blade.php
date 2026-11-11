@@ -3,15 +3,14 @@
 @section('title', __('accounting.add_supplier'))
 @section('breadcrumb', __('accounting.add_supplier'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('accounting.add_supplier') }}</h1>
     </div>
-    <a href="{{ route('accounting.suppliers.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('accounting.suppliers.store') }}" method="POST" enctype="multipart/form-data">
@@ -23,7 +22,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('accounting.add_supplier') }}
         </button>
-        <a href="{{ route('accounting.suppliers.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

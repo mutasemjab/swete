@@ -12,10 +12,7 @@
         </h1>
         <p class="page-subtitle">{{ $visit->technician?->name }} — <span dir="ltr">{{ $visit->check_in_at->format('Y-m-d H:i') }}</span></p>
     </div>
-    <a href="{{ route('maintenance-visits.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <div class="card px-6 py-5 mb-5">

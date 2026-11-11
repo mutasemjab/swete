@@ -3,15 +3,14 @@
 @section('title', __('settings.add_country'))
 @section('breadcrumb', __('settings.add_country'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('settings.add_country') }}</h1>
     </div>
-    <a href="{{ route('settings.countries.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('settings.countries.store') }}" method="POST">
@@ -49,7 +48,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('settings.add_country') }}
         </button>
-        <a href="{{ route('settings.countries.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

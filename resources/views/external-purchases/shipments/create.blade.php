@@ -3,20 +3,20 @@
 @section('title', __('external_purchases.add_shipment'))
 @section('breadcrumb', __('external_purchases.add_shipment'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('external_purchases.add_shipment') }}</h1>
         <p class="page-subtitle">{{ __('external_purchases.add_shipment_subtitle') }}</p>
     </div>
-    <a href="{{ route('shipments.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('shipments.store') }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @include('external-purchases.shipments._form', [
         'eligiblePurchaseRequests' => $eligiblePurchaseRequests,
         'shippingCompanies' => $shippingCompanies,
@@ -28,7 +28,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('external_purchases.add_shipment') }}
         </button>
-        <a href="{{ route('shipments.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

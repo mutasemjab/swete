@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Maintenance;
 use App\Http\Controllers\ModuleController;
 use App\Models\MaintenanceVisit;
 use App\Models\MaintenanceVisitType;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -34,8 +35,9 @@ class MaintenanceVisitController extends ModuleController
     {
         $maintenanceVisit->load(['customer', 'technician', 'maintenanceRequest', 'visitType', 'classifiedBy', 'reports.fields', 'reports.materials.material']);
         $visitTypes = MaintenanceVisitType::where('status', true)->orderBy('name')->get();
+        $backUrl = BackNavigation::url();
 
-        return $this->moduleView('maintenance.visits.show', ['visit' => $maintenanceVisit, 'visitTypes' => $visitTypes]);
+        return $this->moduleView('maintenance.visits.show', ['visit' => $maintenanceVisit, 'visitTypes' => $visitTypes, 'backUrl' => $backUrl]);
     }
 
     public function classify(Request $request, MaintenanceVisit $maintenanceVisit)

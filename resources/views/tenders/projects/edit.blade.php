@@ -9,14 +9,12 @@
         <h1 class="page-title">{{ __('tenders.edit_project') }}</h1>
         <p class="page-subtitle">{{ $project->number }}</p>
     </div>
-    <a href="{{ route('projects.show', $project) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('projects.update', $project) }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @method('PUT')
 
     <div class="card mb-5">
@@ -64,7 +62,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('projects.show', $project) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

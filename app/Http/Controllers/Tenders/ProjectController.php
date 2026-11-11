@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenders;
 use App\Http\Controllers\ModuleController;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class ProjectController extends ModuleController
@@ -29,7 +30,7 @@ class ProjectController extends ModuleController
         return $this->moduleView('tenders.projects.index', compact('projects'));
     }
 
-    public function show(Project $project)
+    public function show(Request $request, Project $project)
     {
         // Keeps the sidebar/title context matching wherever the project actually is right now,
         // not always "Projects" — mirrors Clients\ClientExtraFieldController's per-action module switch.
@@ -56,16 +57,21 @@ class ProjectController extends ModuleController
         }
 
         $financialSummary = $project->financialSummary();
+        // Preserve the existing status-aware default (an under-review project's "natural home" is
+        // the review queue, not the main Projects index) as the explicit fallback.
+        $backUrl = BackNavigation::url([], $project->status === 'under_review' ? 'project-reviews.index' : 'projects.index');
 
-        return $this->moduleView('tenders.projects.show', compact('project', 'employees', 'quoteItems', 'financialSummary'));
+        return $this->moduleView('tenders.projects.show', compact('project', 'employees', 'quoteItems', 'financialSummary', 'backUrl'));
     }
 
-    public function edit(Project $project)
+    public function edit(Request $request, Project $project)
     {
         abort_unless($project->is_current, 404);
         $this->module = $project->status === 'under_review' ? 'projects_under_review' : 'projects';
 
-        return $this->moduleView('tenders.projects.edit', compact('project'));
+        $backUrl = BackNavigation::url([$project], 'projects.show');
+
+        return $this->moduleView('tenders.projects.edit', compact('project', 'backUrl'));
     }
 
     public function update(Request $request, Project $project)
@@ -81,7 +87,7 @@ class ProjectController extends ModuleController
 
         $project->update($validated);
 
-        return redirect()->route('projects.show', $project)
+        return redirect()->route('projects.show', [$project, 'back' => $request->input('back')])
             ->with('success', __('tenders.project_updated'));
     }
 

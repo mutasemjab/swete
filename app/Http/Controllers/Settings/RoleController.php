@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\ModuleController;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -41,14 +42,16 @@ class RoleController extends ModuleController
     public function show(Role $role)
     {
         $role->load('permissions', 'users');
-        return $this->moduleView('settings.roles.show', compact('role'));
+        $backUrl = BackNavigation::url();
+        return $this->moduleView('settings.roles.show', compact('role', 'backUrl'));
     }
 
     public function edit(Role $role)
     {
         $permissions    = Permission::orderBy('name')->get()->groupBy(fn ($p) => explode('.', $p->name)[0]);
         $rolePermissions = $role->permissions->pluck('name')->toArray();
-        return $this->moduleView('settings.roles.edit', compact('role', 'permissions', 'rolePermissions'));
+        $backUrl = BackNavigation::url();
+        return $this->moduleView('settings.roles.edit', compact('role', 'permissions', 'rolePermissions', 'backUrl'));
     }
 
     public function update(Request $request, Role $role)

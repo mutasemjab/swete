@@ -17,6 +17,7 @@ use App\Models\SplitUnit;
 use App\Models\SplitUnitItem;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -67,28 +68,33 @@ class SplitUnitController extends ModuleController
 
         $this->syncItems($splitUnit, $validated['items']);
 
-        return redirect()->route('split-units.show', $splitUnit)
+        return redirect()->route('split-units.show', [$splitUnit, 'back' => $request->input('back')])
             ->with('success', __('split_units.quote_added'));
     }
 
-    public function show(SplitUnit $splitUnit)
+    public function show(Request $request, SplitUnit $splitUnit)
     {
         $splitUnit->load([
             'customer', 'creator', 'branch', 'currency', 'supplyScope', 'deliveryTerm',
             'items.material.unit', 'assignee', 'invoice',
         ]);
 
-        return $this->moduleView('split-units.show', compact('splitUnit'));
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('split-units.show', compact('splitUnit', 'backUrl'));
     }
 
-    public function edit(SplitUnit $splitUnit)
+    public function edit(Request $request, SplitUnit $splitUnit)
     {
         $splitUnit->load('items');
+
+        $backUrl = BackNavigation::url([$splitUnit], 'split-units.show');
 
         return $this->moduleView('split-units.edit', [
             ...$this->formOptions(),
             ...$this->historyData($splitUnit),
             'splitUnit' => $splitUnit,
+            'backUrl'   => $backUrl,
         ]);
     }
 
@@ -100,7 +106,7 @@ class SplitUnitController extends ModuleController
 
         $this->syncItems($splitUnit, $validated['items']);
 
-        return redirect()->route('split-units.show', $splitUnit)
+        return redirect()->route('split-units.show', [$splitUnit, 'back' => $request->input('back')])
             ->with('success', __('split_units.quote_updated'));
     }
 

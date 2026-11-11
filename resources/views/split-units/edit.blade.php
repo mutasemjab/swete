@@ -9,14 +9,12 @@
         <h1 class="page-title">{{ __('split_units.edit') }}</h1>
         <p class="page-subtitle">{{ $splitUnit->number }}</p>
     </div>
-    <a href="{{ route('split-units.show', $splitUnit) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('split-units.update', $splitUnit) }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @method('PUT')
 
     @include('split-units._form')
@@ -26,7 +24,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('split-units.show', $splitUnit) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

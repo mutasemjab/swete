@@ -3,25 +3,30 @@
 @section('title', __('warehouse.add_voucher_' . $type))
 @section('breadcrumb', __('warehouse.add_voucher_' . $type))
 
+@php($backUrl = \App\Support\BackNavigation::url(['type' => $type], 'warehouse.vouchers.index'))
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('warehouse.add_voucher_' . $type) }}</h1>
         <p class="page-subtitle">{{ __('warehouse.voucher_type_' . $type) }}</p>
     </div>
-    <a href="{{ route('warehouse.vouchers.index', ['type' => $type]) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('warehouse.vouchers.store', ['type' => $type]) }}" method="POST"
       x-data="{
+        warehouseId: '{{ old('warehouse_id') }}',
         items: [{ material_id: '', quantity: '', unit_cost: '', notes: '' }],
         addItem() { this.items.push({ material_id: '', quantity: '', unit_cost: '', notes: '' }); },
         removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); },
+        materialStocks: {{ $materialStocks->toJson() }},
+        systemQty(item) { return this.materialStocks[item.material_id + '-' + this.warehouseId] ?? 0; },
+        variance(item) { return (parseFloat(item.quantity) || 0) - this.systemQty(item); },
+        fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
       }">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
 
     <div class="card mb-5">
         <div class="card-header">
@@ -36,7 +41,7 @@
                     {{ $type === 'transfer' ? __('warehouse.voucher_source_warehouse') : __('warehouse.voucher_warehouse') }}
                     <span class="text-rose-500">*</span>
                 </label>
-                <select name="warehouse_id" class="form-select @error('warehouse_id') is-invalid @enderror">
+                <select name="warehouse_id" x-model="warehouseId" class="form-select @error('warehouse_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($warehouses as $warehouse)
                         <option value="{{ $warehouse->id }}" @selected(old('warehouse_id') == $warehouse->id)>{{ $warehouse->localized_name }}</option>
@@ -44,6 +49,19 @@
                 </select>
                 @error('warehouse_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
+
+            @if($type === 'issue')
+            <div>
+                <label class="form-label">{{ __('warehouse.voucher_customer') }}</label>
+                <select name="customer_id" class="js-select2 form-select @error('customer_id') is-invalid @enderror">
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach($customers as $customer)
+                        <option value="{{ $customer->id }}" @selected(old('customer_id') == $customer->id)>{{ $customer->localized_name }}</option>
+                    @endforeach
+                </select>
+                @error('customer_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+            @endif
 
             @if($type === 'transfer')
             <div>
@@ -96,7 +114,13 @@
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr>
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_material') }}</th>
+                        @if($type === 'stocktake')
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('warehouse.voucher_item_system_quantity') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('warehouse.voucher_item_counted_quantity') }}</th>
+                        <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-28">{{ __('warehouse.voucher_item_variance') }}</th>
+                        @else
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-32">{{ __('warehouse.voucher_item_quantity') }}</th>
+                        @endif
                         @if($type === 'receipt')
                         <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider w-36">{{ __('warehouse.voucher_item_unit_cost') }}</th>
                         @endif
@@ -115,10 +139,21 @@
                                     @endforeach
                                 </select>
                             </td>
+                            @if($type === 'stocktake')
+                            <td class="px-5 py-2.5 text-slate-600" dir="ltr" x-text="fmt(systemQty(item))"></td>
+                            <td class="px-5 py-2.5">
+                                <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"
+                                       step="0.001" min="0" dir="ltr" class="form-input" required>
+                            </td>
+                            <td class="px-5 py-2.5 font-bold" dir="ltr"
+                                :class="variance(item) > 0 ? 'text-emerald-600' : (variance(item) < 0 ? 'text-rose-600' : 'text-slate-400')"
+                                x-text="(variance(item) > 0 ? '+' : '') + fmt(variance(item))"></td>
+                            @else
                             <td class="px-5 py-2.5">
                                 <input type="number" :name="`items[${index}][quantity]`" x-model="item.quantity"
                                        step="0.001" min="0.001" dir="ltr" class="form-input" required>
                             </td>
+                            @endif
                             @if($type === 'receipt')
                             <td class="px-5 py-2.5">
                                 <input type="number" :name="`items[${index}][unit_cost]`" x-model="item.unit_cost"
@@ -147,7 +182,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('warehouse.add_voucher_' . $type) }}
         </button>
-        <a href="{{ route('warehouse.vouchers.index', ['type' => $type]) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

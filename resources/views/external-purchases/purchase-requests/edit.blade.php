@@ -9,15 +9,13 @@
         <h1 class="page-title">{{ __('external_purchases.edit_purchase_request') }}</h1>
         <p class="page-subtitle">{{ $purchaseRequest->number }}</p>
     </div>
-    <a href="{{ route('purchase-requests.show', $purchaseRequest) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('purchase-requests.update', $purchaseRequest) }}" method="POST">
     @csrf
     @method('PUT')
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @include('external-purchases.purchase-requests._form', [
         'purchaseRequest' => $purchaseRequest,
         'projects' => $projects, 'serviceCalls' => $serviceCalls, 'suppliers' => $suppliers,
@@ -30,7 +28,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('purchase-requests.show', $purchaseRequest) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

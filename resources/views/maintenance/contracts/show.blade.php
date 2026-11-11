@@ -29,10 +29,7 @@
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
         </a>
-        <a href="{{ route('maintenance-contracts.index') }}" class="btn-secondary">
-            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-            {{ __('app.back_to_list') }}
-        </a>
+        @include('components.back-link', ['url' => $backUrl])
     </div>
 </div>
 

@@ -7,6 +7,7 @@ use App\Models\Currency;
 use App\Models\PurchaseRequest;
 use App\Models\Shipment;
 use App\Models\ShippingCompany;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class ShipmentController extends ModuleController
@@ -54,24 +55,27 @@ class ShipmentController extends ModuleController
         $shipment->purchaseRequests()->sync($purchaseRequestIds);
         $this->markLinkedRequestsShipped($shipment);
 
-        return redirect()->route('shipments.show', $shipment)
+        return redirect()->route('shipments.show', [$shipment, 'back' => $request->input('back')])
             ->with('success', __('external_purchases.shipment_added'));
     }
 
     public function show(Shipment $shipment)
     {
         $shipment->load(['shippingCompany.country', 'currency', 'creator', 'purchaseRequests.supplier']);
+        $backUrl = BackNavigation::url();
 
-        return $this->moduleView('external-purchases.shipments.show', compact('shipment'));
+        return $this->moduleView('external-purchases.shipments.show', compact('shipment', 'backUrl'));
     }
 
     public function edit(Shipment $shipment)
     {
         $shipment->load('purchaseRequests');
+        $backUrl = BackNavigation::url([$shipment], 'shipments.show');
 
         return $this->moduleView('external-purchases.shipments.edit', [
             ...$this->formOptions($shipment),
             'shipment' => $shipment,
+            'backUrl'  => $backUrl,
         ]);
     }
 
@@ -85,7 +89,7 @@ class ShipmentController extends ModuleController
         $shipment->purchaseRequests()->sync($purchaseRequestIds);
         $this->markLinkedRequestsShipped($shipment);
 
-        return redirect()->route('shipments.show', $shipment)
+        return redirect()->route('shipments.show', [$shipment, 'back' => $request->input('back')])
             ->with('success', __('external_purchases.shipment_updated'));
     }
 

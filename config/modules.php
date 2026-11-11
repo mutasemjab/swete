@@ -130,7 +130,15 @@ return [
                     ['label' => 'warehouse.nav_stock_in',          'route' => 'warehouse.vouchers.index',         'icon' => 'box-open',        'params' => ['type' => 'receipt'], 'permission' => 'warehouse.view'],
                     ['label' => 'warehouse.nav_stock_out',         'route' => 'warehouse.vouchers.index',         'icon' => 'arrow-up-from-bracket', 'params' => ['type' => 'issue'], 'permission' => 'warehouse.view'],
                     ['label' => 'warehouse.nav_transfer',          'route' => 'warehouse.vouchers.index',         'icon' => 'right-left',      'params' => ['type' => 'transfer'], 'permission' => 'warehouse.view'],
+                    ['label' => 'warehouse.nav_stocktake_voucher', 'route' => 'warehouse.vouchers.index',         'icon' => 'clipboard-check', 'params' => ['type' => 'stocktake'], 'permission' => 'warehouse.view'],
                     ['label' => 'warehouse.nav_material_requests', 'route' => 'warehouse.material-requests.index', 'icon' => 'clipboard-list', 'permission' => 'warehouse.view'],
+                ],
+            ],
+            [
+                'label' => 'warehouse.section_purchasing',
+                'items' => [
+                    ['label' => 'warehouse.nav_purchase_orders',   'route' => 'purchase-orders.index',   'icon' => 'file-signature', 'permission' => 'warehouse.view'],
+                    ['label' => 'warehouse.nav_purchase_invoices', 'route' => 'purchase-invoices.index', 'icon' => 'file-invoice-dollar', 'permission' => 'warehouse.view'],
                 ],
             ],
             [

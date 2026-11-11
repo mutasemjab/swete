@@ -15,7 +15,6 @@ class Warehouse extends Model
         'branch_id',
         'name',
         'name_en',
-        'code',
         'is_main',
         'status',
     ];

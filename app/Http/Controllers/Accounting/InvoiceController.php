@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceType;
 use App\Models\Supplier;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class InvoiceController extends ModuleController
@@ -84,13 +85,14 @@ class InvoiceController extends ModuleController
 
         $invoice->recalculateTotals();
 
-        return redirect()->route('accounting.invoices.show', $invoice)
+        return redirect()->route('accounting.invoices.show', [$invoice, 'back' => $request->input('back')])
             ->with('success', __('accounting.invoice_added'));
     }
 
     public function show(Invoice $invoice)
     {
         $invoice->load(['invoiceType', 'party', 'currency', 'creator', 'items', 'receipts.creator']);
-        return $this->moduleView('accounting.invoices.show', compact('invoice'));
+        $backUrl = BackNavigation::url();
+        return $this->moduleView('accounting.invoices.show', compact('invoice', 'backUrl'));
     }
 }

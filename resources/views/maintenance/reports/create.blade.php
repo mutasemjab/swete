@@ -3,16 +3,15 @@
 @section('title', __('maintenance.add_report'))
 @section('breadcrumb', __('maintenance.add_report'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('maintenance.add_report') }}</h1>
         <p class="page-subtitle">{{ __('maintenance.add_report_subtitle') }}</p>
     </div>
-    <a href="{{ route('maintenance-reports.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 @if($templates->isEmpty())
@@ -43,6 +42,7 @@
       }"
       x-init="$nextTick(() => window.initSelect2())">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
 
     <div class="card mb-5">
         <div class="card-header">
@@ -199,7 +199,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('maintenance.add_report') }}
         </button>
-        <a href="{{ route('maintenance-reports.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endif

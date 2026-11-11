@@ -6,6 +6,7 @@ use App\Http\Controllers\ModuleController;
 use App\Models\Material;
 use App\Models\MaterialCategory;
 use App\Models\Unit;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class MaterialController extends ModuleController
@@ -132,14 +133,16 @@ class MaterialController extends ModuleController
     public function show(Material $material)
     {
         $material->load(['category', 'unit', 'stocks.warehouse']);
-        return $this->moduleView('warehouse.materials.show', compact('material'));
+        $backUrl = BackNavigation::url();
+        return $this->moduleView('warehouse.materials.show', compact('material', 'backUrl'));
     }
 
     public function edit(Material $material)
     {
         $categories = MaterialCategory::orderBy('name')->get();
         $units      = Unit::orderBy('name')->get();
-        return $this->moduleView('warehouse.materials.edit', compact('material', 'categories', 'units'));
+        $backUrl    = BackNavigation::url();
+        return $this->moduleView('warehouse.materials.edit', compact('material', 'categories', 'units', 'backUrl'));
     }
 
     public function update(Request $request, Material $material)

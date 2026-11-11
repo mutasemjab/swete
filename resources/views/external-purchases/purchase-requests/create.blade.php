@@ -3,20 +3,20 @@
 @section('title', __('external_purchases.add_purchase_request'))
 @section('breadcrumb', __('external_purchases.add_purchase_request'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('external_purchases.add_purchase_request') }}</h1>
         <p class="page-subtitle">{{ __('external_purchases.add_purchase_request_subtitle') }}</p>
     </div>
-    <a href="{{ $project ? route('projects.show', $project) : route('purchase-requests.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('purchase-requests.store') }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @if($reminder)
         <input type="hidden" name="reminder_id" value="{{ $reminder->id }}">
     @endif
@@ -32,7 +32,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('external_purchases.add_purchase_request') }}
         </button>
-        <a href="{{ $project ? route('projects.show', $project) : route('purchase-requests.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

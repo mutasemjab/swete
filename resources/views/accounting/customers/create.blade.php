@@ -3,15 +3,14 @@
 @section('title', __('accounting.add_customer'))
 @section('breadcrumb', __('accounting.add_customer'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('accounting.add_customer') }}</h1>
     </div>
-    <a href="{{ route('accounting.customers.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('accounting.customers.store') }}" method="POST" enctype="multipart/form-data">
@@ -23,7 +22,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('accounting.add_customer') }}
         </button>
-        <a href="{{ route('accounting.customers.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

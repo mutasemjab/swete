@@ -9,14 +9,12 @@
         <h1 class="page-title">{{ __('external_purchases.edit_shipment') }}</h1>
         <p class="page-subtitle">{{ $shipment->number }}</p>
     </div>
-    <a href="{{ route('shipments.show', $shipment) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('shipments.update', $shipment) }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @method('PUT')
     @include('external-purchases.shipments._form', [
         'shipment' => $shipment,
@@ -51,7 +49,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('shipments.show', $shipment) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

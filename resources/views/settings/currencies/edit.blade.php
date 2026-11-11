@@ -3,16 +3,15 @@
 @section('title', __('settings.edit_currency'))
 @section('breadcrumb', __('settings.edit_currency'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('settings.edit_currency') }}</h1>
         <p class="page-subtitle">{{ $currency->localized_name }}</p>
     </div>
-    <a href="{{ route('settings.currencies.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('settings.currencies.update', $currency) }}" method="POST">
@@ -123,7 +122,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('settings.currencies.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

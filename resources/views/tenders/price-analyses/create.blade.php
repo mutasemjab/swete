@@ -3,16 +3,15 @@
 @section('title', __('tenders.add_price_analysis'))
 @section('breadcrumb', __('tenders.add_price_analysis'))
 
+@php($backUrl = \App\Support\BackNavigation::url())
+
 @section('content')
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ __('tenders.add_price_analysis') }}</h1>
         <p class="page-subtitle">{{ __('tenders.add_price_analysis_subtitle') }}</p>
     </div>
-    <a href="{{ route('price-analyses.index') }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 @if($ciatDiscounts->isEmpty())
@@ -26,6 +25,7 @@
 @else
 <form action="{{ route('price-analyses.store') }}" method="POST">
     @csrf
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @include('tenders.price-analyses._form', ['analysis' => null, 'branches' => $branches, 'ciatDiscounts' => $ciatDiscounts, 'tenders' => $tenders, 'materialCategories' => $materialCategories, 'units' => $units])
 
     <div class="flex items-center gap-3">
@@ -33,7 +33,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('tenders.add_price_analysis') }}
         </button>
-        <a href="{{ route('price-analyses.index') }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endif

@@ -7,6 +7,7 @@ use App\Models\Material;
 use App\Models\MaterialRequest;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class MaterialRequestController extends ModuleController
@@ -56,7 +57,7 @@ class MaterialRequestController extends ModuleController
             $materialRequest->items()->create($item);
         }
 
-        return redirect()->route('warehouse.material-requests.show', $materialRequest)
+        return redirect()->route('warehouse.material-requests.show', [$materialRequest, 'back' => $request->input('back')])
             ->with('success', __('warehouse.material_request_added'));
     }
 
@@ -64,8 +65,9 @@ class MaterialRequestController extends ModuleController
     {
         $materialRequest->load(['warehouse', 'requester', 'items.material.unit', 'approvals.requester', 'approvals.approver', 'fulfilledVoucher']);
         $approvers = User::where('status', true)->where('id', '!=', auth()->id())->orderBy('name')->get();
+        $backUrl = BackNavigation::url();
 
-        return $this->moduleView('warehouse.material-requests.show', compact('materialRequest', 'approvers'));
+        return $this->moduleView('warehouse.material-requests.show', compact('materialRequest', 'approvers', 'backUrl'));
     }
 
     public function requestApproval(Request $request, MaterialRequest $materialRequest)

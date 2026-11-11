@@ -9,15 +9,13 @@
         <h1 class="page-title">{{ __('tenders.edit_quote') }}</h1>
         <p class="page-subtitle">{{ $priceQuote->number }}</p>
     </div>
-    <a href="{{ route('price-quotes.show', $priceQuote) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('price-quotes.update', $priceQuote) }}" method="POST">
     @csrf
     @method('PUT')
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @if($priceQuote->tender_id)
         <input type="hidden" name="tender_id" value="{{ $priceQuote->tender_id }}">
     @endif
@@ -29,7 +27,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('price-quotes.show', $priceQuote) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

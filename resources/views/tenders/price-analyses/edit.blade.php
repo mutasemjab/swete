@@ -9,15 +9,13 @@
         <h1 class="page-title">{{ __('tenders.edit_price_analysis') }}</h1>
         <p class="page-subtitle">{{ $analysis->number }}</p>
     </div>
-    <a href="{{ route('price-analyses.show', $analysis) }}" class="btn-secondary">
-        <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-        {{ __('app.back_to_list') }}
-    </a>
+    @include('components.back-link', ['url' => $backUrl])
 </div>
 
 <form action="{{ route('price-analyses.update', $analysis) }}" method="POST">
     @csrf
     @method('PUT')
+    <input type="hidden" name="back" value="{{ $backUrl }}">
     @include('tenders.price-analyses._form', ['analysis' => $analysis, 'branches' => $branches, 'ciatDiscounts' => $ciatDiscounts, 'materialCategories' => $materialCategories, 'units' => $units])
 
     <div class="flex items-center gap-3">
@@ -25,7 +23,7 @@
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
         </button>
-        <a href="{{ route('price-analyses.show', $analysis) }}" class="btn-secondary">{{ __('app.cancel') }}</a>
+        <a href="{{ $backUrl }}" class="btn-secondary">{{ __('app.cancel') }}</a>
     </div>
 </form>
 @endsection

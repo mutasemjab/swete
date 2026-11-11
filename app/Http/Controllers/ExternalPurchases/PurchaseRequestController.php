@@ -18,6 +18,7 @@ use App\Models\ServiceCall;
 use App\Models\ShippingCompany;
 use App\Models\Supplier;
 use App\Models\VendorEmailTemplate;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -106,11 +107,11 @@ class PurchaseRequestController extends ModuleController
             $reminder?->markFulfilled($purchaseRequest, $request->user());
         }
 
-        return redirect()->route('purchase-requests.show', $purchaseRequest)
+        return redirect()->route('purchase-requests.show', [$purchaseRequest, 'back' => $request->input('back')])
             ->with('success', __('external_purchases.request_added'));
     }
 
-    public function show(PurchaseRequest $purchaseRequest)
+    public function show(Request $request, PurchaseRequest $purchaseRequest)
     {
         $purchaseRequest->load([
             'supplier', 'branch', 'project', 'serviceCall', 'governorate', 'country', 'currency', 'creator',
@@ -122,20 +123,25 @@ class PurchaseRequestController extends ModuleController
             ? VendorEmailTemplate::current()->forNumber($purchaseRequest->number)
             : null;
 
-        return $this->moduleView('external-purchases.purchase-requests.show', compact('purchaseRequest', 'emailTemplate'));
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('external-purchases.purchase-requests.show', compact('purchaseRequest', 'emailTemplate', 'backUrl'));
     }
 
-    public function edit(PurchaseRequest $purchaseRequest)
+    public function edit(Request $request, PurchaseRequest $purchaseRequest)
     {
         abort_unless($purchaseRequest->isEditable(), 403, __('external_purchases.request_locked'));
 
         $purchaseRequest->load('items.features', 'additionalNotes', 'attachments');
+
+        $backUrl = BackNavigation::url([$purchaseRequest], 'purchase-requests.show');
 
         return $this->moduleView('external-purchases.purchase-requests.edit', [
             ...$this->formOptions($purchaseRequest->governorate_id),
             'purchaseRequest' => $purchaseRequest,
             'project'         => $purchaseRequest->project,
             'serviceCall'     => $purchaseRequest->serviceCall,
+            'backUrl'         => $backUrl,
         ]);
     }
 
@@ -151,7 +157,7 @@ class PurchaseRequestController extends ModuleController
         $this->syncAdditionalNotes($purchaseRequest, $validated['additional_notes'] ?? []);
         $this->syncAttachments($purchaseRequest, $validated['attachments'] ?? [], $request->user()->id);
 
-        return redirect()->route('purchase-requests.show', $purchaseRequest)
+        return redirect()->route('purchase-requests.show', [$purchaseRequest, 'back' => $request->input('back')])
             ->with('success', __('external_purchases.request_updated'));
     }
 

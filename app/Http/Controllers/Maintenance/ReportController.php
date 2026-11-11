@@ -9,6 +9,7 @@ use App\Models\Material;
 use App\Models\MaintenanceReport;
 use App\Models\MaintenanceReportTemplate;
 use App\Models\MaterialStock;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 
 class ReportController extends ModuleController
@@ -77,25 +78,30 @@ class ReportController extends ModuleController
         $this->snapshotFields($request, $report, $template->fields);
         $this->syncMaterials($report, $validated['materials'] ?? []);
 
-        return redirect()->route('maintenance-reports.show', $report)->with('success', __('maintenance.report_added'));
+        return redirect()->route('maintenance-reports.show', [$report, 'back' => $request->input('back')])->with('success', __('maintenance.report_added'));
     }
 
-    public function show(MaintenanceReport $maintenanceReport)
+    public function show(Request $request, MaintenanceReport $maintenanceReport)
     {
         $maintenanceReport->load(['customer', 'material', 'template', 'creator', 'fields', 'materials.material', 'materialApprovals.user', 'issueVoucher', 'priceQuote']);
 
-        return $this->moduleView('maintenance.reports.show', ['report' => $maintenanceReport]);
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('maintenance.reports.show', ['report' => $maintenanceReport, 'backUrl' => $backUrl]);
     }
 
-    public function edit(MaintenanceReport $maintenanceReport)
+    public function edit(Request $request, MaintenanceReport $maintenanceReport)
     {
         $maintenanceReport->load('fields', 'materials.material');
+
+        $backUrl = BackNavigation::url([$maintenanceReport], 'maintenance-reports.show');
 
         return $this->moduleView('maintenance.reports.edit', [
             'report'    => $maintenanceReport,
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
             'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
             'materialStock' => $this->materialStock(),
+            'backUrl'   => $backUrl,
         ]);
     }
 
@@ -138,7 +144,7 @@ class ReportController extends ModuleController
             $this->syncMaterials($maintenanceReport, $validated['materials'] ?? []);
         }
 
-        return redirect()->route('maintenance-reports.show', $maintenanceReport)
+        return redirect()->route('maintenance-reports.show', [$maintenanceReport, 'back' => $request->input('back')])
             ->with('success', __('maintenance.report_updated'));
     }
 
@@ -186,7 +192,14 @@ class ReportController extends ModuleController
     /** Hands this report's context (customer + materials used) to a brand-new Price Quote. */
     public function convertToQuote(MaintenanceReport $maintenanceReport)
     {
-        return redirect()->route('price-quotes.create', ['report_id' => $maintenanceReport->id]);
+        // This redirect is itself an extra hop between the report's Show page and the quote's
+        // Create page — without forwarding `back` explicitly, url()->previous() on the Create page
+        // would resolve to THIS route's own URL instead of the report, same class of bug as the
+        // create->store->show hop this mechanism exists to fix (see BackNavigation).
+        return redirect()->route('price-quotes.create', [
+            'report_id' => $maintenanceReport->id,
+            'back'      => BackNavigation::url(),
+        ]);
     }
 
     private function formOptions(): array

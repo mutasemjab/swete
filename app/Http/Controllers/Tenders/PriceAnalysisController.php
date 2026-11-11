@@ -13,6 +13,7 @@ use App\Models\Tender;
 use App\Models\Unit;
 use App\Models\X8;
 use App\Models\X8Item;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -76,28 +77,33 @@ class PriceAnalysisController extends ModuleController
             X8::getOrCreateFor($analysis, $request->user()->id);
         }
 
-        return redirect()->route('price-analyses.show', $analysis)
+        return redirect()->route('price-analyses.show', [$analysis, 'back' => $request->input('back')])
             ->with('success', __('tenders.price_analysis_added'));
     }
 
-    public function show(PriceAnalysis $priceAnalysis)
+    public function show(Request $request, PriceAnalysis $priceAnalysis)
     {
         $priceAnalysis->load(['branch', 'creator', 'items.ciatDiscount', 'items.material', 'versions']);
         // linked() isn't a real polymorphic relation (same convention as Agreement::party()), so it
         // can't be eager-loaded with ->load() — set it individually instead.
         $priceAnalysis->setRelation('linked', $priceAnalysis->linked()->first());
 
-        return $this->moduleView('tenders.price-analyses.show', ['analysis' => $priceAnalysis]);
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('tenders.price-analyses.show', ['analysis' => $priceAnalysis, 'backUrl' => $backUrl]);
     }
 
-    public function edit(PriceAnalysis $priceAnalysis)
+    public function edit(Request $request, PriceAnalysis $priceAnalysis)
     {
         abort_unless($priceAnalysis->is_current, 404);
         $priceAnalysis->load('items');
         $priceAnalysis->setRelation('linked', $priceAnalysis->linked()->first());
 
+        $backUrl = BackNavigation::url([$priceAnalysis], 'price-analyses.show');
+
         return $this->moduleView('tenders.price-analyses.edit', [
             'analysis' => $priceAnalysis,
+            'backUrl'  => $backUrl,
             ...$this->formOptions(),
         ]);
     }
@@ -130,7 +136,7 @@ class PriceAnalysisController extends ModuleController
 
         $this->syncItems($priceAnalysis, $validated['items'], (float) $rates['jd_rate']);
 
-        return redirect()->route('price-analyses.show', $priceAnalysis)
+        return redirect()->route('price-analyses.show', [$priceAnalysis, 'back' => $request->input('back')])
             ->with('success', __('tenders.price_analysis_updated'));
     }
 

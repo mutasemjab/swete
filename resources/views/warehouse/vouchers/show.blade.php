@@ -26,10 +26,7 @@
             </button>
         </form>
         @endif
-        <a href="{{ route('warehouse.vouchers.index', ['type' => $type]) }}" class="btn-secondary">
-            <i class="fa-solid fa-arrow-right-to-bracket fa-flip-horizontal"></i>
-            {{ __('app.back_to_list') }}
-        </a>
+        @include('components.back-link', ['url' => $backUrl])
     </div>
 </div>
 
@@ -45,6 +42,12 @@
         <div>
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('warehouse.voucher_destination_warehouse') }}</dt>
             <dd class="font-bold text-slate-800">{{ $voucher->destinationWarehouse?->localized_name }}</dd>
+        </div>
+        @endif
+        @if($voucher->customer)
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('warehouse.voucher_customer') }}</dt>
+            <dd class="font-bold text-slate-800">{{ $voucher->customer->localized_name }}</dd>
         </div>
         @endif
         <div>
@@ -83,7 +86,7 @@
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_material') }}</th>
-                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_quantity') }}</th>
+                    <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ $type === 'stocktake' ? __('warehouse.voucher_item_counted_quantity') : __('warehouse.voucher_item_quantity') }}</th>
                     @if($type === 'receipt')
                     <th class="px-5 py-3 text-start text-xs font-black text-slate-500 uppercase tracking-wider">{{ __('warehouse.voucher_item_unit_cost') }}</th>
                     @endif

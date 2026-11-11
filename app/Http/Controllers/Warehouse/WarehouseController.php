@@ -29,7 +29,6 @@ class WarehouseController extends ModuleController
             'branch_id' => ['required', 'exists:branches,id'],
             'name'      => ['required', 'string', 'max:100'],
             'name_en'   => ['nullable', 'string', 'max:100'],
-            'code'      => ['required', 'string', 'max:30', 'unique:warehouses,code'],
             'is_main'   => ['boolean'],
             'status'    => ['boolean'],
         ]);
@@ -56,7 +55,6 @@ class WarehouseController extends ModuleController
             'branch_id' => ['required', 'exists:branches,id'],
             'name'      => ['required', 'string', 'max:100'],
             'name_en'   => ['nullable', 'string', 'max:100'],
-            'code'      => ['required', 'string', 'max:30', "unique:warehouses,code,{$warehouse->id}"],
             'is_main'   => ['boolean'],
             'status'    => ['boolean'],
         ]);

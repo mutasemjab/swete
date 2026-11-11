@@ -60,6 +60,8 @@ class PermissionSeeder extends Seeder
             'warehouse.materials.create', 'warehouse.materials.edit', 'warehouse.materials.delete',
             'warehouse.vouchers.create', 'warehouse.vouchers.post',
             'warehouse.material_requests.create', 'warehouse.material_requests.approve', 'warehouse.material_requests.fulfill',
+            'warehouse.purchase_orders.create', 'warehouse.purchase_orders.edit',
+            'warehouse.purchase_invoices.create',
             'warehouse.reports.view',
 
             // Tenders
@@ -171,6 +173,8 @@ class PermissionSeeder extends Seeder
             'warehouse.materials.create', 'warehouse.materials.edit',
             'warehouse.vouchers.create', 'warehouse.vouchers.post',
             'warehouse.material_requests.create', 'warehouse.material_requests.fulfill',
+            'warehouse.purchase_orders.create', 'warehouse.purchase_orders.edit',
+            'warehouse.purchase_invoices.create',
             'warehouse.reports.view',
         ]);
 

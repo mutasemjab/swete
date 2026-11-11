@@ -22,6 +22,7 @@ use App\Models\QuoteSupplyScope;
 use App\Models\Tender;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\BackNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -99,21 +100,23 @@ class PriceQuoteController extends ModuleController
             MaintenanceReport::where('id', $request->input('report_id'))->update(['price_quote_id' => $priceQuote->id]);
         }
 
-        return redirect()->route('price-quotes.show', $priceQuote)
+        return redirect()->route('price-quotes.show', [$priceQuote, 'back' => $request->input('back')])
             ->with('success', __('tenders.quote_added'));
     }
 
-    public function show(PriceQuote $priceQuote)
+    public function show(Request $request, PriceQuote $priceQuote)
     {
         $priceQuote->load([
             'customer', 'tender', 'creator', 'branch', 'currency', 'supplyScope', 'deliveryTerm',
             'items.material', 'items.unit', 'assignee', 'invoice', 'installments', 'versions', 'root',
         ]);
 
-        return $this->moduleView('tenders.price-quotes.show', compact('priceQuote'));
+        $backUrl = BackNavigation::url();
+
+        return $this->moduleView('tenders.price-quotes.show', compact('priceQuote', 'backUrl'));
     }
 
-    public function edit(PriceQuote $priceQuote)
+    public function edit(Request $request, PriceQuote $priceQuote)
     {
         // A frozen historical version is read-only — only the live quote can be edited.
         abort_unless($priceQuote->is_current, 404);
@@ -129,12 +132,15 @@ class PriceQuoteController extends ModuleController
             $seedInstallments = [['description' => '', 'percentage' => '']];
         }
 
+        $backUrl = BackNavigation::url([$priceQuote], 'price-quotes.show');
+
         return $this->moduleView('tenders.price-quotes.edit', [
             ...$this->formOptions(),
             ...$this->historyData($priceQuote),
             'priceQuote'       => $priceQuote,
             'tender'           => $priceQuote->tender,
             'seedInstallments' => $seedInstallments,
+            'backUrl'          => $backUrl,
         ]);
     }
 
@@ -164,7 +170,7 @@ class PriceQuoteController extends ModuleController
         $this->syncItems($priceQuote, $validated['items']);
         $this->syncInstallments($priceQuote, $validated['installments'] ?? []);
 
-        return redirect()->route('price-quotes.show', $priceQuote)
+        return redirect()->route('price-quotes.show', [$priceQuote, 'back' => $request->input('back')])
             ->with('success', __('tenders.quote_updated'));
     }
 
