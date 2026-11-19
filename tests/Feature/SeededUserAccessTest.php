@@ -37,13 +37,13 @@ class SeededUserAccessTest extends TestCase
     public function test_each_employee_sees_and_can_open_only_the_requested_modules(): void
     {
         $access = [
-            'm@m.com' => ['tenders', 'x8', 'quotations', 'customers', 'suppliers', 'projects'],
-            'thaer@erp.local' => ['maintenance', 'quotations'],
-            'mohammad.lubban@erp.local' => ['accounting'],
-            'roshdy@erp.local' => ['warehouse'],
-            'r@r.com' => ['external_purchases', 'projects', 'customers', 'suppliers'],
-            'ahmad.howmran@erp.local' => ['maintenance', 'quotations'],
-            'khalil@erp.local' => [],
+            'm@gmail.com' => ['tenders', 'x8', 'quotations', 'customers', 'suppliers', 'projects'],
+            'thaer@gmail.com' => ['maintenance', 'quotations'],
+            'labban@gmail.com' => ['accounting'],
+            'roshdy@gmail.com' => ['warehouse'],
+            'r@gmail.com' => ['external_purchases', 'projects', 'customers', 'suppliers'],
+            'homran@gmail.com' => ['maintenance', 'quotations'],
+            'khalil@gmail.com' => [],
         ];
 
         foreach ($access as $email => $allowed) {
@@ -52,7 +52,7 @@ class SeededUserAccessTest extends TestCase
             $this->assertCount(1, $user->roles);
             $this->assertCount(0, $user->permissions);
 
-            if ($email !== 'khalil@erp.local') {
+            if ($email !== 'khalil@gmail.com') {
                 $this->get(route('dashboard'))->assertOk()->assertViewHas('modules', function ($modules) use ($allowed) {
                     return count($modules) === count($allowed) && array_diff(array_keys($modules), $allowed) === [];
                 });
@@ -68,11 +68,11 @@ class SeededUserAccessTest extends TestCase
     public function test_create_and_edit_permissions_stay_inside_assigned_departments(): void
     {
         $grants = [
-            'm@m.com' => ['tenders.create', 'tenders.edit', 'quotations.price_quotes.create', 'quotations.price_quotes.edit', 'clients.customers.create', 'clients.suppliers.edit', 'projects.edit'],
-            'thaer@erp.local' => ['maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.contracts.create', 'maintenance.contracts.edit', 'quotations.price_quotes.create', 'quotations.price_quotes.edit'],
-            'mohammad.lubban@erp.local' => ['accounting.invoices.create', 'accounting.invoice_types.edit'],
-            'roshdy@erp.local' => ['warehouse.materials.create', 'warehouse.materials.edit', 'warehouse.warehouses.create', 'warehouse.warehouses.edit'],
-            'r@r.com' => ['external_purchases.purchase_requests.create', 'external_purchases.purchase_requests.edit', 'projects.edit', 'clients.customers.create', 'clients.suppliers.edit'],
+            'm@gmail.com' => ['tenders.create', 'tenders.edit', 'quotations.price_quotes.create', 'quotations.price_quotes.edit', 'clients.customers.create', 'clients.suppliers.edit', 'projects.edit'],
+            'thaer@gmail.com' => ['maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.contracts.create', 'maintenance.contracts.edit', 'quotations.price_quotes.create', 'quotations.price_quotes.edit'],
+            'labban@gmail.com' => ['accounting.invoices.create', 'accounting.invoice_types.edit'],
+            'roshdy@gmail.com' => ['warehouse.materials.create', 'warehouse.materials.edit', 'warehouse.warehouses.create', 'warehouse.warehouses.edit'],
+            'r@gmail.com' => ['external_purchases.purchase_requests.create', 'external_purchases.purchase_requests.edit', 'projects.edit', 'clients.customers.create', 'clients.suppliers.edit'],
         ];
         foreach ($grants as $email => $permissions) {
             $user = User::where('email', $email)->sole();
@@ -82,18 +82,18 @@ class SeededUserAccessTest extends TestCase
             $this->assertFalse($user->can('settings.users.edit'));
         }
 
-        $accountant = User::where('email', 'mohammad.lubban@erp.local')->sole();
+        $accountant = User::where('email', 'labban@gmail.com')->sole();
         $this->actingAs($accountant)->get(route('accounting.customers.export'))->assertForbidden();
         $this->get(route('accounting.suppliers.create'))->assertForbidden();
         $this->get(route('settings.currencies.index'))->assertForbidden();
-        $this->actingAs(User::where('email', 'r@r.com')->sole())->get(route('accounting.customers.create'))->assertOk();
+        $this->actingAs(User::where('email', 'r@gmail.com')->sole())->get(route('accounting.customers.create'))->assertOk();
         $this->get(route('accounting.suppliers.create'))->assertOk();
     }
 
     public function test_manager_has_staff_access_plus_the_maintenance_manager_workflow(): void
     {
-        $staff = User::where('email', 'thaer@erp.local')->sole();
-        $manager = User::where('email', 'ahmad.howmran@erp.local')->sole();
+        $staff = User::where('email', 'thaer@gmail.com')->sole();
+        $manager = User::where('email', 'homran@gmail.com')->sole();
         $this->assertFalse($staff->is_maintenance_manager);
         $this->assertTrue($manager->is_maintenance_manager);
         $this->assertEqualsCanonicalizing(
@@ -112,7 +112,7 @@ class SeededUserAccessTest extends TestCase
 
     public function test_khalil_logs_into_his_portal_and_can_fill_only_his_own_visit_reports(): void
     {
-        $khalil = User::where('email', 'khalil@erp.local')->sole();
+        $khalil = User::where('email', 'khalil@gmail.com')->sole();
         $this->withSession(['url.intended' => route('accounting.invoices.index')])->post(route('auth.authenticate'), [
             'email' => $khalil->email, 'password' => 'password',
         ])->assertRedirect(route('maintenance-visits.mobile.create'));
@@ -135,7 +135,7 @@ class SeededUserAccessTest extends TestCase
         $this->patchJson(route('maintenance-visits.mobile.reports.answer', [$visit, $report]), ['field_id' => $field->id, 'answer' => 'Completed work'])->assertOk();
         $this->assertSame('Completed work', $field->fresh()->answer);
 
-        $otherVisit = MaintenanceVisit::create(['customer_id' => $customer->id, 'created_by' => User::where('email', 'thaer@erp.local')->sole()->id, 'check_in_at' => now(), 'status' => 'open']);
+        $otherVisit = MaintenanceVisit::create(['customer_id' => $customer->id, 'created_by' => User::where('email', 'thaer@gmail.com')->sole()->id, 'check_in_at' => now(), 'status' => 'open']);
         $this->get(route('maintenance-visits.mobile.show', $otherVisit))->assertForbidden();
         $this->postJson(route('maintenance-visits.mobile.reports.store', $otherVisit), ['template_id' => $template->id])->assertForbidden();
         $this->post(route('maintenance-visits.mobile.finish', $visit))->assertRedirect();
@@ -144,7 +144,7 @@ class SeededUserAccessTest extends TestCase
 
     public function test_reseeding_preserves_passwords_and_removes_previous_extra_grants(): void
     {
-        $user = User::where('email', 'm@m.com')->sole();
+        $user = User::where('email', 'm@gmail.com')->sole();
         $user->update(['password' => Hash::make('changed-by-user')]);
         $passwordHash = $user->password;
         $user->assignRole('super-admin');
@@ -158,6 +158,20 @@ class SeededUserAccessTest extends TestCase
         $this->assertSame(['project_manager'], $user->roles->pluck('name')->all());
         $this->assertCount(0, $user->permissions);
         $this->assertFalse($user->can('accounting.view'));
-        $this->assertSame(1, User::where('email', 'khalil@erp.local')->count());
+        $this->assertSame(1, User::where('email', 'khalil@gmail.com')->count());
+    }
+
+    public function test_legacy_email_is_updated_without_creating_another_user(): void
+    {
+        $user = User::where('email', 'm@gmail.com')->sole();
+        $user->update(['email' => 'm@m.com', 'password' => Hash::make('existing-password')]);
+        $hash = $user->password;
+        $count = User::count();
+
+        $this->seed(UserSeeder::class);
+
+        $this->assertSame($count, User::count());
+        $this->assertSame($user->id, User::where('email', 'm@gmail.com')->sole()->id);
+        $this->assertSame($hash, $user->fresh()->password);
     }
 }

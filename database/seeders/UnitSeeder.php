@@ -9,6 +9,11 @@ class UnitSeeder extends Seeder
 {
     public function run(): void
     {
+        // Rename the existing seeded unit in place so material references keep their IDs.
+        if (! Unit::where('symbol', 'قطعة')->exists()) {
+            Unit::where('symbol', 'حبة')->first()?->update(['symbol' => 'قطعة', 'name' => 'قطعة']);
+        }
+
         $units = [
             ['symbol' => 'قطعة',    'name' => 'قطعة',     'name_en' => 'Item'],
             ['symbol' => 'كرتونة', 'name' => 'كرتونة',  'name_en' => 'Carton'],

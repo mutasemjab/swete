@@ -8,20 +8,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            PermissionSeeder::class,
-            BranchSeeder::class,
-            WarehouseSeeder::class,
-            CurrencySeeder::class,
-            CountrySeeder::class,
-            GovernorateSeeder::class,
-            InvoiceTypeSeeder::class,
-            TenderStatusSeeder::class,
-            QuoteOptionsSeeder::class,
-            AppointmentTypeSeeder::class,
-            UnitSeeder::class,
-            MaintenanceVisitTypeSeeder::class,
-            UserSeeder::class,
-        ]);
+        // Deploy the captured database as a whole, preserving IDs, stock history and access.
+        // Individual reference/user seeders remain available for explicit later updates.
+        $this->call(CurrentDatabaseSeeder::class);
     }
 }
