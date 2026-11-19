@@ -272,7 +272,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     // ── Clients (customers, suppliers and groups — moved out of accounting prefix but
     //    route NAMES stay as accounting.customers.* so existing blade templates need no changes) ──
-    Route::prefix('clients')->name('accounting.')->group(function () {
+    Route::prefix('clients')->name('accounting.')->middleware('permission:clients.view')->group(function () {
 
         // Customers and suppliers are separate tables/models/controllers — each
         // is its own domain, not a shared "party" concept.
@@ -344,16 +344,16 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->only(['edit', 'update'])->middleware('permission:tenders.quote_delivery_terms.edit');
     Route::resource('quote-delivery-terms', QuoteDeliveryTermController::class)->only(['destroy'])->middleware('permission:tenders.quote_delivery_terms.delete');
 
-    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['index'])->middleware('permission:analyses.view|tenders.view');
+    Route::resource('ciat-discounts', CiatDiscountController::class)->only(['index'])->middleware('permission:analyses.view');
     Route::resource('ciat-discounts', CiatDiscountController::class)->only(['create', 'store'])->middleware('permission:analyses.ciat_discounts.create|tenders.ciat_discounts.create');
     Route::resource('ciat-discounts', CiatDiscountController::class)->only(['edit', 'update'])->middleware('permission:analyses.ciat_discounts.edit|tenders.ciat_discounts.edit');
     Route::resource('ciat-discounts', CiatDiscountController::class)->only(['destroy'])->middleware('permission:analyses.ciat_discounts.delete|tenders.ciat_discounts.delete');
 
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['create', 'store'])->middleware('permission:analyses.price_analyses.create|tenders.price_analyses.create');
-    Route::resource('price-analyses', PriceAnalysisController::class)->only(['index', 'show'])->middleware('permission:analyses.view|tenders.view');
+    Route::resource('price-analyses', PriceAnalysisController::class)->only(['index', 'show'])->middleware('permission:analyses.view');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['edit', 'update'])->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
     Route::resource('price-analyses', PriceAnalysisController::class)->only(['destroy'])->middleware('permission:analyses.price_analyses.delete|tenders.price_analyses.delete');
-    Route::get('price-analyses/{priceAnalysis}/x8', [PriceAnalysisController::class, 'showX8'])->name('price-analyses.x8.show')->middleware('permission:analyses.view|tenders.view');
+    Route::get('price-analyses/{priceAnalysis}/x8', [PriceAnalysisController::class, 'showX8'])->name('price-analyses.x8.show')->middleware('permission:analyses.view');
     Route::get('price-analyses/{priceAnalysis}/x8/edit', [PriceAnalysisController::class, 'editX8'])->name('price-analyses.x8.edit')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
     Route::post('price-analyses/{priceAnalysis}/x8', [PriceAnalysisController::class, 'saveX8'])->name('price-analyses.x8.save')->middleware('permission:analyses.price_analyses.edit|tenders.price_analyses.edit');
 
@@ -476,7 +476,7 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('report-templates', ReportTemplateController::class)->only(['destroy'])->middleware('permission:maintenance.report_templates.delete');
 
     Route::get('maintenance-reports/search', [MaintenanceReportController::class, 'search'])->name('maintenance-reports.search')->middleware('permission:maintenance.view');
-    Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['create', 'store'])->middleware('permission:maintenance.reports.create');
+    Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['create', 'store'])->middleware(['permission:maintenance.view', 'permission:maintenance.reports.create']);
     Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['index', 'show'])->middleware('permission:maintenance.view');
     Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['edit', 'update'])->middleware('permission:maintenance.reports.edit');
     Route::resource('maintenance-reports', MaintenanceReportController::class)->only(['destroy'])->middleware('permission:maintenance.reports.delete');

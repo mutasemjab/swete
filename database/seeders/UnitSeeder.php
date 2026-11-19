@@ -10,7 +10,7 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         $units = [
-            ['symbol' => 'حبة',    'name' => 'حبة',     'name_en' => 'Item'],
+            ['symbol' => 'قطعة',    'name' => 'قطعة',     'name_en' => 'Item'],
             ['symbol' => 'كرتونة', 'name' => 'كرتونة',  'name_en' => 'Carton'],
             ['symbol' => 'م.ط',    'name' => 'متر طولي', 'name_en' => 'Linear Meter'],
             ['symbol' => 'م2',     'name' => 'متر مربع', 'name_en' => 'Square Meter'],

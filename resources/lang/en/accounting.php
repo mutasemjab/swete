@@ -58,7 +58,7 @@ return [
     'import_excel' => 'Import from Excel',
     'import_customers' => 'Import Customers from Excel',
     'import_suppliers' => 'Import Suppliers from Excel',
-    'import_hint' => 'The file must have these columns: name, name_en, phone, email, address, tax_number, opening_balance. Download the ready-made template:',
+    'import_hint' => 'Use the English template or Arabic columns: الاسم، رقم الهاتف، المنطقة، الرقم الضريبي. Only name is required. Download the template:',
     'download_template' => 'Download Template',
     'import_success' => 'Data imported successfully.',
     'import_partial' => 'Imported, but these rows were skipped due to an error: :rows',

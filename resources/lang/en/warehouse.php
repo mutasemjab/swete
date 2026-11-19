@@ -126,7 +126,7 @@ return [
     'import_materials'            => 'Import Materials from Excel',
     'import_excel'                 => 'Import from Excel',
     'export_excel'                 => 'Export to Excel',
-    'import_materials_hint'        => 'The file must have these columns: code, name, name_en, category, unit (type the category/unit name exactly as saved in the system). Download the ready-made template:',
+    'import_materials_hint'        => 'Use code, name, name_en, category, unit and optional group, or the Arabic item-report headings. Missing categories and units are created automatically. Only material definitions are imported; quantities and costs do not update stock. Download the template:',
     'download_template'             => 'Download Template',
     'import_category_not_found'    => 'The category ":name" was not found.',
     'import_unit_not_found'         => 'The unit ":name" was not found.',

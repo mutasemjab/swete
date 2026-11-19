@@ -150,24 +150,14 @@ class PermissionSeeder extends Seeder
         $accountant = Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
         $accountant->syncPermissions([
             'accounting.view',
-            'accounting.customers.create', 'accounting.customers.edit',
-            'accounting.suppliers.create', 'accounting.suppliers.edit',
-            'accounting.customer_groups.create', 'accounting.customer_groups.edit',
-            'accounting.supplier_groups.create', 'accounting.supplier_groups.edit',
             'accounting.invoice_types.create', 'accounting.invoice_types.edit',
             'accounting.invoices.create',
-            'accounting.invoices.receipts.delete',
-            'settings.currencies.view',
-            'clients.view',
-            'clients.customers.create', 'clients.customers.edit',
-            'clients.suppliers.create', 'clients.suppliers.edit',
-            'clients.customer_groups.create', 'clients.customer_groups.edit',
-            'clients.supplier_groups.create', 'clients.supplier_groups.edit',
         ]);
 
         $warehouseOfficer = Role::firstOrCreate(['name' => 'warehouse_officer', 'guard_name' => 'web']);
         $warehouseOfficer->syncPermissions([
             'warehouse.view',
+            'warehouse.warehouses.create', 'warehouse.warehouses.edit',
             'warehouse.categories.create', 'warehouse.categories.edit',
             'warehouse.units.create', 'warehouse.units.edit',
             'warehouse.materials.create', 'warehouse.materials.edit',
@@ -183,19 +173,62 @@ class PermissionSeeder extends Seeder
             'maintenance.reports.create',
         ]);
 
-        // Every permission under the Tenders, Quotations, and Analyses modules — kept as a live
-        // filter (not a hardcoded list) so this role automatically keeps "all of them" as new
-        // permissions are added to those three modules later, matching what was actually asked for.
+        // Explicit lists keep each employee within the requested modules as new permissions
+        // are added. Shared lists also keep the maintenance manager aligned with maintenance staff.
+        $clients = [
+            'clients.view',
+            'clients.customers.create', 'clients.customers.edit',
+            'clients.suppliers.create', 'clients.suppliers.edit',
+            'clients.customer_groups.create', 'clients.customer_groups.edit',
+            'clients.supplier_groups.create', 'clients.supplier_groups.edit',
+            'clients.extra_fields.view', 'clients.extra_fields.create', 'clients.extra_fields.edit',
+        ];
+        $quotations = [
+            'quotations.view',
+            'quotations.price_quotes.create', 'quotations.price_quotes.edit',
+        ];
+        $maintenance = [
+            'maintenance.view',
+            'maintenance.report_templates.create', 'maintenance.report_templates.edit',
+            'maintenance.reports.create', 'maintenance.reports.edit',
+            'maintenance.contracts.create', 'maintenance.contracts.edit',
+            'maintenance.contract_payments.create',
+            'maintenance.contract_scheduled_visits.create',
+            'maintenance.visit_types.create', 'maintenance.visit_types.edit',
+            'maintenance.device_passwords.create', 'maintenance.device_passwords.edit',
+        ];
+
         $projectManager = Role::firstOrCreate(['name' => 'project_manager', 'guard_name' => 'web']);
-        $projectManager->syncPermissions(
-            Permission::where('guard_name', 'web')
-                ->where(fn ($query) => $query
-                    ->where('name', 'like', 'tenders.%')
-                    ->orWhere('name', 'like', 'quotations.%')
-                    ->orWhere('name', 'like', 'analyses.%')
-                    ->orWhere('name', 'like', 'x8.%'))
-                ->get()
-        );
+        $projectManager->syncPermissions([
+            ...$clients, ...$quotations,
+            'tenders.view', 'tenders.create', 'tenders.edit',
+            'tenders.tender_statuses.create', 'tenders.tender_statuses.edit',
+            'tenders.quote_supply_scopes.create', 'tenders.quote_supply_scopes.edit',
+            'tenders.quote_delivery_terms.create', 'tenders.quote_delivery_terms.edit',
+            'tenders.purchase_request_reminders.create', 'tenders.purchase_request_reminders.edit',
+            'projects.view', 'projects.edit',
+            'x8.view',
+        ]);
+
+        Role::firstOrCreate(['name' => 'maintenance_staff', 'guard_name' => 'web'])
+            ->syncPermissions([...$maintenance, ...$quotations]);
+
+        Role::firstOrCreate(['name' => 'maintenance_manager', 'guard_name' => 'web'])
+            ->syncPermissions([
+                ...$maintenance, ...$quotations,
+                'maintenance.requests.manage', 'maintenance.visits.manage',
+            ]);
+
+        Role::firstOrCreate(['name' => 'external_purchases_officer', 'guard_name' => 'web'])
+            ->syncPermissions([
+                ...$clients,
+                'projects.view', 'projects.edit',
+                'external_purchases.view',
+                'external_purchases.purchase_requests.create', 'external_purchases.purchase_requests.edit',
+                'external_purchases.shipping_companies.create', 'external_purchases.shipping_companies.edit',
+                'external_purchases.shipments.create', 'external_purchases.shipments.edit',
+                'external_purchases.vendor_email_template.edit',
+            ]);
 
         // ── Default Super Admin User ──────────────────────────────────────────────
 
@@ -213,7 +246,9 @@ class PermissionSeeder extends Seeder
             $admin->assignRole('super-admin');
         }
 
-        $this->command->info('✓ Permissions and roles seeded.');
-        $this->command->line('  Login: admin@erp.local / password');
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $this->command?->info('✓ Permissions and roles seeded.');
+        $this->command?->line('  Default login for a new installation: admin@erp.local / password');
     }
 }

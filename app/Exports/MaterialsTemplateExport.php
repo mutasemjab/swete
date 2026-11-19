@@ -15,6 +15,6 @@ class MaterialsTemplateExport implements FromArray, WithHeadings
 
     public function headings(): array
     {
-        return ['code', 'name', 'name_en', 'category', 'unit'];
+        return ['code', 'name', 'name_en', 'category', 'unit', 'group'];
     }
 }

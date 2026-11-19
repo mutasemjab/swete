@@ -11,16 +11,15 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionSeeder::class,
             BranchSeeder::class,
+            WarehouseSeeder::class,
             CurrencySeeder::class,
             CountrySeeder::class,
             GovernorateSeeder::class,
             InvoiceTypeSeeder::class,
-            PartySeeder::class,
             TenderStatusSeeder::class,
             QuoteOptionsSeeder::class,
             AppointmentTypeSeeder::class,
             UnitSeeder::class,
-            MaterialSeeder::class,
             MaintenanceVisitTypeSeeder::class,
             UserSeeder::class,
         ]);

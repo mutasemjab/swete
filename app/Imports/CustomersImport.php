@@ -3,13 +3,14 @@
 namespace App\Imports;
 
 use App\Models\Customer;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class CustomersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure
+class CustomersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure, SkipsEmptyRows
 {
     use SkipsFailures;
 
@@ -20,7 +21,13 @@ class CustomersImport implements ToModel, WithHeadingRow, WithValidation, SkipsO
 
     public function __construct(private int $createdBy)
     {
-        $this->nextSeq = Customer::count() + 1;
+        $this->nextSeq = (int) Customer::where('code', 'like', 'CUST-%')->pluck('code')
+            ->map(fn ($code) => ctype_digit(substr($code, 5)) ? (int) substr($code, 5) : 0)->max() + 1;
+    }
+
+    public function prepareForValidation(array $row, int $index): array
+    {
+        return ImportRow::party($row);
     }
 
     public function model(array $row)
