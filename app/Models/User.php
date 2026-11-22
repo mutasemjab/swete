@@ -40,7 +40,9 @@ class User extends Authenticatable
     /** Display name for the first assigned role. */
     public function getRoleLabelAttribute(): string
     {
-        return $this->roles->first()?->name ?? __('settings.no_role');
+        $role = $this->roles->first();
+
+        return $role ? \App\Support\PermissionLabels::role($role->name) : __('settings.no_role');
     }
 
     /** Tailwind gradient classes for the avatar background, derived from email hash. */

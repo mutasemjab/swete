@@ -142,6 +142,9 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('roles', RoleController::class)->only(['destroy'])->middleware('permission:settings.roles.delete');
 
         Route::resource('permissions', PermissionController::class)->only(['index'])->middleware('permission:settings.permissions.view');
+        Route::put('permissions/roles/{role}', [PermissionController::class, 'updateRole'])
+            ->name('permissions.roles.update')
+            ->middleware(['permission:settings.permissions.view', 'permission:settings.roles.edit']);
 
         Route::resource('branches', BranchController::class)->only(['index'])->middleware('permission:settings.branches.view');
         Route::resource('branches', BranchController::class)->only(['create', 'store'])->middleware('permission:settings.branches.create');

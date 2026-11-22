@@ -252,7 +252,7 @@
     {{-- ═══════════════════════════════════════════════════════════
          MAIN CONTENT  (offset by sidebar width using logical padding)
     ════════════════════════════════════════════════════════════════ --}}
-    <div class="flex-1 flex flex-col min-h-screen lg:ps-64 transition-all duration-300">
+    <div class="flex-1 min-w-0 flex flex-col min-h-screen lg:ps-64 transition-all duration-300">
 
         {{-- Top navbar --}}
         <header class="sticky top-0 z-10 h-16 bg-white/95 backdrop-blur border-b border-slate-100

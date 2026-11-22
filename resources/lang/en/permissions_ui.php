@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'subtitle' => 'Choose a role to grant or revoke permissions for all its users, or browse the permission directory.',
+    'choose_role' => 'Role and assigned users',
+    'directory' => 'Permission directory — no role selected',
+    'show_role' => 'Show role permissions',
+    'role_access' => 'Permissions for :name',
+    'role_hint' => 'A checked box grants the permission to everyone with this role. Unchecking it removes the permission from the role when you save.',
+    'other_grants_hint' => 'A user may retain access if the permission is granted directly or through another role.',
+    'module_hint' => 'To show a section, enable its open or view permission as well as the actions its users need.',
+    'super_admin_hint' => 'The system administrator role automatically grants full access. To restrict a user, assign them a different role on the user edit page.',
+    'read_only' => 'You can view permissions. Editing requires permission to edit roles and their permissions.',
+    'search' => 'Search for a permission or section',
+    'select_group' => 'Select / clear all permissions in this section',
+    'full_access' => 'Full access',
+    'save' => 'Save role permissions for all its users',
+    'saved' => 'Permissions updated for everyone assigned to the :name role.',
+    'manage' => 'Manage role permissions',
+    'role_warning' => 'Changing this role affects every user assigned to it.',
+    'no_matches' => 'No permissions match your search.',
+    'affected_users' => 'Users affected by this change (:count)',
+    'no_users' => 'No users are currently assigned to this role.',
+    'no_role_user' => 'The user :name has no assigned role. Assign a role on the user edit page first.',
+    'maintenance_manager_hint' => 'Also requires the maintenance manager option on the user account.',
+];

@@ -35,7 +35,7 @@
             @if($user->roles->isNotEmpty())
             <span class="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-xl text-sm font-bold">
                 <i class="fa-solid fa-shield-halved text-xs"></i>
-                {{ $user->roles->first()->name }}
+                {{ $user->role_label }}
             </span>
             @endif
 
@@ -106,29 +106,33 @@
         </div>
 
         {{-- Permissions --}}
-        @if($user->roles->isNotEmpty())
         <div class="card">
             <div class="card-header">
                 <h3 class="font-bold text-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-key text-indigo-500 text-sm"></i>
                     {{ __('settings.permissions_section') }}
                 </h3>
-                <span class="badge bg-indigo-100 text-indigo-700">{{ $user->roles->first()->name }}</span>
+                @can('settings.permissions.view')
+                    <a href="{{ route('settings.permissions.index', ['user' => $user->id]) }}" class="btn-secondary btn-sm">
+                        {{ __('permissions_ui.manage') }}
+                    </a>
+                @endcan
             </div>
             <div class="px-6 py-5">
-                @php $perms = $user->roles->first()->permissions; @endphp
-                @if($perms->isEmpty())
+                @php $perms = $user->getAllPermissions(); @endphp
+                @if($user->hasRole('super-admin'))
+                    <p class="text-sm font-semibold text-indigo-700">{{ __('permissions_ui.full_access') }}</p>
+                @elseif($perms->isEmpty())
                     <p class="text-sm text-slate-400">{{ __('settings.no_permissions') }}</p>
                 @else
                     <div class="flex flex-wrap gap-2">
                         @foreach($perms as $perm)
-                            <span class="badge bg-slate-100 text-slate-600 font-mono text-[11px]">{{ $perm->name }}</span>
+                            <span class="badge bg-slate-100 text-slate-600">{{ \App\Support\PermissionLabels::permission($perm->name) }}</span>
                         @endforeach
                     </div>
                 @endif
             </div>
         </div>
-        @endif
 
     </div>
 </div>

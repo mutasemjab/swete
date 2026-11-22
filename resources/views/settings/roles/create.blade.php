@@ -44,9 +44,9 @@
         </div>
         <div class="px-6 py-5 space-y-6">
             @forelse($permissions as $group => $groupPerms)
-            <div>
-                <div class="flex items-center gap-3 mb-3" x-data>
-                    <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ $group }}</h4>
+            <div x-data>
+                <div class="flex items-center gap-3 mb-3">
+                    <h4 class="text-sm font-black text-slate-700">{{ \App\Support\PermissionLabels::group($group) }}</h4>
                     <div class="flex-1 h-px bg-slate-100"></div>
                     <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-500 hover:text-slate-700">
                         <input type="checkbox"
@@ -64,7 +64,7 @@
                         <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
                                @checked(in_array($permission->name, old('permissions', [])))
                                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm font-mono text-slate-700">{{ $permission->name }}</span>
+                        @include('settings.permissions._label')
                     </label>
                     @endforeach
                 </div>

@@ -157,11 +157,6 @@
                             <i class="fa-solid fa-user w-4 text-center text-slate-400 text-sm"></i>
                             {{ __('app.profile') }}
                         </a>
-                        <a href="{{ route('settings.users.index') }}"
-                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                            <i class="fa-solid fa-sliders w-4 text-center text-slate-400 text-sm"></i>
-                            {{ __('settings.module_name') }}
-                        </a>
                         <div class="my-1 border-t border-slate-100"></div>
                         <form action="{{ route('auth.logout') }}" method="POST">
                             @csrf

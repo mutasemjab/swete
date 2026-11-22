@@ -87,7 +87,7 @@
                 <select name="role" class="form-select">
                     <option value="">{{ __('settings.no_role') }}</option>
                     @foreach($roles as $role)
-                        <option value="{{ $role->name }}" @selected(old('role') === $role->name)>{{ $role->name }}</option>
+                        <option value="{{ $role->name }}" @selected(old('role') === $role->name)>{{ \App\Support\PermissionLabels::role($role->name) }}</option>
                     @endforeach
                 </select>
                 <p class="text-xs text-slate-400 mt-1.5">{{ __('settings.login_tip') }}</p>

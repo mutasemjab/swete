@@ -48,7 +48,7 @@
     <select name="role" class="form-select w-44">
         <option value="">{{ __('settings.all_roles') }}</option>
         @foreach($roles as $role)
-            <option value="{{ $role->name }}" @selected(request('role') === $role->name)>{{ $role->name }}</option>
+            <option value="{{ $role->name }}" @selected(request('role') === $role->name)>{{ \App\Support\PermissionLabels::role($role->name) }}</option>
         @endforeach
     </select>
     <select name="status" class="form-select w-44">
@@ -123,7 +123,7 @@
                             @if($user->roles->isNotEmpty())
                                 <span class="badge bg-indigo-100 text-indigo-700">
                                     <i class="fa-solid fa-shield-halved text-[10px]"></i>
-                                    {{ $user->roles->first()->name }}
+                                    {{ $user->role_label }}
                                 </span>
                             @else
                                 <span class="text-slate-400 text-sm">{{ __('settings.no_role') }}</span>
