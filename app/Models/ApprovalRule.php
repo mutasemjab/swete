@@ -14,8 +14,8 @@ use Illuminate\Support\Str;
  */
 class ApprovalRule extends Model
 {
-    /** Route names that can never be gated, so the mechanism can't deadlock itself. */
-    public const EXCLUDED_ROUTE_PREFIXES = ['auth.', 'approvals.', 'lang.', 'settings.approval-rules.', 'passport.'];
+    /** Never gate account credentials or the approval mechanism itself. */
+    public const EXCLUDED_ROUTE_PREFIXES = ['auth.', 'profile.', 'approvals.', 'lang.', 'settings.approval-rules.', 'passport.'];
 
     protected $fillable = [
         'route_name',

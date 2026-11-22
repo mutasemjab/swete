@@ -152,7 +152,7 @@
                             <p class="text-sm font-bold text-slate-800">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr">{{ Auth::user()->email }}</p>
                         </div>
-                        <a href="{{ route('settings.users.show', Auth::id()) }}"
+                        <a href="{{ route('profile.edit') }}"
                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                             <i class="fa-solid fa-user w-4 text-center text-slate-400 text-sm"></i>
                             {{ __('app.profile') }}
