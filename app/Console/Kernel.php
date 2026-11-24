@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
     {
         // Requires a real server cron hitting `php artisan schedule:run` to actually fire.
         $schedule->command('maintenance:notify-due-scheduled-visits')->dailyAt('08:00');
+        $schedule->command('app:backup')->daily();
     }
 
     /**

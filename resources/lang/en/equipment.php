@@ -1,0 +1,110 @@
+<?php
+
+return [
+
+    // ── Module ───────────────────────────────────────────────────────────────
+    'module_name' => 'Equipment',
+    'module_desc' => 'Catalog of equipment installed at customer sites: categories, subtypes, manufacturers, models and units',
+
+    // ── Sidebar ──────────────────────────────────────────────────────────────
+    'section_units'      => 'Units',
+    'section_catalog'     => 'Catalog',
+    'nav_units_list'      => 'Units List',
+    'nav_units_add'       => 'Add Unit',
+    'nav_categories'      => 'Categories',
+    'nav_subtypes'        => 'Subtypes',
+    'nav_manufacturers'   => 'Manufacturers',
+    'nav_models'          => 'Models',
+
+    // ── Shared ───────────────────────────────────────────────────────────────
+    'category' => 'Category',
+    'subtype'   => 'Subtype',
+    'manufacturer' => 'Manufacturer',
+    'model'     => 'Model',
+    'unit'      => 'Unit',
+
+    // ── Categories ───────────────────────────────────────────────────────────
+    'categories_list'     => 'Equipment Categories',
+    'categories_subtitle' => 'The main equipment type, e.g. "Chillers" or "Split Units"',
+    'category_name'       => 'Category Name',
+    'add_category'        => 'Add Category',
+    'edit_category'       => 'Edit Category',
+    'no_categories'       => 'No equipment categories yet',
+    'category_added'      => 'Category added successfully',
+    'category_updated'    => 'Category updated successfully',
+    'category_deleted'    => 'Category deleted successfully',
+    'category_in_use'     => 'This category cannot be deleted — it is used by subtypes, models or units',
+
+    // ── Subtypes ─────────────────────────────────────────────────────────────
+    'subtypes_list'       => 'Equipment Subtypes',
+    'subtypes_subtitle'   => 'A sub-classification under each category, e.g. "Air-Cooled Chillers"',
+    'subtype_name'        => 'Subtype Name',
+    'add_subtype'         => 'Add Subtype',
+    'edit_subtype'        => 'Edit Subtype',
+    'no_subtypes'         => 'No equipment subtypes yet',
+    'subtype_added'       => 'Subtype added successfully',
+    'subtype_updated'     => 'Subtype updated successfully',
+    'subtype_deleted'     => 'Subtype deleted successfully',
+    'subtype_in_use'      => 'This subtype cannot be deleted — it is used by models or units',
+
+    // ── Manufacturers ────────────────────────────────────────────────────────
+    'manufacturers_list'     => 'Manufacturers',
+    'manufacturers_subtitle' => 'Equipment manufacturers and their models',
+    'manufacturer_name'      => 'Manufacturer Name',
+    'manufacturer_website'   => 'Website',
+    'add_manufacturer'       => 'Add Manufacturer',
+    'edit_manufacturer'      => 'Edit Manufacturer',
+    'no_manufacturers'       => 'No manufacturers yet',
+    'manufacturer_added'     => 'Manufacturer added successfully',
+    'manufacturer_updated'   => 'Manufacturer updated successfully',
+    'manufacturer_deleted'   => 'Manufacturer deleted successfully',
+    'manufacturer_in_use'    => 'This manufacturer cannot be deleted — it is used by models',
+
+    // ── Models ───────────────────────────────────────────────────────────────
+    'models_list'      => 'Equipment Models',
+    'models_subtitle'  => 'Each manufacturer\'s model — every unit of that model shares the same specifications',
+    'model_number'     => 'Model Number',
+    'add_model'        => 'Add Model',
+    'edit_model'       => 'Edit Model',
+    'no_models'        => 'No models yet',
+    'model_added'      => 'Model added successfully',
+    'model_updated'    => 'Model updated successfully',
+    'model_deleted'    => 'Model deleted successfully',
+    'model_in_use'     => 'This model cannot be deleted — it is used by units',
+    'all_manufacturers' => 'All Manufacturers',
+
+    // ── Units ────────────────────────────────────────────────────────────────
+    'units_list'              => 'Equipment Units',
+    'units_subtitle'          => 'Every physical piece of equipment actually installed at a customer site',
+    'unit_customer'           => 'Customer',
+    'unit_name'               => 'Unit Name/Code',
+    'unit_name_hint'          => 'e.g. AHU-0003',
+    'unit_serial_number'      => 'Serial Number',
+    'unit_location'           => 'Location on Site',
+    'unit_project'            => 'Project/Site',
+    'unit_project_hint'       => 'Distinguishes more than one site/phase for the same customer',
+    'unit_status'             => 'Unit Status',
+    'unit_status_operational'    => 'Operational',
+    'unit_status_maintenance'    => 'Under Maintenance',
+    'unit_status_out_of_service' => 'Out of Service',
+    'unit_status_decommissioned' => 'Decommissioned',
+    'unit_notes'              => 'Notes',
+    'add_unit'                => 'Add Unit',
+    'add_unit_subtitle'       => 'Choose the customer and model — category and subtype fill in automatically',
+    'edit_unit'               => 'Edit Unit',
+    'no_units'                => 'No equipment units yet',
+    'add_first_unit'          => 'Add First Unit',
+    'unit_added'              => 'Unit added successfully',
+    'unit_updated'            => 'Unit updated successfully',
+    'unit_archived'           => 'Unit archived successfully',
+    'archive'                 => 'Archive',
+    'archive_confirm_msg'     => 'Are you sure you want to archive this unit? Its records stay saved and this can be reversed later from the database.',
+    'archived'                => 'Archived',
+    'total_units'             => 'Total Units',
+    'unit_search_placeholder' => 'Search by name or serial number...',
+    'all_customers'           => 'All Customers',
+    'all_categories'          => 'All Categories',
+    'all_statuses'            => 'All Statuses',
+    'show_archived'           => 'Show Archived',
+
+];

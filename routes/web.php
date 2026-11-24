@@ -58,6 +58,11 @@ use App\Http\Controllers\Maintenance\MaintenanceVisitTypeController;
 use App\Http\Controllers\Maintenance\MaintenanceRequestController;
 use App\Http\Controllers\Maintenance\MaintenanceVisitController;
 use App\Http\Controllers\Maintenance\DevicePasswordController;
+use App\Http\Controllers\Equipment\EquipmentCategoryController;
+use App\Http\Controllers\Equipment\EquipmentSubtypeController;
+use App\Http\Controllers\Equipment\EquipmentManufacturerController;
+use App\Http\Controllers\Equipment\EquipmentModelController;
+use App\Http\Controllers\Equipment\EquipmentUnitController;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\CustomerPortalController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
@@ -526,6 +531,32 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('maintenance-contracts/{maintenanceContract}/scheduled-visits', [ContractScheduledVisitController::class, 'store'])->name('contract-scheduled-visits.store')->middleware('permission:maintenance.contract_scheduled_visits.create');
     Route::delete('maintenance-contracts/{maintenanceContract}/scheduled-visits/{scheduledVisit}', [ContractScheduledVisitController::class, 'destroy'])->name('contract-scheduled-visits.destroy')->middleware('permission:maintenance.contract_scheduled_visits.delete');
     Route::get('contract-scheduled-visits', [ContractScheduledVisitController::class, 'index'])->name('contract-scheduled-visits.index')->middleware('permission:maintenance.view');
+
+    // ── Equipment (Category > Subtype > Manufacturer > Model > Unit) ──────────
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['create', 'store'])->middleware('permission:equipment.units.create');
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['edit', 'update'])->middleware('permission:equipment.units.edit');
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['destroy'])->middleware('permission:equipment.units.delete');
+
+    Route::resource('equipment-categories', EquipmentCategoryController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('equipment-categories', EquipmentCategoryController::class)->only(['create', 'store'])->middleware('permission:equipment.categories.create');
+    Route::resource('equipment-categories', EquipmentCategoryController::class)->only(['edit', 'update'])->middleware('permission:equipment.categories.edit');
+    Route::resource('equipment-categories', EquipmentCategoryController::class)->only(['destroy'])->middleware('permission:equipment.categories.delete');
+
+    Route::resource('equipment-subtypes', EquipmentSubtypeController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('equipment-subtypes', EquipmentSubtypeController::class)->only(['create', 'store'])->middleware('permission:equipment.categories.create');
+    Route::resource('equipment-subtypes', EquipmentSubtypeController::class)->only(['edit', 'update'])->middleware('permission:equipment.categories.edit');
+    Route::resource('equipment-subtypes', EquipmentSubtypeController::class)->only(['destroy'])->middleware('permission:equipment.categories.delete');
+
+    Route::resource('equipment-manufacturers', EquipmentManufacturerController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('equipment-manufacturers', EquipmentManufacturerController::class)->only(['create', 'store'])->middleware('permission:equipment.manufacturers.create');
+    Route::resource('equipment-manufacturers', EquipmentManufacturerController::class)->only(['edit', 'update'])->middleware('permission:equipment.manufacturers.edit');
+    Route::resource('equipment-manufacturers', EquipmentManufacturerController::class)->only(['destroy'])->middleware('permission:equipment.manufacturers.delete');
+
+    Route::resource('equipment-models', EquipmentModelController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('equipment-models', EquipmentModelController::class)->only(['create', 'store'])->middleware('permission:equipment.models.create');
+    Route::resource('equipment-models', EquipmentModelController::class)->only(['edit', 'update'])->middleware('permission:equipment.models.edit');
+    Route::resource('equipment-models', EquipmentModelController::class)->only(['destroy'])->middleware('permission:equipment.models.delete');
 
     Route::patch('appointments/{appointment}/toggle-complete', [AppointmentController::class, 'toggleComplete'])->name('appointments.toggle-complete')->middleware('permission:crm.appointments.edit');
     Route::resource('appointments', AppointmentController::class)->only(['index'])->middleware('permission:crm.view');

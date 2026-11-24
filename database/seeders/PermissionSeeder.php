@@ -130,6 +130,13 @@ class PermissionSeeder extends Seeder
             'maintenance.requests.manage', 'maintenance.visits.manage',
             'maintenance.device_passwords.create', 'maintenance.device_passwords.edit', 'maintenance.device_passwords.delete',
             'maintenance.contract_scheduled_visits.create', 'maintenance.contract_scheduled_visits.delete',
+
+            // Equipment (new standalone module — equipment catalog: categories/subtypes, manufacturers, models, units)
+            'equipment.view',
+            'equipment.categories.create', 'equipment.categories.edit', 'equipment.categories.delete',
+            'equipment.manufacturers.create', 'equipment.manufacturers.edit', 'equipment.manufacturers.delete',
+            'equipment.models.create', 'equipment.models.edit', 'equipment.models.delete',
+            'equipment.units.create', 'equipment.units.edit', 'equipment.units.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -171,6 +178,7 @@ class PermissionSeeder extends Seeder
         $maintenanceTechnician = Role::firstOrCreate(['name' => 'maintenance_technician', 'guard_name' => 'web']);
         $maintenanceTechnician->syncPermissions([
             'maintenance.reports.create',
+            'equipment.view',
         ]);
 
         // Explicit lists keep each employee within the requested modules as new permissions
@@ -197,6 +205,13 @@ class PermissionSeeder extends Seeder
             'maintenance.visit_types.create', 'maintenance.visit_types.edit',
             'maintenance.device_passwords.create', 'maintenance.device_passwords.edit',
         ];
+        $equipment = [
+            'equipment.view',
+            'equipment.categories.create', 'equipment.categories.edit',
+            'equipment.manufacturers.create', 'equipment.manufacturers.edit',
+            'equipment.models.create', 'equipment.models.edit',
+            'equipment.units.create', 'equipment.units.edit',
+        ];
 
         $projectManager = Role::firstOrCreate(['name' => 'project_manager', 'guard_name' => 'web']);
         $projectManager->syncPermissions([
@@ -211,11 +226,11 @@ class PermissionSeeder extends Seeder
         ]);
 
         Role::firstOrCreate(['name' => 'maintenance_staff', 'guard_name' => 'web'])
-            ->syncPermissions([...$maintenance, ...$quotations]);
+            ->syncPermissions([...$maintenance, ...$quotations, 'equipment.view']);
 
         Role::firstOrCreate(['name' => 'maintenance_manager', 'guard_name' => 'web'])
             ->syncPermissions([
-                ...$maintenance, ...$quotations,
+                ...$maintenance, ...$quotations, ...$equipment,
                 'maintenance.requests.manage', 'maintenance.visits.manage',
             ]);
 

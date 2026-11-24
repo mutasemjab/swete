@@ -443,6 +443,37 @@ return [
     ],
 
     // ──────────────────────────────────────────────────────────────────────────
+    // EQUIPMENT MODULE  ← new standalone module: Category > Subtype > Manufacturer > Model > Unit
+    // ──────────────────────────────────────────────────────────────────────────
+    'equipment' => [
+        'name'        => 'equipment.module_name',
+        'description' => 'equipment.module_desc',
+        'icon'        => 'fan',
+        'color'       => 'cyan',
+        'route'       => 'equipment-units.index',
+        'permission'  => 'equipment.view',
+        'gradient'    => 'from-cyan-500 to-cyan-700',
+        'sections'    => [
+            [
+                'label' => 'equipment.section_units',
+                'items' => [
+                    ['label' => 'equipment.nav_units_list', 'route' => 'equipment-units.index',  'icon' => 'server', 'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_units_add',  'route' => 'equipment-units.create', 'icon' => 'plus',   'permission' => 'equipment.units.create'],
+                ],
+            ],
+            [
+                'label' => 'equipment.section_catalog',
+                'items' => [
+                    ['label' => 'equipment.nav_categories',    'route' => 'equipment-categories.index',    'icon' => 'layer-group', 'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_subtypes',      'route' => 'equipment-subtypes.index',      'icon' => 'sitemap',     'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_manufacturers', 'route' => 'equipment-manufacturers.index', 'icon' => 'industry',    'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_models',        'route' => 'equipment-models.index',        'icon' => 'microchip',   'permission' => 'equipment.view'],
+                ],
+            ],
+        ],
+    ],
+
+    // ──────────────────────────────────────────────────────────────────────────
     // MAINTENANCE MODULE  ← price quotes removed (now in standalone quotations module)
     // ──────────────────────────────────────────────────────────────────────────
     'maintenance' => [

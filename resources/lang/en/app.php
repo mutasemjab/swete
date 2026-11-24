@@ -58,6 +58,7 @@ return [
     'description'        => 'Description',
     'required'           => 'Required field',
     'select'             => 'Select',
+    'none'               => 'None',
     'yes'                => 'Yes',
     'no'                 => 'No',
     'all'                => 'All',

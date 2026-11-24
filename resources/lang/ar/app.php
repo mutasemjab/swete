@@ -58,6 +58,7 @@ return [
     'description'        => 'الوصف',
     'required'           => 'حقل مطلوب',
     'select'             => 'اختر',
+    'none'               => 'بدون',
     'yes'                => 'نعم',
     'no'                 => 'لا',
     'all'                => 'الكل',
