@@ -16,7 +16,7 @@
 
 <form action="{{ route('report-templates.store') }}" method="POST">
     @csrf
-    @include('maintenance.report-templates._form', ['template' => null, 'materials' => $materials])
+    @include('maintenance.report-templates._form', ['template' => null, 'materials' => $materials, 'categories' => $categories])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

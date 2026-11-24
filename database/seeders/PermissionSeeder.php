@@ -123,6 +123,7 @@ class PermissionSeeder extends Seeder
             'maintenance.report_templates.create', 'maintenance.report_templates.edit', 'maintenance.report_templates.delete',
             'maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.reports.delete',
             'maintenance.reports.approve_materials', 'maintenance.reports.convert_to_quote',
+            'maintenance.reports.review', 'maintenance.reports.approve',
             'maintenance.contracts.create', 'maintenance.contracts.edit', 'maintenance.contracts.delete',
             'maintenance.contract_payments.create', 'maintenance.contract_payments.delete',
             'maintenance.contract_payments.assign', 'maintenance.contract_payments.convert_to_invoice',
@@ -130,6 +131,7 @@ class PermissionSeeder extends Seeder
             'maintenance.requests.manage', 'maintenance.visits.manage',
             'maintenance.device_passwords.create', 'maintenance.device_passwords.edit', 'maintenance.device_passwords.delete',
             'maintenance.contract_scheduled_visits.create', 'maintenance.contract_scheduled_visits.delete',
+            'maintenance.contract_schedules.create', 'maintenance.contract_schedules.edit', 'maintenance.contract_schedules.delete',
 
             // Equipment (new standalone module — equipment catalog: categories/subtypes, manufacturers, models, units)
             'equipment.view',
@@ -137,6 +139,11 @@ class PermissionSeeder extends Seeder
             'equipment.manufacturers.create', 'equipment.manufacturers.edit', 'equipment.manufacturers.delete',
             'equipment.models.create', 'equipment.models.edit', 'equipment.models.delete',
             'equipment.units.create', 'equipment.units.edit', 'equipment.units.delete',
+            'equipment.document_types.create', 'equipment.document_types.edit', 'equipment.document_types.delete',
+            'equipment.documents.upload', 'equipment.documents.edit', 'equipment.documents.delete',
+            'equipment.reading_limits.manage',
+            'equipment.control_systems.create', 'equipment.control_systems.edit', 'equipment.control_systems.delete',
+            'equipment.alarm_codes.create', 'equipment.alarm_codes.edit', 'equipment.alarm_codes.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -178,7 +185,7 @@ class PermissionSeeder extends Seeder
         $maintenanceTechnician = Role::firstOrCreate(['name' => 'maintenance_technician', 'guard_name' => 'web']);
         $maintenanceTechnician->syncPermissions([
             'maintenance.reports.create',
-            'equipment.view',
+            'equipment.view', 'equipment.documents.upload',
         ]);
 
         // Explicit lists keep each employee within the requested modules as new permissions
@@ -198,10 +205,11 @@ class PermissionSeeder extends Seeder
         $maintenance = [
             'maintenance.view',
             'maintenance.report_templates.create', 'maintenance.report_templates.edit',
-            'maintenance.reports.create', 'maintenance.reports.edit',
+            'maintenance.reports.create', 'maintenance.reports.edit', 'maintenance.reports.review',
             'maintenance.contracts.create', 'maintenance.contracts.edit',
             'maintenance.contract_payments.create',
             'maintenance.contract_scheduled_visits.create',
+            'maintenance.contract_schedules.create', 'maintenance.contract_schedules.edit',
             'maintenance.visit_types.create', 'maintenance.visit_types.edit',
             'maintenance.device_passwords.create', 'maintenance.device_passwords.edit',
         ];
@@ -211,6 +219,11 @@ class PermissionSeeder extends Seeder
             'equipment.manufacturers.create', 'equipment.manufacturers.edit',
             'equipment.models.create', 'equipment.models.edit',
             'equipment.units.create', 'equipment.units.edit',
+            'equipment.document_types.create', 'equipment.document_types.edit',
+            'equipment.documents.upload', 'equipment.documents.edit',
+            'equipment.reading_limits.manage',
+            'equipment.control_systems.create', 'equipment.control_systems.edit',
+            'equipment.alarm_codes.create', 'equipment.alarm_codes.edit',
         ];
 
         $projectManager = Role::firstOrCreate(['name' => 'project_manager', 'guard_name' => 'web']);
@@ -226,12 +239,12 @@ class PermissionSeeder extends Seeder
         ]);
 
         Role::firstOrCreate(['name' => 'maintenance_staff', 'guard_name' => 'web'])
-            ->syncPermissions([...$maintenance, ...$quotations, 'equipment.view']);
+            ->syncPermissions([...$maintenance, ...$quotations, 'equipment.view', 'equipment.documents.upload']);
 
         Role::firstOrCreate(['name' => 'maintenance_manager', 'guard_name' => 'web'])
             ->syncPermissions([
                 ...$maintenance, ...$quotations, ...$equipment,
-                'maintenance.requests.manage', 'maintenance.visits.manage',
+                'maintenance.requests.manage', 'maintenance.visits.manage', 'maintenance.reports.approve',
             ]);
 
         Role::firstOrCreate(['name' => 'external_purchases_officer', 'guard_name' => 'web'])

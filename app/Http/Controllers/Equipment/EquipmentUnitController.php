@@ -9,11 +9,47 @@ use App\Models\EquipmentManufacturer;
 use App\Models\EquipmentModel;
 use App\Models\EquipmentSubtype;
 use App\Models\EquipmentUnit;
+use App\Models\MaintenanceReportTemplate;
+use App\Support\DocumentInheritance;
+use App\Support\ReportTemplateResolver;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\SvgWriter;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class EquipmentUnitController extends ModuleController
 {
     protected string $module = 'equipment';
+
+    public function show(EquipmentUnit $equipmentUnit)
+    {
+        $equipmentUnit->load(['customer', 'category', 'subtype', 'model.manufacturer', 'creator']);
+        $documents = DocumentInheritance::forUnit($equipmentUnit);
+        $suggestedTemplate = ReportTemplateResolver::forUnit($equipmentUnit);
+
+        return $this->moduleView('equipment.units.show', compact('equipmentUnit', 'documents', 'suggestedTemplate'));
+    }
+
+    /** The scannable SVG image itself, encoding the URL a phone's camera should open. */
+    public function qr(EquipmentUnit $equipmentUnit): Response
+    {
+        $result = Builder::create()
+            ->writer(new SvgWriter())
+            ->data(route('equipment-units.scan', $equipmentUnit->qr_token))
+            ->size(300)
+            ->margin(10)
+            ->build();
+
+        return response($result->getString(), 200, ['Content-Type' => $result->getMimeType()]);
+    }
+
+    /** Where a scanned QR code lands — resolves the token and hands off to the normal, permission-checked show page. */
+    public function scan(string $token)
+    {
+        $equipmentUnit = EquipmentUnit::where('qr_token', $token)->firstOrFail();
+
+        return redirect()->route('equipment-units.show', $equipmentUnit);
+    }
 
     public function index(Request $request)
     {
@@ -62,8 +98,9 @@ class EquipmentUnitController extends ModuleController
 
         EquipmentUnit::create([
             ...$validated,
-            'is_active'  => true,
-            'created_by' => $request->user()->id,
+            'reading_limits' => $this->readingLimits($request),
+            'is_active'      => true,
+            'created_by'     => $request->user()->id,
         ]);
 
         return redirect()->route('equipment-units.index')
@@ -81,7 +118,7 @@ class EquipmentUnitController extends ModuleController
     {
         $validated = $this->validated($request);
 
-        $equipmentUnit->update($validated);
+        $equipmentUnit->update([...$validated, 'reading_limits' => $this->readingLimits($request)]);
 
         return redirect()->route('equipment-units.index')
             ->with('success', __('equipment.unit_updated'));
@@ -105,6 +142,7 @@ class EquipmentUnitController extends ModuleController
             'manufacturers' => EquipmentManufacturer::where('status', true)->orderBy('name')->get(),
             'models'        => EquipmentModel::where('status', true)->orderBy('model_number')
                 ->get(['id', 'model_number', 'equipment_manufacturer_id', 'equipment_category_id', 'equipment_subtype_id']),
+            'reportTemplates' => MaintenanceReportTemplate::where('status', true)->orderBy('name')->get(),
         ];
     }
 
@@ -127,6 +165,19 @@ class EquipmentUnitController extends ModuleController
             'project'                => ['nullable', 'string', 'max:150'],
             'status'                 => ['required', 'in:'.implode(',', EquipmentUnit::STATUSES)],
             'notes'                  => ['nullable', 'string'],
+            'report_template_id'     => ['nullable', 'exists:maintenance_report_templates,id'],
+            'superheat_low'          => ['nullable', 'numeric'],
+            'superheat_high'         => ['nullable', 'numeric', 'gt:superheat_low'],
         ]);
+    }
+
+    /** Packs the optional superheat-band override inputs into the reading_limits JSON column. */
+    private function readingLimits(Request $request): ?array
+    {
+        if (! $request->filled('superheat_low') || ! $request->filled('superheat_high')) {
+            return null;
+        }
+
+        return ['superheat' => ['low' => (float) $request->input('superheat_low'), 'high' => (float) $request->input('superheat_high')]];
     }
 }

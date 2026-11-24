@@ -114,6 +114,30 @@
             @error('status')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div>
+            <label class="form-label">{{ __('equipment.unit_report_template') }}</label>
+            <select name="report_template_id" class="js-select2 form-select @error('report_template_id') is-invalid @enderror">
+                <option value="">{{ __('equipment.unit_report_template_auto') }}</option>
+                @foreach($reportTemplates as $rt)
+                    <option value="{{ $rt->id }}" @selected(old('report_template_id', $unit?->report_template_id) == $rt->id)>{{ $rt->localized_name }}</option>
+                @endforeach
+            </select>
+            <p class="text-xs text-slate-400 mt-1">{{ __('equipment.unit_report_template_hint') }}</p>
+            @error('report_template_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div class="sm:col-span-2">
+            <label class="form-label">{{ __('equipment.superheat_band_override') }}</label>
+            <div class="flex items-center gap-3">
+                <input type="number" step="0.1" name="superheat_low" value="{{ old('superheat_low', $unit?->reading_limits['superheat']['low'] ?? '') }}" placeholder="{{ __('equipment.superheat_low') }}" class="form-input @error('superheat_low') is-invalid @enderror">
+                <span class="text-slate-400">—</span>
+                <input type="number" step="0.1" name="superheat_high" value="{{ old('superheat_high', $unit?->reading_limits['superheat']['high'] ?? '') }}" placeholder="{{ __('equipment.superheat_high') }}" class="form-input @error('superheat_high') is-invalid @enderror">
+            </div>
+            <p class="text-xs text-slate-400 mt-1">{{ __('equipment.superheat_band_hint') }}</p>
+            @error('superheat_low')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            @error('superheat_high')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
         <div class="sm:col-span-2">
             <label class="form-label">{{ __('equipment.unit_notes') }}</label>
             <textarea name="notes" rows="2" class="form-input @error('notes') is-invalid @enderror">{{ old('notes', $unit?->notes) }}</textarea>

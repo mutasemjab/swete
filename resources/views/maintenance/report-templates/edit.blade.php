@@ -22,7 +22,7 @@
 <form action="{{ route('report-templates.update', $template) }}" method="POST">
     @csrf
     @method('PUT')
-    @include('maintenance.report-templates._form', ['template' => $template, 'materials' => $materials])
+    @include('maintenance.report-templates._form', ['template' => $template, 'materials' => $materials, 'categories' => $categories])
 
     <div class="flex items-center gap-3">
         <button type="submit" class="btn-primary">

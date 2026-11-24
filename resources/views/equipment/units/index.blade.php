@@ -97,7 +97,7 @@
                     @foreach($units as $unit)
                     <tr class="hover:bg-slate-50/50 transition-colors group {{ ! $unit->is_active ? 'opacity-50' : '' }}">
                         <td class="px-5 py-4">
-                            <span class="font-bold text-slate-800">{{ $unit->localized_name }}</span>
+                            <a href="{{ route('equipment-units.show', $unit) }}" class="font-bold text-slate-800 hover:text-indigo-600 transition-colors">{{ $unit->localized_name }}</a>
                             @if($unit->serial_number)<p class="text-xs text-slate-400" dir="ltr">{{ $unit->serial_number }}</p>@endif
                         </td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $unit->customer?->localized_name }}</td>

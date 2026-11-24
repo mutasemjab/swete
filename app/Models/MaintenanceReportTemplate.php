@@ -19,6 +19,7 @@ class MaintenanceReportTemplate extends Model
 
     protected $fillable = [
         'material_id',
+        'equipment_category_id',
         'name',
         'name_en',
         'status',
@@ -32,6 +33,23 @@ class MaintenanceReportTemplate extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(EquipmentCategory::class, 'equipment_category_id');
+    }
+
+    public function isForCategory(): bool
+    {
+        return $this->equipment_category_id !== null;
+    }
+
+    public function getSubjectLabelAttribute(): string
+    {
+        return $this->isForCategory()
+            ? __('maintenance.template_subject_category', ['name' => $this->category?->localized_name])
+            : $this->material?->localized_name ?? '—';
     }
 
     public function creator(): BelongsTo

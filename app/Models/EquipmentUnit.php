@@ -28,11 +28,21 @@ class EquipmentUnit extends Model
         'notes',
         'is_active',
         'created_by',
+        'report_template_id',
+        'reading_limits',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'      => 'boolean',
+        'reading_limits' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $unit) {
+            $unit->qr_token ??= bin2hex(random_bytes(16));
+        });
+    }
 
     public function customer(): BelongsTo
     {
@@ -57,6 +67,11 @@ class EquipmentUnit extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reportTemplate(): BelongsTo
+    {
+        return $this->belongsTo(MaintenanceReportTemplate::class, 'report_template_id');
     }
 
     public function getLocalizedNameAttribute(): string

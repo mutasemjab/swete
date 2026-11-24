@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Maintenance;
 
 use App\Http\Controllers\ModuleController;
+use App\Models\EquipmentCategory;
 use App\Models\Material;
 use App\Models\MaintenanceReportTemplate;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class ReportTemplateController extends ModuleController
 
     public function index()
     {
-        $templates = MaintenanceReportTemplate::with('material')->withCount('reports')->orderBy('name')->get();
+        $templates = MaintenanceReportTemplate::with(['material', 'category'])->withCount('reports')->orderBy('name')->get();
 
         return $this->moduleView('maintenance.report-templates.index', compact('templates'));
     }
@@ -27,9 +28,8 @@ class ReportTemplateController extends ModuleController
     public function create()
     {
         return $this->moduleView('maintenance.report-templates.create', [
-            'template'  => null,
-            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
-        ]);
+            'template' => null,
+        ] + $this->pickers());
     }
 
     public function store(Request $request)
@@ -37,7 +37,8 @@ class ReportTemplateController extends ModuleController
         $validated = $this->validated($request);
 
         $template = MaintenanceReportTemplate::create([
-            'material_id' => $validated['material_id'],
+            'material_id'           => $validated['subject_type'] === 'material' ? $validated['material_id'] : null,
+            'equipment_category_id' => $validated['subject_type'] === 'category' ? $validated['equipment_category_id'] : null,
             'name'        => $validated['name'],
             'name_en'     => $validated['name_en'] ?? null,
             'status'      => $request->boolean('status', true),
@@ -55,9 +56,8 @@ class ReportTemplateController extends ModuleController
         $reportTemplate->load('fields');
 
         return $this->moduleView('maintenance.report-templates.edit', [
-            'template'  => $reportTemplate,
-            'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
-        ]);
+            'template' => $reportTemplate,
+        ] + $this->pickers());
     }
 
     public function update(Request $request, MaintenanceReportTemplate $reportTemplate)
@@ -65,7 +65,8 @@ class ReportTemplateController extends ModuleController
         $validated = $this->validated($request);
 
         $reportTemplate->update([
-            'material_id' => $validated['material_id'],
+            'material_id'           => $validated['subject_type'] === 'material' ? $validated['material_id'] : null,
+            'equipment_category_id' => $validated['subject_type'] === 'category' ? $validated['equipment_category_id'] : null,
             'name'        => $validated['name'],
             'name_en'     => $validated['name_en'] ?? null,
             'status'      => $request->boolean('status'),
@@ -75,6 +76,14 @@ class ReportTemplateController extends ModuleController
 
         return redirect()->route('report-templates.index')
             ->with('success', __('maintenance.template_updated'));
+    }
+
+    private function pickers(): array
+    {
+        return [
+            'materials'  => Material::confirmed()->where('status', true)->orderBy('name')->get(),
+            'categories' => EquipmentCategory::where('status', true)->orderBy('name')->get(),
+        ];
     }
 
     /** Deletion is always safe: every filled report already carries its own permanent copy of its fields. */
@@ -89,7 +98,9 @@ class ReportTemplateController extends ModuleController
     private function validated(Request $request): array
     {
         $validated = $request->validate([
-            'material_id'          => ['required', 'exists:materials,id'],
+            'subject_type'         => ['required', 'in:material,category'],
+            'material_id'          => ['required_if:subject_type,material', 'nullable', 'exists:materials,id'],
+            'equipment_category_id' => ['required_if:subject_type,category', 'nullable', 'exists:equipment_categories,id'],
             'name'                 => ['required', 'string', 'max:150'],
             'name_en'              => ['nullable', 'string', 'max:150'],
             'status'               => ['boolean'],

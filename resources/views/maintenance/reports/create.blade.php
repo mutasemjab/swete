@@ -33,7 +33,7 @@
                 'id' => $f->id, 'question' => $f->localized_question, 'type' => $f->type, 'options' => $f->options ?? [],
             ])->values(),
         ])->values()->toJson() }},
-        templateId: '{{ old('template_id') }}',
+        templateId: '{{ old('template_id', request('template_id')) }}',
         get selectedTemplate() { return this.templates.find(t => String(t.id) === String(this.templateId)) || null; },
         materials: {{ collect(old('materials', []))->values()->toJson() }},
         materialStock: {{ $materialStock->toJson() }},
@@ -57,7 +57,7 @@
                 <select name="template_id" x-model="templateId" class="js-select2 form-select @error('template_id') is-invalid @enderror">
                     <option value="">{{ __('maintenance.report_select_template') }}</option>
                     @foreach($templates as $template)
-                        <option value="{{ $template->id }}" @selected(old('template_id') == $template->id)>{{ $template->localized_name }} — {{ $template->material?->localized_name }}</option>
+                        <option value="{{ $template->id }}" @selected(old('template_id', request('template_id')) == $template->id)>{{ $template->localized_name }} — {{ $template->subject_label }}</option>
                     @endforeach
                 </select>
                 @error('template_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
@@ -72,6 +72,17 @@
                     @endforeach
                 </select>
                 @error('customer_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label class="form-label">{{ __('equipment.unit') }}</label>
+                <select name="equipment_unit_id" class="js-select2 form-select @error('equipment_unit_id') is-invalid @enderror">
+                    <option value="">{{ __('app.none') }}</option>
+                    @foreach($equipmentUnits as $unit)
+                        <option value="{{ $unit->id }}" @selected(old('equipment_unit_id', request('equipment_unit_id')) == $unit->id)>{{ $unit->localized_name }}</option>
+                    @endforeach
+                </select>
+                @error('equipment_unit_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             <div>

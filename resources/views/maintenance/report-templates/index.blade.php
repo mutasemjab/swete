@@ -43,7 +43,7 @@
                     @foreach($templates as $template)
                     <tr class="hover:bg-slate-50/50 transition-colors group">
                         <td class="px-5 py-4 font-bold text-slate-800">{{ $template->localized_name }}</td>
-                        <td class="px-5 py-4 text-sm text-slate-600">{{ $template->material?->localized_name }}</td>
+                        <td class="px-5 py-4 text-sm text-slate-600">{{ $template->subject_label }}</td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $template->reports_count }}</td>
                         <td class="px-5 py-4">
                             @if($template->status)

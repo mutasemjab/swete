@@ -48,6 +48,30 @@
             @error('equipment_subtype_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
 
+        <div>
+            <label class="form-label">{{ __('equipment.control_system') }}</label>
+            <select name="control_system_id" class="js-select2 form-select @error('control_system_id') is-invalid @enderror">
+                <option value="">{{ __('app.none') }}</option>
+                @foreach($controlSystems as $cs)
+                    <option value="{{ $cs->id }}" @selected(old('control_system_id', $model?->control_system_id) == $cs->id)>{{ $cs->localized_name }}</option>
+                @endforeach
+            </select>
+            <p class="text-xs text-slate-400 mt-1">{{ __('equipment.control_system_hint') }}</p>
+            @error('control_system_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
+        <div class="sm:col-span-2">
+            <label class="form-label">{{ __('equipment.superheat_band_override') }}</label>
+            <div class="flex items-center gap-3">
+                <input type="number" step="0.1" name="superheat_low" value="{{ old('superheat_low', $model?->reading_limits['superheat']['low'] ?? '') }}" placeholder="{{ __('equipment.superheat_low') }}" class="form-input @error('superheat_low') is-invalid @enderror">
+                <span class="text-slate-400">—</span>
+                <input type="number" step="0.1" name="superheat_high" value="{{ old('superheat_high', $model?->reading_limits['superheat']['high'] ?? '') }}" placeholder="{{ __('equipment.superheat_high') }}" class="form-input @error('superheat_high') is-invalid @enderror">
+            </div>
+            <p class="text-xs text-slate-400 mt-1">{{ __('equipment.superheat_band_hint') }}</p>
+            @error('superheat_low')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            @error('superheat_high')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+        </div>
+
         @if($model)
         <div class="flex items-center">
             <label class="relative inline-flex items-center cursor-pointer" dir="ltr">

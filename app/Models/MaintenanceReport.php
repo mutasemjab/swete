@@ -19,6 +19,7 @@ class MaintenanceReport extends Model
         'template_id',
         'template_name',
         'material_id',
+        'equipment_unit_id',
         'customer_id',
         'date',
         'problem',
@@ -29,10 +30,18 @@ class MaintenanceReport extends Model
         'price_quote_id',
         'created_by',
         'visit_id',
+        'content_status',
+        'foreman_note',
+        'foreman_reviewed_by',
+        'foreman_reviewed_at',
+        'approved_by',
+        'approved_at',
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date'                => 'date',
+        'foreman_reviewed_at' => 'datetime',
+        'approved_at'         => 'datetime',
     ];
 
     public function template(): BelongsTo
@@ -43,6 +52,11 @@ class MaintenanceReport extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function equipmentUnit(): BelongsTo
+    {
+        return $this->belongsTo(EquipmentUnit::class, 'equipment_unit_id');
     }
 
     public function customer(): BelongsTo
@@ -83,6 +97,56 @@ class MaintenanceReport extends Model
     public function visit(): BelongsTo
     {
         return $this->belongsTo(MaintenanceVisit::class, 'visit_id');
+    }
+
+    public function foremanReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'foreman_reviewed_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * received -> the foreman corrects and sends it on -> engineer -> the engineer approves ->
+     * approved, permanently locked. Only the terminal lock is new behavior for existing reports —
+     * see canEditContent().
+     */
+    public function sendToEngineer(User $user, ?string $note): void
+    {
+        $this->update([
+            'content_status'      => 'engineer',
+            'foreman_note'        => $note,
+            'foreman_reviewed_by' => $user->id,
+            'foreman_reviewed_at' => now(),
+        ]);
+    }
+
+    public function approveContent(User $user): void
+    {
+        $this->update([
+            'content_status' => 'approved',
+            'approved_by'    => $user->id,
+            'approved_at'    => now(),
+        ]);
+    }
+
+    public function isContentApproved(): bool
+    {
+        return $this->content_status === 'approved';
+    }
+
+    /**
+     * The only NEW restriction the content-approval workflow adds: once a report is actually
+     * approved, it's a permanent record (same ethos as MaintenanceVisit::status=='completed').
+     * Before that, today's existing `maintenance.reports.edit` permission keeps working exactly
+     * as it always has — nothing about editing a 'received' or 'engineer' report changes.
+     */
+    public function canEditContent(User $user): bool
+    {
+        return ! $this->isContentApproved() && $user->can('maintenance.reports.edit');
     }
 
     public static function nextNumber(): string

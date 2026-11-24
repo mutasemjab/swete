@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Maintenance;
 use App\Http\Controllers\Maintenance\Concerns\ManagesMaintenanceReportFields;
 use App\Http\Controllers\ModuleController;
 use App\Models\Customer;
+use App\Models\EquipmentUnit;
 use App\Models\Material;
 use App\Models\MaintenanceReport;
 use App\Models\MaintenanceReportTemplate;
@@ -49,6 +50,7 @@ class ReportController extends ModuleController
         $validated = $request->validate([
             'template_id' => ['required', 'exists:maintenance_report_templates,id'],
             'customer_id' => ['required', 'exists:customers,id'],
+            'equipment_unit_id' => ['nullable', 'exists:equipment_units,id'],
             'date'        => ['required', 'date'],
             'problem'     => ['nullable', 'string'],
             'solution'    => ['nullable', 'string'],
@@ -66,6 +68,7 @@ class ReportController extends ModuleController
             'template_id'   => $template->id,
             'template_name' => $template->name,
             'material_id'   => $template->material_id,
+            'equipment_unit_id' => $validated['equipment_unit_id'] ?? null,
             'customer_id'   => $validated['customer_id'],
             'date'          => $validated['date'],
             'problem'       => $validated['problem'] ?? null,
@@ -83,7 +86,7 @@ class ReportController extends ModuleController
 
     public function show(Request $request, MaintenanceReport $maintenanceReport)
     {
-        $maintenanceReport->load(['customer', 'material', 'template', 'creator', 'fields', 'materials.material', 'materialApprovals.user', 'issueVoucher', 'priceQuote']);
+        $maintenanceReport->load(['customer', 'material', 'equipmentUnit', 'template', 'creator', 'fields', 'materials.material', 'materialApprovals.user', 'issueVoucher', 'priceQuote']);
 
         $backUrl = BackNavigation::url();
 
@@ -92,6 +95,8 @@ class ReportController extends ModuleController
 
     public function edit(Request $request, MaintenanceReport $maintenanceReport)
     {
+        abort_unless($maintenanceReport->canEditContent($request->user()), 403);
+
         $maintenanceReport->load('fields', 'materials.material');
 
         $backUrl = BackNavigation::url([$maintenanceReport], 'maintenance-reports.show');
@@ -107,6 +112,8 @@ class ReportController extends ModuleController
 
     public function update(Request $request, MaintenanceReport $maintenanceReport)
     {
+        abort_unless($maintenanceReport->canEditContent($request->user()), 403);
+
         $validated = $request->validate([
             'customer_id' => ['required', 'exists:customers,id'],
             'date'        => ['required', 'date'],
@@ -173,6 +180,38 @@ class ReportController extends ModuleController
         return back()->with('success', __('maintenance.material_decision_recorded'));
     }
 
+    /** The foreman's step: corrects, optionally leaves a note for the engineer, sends it on. */
+    public function sendToEngineer(Request $request, MaintenanceReport $maintenanceReport)
+    {
+        abort_unless($maintenanceReport->content_status === 'received', 404);
+
+        $validated = $request->validate(['foreman_note' => ['nullable', 'string', 'max:2000']]);
+
+        $maintenanceReport->sendToEngineer($request->user(), $validated['foreman_note'] ?? null);
+
+        return back()->with('success', __('maintenance.report_sent_to_engineer'));
+    }
+
+    /** The engineer's step: approves — locking the report as a permanent, PDF-exportable record. */
+    public function approveContent(Request $request, MaintenanceReport $maintenanceReport)
+    {
+        abort_unless($maintenanceReport->content_status === 'engineer', 404);
+
+        $maintenanceReport->approveContent($request->user());
+
+        return back()->with('success', __('maintenance.report_approved_content'));
+    }
+
+    /** A print-friendly, browser-printable export — only once the report is actually approved. */
+    public function print(MaintenanceReport $maintenanceReport)
+    {
+        abort_unless($maintenanceReport->isContentApproved(), 403);
+
+        $maintenanceReport->load(['customer', 'material', 'template', 'creator', 'fields', 'materials.material', 'approver', 'foremanReviewer']);
+
+        return view('maintenance.reports.print', ['report' => $maintenanceReport]);
+    }
+
     /** Keyword search across every report's "problem" field, to find how a similar issue was solved before. */
     public function search(Request $request)
     {
@@ -209,6 +248,7 @@ class ReportController extends ModuleController
             'customers' => Customer::where('status', true)->orderBy('name')->get(),
             'materials' => Material::confirmed()->where('status', true)->orderBy('name')->get(),
             'materialStock' => $this->materialStock(),
+            'equipmentUnits' => EquipmentUnit::where('is_active', true)->orderBy('name')->get(['id', 'name', 'name_en']),
         ];
     }
 

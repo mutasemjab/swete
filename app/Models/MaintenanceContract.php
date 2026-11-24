@@ -13,10 +13,13 @@ class MaintenanceContract extends Model
 {
     use LogsActivity;
 
+    public const STATUSES = ['draft', 'active', 'suspended', 'terminated'];
+
     protected $fillable = [
         'number',
         'customer_id',
         'path',
+        'status',
         'signed_date',
         'expiry_date',
         'notes',
@@ -46,6 +49,48 @@ class MaintenanceContract extends Model
     public function scheduledVisits(): HasMany
     {
         return $this->hasMany(MaintenanceContractScheduledVisit::class, 'contract_id');
+    }
+
+    public function contractUnits(): HasMany
+    {
+        return $this->hasMany(MaintenanceContractUnit::class, 'contract_id');
+    }
+
+    /** Units currently covered by this contract (not soft-removed). */
+    public function activeUnits()
+    {
+        return $this->contractUnits()->whereNull('removed_at')->with('unit');
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(MaintenanceContractSchedule::class, 'contract_id');
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
+
+    public function isTerminated(): bool
+    {
+        return $this->status === 'terminated';
+    }
+
+    /** Active and not past its own end date — the window auto-generation actually works within. */
+    public function inForce(): bool
+    {
+        return $this->isActive() && ! $this->isExpired();
     }
 
     public function getUrlAttribute(): ?string

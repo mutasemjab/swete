@@ -54,6 +54,8 @@ use App\Http\Controllers\Maintenance\ReportController as MaintenanceReportContro
 use App\Http\Controllers\Maintenance\ContractController as MaintenanceContractController;
 use App\Http\Controllers\Maintenance\ContractPaymentController;
 use App\Http\Controllers\Maintenance\ContractScheduledVisitController;
+use App\Http\Controllers\Maintenance\ContractScheduleController;
+use App\Http\Controllers\Maintenance\CalendarController;
 use App\Http\Controllers\Maintenance\MobileVisitController;
 use App\Http\Controllers\Maintenance\MaintenanceVisitTypeController;
 use App\Http\Controllers\Maintenance\MaintenanceRequestController;
@@ -64,6 +66,12 @@ use App\Http\Controllers\Equipment\EquipmentSubtypeController;
 use App\Http\Controllers\Equipment\EquipmentManufacturerController;
 use App\Http\Controllers\Equipment\EquipmentModelController;
 use App\Http\Controllers\Equipment\EquipmentUnitController;
+use App\Http\Controllers\Equipment\SuperheatController;
+use App\Http\Controllers\Equipment\RefrigerantPtPointController;
+use App\Http\Controllers\Equipment\ControlSystemController;
+use App\Http\Controllers\Equipment\AlarmCodeController;
+use App\Http\Controllers\Documents\DocumentTypeController;
+use App\Http\Controllers\Documents\DocumentController;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\CustomerPortalController;
 use App\Http\Controllers\ExternalPurchases\PurchaseRequestController;
@@ -496,6 +504,9 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('maintenance-reports/{maintenanceReport}/approve-materials', [MaintenanceReportController::class, 'approveMaterials'])->name('maintenance-reports.approve-materials')->middleware('permission:maintenance.reports.approve_materials');
     Route::post('maintenance-reports/{maintenanceReport}/reject-materials', [MaintenanceReportController::class, 'rejectMaterials'])->name('maintenance-reports.reject-materials')->middleware('permission:maintenance.reports.approve_materials');
     Route::post('maintenance-reports/{maintenanceReport}/convert-to-quote', [MaintenanceReportController::class, 'convertToQuote'])->name('maintenance-reports.convert-to-quote')->middleware('permission:maintenance.reports.convert_to_quote');
+    Route::post('maintenance-reports/{maintenanceReport}/send-to-engineer', [MaintenanceReportController::class, 'sendToEngineer'])->name('maintenance-reports.send-to-engineer')->middleware('permission:maintenance.reports.review');
+    Route::post('maintenance-reports/{maintenanceReport}/approve-content', [MaintenanceReportController::class, 'approveContent'])->name('maintenance-reports.approve-content')->middleware('permission:maintenance.reports.approve');
+    Route::get('maintenance-reports/{maintenanceReport}/print', [MaintenanceReportController::class, 'print'])->name('maintenance-reports.print')->middleware('permission:maintenance.view');
 
     // Replaces the old m/maintenance-reports one-shot mobile flow — see MobileVisitController.
     Route::prefix('m/visits')->name('maintenance-visits.mobile.')->middleware('permission:maintenance.reports.create')->group(function () {
@@ -540,8 +551,24 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::delete('maintenance-contracts/{maintenanceContract}/scheduled-visits/{scheduledVisit}', [ContractScheduledVisitController::class, 'destroy'])->name('contract-scheduled-visits.destroy')->middleware('permission:maintenance.contract_scheduled_visits.delete');
     Route::get('contract-scheduled-visits', [ContractScheduledVisitController::class, 'index'])->name('contract-scheduled-visits.index')->middleware('permission:maintenance.view');
 
+    // ── Contract equipment linking + schedules + status actions (auto visit-generation) ──
+    Route::get('maintenance-contracts/{maintenance_contract}/equipment', [MaintenanceContractController::class, 'equipment'])->name('maintenance-contracts.equipment')->middleware('permission:maintenance.contracts.edit');
+    Route::post('maintenance-contracts/{maintenance_contract}/equipment', [MaintenanceContractController::class, 'syncEquipment'])->name('maintenance-contracts.equipment.sync')->middleware('permission:maintenance.contracts.edit');
+    Route::post('maintenance-contracts/{maintenance_contract}/{verb}', [MaintenanceContractController::class, 'action'])
+        ->name('maintenance-contracts.action')->where('verb', 'suspend|terminate|reactivate')->middleware('permission:maintenance.contracts.edit');
+
+    Route::get('maintenance-contracts/{maintenance_contract}/schedules/create', [ContractScheduleController::class, 'create'])->name('maintenance-contract-schedules.create')->middleware('permission:maintenance.contract_schedules.create');
+    Route::post('maintenance-contracts/{maintenance_contract}/schedules', [ContractScheduleController::class, 'store'])->name('maintenance-contract-schedules.store')->middleware('permission:maintenance.contract_schedules.create');
+    Route::get('maintenance-contracts/{maintenance_contract}/schedules/{schedule}/edit', [ContractScheduleController::class, 'edit'])->name('maintenance-contract-schedules.edit')->middleware('permission:maintenance.contract_schedules.edit');
+    Route::put('maintenance-contracts/{maintenance_contract}/schedules/{schedule}', [ContractScheduleController::class, 'update'])->name('maintenance-contract-schedules.update')->middleware('permission:maintenance.contract_schedules.edit');
+    Route::delete('maintenance-contracts/{maintenance_contract}/schedules/{schedule}', [ContractScheduleController::class, 'destroy'])->name('maintenance-contract-schedules.destroy')->middleware('permission:maintenance.contract_schedules.delete');
+
+    Route::get('maintenance-calendar', [CalendarController::class, 'index'])->name('maintenance-calendar.index')->middleware('permission:maintenance.view');
+
     // ── Equipment (Category > Subtype > Manufacturer > Model > Unit) ──────────
-    Route::resource('equipment-units', EquipmentUnitController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['index', 'show'])->middleware('permission:equipment.view');
+    Route::get('equipment-units/{equipment_unit}/qr', [EquipmentUnitController::class, 'qr'])->name('equipment-units.qr')->middleware('permission:equipment.view');
+    Route::get('q/{token}', [EquipmentUnitController::class, 'scan'])->name('equipment-units.scan')->middleware('permission:equipment.view');
     Route::resource('equipment-units', EquipmentUnitController::class)->only(['create', 'store'])->middleware('permission:equipment.units.create');
     Route::resource('equipment-units', EquipmentUnitController::class)->only(['edit', 'update'])->middleware('permission:equipment.units.edit');
     Route::resource('equipment-units', EquipmentUnitController::class)->only(['destroy'])->middleware('permission:equipment.units.delete');
@@ -565,6 +592,37 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::resource('equipment-models', EquipmentModelController::class)->only(['create', 'store'])->middleware('permission:equipment.models.create');
     Route::resource('equipment-models', EquipmentModelController::class)->only(['edit', 'update'])->middleware('permission:equipment.models.edit');
     Route::resource('equipment-models', EquipmentModelController::class)->only(['destroy'])->middleware('permission:equipment.models.delete');
+
+    // ── Reading limits + superheat calculator ──────────────────────────────
+    Route::get('superheat-calculator', [SuperheatController::class, 'index'])->name('superheat-calculator.index')->middleware('permission:equipment.view');
+    Route::get('refrigerant-pt-points', [RefrigerantPtPointController::class, 'index'])->name('refrigerant-pt-points.index')->middleware('permission:equipment.view');
+    Route::post('refrigerant-pt-points', [RefrigerantPtPointController::class, 'store'])->name('refrigerant-pt-points.store')->middleware('permission:equipment.reading_limits.manage');
+    Route::delete('refrigerant-pt-points/{refrigerant_pt_point}', [RefrigerantPtPointController::class, 'destroy'])->name('refrigerant-pt-points.destroy')->middleware('permission:equipment.reading_limits.manage');
+
+    // ── Control systems + Alarm Lookup ─────────────────────────────────────
+    Route::get('alarm-lookup', [AlarmCodeController::class, 'lookup'])->name('alarm-lookup.index')->middleware('permission:equipment.view');
+
+    Route::resource('control-systems', ControlSystemController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('control-systems', ControlSystemController::class)->only(['create', 'store'])->middleware('permission:equipment.control_systems.create');
+    Route::resource('control-systems', ControlSystemController::class)->only(['edit', 'update'])->middleware('permission:equipment.control_systems.edit');
+    Route::resource('control-systems', ControlSystemController::class)->only(['destroy'])->middleware('permission:equipment.control_systems.delete');
+
+    Route::resource('alarm-codes', AlarmCodeController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('alarm-codes', AlarmCodeController::class)->only(['create', 'store'])->middleware('permission:equipment.alarm_codes.create');
+    Route::resource('alarm-codes', AlarmCodeController::class)->only(['edit', 'update'])->middleware('permission:equipment.alarm_codes.edit');
+    Route::resource('alarm-codes', AlarmCodeController::class)->only(['destroy'])->middleware('permission:equipment.alarm_codes.delete');
+
+    // ── Technical Documents (with inheritance across unit/model/subtype/category/manufacturer/all) ──
+    Route::resource('documents', DocumentController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('documents', DocumentController::class)->only(['create', 'store'])->middleware('permission:equipment.documents.upload');
+    Route::resource('documents', DocumentController::class)->only(['edit', 'update'])->middleware('permission:equipment.documents.edit');
+    Route::resource('documents', DocumentController::class)->only(['destroy'])->middleware('permission:equipment.documents.delete');
+    Route::post('documents/{document}/archive', [DocumentController::class, 'archive'])->name('documents.archive')->middleware('permission:equipment.documents.edit');
+
+    Route::resource('document-types', DocumentTypeController::class)->only(['index'])->middleware('permission:equipment.view');
+    Route::resource('document-types', DocumentTypeController::class)->only(['create', 'store'])->middleware('permission:equipment.document_types.create');
+    Route::resource('document-types', DocumentTypeController::class)->only(['edit', 'update'])->middleware('permission:equipment.document_types.edit');
+    Route::resource('document-types', DocumentTypeController::class)->only(['destroy'])->middleware('permission:equipment.document_types.delete');
 
     Route::patch('appointments/{appointment}/toggle-complete', [AppointmentController::class, 'toggleComplete'])->name('appointments.toggle-complete')->middleware('permission:crm.appointments.edit');
     Route::resource('appointments', AppointmentController::class)->only(['index'])->middleware('permission:crm.view');

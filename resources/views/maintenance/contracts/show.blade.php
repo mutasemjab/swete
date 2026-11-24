@@ -12,6 +12,8 @@
     <div>
         <h1 class="page-title flex items-center gap-3">
             {{ $contract->number }}
+            @php($statusColors = ['draft' => 'slate', 'active' => 'emerald', 'suspended' => 'amber', 'terminated' => 'rose'])
+            <span class="badge bg-{{ $statusColors[$contract->status] }}-100 text-{{ $statusColors[$contract->status] }}-700">{{ __('maintenance.contract_status_'.$contract->status) }}</span>
             @if($expiringSoon)
                 <span class="badge bg-amber-100 text-amber-700">{{ __('maintenance.contract_expiring_soon') }}</span>
             @elseif($expired)
@@ -29,6 +31,21 @@
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
         </a>
+        @can('maintenance.contracts.edit')
+        @if($contract->status === 'active')
+            <form action="{{ route('maintenance-contracts.action', [$contract, 'suspend']) }}" method="POST">@csrf
+                <button type="submit" class="btn-secondary"><i class="fa-solid fa-pause"></i> {{ __('maintenance.contract_suspend') }}</button>
+            </form>
+            <form action="{{ route('maintenance-contracts.action', [$contract, 'terminate']) }}" method="POST"
+                  onsubmit="return confirm('{{ __('maintenance.contract_terminate_confirm') }}')">@csrf
+                <button type="submit" class="btn-secondary text-rose-600"><i class="fa-solid fa-ban"></i> {{ __('maintenance.contract_terminate') }}</button>
+            </form>
+        @elseif(in_array($contract->status, ['suspended', 'terminated']))
+            <form action="{{ route('maintenance-contracts.action', [$contract, 'reactivate']) }}" method="POST">@csrf
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-play"></i> {{ __('maintenance.contract_reactivate') }}</button>
+            </form>
+        @endif
+        @endcan
         @include('components.back-link', ['url' => $backUrl])
     </div>
 </div>
@@ -54,6 +71,73 @@
         </div>
         @endif
     </dl>
+</div>
+
+<div class="card overflow-hidden mb-5">
+    <div class="card-header flex items-center justify-between">
+        <h3 class="font-bold text-slate-700">{{ __('maintenance.contract_equipment') }}</h3>
+        @can('maintenance.contracts.edit')
+        <a href="{{ route('maintenance-contracts.equipment', $contract) }}" class="text-sm text-indigo-600 hover:underline font-semibold">
+            <i class="fa-solid fa-pen"></i> {{ __('maintenance.contract_equipment_manage') }}
+        </a>
+        @endcan
+    </div>
+    <div class="px-6 py-5">
+        @forelse($contract->activeUnits as $contractUnit)
+            <span class="badge bg-cyan-100 text-cyan-700 me-2 mb-2">
+                <a href="{{ route('equipment-units.show', $contractUnit->unit) }}" class="hover:underline">{{ $contractUnit->unit?->localized_name }}</a>
+            </span>
+        @empty
+            <p class="text-sm text-slate-400">{{ __('maintenance.contract_equipment_none') }}</p>
+        @endforelse
+    </div>
+</div>
+
+<div class="card overflow-hidden mb-5">
+    <div class="card-header flex items-center justify-between">
+        <h3 class="font-bold text-slate-700">{{ __('maintenance.schedules') }}</h3>
+        @can('maintenance.contract_schedules.create')
+        <a href="{{ route('maintenance-contract-schedules.create', $contract) }}" class="text-sm text-indigo-600 hover:underline font-semibold">
+            <i class="fa-solid fa-plus"></i> {{ __('maintenance.add_schedule') }}
+        </a>
+        @endcan
+    </div>
+    <div class="px-6 py-5">
+        @forelse($contract->schedules->where('is_active', true) as $schedule)
+            <div class="flex items-center justify-between flex-wrap gap-2 py-2.5 border-b border-slate-100 last:border-0">
+                <div class="flex items-center gap-3">
+                    <span class="badge {{ $schedule->scope === 'general' ? 'bg-blue-100 text-blue-700' : 'bg-violet-100 text-violet-700' }}">
+                        {{ $schedule->scope === 'general' ? __('maintenance.schedule_scope_general') : $schedule->unit?->localized_name }}
+                    </span>
+                    <span class="text-sm text-slate-600">
+                        @if($schedule->mode === 'interval')
+                            {{ __('maintenance.schedule_every', ['value' => $schedule->interval_value, 'unit' => __('maintenance.schedule_interval_'.$schedule->interval_unit)]) }}
+                        @else
+                            {{ __('maintenance.schedule_manual_dates') }} ({{ count($schedule->manual_dates ?? []) }})
+                        @endif
+                    </span>
+                    <span class="text-xs text-slate-400" dir="ltr">{{ $schedule->start_date->format('Y-m-d') }} @if($schedule->end_date) → {{ $schedule->end_date->format('Y-m-d') }} @endif</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    @can('maintenance.contract_schedules.edit')
+                    <a href="{{ route('maintenance-contract-schedules.edit', [$contract, $schedule]) }}" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all">
+                        <i class="fa-solid fa-pen text-sm"></i>
+                    </a>
+                    @endcan
+                    @can('maintenance.contract_schedules.delete')
+                    <form action="{{ route('maintenance-contract-schedules.destroy', [$contract, $schedule]) }}" method="POST">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                            <i class="fa-solid fa-trash text-sm"></i>
+                        </button>
+                    </form>
+                    @endcan
+                </div>
+            </div>
+        @empty
+            <p class="text-sm text-slate-400">{{ __('maintenance.no_schedules') }}</p>
+        @endforelse
+    </div>
 </div>
 
 <div class="card overflow-hidden">

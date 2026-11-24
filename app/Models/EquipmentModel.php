@@ -17,12 +17,15 @@ class EquipmentModel extends Model
         'equipment_manufacturer_id',
         'equipment_category_id',
         'equipment_subtype_id',
+        'control_system_id',
         'model_number',
         'status',
+        'reading_limits',
     ];
 
     protected $casts = [
-        'status' => 'boolean',
+        'status'         => 'boolean',
+        'reading_limits' => 'array',
     ];
 
     public function manufacturer(): BelongsTo
@@ -38,6 +41,11 @@ class EquipmentModel extends Model
     public function subtype(): BelongsTo
     {
         return $this->belongsTo(EquipmentSubtype::class, 'equipment_subtype_id');
+    }
+
+    public function controlSystem(): BelongsTo
+    {
+        return $this->belongsTo(ControlSystem::class, 'control_system_id');
     }
 
     public function units(): HasMany

@@ -470,6 +470,29 @@ return [
                     ['label' => 'equipment.nav_models',        'route' => 'equipment-models.index',        'icon' => 'microchip',   'permission' => 'equipment.view'],
                 ],
             ],
+            [
+                'label' => 'equipment.section_documents',
+                'items' => [
+                    ['label' => 'equipment.nav_documents_list', 'route' => 'documents.index',      'icon' => 'file-lines', 'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_documents_add',  'route' => 'documents.create',     'icon' => 'plus',       'permission' => 'equipment.documents.upload'],
+                    ['label' => 'equipment.nav_document_types', 'route' => 'document-types.index', 'icon' => 'tags',       'permission' => 'equipment.view'],
+                ],
+            ],
+            [
+                'label' => 'equipment.section_reading_limits',
+                'items' => [
+                    ['label' => 'equipment.nav_superheat_calculator', 'route' => 'superheat-calculator.index',  'icon' => 'calculator', 'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_pt_points',            'route' => 'refrigerant-pt-points.index', 'icon' => 'table',       'permission' => 'equipment.view'],
+                ],
+            ],
+            [
+                'label' => 'equipment.section_alarms',
+                'items' => [
+                    ['label' => 'equipment.nav_alarm_lookup',     'route' => 'alarm-lookup.index',     'icon' => 'triangle-exclamation', 'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_alarm_codes',      'route' => 'alarm-codes.index',      'icon' => 'list',                 'permission' => 'equipment.view'],
+                    ['label' => 'equipment.nav_control_systems',  'route' => 'control-systems.index',  'icon' => 'microchip',            'permission' => 'equipment.view'],
+                ],
+            ],
         ],
     ],
 
@@ -507,6 +530,7 @@ return [
                 'label' => 'maintenance.section_visits',
                 'items' => [
                     ['label' => 'maintenance.nav_requests_inbox', 'route' => 'maintenance-requests.index',    'icon' => 'bell',  'permission' => 'maintenance.requests.manage'],
+                    ['label' => 'maintenance.nav_calendar',       'route' => 'maintenance-calendar.index',    'icon' => 'calendar-days', 'permission' => 'maintenance.view'],
                     ['label' => 'maintenance.nav_visits_list',    'route' => 'maintenance-visits.index',      'icon' => 'route', 'permission' => 'maintenance.visits.manage'],
                     ['label' => 'maintenance.nav_visit_types',    'route' => 'maintenance-visit-types.index', 'icon' => 'tags',  'permission' => 'maintenance.view'],
                 ],

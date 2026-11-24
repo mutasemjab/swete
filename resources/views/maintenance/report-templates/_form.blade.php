@@ -9,7 +9,9 @@
         )->toJson() }},
         addField() { this.fields.push({ question: '', question_en: '', type: 'text', options: [''] }); },
         removeField(i) { if (this.fields.length > 1) this.fields.splice(i, 1); },
-      }">
+        subjectType: '{{ old('subject_type', $template?->isForCategory() ? 'category' : 'material') }}',
+      }"
+      x-init="$nextTick(() => window.initSelect2())">
 
     <div class="card mb-5">
         <div class="card-header">
@@ -34,14 +36,36 @@
             </div>
 
             <div>
-                <label class="form-label">{{ __('maintenance.template_product') }} <span class="text-rose-500">*</span></label>
-                <select name="material_id" class="js-select2 form-select @error('material_id') is-invalid @enderror">
+                <label class="form-label">{{ __('maintenance.template_subject_type') }} <span class="text-rose-500">*</span></label>
+                <select name="subject_type" x-model="subjectType"
+                        @change="$nextTick(() => { $(document).find('.js-template-subject-select.select2-hidden-accessible').select2('destroy'); window.initSelect2(); })"
+                        class="form-select @error('subject_type') is-invalid @enderror">
+                    <option value="material" @selected(old('subject_type', $template && !$template->isForCategory() ? 'material' : null) == 'material')>{{ __('maintenance.template_subject_material') }}</option>
+                    <option value="category" @selected(old('subject_type', $template?->isForCategory() ? 'category' : null) == 'category')>{{ __('maintenance.template_subject_category_option') }}</option>
+                </select>
+                @error('subject_type')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div x-show="subjectType === 'material'">
+                <label class="form-label">{{ __('maintenance.template_product') }}</label>
+                <select name="material_id" class="js-select2 js-template-subject-select form-select @error('material_id') is-invalid @enderror">
                     <option value="">{{ __('app.select') }}</option>
                     @foreach($materials as $material)
                         <option value="{{ $material->id }}" @selected(old('material_id', $template?->material_id) == $material->id)>{{ $material->localized_name }} ({{ $material->code }})</option>
                     @endforeach
                 </select>
                 @error('material_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
+            </div>
+
+            <div x-show="subjectType === 'category'">
+                <label class="form-label">{{ __('equipment.category') }}</label>
+                <select name="equipment_category_id" class="js-select2 js-template-subject-select form-select @error('equipment_category_id') is-invalid @enderror">
+                    <option value="">{{ __('app.select') }}</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" @selected(old('equipment_category_id', $template?->equipment_category_id) == $category->id)>{{ $category->localized_name }}</option>
+                    @endforeach
+                </select>
+                @error('equipment_category_id')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
             @if($template)

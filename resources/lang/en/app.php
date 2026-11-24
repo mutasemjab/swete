@@ -20,6 +20,8 @@ return [
     'edit'               => 'Edit',
     'delete'             => 'Delete',
     'view'               => 'View',
+    'download'           => 'Download',
+    'print'              => 'Print',
     'save'               => 'Save Changes',
     'cancel'             => 'Cancel',
     'search'             => 'Search',

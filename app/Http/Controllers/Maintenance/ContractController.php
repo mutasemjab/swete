@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Maintenance;
 use App\Http\Controllers\ModuleController;
 use App\Models\Currency;
 use App\Models\Customer;
+use App\Models\EquipmentUnit;
 use App\Models\MaintenanceContract;
+use App\Models\MaintenanceContractUnit;
 use App\Support\BackNavigation;
+use App\Support\ContractVisitSync;
 use App\Support\FileStorage;
 use Illuminate\Http\Request;
 
@@ -62,7 +65,7 @@ class ContractController extends ModuleController
 
     public function show(MaintenanceContract $maintenanceContract)
     {
-        $maintenanceContract->load(['customer', 'creator', 'payments.currency', 'payments.assignee', 'payments.invoice']);
+        $maintenanceContract->load(['customer', 'creator', 'payments.currency', 'payments.assignee', 'payments.invoice', 'activeUnits.unit', 'schedules.unit']);
         $currencies = Currency::where('status', true)->orderBy('name')->get();
         $backUrl = BackNavigation::url();
 
@@ -71,6 +74,74 @@ class ContractController extends ModuleController
             'currencies' => $currencies,
             'backUrl'    => $backUrl,
         ]);
+    }
+
+    /** The customer's equipment units, with checkboxes for which ones this contract currently covers. */
+    public function equipment(MaintenanceContract $maintenanceContract)
+    {
+        $units = EquipmentUnit::where('customer_id', $maintenanceContract->customer_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        $coveredIds = $maintenanceContract->activeUnits()->pluck('equipment_unit_id')->all();
+
+        return $this->moduleView('maintenance.contracts.equipment', [
+            'contract'   => $maintenanceContract,
+            'units'      => $units,
+            'coveredIds' => $coveredIds,
+            'backUrl'    => BackNavigation::url([$maintenanceContract], 'maintenance-contracts.show'),
+        ]);
+    }
+
+    public function syncEquipment(Request $request, MaintenanceContract $maintenanceContract)
+    {
+        $chosenIds = collect($request->input('unit_ids', []))->map(fn ($id) => (int) $id)->all();
+        $currentIds = $maintenanceContract->activeUnits()->pluck('equipment_unit_id')->all();
+
+        $toRemove = array_diff($currentIds, $chosenIds);
+        $toAdd = array_diff($chosenIds, $currentIds);
+
+        if ($toRemove) {
+            MaintenanceContractUnit::where('contract_id', $maintenanceContract->id)
+                ->whereIn('equipment_unit_id', $toRemove)
+                ->whereNull('removed_at')
+                ->update(['removed_at' => now()]);
+        }
+
+        foreach ($toAdd as $unitId) {
+            MaintenanceContractUnit::create([
+                'contract_id'       => $maintenanceContract->id,
+                'equipment_unit_id' => $unitId,
+                'added_at'          => now(),
+            ]);
+        }
+
+        ContractVisitSync::sync($maintenanceContract);
+
+        return redirect()->route('maintenance-contracts.show', $maintenanceContract)
+            ->with('success', __('maintenance.contract_equipment_updated'));
+    }
+
+    /** suspend / terminate / reactivate — the only three transitions a contract's status ever makes. */
+    public function action(MaintenanceContract $maintenanceContract, string $verb)
+    {
+        abort_unless(in_array($verb, ['suspend', 'terminate', 'reactivate'], true), 404);
+
+        $status = match ($verb) {
+            'reactivate' => 'active',
+            'suspend'    => 'suspended',
+            'terminate'  => 'terminated',
+        };
+        $maintenanceContract->update(['status' => $status]);
+
+        if ($verb === 'reactivate') {
+            ContractVisitSync::sync($maintenanceContract);
+        } else {
+            ContractVisitSync::close($maintenanceContract);
+        }
+
+        return redirect()->route('maintenance-contracts.show', $maintenanceContract)
+            ->with('success', __('maintenance.contract_status_'.$verb));
     }
 
     public function edit(MaintenanceContract $maintenanceContract)

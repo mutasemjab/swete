@@ -6,10 +6,40 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h1 class="page-title">{{ $report->number }}</h1>
+        <h1 class="page-title flex items-center gap-3">
+            {{ $report->number }}
+            @php($contentColors = ['received' => 'slate', 'engineer' => 'amber', 'approved' => 'emerald'])
+            <span class="badge bg-{{ $contentColors[$report->content_status] }}-100 text-{{ $contentColors[$report->content_status] }}-700">{{ __('maintenance.content_status_'.$report->content_status) }}</span>
+        </h1>
         <p class="page-subtitle">{{ $report->template_name }}</p>
     </div>
     <div class="flex items-center gap-2">
+        @if($report->isContentApproved())
+            <a href="{{ route('maintenance-reports.print', $report) }}" target="_blank" class="btn-secondary">
+                <i class="fa-solid fa-print"></i>
+                {{ __('maintenance.print_report') }}
+            </a>
+        @endif
+        @if($report->content_status === 'received')
+            @can('maintenance.reports.review')
+            <form action="{{ route('maintenance-reports.send-to-engineer', $report) }}" method="POST" class="flex items-center gap-2" x-data="{ note: '' }">
+                @csrf
+                <input type="text" name="foreman_note" x-model="note" class="form-input !py-2 !text-sm w-44" placeholder="{{ __('maintenance.foreman_note_placeholder') }}">
+                <button type="submit" class="btn-secondary">
+                    <i class="fa-solid fa-arrow-right"></i> {{ __('maintenance.send_to_engineer') }}
+                </button>
+            </form>
+            @endcan
+        @elseif($report->content_status === 'engineer')
+            @can('maintenance.reports.approve')
+            <form action="{{ route('maintenance-reports.approve-content', $report) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-check"></i> {{ __('maintenance.approve_content') }}
+                </button>
+            </form>
+            @endcan
+        @endif
         @if($report->price_quote_id)
             <a href="{{ route('price-quotes.show', $report->price_quote_id) }}" class="btn-secondary">
                 <i class="fa-solid fa-file-invoice"></i>
@@ -24,10 +54,12 @@
                 </button>
             </form>
         @endif
+        @if($report->canEditContent(Auth::user()))
         <a href="{{ route('maintenance-reports.edit', $report) }}" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}
         </a>
+        @endif
         @include('components.back-link', ['url' => $backUrl])
     </div>
 </div>
@@ -46,6 +78,12 @@
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('maintenance.report_date') }}</dt>
             <dd class="font-bold text-slate-800">{{ $report->date->format('Y-m-d') }}</dd>
         </div>
+        @if($report->equipmentUnit)
+        <div>
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('equipment.unit') }}</dt>
+            <dd class="font-bold text-slate-800"><a href="{{ route('equipment-units.show', $report->equipmentUnit) }}" class="hover:text-indigo-600">{{ $report->equipmentUnit->localized_name }}</a></dd>
+        </div>
+        @endif
         @if($report->problem)
         <div class="sm:col-span-3">
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('maintenance.report_problem') }}</dt>
@@ -62,6 +100,17 @@
         <div class="sm:col-span-3">
             <dt class="text-slate-400 font-medium mb-0.5">{{ __('maintenance.report_notes') }}</dt>
             <dd class="text-slate-700">{{ $report->notes }}</dd>
+        </div>
+        @endif
+        @if($report->foreman_note)
+        <div class="sm:col-span-3">
+            <dt class="text-slate-400 font-medium mb-0.5">{{ __('maintenance.foreman_note') }} ({{ $report->foremanReviewer?->name }})</dt>
+            <dd class="text-slate-700">{{ $report->foreman_note }}</dd>
+        </div>
+        @endif
+        @if($report->isContentApproved())
+        <div class="sm:col-span-3 text-xs text-slate-400">
+            {{ __('maintenance.approved_by_on', ['user' => $report->approver?->name, 'date' => $report->approved_at?->format('Y-m-d H:i')]) }}
         </div>
         @endif
     </dl>

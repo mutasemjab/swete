@@ -40,7 +40,8 @@ class EquipmentModelController extends ModuleController
 
         EquipmentModel::create([
             ...$validated,
-            'status' => $request->boolean('status', true),
+            'status'         => $request->boolean('status', true),
+            'reading_limits' => $this->readingLimits($request),
         ]);
 
         return redirect()->route('equipment-models.index')
@@ -60,7 +61,8 @@ class EquipmentModelController extends ModuleController
 
         $equipmentModel->update([
             ...$validated,
-            'status' => $request->boolean('status'),
+            'status'         => $request->boolean('status'),
+            'reading_limits' => $this->readingLimits($request),
         ]);
 
         return redirect()->route('equipment-models.index')
@@ -85,6 +87,7 @@ class EquipmentModelController extends ModuleController
             'manufacturers' => EquipmentManufacturer::where('status', true)->orderBy('name')->get(),
             'categories'    => EquipmentCategory::where('status', true)->orderBy('name')->get(),
             'subtypes'      => EquipmentSubtype::where('status', true)->orderBy('name')->get(['id', 'name', 'name_en', 'equipment_category_id']),
+            'controlSystems' => \App\Models\ControlSystem::where('status', true)->orderBy('name')->get(),
         ];
     }
 
@@ -96,10 +99,23 @@ class EquipmentModelController extends ModuleController
             'equipment_manufacturer_id' => ['required', 'exists:equipment_manufacturers,id'],
             'equipment_category_id'     => ['required', 'exists:equipment_categories,id'],
             'equipment_subtype_id'      => ['nullable', 'exists:equipment_subtypes,id'],
+            'control_system_id'         => ['nullable', 'exists:control_systems,id'],
             'model_number'              => [
                 'required', 'string', 'max:150',
                 "unique:equipment_models,model_number,{$modelId},id,equipment_manufacturer_id,{$request->input('equipment_manufacturer_id')}",
             ],
+            'superheat_low'  => ['nullable', 'numeric'],
+            'superheat_high' => ['nullable', 'numeric', 'gt:superheat_low'],
         ]);
+    }
+
+    /** Packs the optional superheat-band override inputs into the reading_limits JSON column. */
+    private function readingLimits(Request $request): ?array
+    {
+        if (! $request->filled('superheat_low') || ! $request->filled('superheat_high')) {
+            return null;
+        }
+
+        return ['superheat' => ['low' => (float) $request->input('superheat_low'), 'high' => (float) $request->input('superheat_high')]];
     }
 }

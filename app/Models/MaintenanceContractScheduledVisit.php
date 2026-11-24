@@ -12,6 +12,9 @@ class MaintenanceContractScheduledVisit extends Model
 
     protected $fillable = [
         'contract_id',
+        'equipment_unit_id',
+        'schedule_id',
+        'source',
         'scheduled_date',
         'type',
         'notes',
@@ -26,6 +29,27 @@ class MaintenanceContractScheduledVisit extends Model
     public function contract(): BelongsTo
     {
         return $this->belongsTo(MaintenanceContract::class, 'contract_id');
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(EquipmentUnit::class, 'equipment_unit_id');
+    }
+
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(MaintenanceContractSchedule::class, 'schedule_id');
+    }
+
+    public function isGenerated(): bool
+    {
+        return $this->schedule_id !== null;
+    }
+
+    /** Safe to replace/delete during a re-sync — not yet notified about. */
+    public function isUntouched(): bool
+    {
+        return $this->notified_at === null;
     }
 
     /** Due today or already past — what the contract's visits list highlights. */
