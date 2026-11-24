@@ -16,6 +16,8 @@
     @csrf
     @method('PUT')
 
+    <p class="mb-5 rounded-xl bg-amber-50 px-5 py-4 text-sm text-amber-800">{{ __('permissions_ui.role_warning') }}</p>
+
     <div class="card mb-5">
         <div class="card-header">
             <h3 class="font-bold text-slate-700 flex items-center gap-2">
@@ -44,7 +46,7 @@
             @forelse($permissions as $group => $groupPerms)
             <div>
                 <div class="flex items-center gap-3 mb-3">
-                    <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ $group }}</h4>
+                    <h4 class="text-sm font-black text-slate-700">{{ \App\Support\PermissionLabels::group($group) }}</h4>
                     <div class="flex-1 h-px bg-slate-100"></div>
                     <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-500 hover:text-slate-700" x-data>
                         <input type="checkbox"
@@ -59,9 +61,9 @@
                                   hover:border-indigo-300 hover:bg-indigo-50/50 cursor-pointer transition-all
                                   has-[:checked]:border-indigo-400 has-[:checked]:bg-indigo-50">
                         <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
-                               @checked(in_array($permission->name, old('permissions', $rolePermissions)))
+                               @checked(in_array($permission->name, session()->hasOldInput() ? old('permissions', []) : $rolePermissions))
                                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm font-mono text-slate-700">{{ $permission->name }}</span>
+                        @include('settings.permissions._label')
                     </label>
                     @endforeach
                 </div>

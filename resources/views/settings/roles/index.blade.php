@@ -69,7 +69,7 @@
                                 <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
                                     <i class="fa-solid fa-shield-halved text-indigo-600 text-sm"></i>
                                 </div>
-                                <span class="font-mono font-bold text-slate-800">{{ $role->name }}</span>
+                                <span class="font-bold text-slate-800">{{ \App\Support\PermissionLabels::role($role->name) }}</span>
                             </div>
                         </td>
                         <td class="px-5 py-4">

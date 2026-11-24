@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Settings\RoleController;
@@ -105,7 +106,7 @@ Route::get('/lang/{locale}', function (string $locale) {
 |--------------------------------------------------------------------------
 | ERP Application Routes  (authenticated users)
 |--------------------------------------------------------------------------
-| Every route below (other than the dashboard and the generic /approvals
+| Every route below (other than the dashboard, the current user's profile and the generic /approvals
 | inbox, which is authorized per-item inside its own controller — see
 | ApprovalController — not by a module permission) is gated by a
 | spatie/laravel-permission string via the 'permission:' middleware.
@@ -116,6 +117,10 @@ Route::get('/lang/{locale}', function (string $locale) {
 Route::middleware(['auth', 'approval.gate'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Every signed-in user may edit their own account, without user-management permissions.
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Authorized per-row inside the controller (is this approval assigned to me?),
     // not by a module permission — deliberately ungated here.
@@ -142,6 +147,9 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
         Route::resource('roles', RoleController::class)->only(['destroy'])->middleware('permission:settings.roles.delete');
 
         Route::resource('permissions', PermissionController::class)->only(['index'])->middleware('permission:settings.permissions.view');
+        Route::put('permissions/roles/{role}', [PermissionController::class, 'updateRole'])
+            ->name('permissions.roles.update')
+            ->middleware(['permission:settings.permissions.view', 'permission:settings.roles.edit']);
 
         Route::resource('branches', BranchController::class)->only(['index'])->middleware('permission:settings.branches.view');
         Route::resource('branches', BranchController::class)->only(['create', 'store'])->middleware('permission:settings.branches.create');

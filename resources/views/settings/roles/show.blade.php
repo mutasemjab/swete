@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', $role->name)
-@section('breadcrumb', $role->name)
+@section('title', \App\Support\PermissionLabels::role($role->name))
+@section('breadcrumb', \App\Support\PermissionLabels::role($role->name))
 
 @section('content')
 <div class="page-header">
     <div>
-        <h1 class="page-title">{{ $role->name }}</h1>
+        <h1 class="page-title">{{ \App\Support\PermissionLabels::role($role->name) }}</h1>
         <p class="page-subtitle">{{ __('settings.role_info') }}</p>
     </div>
     <div class="flex gap-2">
@@ -24,7 +24,7 @@
         <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-4">
             <i class="fa-solid fa-shield-halved text-indigo-600 text-2xl"></i>
         </div>
-        <h2 class="font-black text-slate-800 text-xl font-mono">{{ $role->name }}</h2>
+        <h2 class="font-black text-slate-800 text-xl">{{ \App\Support\PermissionLabels::role($role->name) }}</h2>
         <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
             <div>
                 <p class="text-2xl font-black text-slate-800">{{ $role->permissions->count() }}</p>
@@ -54,10 +54,10 @@
                 @else
                     @foreach($role->permissions->groupBy(fn($p) => explode('.', $p->name)[0]) as $group => $perms)
                     <div class="mb-4 last:mb-0">
-                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{{ $group }}</p>
+                        <p class="text-sm font-black text-slate-700 mb-2">{{ \App\Support\PermissionLabels::group($group) }}</p>
                         <div class="flex flex-wrap gap-2">
                             @foreach($perms as $perm)
-                            <span class="badge bg-indigo-50 text-indigo-700 font-mono text-[11px]">{{ $perm->name }}</span>
+                            <span class="badge bg-indigo-50 text-indigo-700">{{ \App\Support\PermissionLabels::permission($perm->name) }}</span>
                             @endforeach
                         </div>
                     </div>

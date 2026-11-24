@@ -252,7 +252,7 @@
     {{-- ═══════════════════════════════════════════════════════════
          MAIN CONTENT  (offset by sidebar width using logical padding)
     ════════════════════════════════════════════════════════════════ --}}
-    <div class="flex-1 flex flex-col min-h-screen lg:ps-64 transition-all duration-300">
+    <div class="flex-1 min-w-0 flex flex-col min-h-screen lg:ps-64 transition-all duration-300">
 
         {{-- Top navbar --}}
         <header class="sticky top-0 z-10 h-16 bg-white/95 backdrop-blur border-b border-slate-100
@@ -397,7 +397,7 @@
                             <p class="text-sm font-bold text-slate-800">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr">{{ Auth::user()->email }}</p>
                         </div>
-                        <a href="{{ route('settings.users.show', Auth::id()) }}"
+                        <a href="{{ route('profile.edit') }}"
                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                             <i class="fa-solid fa-user w-4 text-center text-slate-400"></i>
                             {{ __('app.profile') }}

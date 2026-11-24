@@ -104,7 +104,7 @@
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}"
                                 @selected(old('role', $user->roles->first()?->name) === $role->name)>
-                            {{ $role->name }}
+                            {{ \App\Support\PermissionLabels::role($role->name) }}
                         </option>
                     @endforeach
                 </select>
@@ -168,6 +168,11 @@
     @endif
 
     <div class="flex items-center gap-3">
+        @can('settings.permissions.view')
+            <a href="{{ route('settings.permissions.index', ['user' => $user->id]) }}" class="btn-secondary">
+                {{ __('permissions_ui.manage') }}
+            </a>
+        @endcan
         <button type="submit" class="btn-primary">
             <i class="fa-solid fa-floppy-disk"></i>
             {{ __('app.save') }}
