@@ -566,11 +566,12 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::get('maintenance-calendar', [CalendarController::class, 'index'])->name('maintenance-calendar.index')->middleware('permission:maintenance.view');
 
     // ── Equipment (Category > Subtype > Manufacturer > Model > Unit) ──────────
-    Route::resource('equipment-units', EquipmentUnitController::class)->only(['index', 'show'])->middleware('permission:equipment.view');
-    Route::get('equipment-units/{equipment_unit}/qr', [EquipmentUnitController::class, 'qr'])->name('equipment-units.qr')->middleware('permission:equipment.view');
-    Route::get('q/{token}', [EquipmentUnitController::class, 'scan'])->name('equipment-units.scan')->middleware('permission:equipment.view');
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['index'])->middleware('permission:equipment.view');
     Route::resource('equipment-units', EquipmentUnitController::class)->only(['create', 'store'])->middleware('permission:equipment.units.create');
     Route::resource('equipment-units', EquipmentUnitController::class)->only(['edit', 'update'])->middleware('permission:equipment.units.edit');
+    Route::resource('equipment-units', EquipmentUnitController::class)->only(['show'])->middleware('permission:equipment.view');
+    Route::get('equipment-units/{equipment_unit}/qr', [EquipmentUnitController::class, 'qr'])->name('equipment-units.qr')->middleware('permission:equipment.view');
+    Route::get('q/{token}', [EquipmentUnitController::class, 'scan'])->name('equipment-units.scan')->middleware('permission:equipment.view');
     Route::resource('equipment-units', EquipmentUnitController::class)->only(['destroy'])->middleware('permission:equipment.units.delete');
 
     Route::resource('equipment-categories', EquipmentCategoryController::class)->only(['index'])->middleware('permission:equipment.view');
