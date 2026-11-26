@@ -63,7 +63,7 @@ class MaintenanceBackupImportTest extends TestCase
     protected function tearDown(): void
     {
         // Only exact fixture files created by this test; never recursive deletion.
-        foreach (['files/2026/manual.pdf', 'data.json.gz', 'manifest.json'] as $file) {
+        foreach (['files/2026/manual.pdf', 'data.json.gz', 'manifest.json', 'bundle.php'] as $file) {
             if (is_file($this->package.'/'.$file)) unlink($this->package.'/'.$file);
         }
         rmdir($this->package.'/files/2026'); rmdir($this->package.'/files'); rmdir($this->package);
@@ -79,6 +79,69 @@ class MaintenanceBackupImportTest extends TestCase
         $import = new MaintenanceBackupImport();
         $import->load($this->package, $this->mapping);
         return $import;
+    }
+
+    private function embeddedImporter(): MaintenanceBackupImport
+    {
+        $raw = json_encode($this->source, JSON_THROW_ON_ERROR);
+        $this->mapping['source_sha256'] = hash('sha256', $raw);
+        $envelope = ['sha256' => $this->mapping['source_sha256'], 'mapping' => $this->mapping, 'data' => base64_encode(gzencode($raw))];
+        file_put_contents($this->package.'/bundle.php', '<?php return '.var_export($envelope, true).';');
+        $import = new MaintenanceBackupImport();
+        $import->loadEmbedded($this->package.'/bundle.php');
+        return $import;
+    }
+
+    public function test_data_only_import_needs_no_external_files_and_keeps_document_text_in_database(): void
+    {
+        unlink($this->package.'/files/2026/manual.pdf');
+        $import = $this->embeddedImporter();
+        $this->assertTrue($import->preview()['data_only']);
+        $import->apply();
+        $this->assertTrue($import->apply()['already_imported']);
+        $document = \App\Models\Document::first();
+        $this->assertSame('', $document->path);
+        $this->assertNull($document->url);
+        $this->assertFalse($document->can_preview);
+        $this->assertSame(2, $document->assignments()->count());
+        $this->assertSame([['number' => 4, 'text' => 'P123 source setting']], app(\App\Support\MaintenanceDocumentText::class)->pages($document));
+        $this->assertSame(1, DB::table('maintenance_import_records')->where('source_table', 'core_documentpage')->count());
+        $this->assertSame([], Storage::allFiles());
+        $this->assertSame([], Storage::disk('maintenance_private')->allFiles());
+    }
+
+    public function test_pending_document_can_be_uploaded_later_without_losing_assignments_or_using_old_index(): void
+    {
+        $this->embeddedImporter()->apply();
+        $user = User::first();
+        foreach (['maintenance.reports.create', 'equipment.documents.edit'] as $name) {
+            $user->givePermissionTo(\Spatie\Permission\Models\Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']));
+        }
+        $this->actingAs($user);
+        app('url')->forceRootUrl('http://localhost');
+        $document = \App\Models\Document::first();
+        $this->getJson(route('maintenance-visits.mobile.data'))->assertJsonPath('documents.0.file_available', false)->assertJsonPath('documents.0.url', null);
+        $this->get(route('maintenance-visits.mobile.document', $document))->assertNotFound();
+        $pdf = new \Mpdf\Mpdf(['tempDir' => storage_path('app/maintenance-pdf-temp')]);
+        $pdf->WriteHTML('P456 New uploaded manual.');
+        $upload = \Illuminate\Http\UploadedFile::fake()->createWithContent('new.pdf', $pdf->Output('', 'S'));
+        $this->put(route('documents.update', $document), ['document_type_id' => $document->document_type_id,
+            'name' => $document->name, 'language' => 'en', 'level' => 'unit',
+            'equipment_unit_id' => \App\Models\EquipmentUnit::first()->id, 'file' => $upload])->assertRedirect();
+        $this->assertSame(2, $document->assignments()->count());
+        $this->getJson(route('maintenance-visits.mobile.data'))->assertJsonPath('documents.0.file_available', true);
+        $this->get(route('maintenance-visits.mobile.document', $document))->assertOk();
+        $this->getJson(route('maintenance-visits.mobile.document-text', $document))->assertJsonPath('pages.0.text', 'P456 New uploaded manual.');
+    }
+
+    public function test_switching_to_bundled_seed_does_not_erase_files_from_a_completed_full_import(): void
+    {
+        $this->importer()->apply();
+        $path = \App\Models\Document::first()->path;
+        $bytes = Storage::get($path);
+        $this->assertTrue($this->embeddedImporter()->apply()['already_imported']);
+        $this->assertSame($path, \App\Models\Document::first()->path);
+        $this->assertSame($bytes, Storage::get($path));
     }
 
     public function test_import_preserves_customer_identity_and_multiple_manual_links_and_retries_without_duplicates(): void

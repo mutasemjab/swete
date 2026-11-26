@@ -87,7 +87,8 @@ class TechnicianController extends Controller
                 'id' => $d->id, 'name' => $d->localized_name, 'tags' => $d->tags, 'filename' => $d->original_name,
                 'size' => $d->size, 'version' => $d->updated_at->toISOString(),
                 'assignments' => $d->assignments->map(fn ($assignment) => $assignment->only(['level', 'equipment_unit_id', 'equipment_model_id', 'equipment_subtype_id', 'equipment_category_id', 'equipment_manufacturer_id'])),
-                'url' => route('maintenance-visits.mobile.document', $d),
+                'file_available' => (bool) $d->path,
+                'url' => $d->path ? route('maintenance-visits.mobile.document', $d) : null,
             ]),
             'open_visits' => $visits->map(fn ($v) => [
                 'id' => $v->id, 'customer_id' => $v->customer_id, 'contract_id' => $v->contract_id,
@@ -146,7 +147,7 @@ class TechnicianController extends Controller
 
     public function document(Document $document)
     {
-        abort_if($document->is_archived, 404);
+        abort_if($document->is_archived || ! $document->path, 404);
 
         return Storage::response($document->path, $document->original_name, ['Cache-Control' => 'private, no-store']);
     }

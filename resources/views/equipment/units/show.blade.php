@@ -100,10 +100,15 @@
                 @foreach($documents as $document)
                 <div class="py-3 flex items-center justify-between gap-3">
                     <div>
+                        @if($document->path)
                         <a href="{{ $document->url }}" target="_blank" class="font-semibold text-slate-700 hover:text-indigo-600 transition-colors">
                             <i class="fa-solid {{ $document->can_preview ? 'fa-eye' : 'fa-download' }} text-xs text-slate-400"></i>
                             {{ $document->localized_name }}
                         </a>
+                        @else
+                        <span class="font-semibold text-slate-700">{{ $document->localized_name }}</span>
+                        <span class="badge bg-amber-100 text-amber-800">{{ __('maintenance.file_pending_upload') }}</span>
+                        @endif
                         <p class="text-xs text-slate-400">{{ $document->type?->localized_name }} · {{ $document->source_label }}</p>
                     </div>
                 </div>

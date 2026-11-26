@@ -19,9 +19,30 @@ class MaintenanceBackupImport
     private string $directory;
     private string $hash;
     private int $runId;
+    private bool $dataOnly = false;
+
+    /** Repository-owned PHP envelope contains compressed rows and the reviewed mapping, no binaries. */
+    public function loadEmbedded(string $path): void
+    {
+        $bundle = require $path;
+        $compressed = base64_decode($bundle['data'] ?? '', true);
+        $raw = $compressed === false ? false : gzdecode($compressed);
+        if ($raw === false || ! hash_equals($bundle['sha256'] ?? '', hash('sha256', $raw))) {
+            throw new RuntimeException('Bundled maintenance data checksum mismatch.');
+        }
+        $this->hash = $bundle['sha256'];
+        $this->package = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        if ($this->package['version'] !== 1 || $this->package['source'] !== 'hvac') throw new RuntimeException('Unsupported maintenance data.');
+        $this->mapping = $bundle['mapping'];
+        $this->directory = '';
+        $this->dataOnly = true;
+        $this->ids = [];
+        $this->createdFiles = [];
+    }
 
     public function load(string $directory, array $mapping = []): array
     {
+        $this->dataOnly = false;
         $this->directory = rtrim($directory, '/\\');
         $manifest = json_decode(file_get_contents($this->directory.'/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
         $raw = gzdecode(file_get_contents($this->directory.'/data.json.gz'));
@@ -87,7 +108,7 @@ class MaintenanceBackupImport
             if ($this->rows($table)) $blockers[] = $table.' has rows; this package needs a reviewed mapping for that table.';
         }
         return ['sha256' => $this->hash, 'counts' => array_map('count', $this->package['tables']),
-            'files' => count($this->package['files']), 'users' => $this->rows('core_user'),
+            'files' => count($this->package['files']), 'data_only' => $this->dataOnly, 'users' => $this->rows('core_user'),
             'customer_candidates' => $candidates, 'blockers' => $blockers];
     }
 
@@ -121,7 +142,7 @@ class MaintenanceBackupImport
                 // Preserve unrepresented source fields and links without applying old settings,
                 // notifications, financial amounts or permissions to the current application.
                 foreach ($this->package['tables'] as $table => $rows) {
-                    if ($table === 'core_documentpage') continue; // preserved in source package and page cache
+                    if ($table === 'core_documentpage') continue; // stored during document import
                     foreach ($rows as $row) {
                         if (! DB::table('maintenance_import_records')->where('run_id', $this->runId)->where('source_table', $table)->where('source_id', $row['id'])->exists()) {
                             $this->record($table, $row);
@@ -185,7 +206,7 @@ class MaintenanceBackupImport
         foreach ($this->rows('core_document') as $r) {
             $this->put('core_document', $r, 'documents', $this->name($r) + [
                 'document_type_id' => $this->id('core_documenttype', $r['doc_type_id']), 'language' => $r['language'],
-                'revision' => $r['revision'], 'tags' => $r['tags'], 'path' => $this->copyFile($r['file']),
+                'revision' => $r['revision'], 'tags' => $r['tags'], 'path' => $this->dataOnly ? '' : $this->copyFile($r['file']),
                 'original_name' => $r['original_name'], 'content_type' => $r['content_type'], 'size' => (int) $r['size'],
                 'uploaded_by' => $this->id('core_user', $r['uploaded_by_id']), 'is_archived' => $this->bool($r['is_archived']),
                 'created_at' => $this->date($r['uploaded_at']), 'updated_at' => $this->date($r['updated_at']),
@@ -205,7 +226,13 @@ class MaintenanceBackupImport
             $this->put('core_alarmcode', $r, 'alarm_codes', $data, array_intersect_key($data, array_flip(['control_system_id', 'key', 'source_document_id', 'name_en'])));
         }
         $pages = [];
-        foreach ($this->rows('core_documentpage') as $r) $pages[$r['document_id']][] = ['number' => (int) $r['number'], 'text' => $r['text']];
+        foreach ($this->rows('core_documentpage') as $r) {
+            if ($this->dataOnly) {
+                $this->record('core_documentpage', $r, 'documents', $this->id('core_document', $r['document_id']));
+            } else {
+                $pages[$r['document_id']][] = ['number' => (int) $r['number'], 'text' => $r['text']];
+            }
+        }
         foreach ($pages as $sourceId => $rows) {
             usort($rows, fn ($a, $b) => $a['number'] <=> $b['number']);
             $document = Document::findOrFail($this->id('core_document', $sourceId));
@@ -267,7 +294,7 @@ class MaintenanceBackupImport
             $attachments = collect($this->rows('core_attachment'))->filter(fn ($a) => $a['visit_id'] === $visit['id'] || $a['field_report_id'] === $r['id']);
             $pdfs = $attachments->where('kind', 'report')->where('content_type', 'application/pdf');
             if ($pdfs->count() !== 1) throw new RuntimeException('Expected one original PDF for report '.$r['id']);
-            $originalPath = $this->copyFile($pdfs->first()['file'], 'maintenance_private');
+            $originalPath = $this->dataOnly ? null : $this->copyFile($pdfs->first()['file'], 'maintenance_private');
             if (! in_array($r['status'], ['received', 'engineer', 'approved'], true)) throw new RuntimeException('Unknown source report approval state.');
             $reportId = $this->put('core_fieldreport', $r, 'maintenance_reports', [
                 'number' => 'HVAC-'.$visit['number'], 'template_name' => $r['machine_type'],
@@ -299,6 +326,7 @@ class MaintenanceBackupImport
             }
             $photos = [];
             foreach ($attachments->whereIn('kind', ['photo', 'signature']) as $attachment) {
+                if ($this->dataOnly) continue;
                 $path = $this->copyFile($attachment['file']);
                 $photos[] = ['path' => $path, 'caption' => $attachment['original_name']];
                 $fields[] = ['question' => $attachment['original_name'], 'question_en' => $attachment['original_name'],
@@ -308,9 +336,10 @@ class MaintenanceBackupImport
                 DB::table('maintenance_report_fields')->insert($field + ['report_id' => $reportId, 'order' => $index, 'created_at' => now(), 'updated_at' => now()]);
             }
             $snapshot = ['customer_name' => $r['client_name'], 'model' => $r['machine_model'], 'serial' => $r['serial_no'], 'site' => $r['site'],
-                'maintenance_type' => $r['maintenance_type'], 'fields' => $fields, 'photos' => $photos];
+                'maintenance_type' => $r['maintenance_type'], 'fields' => $fields, 'photos' => $photos,
+                'files_deferred' => $this->dataOnly];
             DB::table('maintenance_reports')->where('id', $reportId)->update(['technician_snapshot' => $this->json($snapshot)]);
-            if ($r['status'] === 'approved') {
+            if ($r['status'] === 'approved' && ! $this->dataOnly) {
                 $report = MaintenanceReport::findOrFail($reportId);
                 $path = 'maintenance-approved/import-'.$this->hash.'-'.$r['id'].'.pdf';
                 $this->storeBytes('maintenance_private', $path, app(MaintenanceReportPdf::class)->approved($report));

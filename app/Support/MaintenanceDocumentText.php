@@ -11,6 +11,15 @@ class MaintenanceDocumentText
 {
     public function pages(Document $document): array
     {
+        if (! $document->path) {
+            if (! \Illuminate\Support\Facades\Schema::hasTable('maintenance_import_records')) return [];
+            return \Illuminate\Support\Facades\DB::table('maintenance_import_records')
+                ->where('source_table', 'core_documentpage')->where('target_table', 'documents')->where('target_id', $document->id)
+                ->pluck('payload')->map(function ($payload) {
+                    $row = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+                    return ['number' => (int) $row['number'], 'text' => $row['text']];
+                })->sortBy('number')->values()->all();
+        }
         $key = self::cacheKey($document);
         if (Storage::disk('maintenance_private')->exists($key)) {
             return json_decode(Storage::disk('maintenance_private')->get($key), true, 512, JSON_THROW_ON_ERROR);

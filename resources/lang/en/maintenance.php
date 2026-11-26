@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'file_pending_upload' => 'Awaiting file upload',
+    'report_files_deferred' => 'Report data and approval status were imported. Original PDFs, photos and signature files have not been uploaded.',
     'import_assignment_count' => ':count assignments',
     'import_multiple_scopes' => 'This document has multiple assignments. Metadata can be edited while preserving them; scope changes require reviewing those assignments first.',
     'imported_visits' => 'Imported visit history',

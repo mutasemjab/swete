@@ -4,6 +4,9 @@
 @section('breadcrumb', $report->number)
 
 @section('content')
+@if(data_get($report->technician_snapshot, 'files_deferred') && ! $report->technician_pdf_path)
+<p class="card p-4 mb-4 text-amber-800">{{ __('maintenance.report_files_deferred') }}</p>
+@endif
 <div class="page-header">
     <div>
         <h1 class="page-title flex items-center gap-3">

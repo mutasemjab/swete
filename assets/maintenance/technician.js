@@ -257,11 +257,13 @@ async function renderDocuments() {
     const stored=await all(db,'documents');
     if(tab!=='documents'||current)return;
     main.innerHTML=`<div class="page-title"><div><h1>${t('المانيوالات والكتالوجات','Manuals & catalogues')}</h1><span class="muted">${escape(unit?.name||t('جميع الوثائق','All documents'))}</span></div>${button('all-documents',t('عرض الكل','Show all'))}</div><p class="muted">${t('نزّل الملفات المطلوبة أثناء الاتصال؛ علامة «محفوظ» تعني أنها متاحة بدون إنترنت.','Download the needed files while online. “Saved” means available offline.')}</p><div class="report-grid">${data.documents.filter(d=>reaches(d,unit)).map(d=>{
+        if(d.file_available===false)return `<div class="card"><h3>${escape(d.name)}</h3><p class="muted">${escape(d.filename)}</p><span class="badge orange">${t('بانتظار رفع الملف من الإدارة','Awaiting file upload by staff')}</span></div>`;
         const copy=stored.find(s=>s.id===d.id);const currentCopy=copy?.version===d.version;
         return `<div class="card"><h3>${escape(d.name)}</h3><p class="muted">${escape(d.filename)} · ${Math.round(d.size/1024)} KB</p><span class="badge ${currentCopy?'green':''}">${copy?(currentCopy?t('محفوظ','Saved'):t('يوجد تحديث','Update available')):t('غير منزّل','Not downloaded')}</span><p class="actions">${button('download-document',copy?t('تحديث','Update'):t('تنزيل للأوفلاين','Download offline'),false,`data-id="${d.id}"`)}${copy?button('open-document',t('فتح','Open'),false,`data-id="${d.id}"`):''}</p></div>`;}).join('')}</div>`;
 }
 async function downloadDocument(id) {
     const doc=data.documents.find(d=>d.id===id);
+    if(doc.file_available===false||!doc.url)throw new Error(t('الملف لم يُرفع بعد.','The file has not been uploaded yet.'));
     const response=await fetch(doc.url,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/pdf,application/octet-stream'}});
     if (!response.ok||response.redirected||response.headers.get('Content-Type')?.includes('text/html')) throw new Error(t('تعذّر تنزيل الملف. تأكد من الاتصال وتسجيل الدخول.','Download failed. Check your connection and sign-in.'));
     const saved = {id,version:doc.version,filename:doc.filename,blob:await response.blob(),pages:[]};

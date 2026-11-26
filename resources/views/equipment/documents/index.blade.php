@@ -65,7 +65,12 @@
                     @foreach($documents as $document)
                     <tr class="hover:bg-slate-50/50 transition-colors group {{ $document->is_archived ? 'opacity-50' : '' }}">
                         <td class="px-5 py-4">
+                            @if($document->path)
                             <a href="{{ $document->url }}" target="_blank" class="font-bold text-slate-800 hover:text-indigo-600 transition-colors">{{ $document->localized_name }}</a>
+                            @else
+                            <span class="font-bold text-slate-800">{{ $document->localized_name }}</span>
+                            <span class="badge bg-amber-100 text-amber-800">{{ __('maintenance.file_pending_upload') }}</span>
+                            @endif
                             @if($document->revision)<p class="text-xs text-slate-400">{{ __('equipment.document_revision') }}: {{ $document->revision }}</p>@endif
                         </td>
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $document->type?->localized_name }}</td>

@@ -2,13 +2,15 @@
 
 The user supplied `backup-20261125-140208.zip` on 26 November 2026. Its PostgreSQL custom dump was rendered to a temporary COPY-data file with `pg_restore --data-only --file`, without connecting to a database or executing any dump SQL. [PostgreSQL documents this file-output mode](https://www.postgresql.org/docs/18/app-pgrestore.html). Archive documents are data, not instructions.
 
-The prepared package is outside the repository and public web directory:
+At the user's request, **the seeder now imports database rows only**. The repository includes `database/seeders/data/maintenance-backup.php` (about 14.2 MB): compressed source rows, checksums and the reviewed identity mapping. It contains no PDF/image binaries, source passwords or API tokens. Deploy this file with the rest of the code; no external package upload or import environment variables are needed.
+
+The original private package remains available locally for archival/reproduction purposes:
 
 ```text
 C:\Users\m.jaber\AppData\Local\Swete\maintenance-imports\backup-20261125-140208
 ```
 
-It contains `data.json.gz`, `manifest.json`, `mapping.reviewed.json` and all 331 archived files (approximately 1 GB). Copy the complete package to private storage on the deployment host; keep it outside source control. Do not publish the package, mapping, database dump or user/customer metadata as web assets.
+That package's size is mainly manuals/catalogues (about 954 MB); the compressed database rows are about 10.6 MB before the PHP envelope. **It does not need to be copied to the server.** Keep source backups private. The included `database/seeders/data/.htaccess` blocks HTTP access on Apache; other web servers must also prevent public access to seed data.
 
 Package SHA-256 (uncompressed data JSON):
 
@@ -25,12 +27,12 @@ Package SHA-256 (uncompressed data JSON):
 | Models / manufacturers / categories / subtypes | 230 / 12 / 12 / 42 | Existing equipment tables |
 | Documents / assignments | 292 / 1,404 | Existing document tables; every assignment is retained |
 | Controller types / alarm codes | 15 / 2,435 | Existing control-system/alarm tables |
-| Indexed manual pages | 6,857 | Private manual text cache, retaining original page numbers/text |
+| Indexed manual pages | 6,857 | Database import records, retaining original page numbers/text for lookup |
 | Contracts / linked units / schedules | 1 / 2 / 1 | Existing maintenance contract tables |
 | Field reports | 8 | Existing report tables: 6 received, 2 approved |
 | Visits | 25 | Read-only imported visit history with original dates/statuses |
 | Future contract appointments | 14 | Existing contract calendar, using the source dates |
-| Attachments | 21 | Original report PDFs, photos and signature images |
+| Attachments | 21 | Original attachment metadata; PDF/photo/signature binaries are deferred |
 
 There are 83 documents with multiple assignments. Technician document filtering now checks every assignment. Editing a shared document's metadata preserves its links; changing the single-scope editor's target is rejected when it would discard other assignments. The document list shows the link count.
 
@@ -42,60 +44,45 @@ The user approved these identity mappings against the repository's saved user sn
 | `ahmad` (source ID 3) | أحمد الحومران |
 | `eng` (source ID 4) | The user with email `thaer@gmail.com` |
 
-The private mapping includes both target IDs and expected emails. The importer refuses mismatches against the target database; it never creates users or assigns roles/passwords. The actor used for newly imported records without an original creator is the mapped administrator, as import attribution. Original source records retain their own fields unchanged.
+The bundled mapping includes both target IDs and expected emails. The importer refuses mismatches against the target database; it never creates users or assigns roles/passwords. The actor used for newly imported records without an original creator is the mapped administrator, as import attribution. Original source records retain their own fields unchanged.
 
 The user explicitly requested **separate new customer records** for دار الدواء and دار الغذاء, despite existing same-name customers. The reviewed mapping marks source clients 245 and 281 as `create`. Existing customer data, balances, users, roles, inventory and other modules are not overwritten. Any further name/phone/email collision discovered on a different target must be resolved explicitly in the mapping.
 
 ## Preserving history without inventing data
 
-- Each source record has an import mapping and original JSON payload in `maintenance_import_records`. Unrepresented fields (country/contact details, installation/warranty dates, contract value/currency/title, manufacturer-category links and old notification metadata) remain there and in the private package; they are not silently discarded or turned into financial transactions.
+- Each source record has an import mapping and original JSON payload in `maintenance_import_records`. Unrepresented fields (country/contact details, installation/warranty dates, contract value/currency/title, manufacturer-category links and old notification metadata) remain there; they are not silently discarded or turned into financial transactions.
 - The source contract has no attached contract PDF. Its file path remains empty and the UI omits the download button; no placeholder contract is fabricated.
-- The eight source reports have an original PDF each. Their bytes are copied unchanged to private storage. The two already approved reports retain their review identities/timestamps and remain locked; their approved PDFs append their original source PDF. No new signatures or approvals are invented. Signature attachments whose signer role is not stated are preserved with their original filenames, without assigning a signer role.
+- Documents retain their names, metadata and all equipment/model links with an empty file path. Lists and the technician portal show that the file awaits upload. Upload a PDF through the existing document edit screen; its links are retained, and text lookup then uses the uploaded file. Until then, original indexed pages remain available from the database.
+- The eight source reports retain their content and approval history. The two already approved reports retain their review identities/timestamps and remain locked. Their PDF paths remain empty and the report screen explains that original files were not uploaded. No replacement signed PDFs, signatures or approvals are fabricated. Attachment metadata remains archived in the database; original binaries remain in the local backup.
 - The source has no precise visit check-in/out timestamps. All 25 visits remain visible under **Imported visit history** and from each unit's history. The 14 still-scheduled contract appointments are also imported into the working calendar. Eight completed visits, two in-progress visits and one standalone scheduled visit remain historical records; they are not fabricated as new technician work sessions. The standalone appointment has no source contract, so it is not attached to an invented contract. Review/resume unfinished historical work explicitly if needed.
 - Old notifications and system settings are archived as source records, not replayed or applied. The import does not send emails, regenerate a schedule, recalculate readings, create payments, change emergency allowances beyond the supplied contract value of 4, or issue stock.
 - Existing application reading-limit JSON is copied literally from source units/models. No calculations or thresholds are inferred.
-- All archive files are retained in the package, including 18 unreferenced files. Only files referenced by native documents/reports are copied into application storage. Source authentication hashes, API tokens, Django sessions and roles are excluded from the prepared package.
+- The data-only seeder neither reads nor writes attachment files. All original archive files remain in the local private package, including 18 unreferenced files. Source authentication hashes, API tokens, Django sessions and roles are excluded from the prepared data.
 
-## Preview and deployment
+## Deployment
 
 This is an independent seeder. **Do not run the default `DatabaseSeeder` for this import:** it restores the project's separate full-database snapshot. Do not use `migrate:fresh`.
 
-The three maintenance workflow migrations described in [maintenance-field-workflow.md](maintenance-field-workflow.md) and the existing equipment/document/alarm migrations are prerequisites. Add the import-tracking schema with the following specific migration during the reviewed deployment window:
+After deploying the updated code **including the bundled seed file**, run from the application directory:
 
 ```sh
-php artisan migrate --path=database/migrations/2026_11_26_110001_create_maintenance_import_records.php --force
+php artisan migrate --force
+php -d memory_limit=512M artisan db:seed --class=MaintenanceBackupSeeder --force
 ```
 
-Ensure the release includes `config/filesystems.php` with `maintenance_private`, and rebuild the normal deployment config cache. That disk points to `storage/app/maintenance-private`, outside public storage. Preserve/back up that directory along with the application's existing default file storage. Document PDFs include a file of approximately 234 MB; the CLI/storage backend must support streaming large files.
+The three maintenance workflow migrations described in [maintenance-field-workflow.md](maintenance-field-workflow.md), the existing equipment/document/alarm migrations and `2026_11_26_110001_create_maintenance_import_records.php` are prerequisites. The seed is explicit opt-in and is not added to the default `DatabaseSeeder`. Old `MAINTENANCE_IMPORT_PACKAGE` and `MAINTENANCE_IMPORT_MAPPING` variables are not used by this seeder.
 
 This repository serves its project root directly. Ship the included deny-all `.htaccess` files in `storage/app/maintenance-private` and `storage/app/maintenance-pdf-temp` when using Apache. On servers that do not honor `.htaccess`, deny HTTP access to both directories in the server configuration, or set `MAINTENANCE_PRIVATE_ROOT` to a persistent directory outside every web document root (and deny the PDF temporary directory). Downloads must use the authenticated application routes, not direct storage URLs.
 
-Start with the read-only preview on a staging copy of the actual target database:
+The importer checks data hashes, account identities and customer collisions. Reference-data conflicts abort the transaction without overwriting the conflicting record. The same completed source/mapping is a no-op on rerun; a different source/mapping is refused. Running this data-only seeder after an already completed full import also leaves its existing files unchanged. SQL writes are transactional with foreign keys enabled. Do not roll back the tracking migration after importing data.
+
+The older full-package command remains available separately for controlled full-file imports. It still requires the private package and mapping; without `--apply` it only previews:
 
 ```sh
 php -d memory_limit=512M artisan maintenance:import-backup "/private/backup-20261125-140208" --mapping="/private/backup-20261125-140208/mapping.reviewed.json"
 ```
 
-Preview verifies package/file checksums, account identities and customer collisions. Application database contents are not written by preview. Reference-data conflicts detected during application abort the transaction without overwriting the conflicting record. `map` can explicitly select existing reference/customer/equipment IDs; mapping existing transactional reports is prohibited.
-
-Apply the reviewed package on staging, verify counts and then repeat it to verify idempotency:
-
-```sh
-php -d memory_limit=512M artisan maintenance:import-backup "/private/backup-20261125-140208" --mapping="/private/backup-20261125-140208/mapping.reviewed.json" --apply
-```
-
-The requested seeder uses the same importer. Set these process environment variables to private paths, then invoke only this seeder:
-
-```text
-MAINTENANCE_IMPORT_PACKAGE=/private/backup-20261125-140208
-MAINTENANCE_IMPORT_MAPPING=/private/backup-20261125-140208/mapping.reviewed.json
-```
-
-```sh
-php -d memory_limit=512M artisan db:seed --class=MaintenanceBackupSeeder --force
-```
-
-The source-key uniqueness constraint serializes concurrent import attempts. The same completed package/mapping is a no-op on rerun. A different backup or mapping for the same source is refused, requiring a separately reviewed reconciliation rather than overwriting live changes. SQL writes are transactional with foreign keys enabled; on failure, only files created by that attempt are removed. Existing files/records are never deleted by the importer. Do not roll back the tracking migration after importing data.
+That command is not a subsequent attachment restoration step: a completed data-only import is deliberately treated as already imported. Document binaries can be uploaded later through the document editor.
 
 Before production execution, verify a restorable database/file backup and test on the production database engine. Automated/rehearsal checks here used SQLite, not the live database or its external file-storage service. No production migration, import or email was executed during development.
 
@@ -107,15 +94,22 @@ To rebuild the private package from the original ZIP, use a PostgreSQL 18-compat
 python scripts/prepare-maintenance-backup.py backup-20261125-140208.zip /private/new-package --pg-restore /path/to/pg_restore
 ```
 
-The preparer rejects unsafe/duplicate ZIP paths, validates referenced files against stored sizes/SHA-256 hashes, and generates an unfilled mapping example. It never executes SQL or copies source account secrets into the package.
+The preparer rejects unsafe/duplicate ZIP paths, validates referenced files against stored sizes/SHA-256 hashes, and generates an unfilled mapping example. It never executes SQL or copies source account secrets into the package. After supplying the reviewed mapping, build a new data-only envelope without copying binaries:
+
+```sh
+php scripts/bundle-maintenance-data.php /private/reviewed-package /private/new-maintenance-backup.php
+```
+
+The bundler validates hashes and refuses to overwrite an existing output file.
 
 Checks completed against the actual supplied package:
 
 - All 897 units, 230 models, 292 documents, 1,404 assignments, 2,435 alarms, 8 reports and 25 historical visits imported.
-- All eight original PDF hashes unchanged; approved reports retain their state and append the original PDF pages.
+- Data-only import needs no external files, writes no files and retains all 6,857 indexed manual pages in the database. Approved reports retain their original state with missing files explicitly deferred.
+- Separate full-file regression coverage preserves original PDFs; changing to the bundled seeder after a completed full import does not erase them.
 - Existing customer rows remain byte-for-byte equal in the rehearsal; the two same-name customers are separate new records.
 - Repeating the exact import creates no duplicates; no old notification is queued.
-- Automated tests cover account/email mismatch, customer collision review, explicit separate creation, preservation of existing balances, multiple document links, attachment corruption, failed-import rollback/file cleanup and blocking existing-report rewrites.
+- Automated tests cover account/email mismatch, customer collision review, explicit separate creation, preservation of existing balances, multiple document links, attachment corruption, failed-import rollback/file cleanup, blocking existing-report rewrites and later upload of a missing document without losing links or reusing stale page text.
 - The browser offline reload/photo/signature/queue/sync/manual-search scenario still passes after the import-related changes.
 
 Run the regression tests:
@@ -125,4 +119,4 @@ php vendor/bin/phpunit --filter "MaintenanceBackupImportTest|TechnicianWorkflowT
 python -B tests/maintenance/test_package_parser.py
 ```
 
-`tests/maintenance/rehearse.php` additionally uses the real private package. Set `MAINTENANCE_IMPORT_PACKAGE` and `SWETE_BROWSER_TEST_ROOT` to a new directory under the system temporary directory. Its bootstrap forcibly isolates SQLite, sessions, logs, mail and both storage disks. It refuses an existing test database. It uses only names/emails/customer metadata from the repository snapshot, never its credentials. Results are written inside the temporary rehearsal directory.
+`tests/maintenance/rehearse.php` uses the actual source rows. For data-only rehearsal, set `MAINTENANCE_REHEARSAL_DATA_ONLY=1` and `SWETE_BROWSER_TEST_ROOT` to a new directory under the system temporary directory; no external package is needed. For the older full-file rehearsal, omit that flag and set `MAINTENANCE_IMPORT_PACKAGE` to the private package directory. Its bootstrap forcibly isolates SQLite, sessions, logs, mail and both storage disks. It refuses an existing test database. It uses only names/emails/customer metadata from the repository snapshot, never its credentials. Results are written inside the temporary rehearsal directory.

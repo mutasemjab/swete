@@ -71,6 +71,7 @@ class Document extends Model
 
     public function getCanPreviewAttribute(): bool
     {
+        if (! $this->path) return false;
         $extension = strtolower(pathinfo($this->original_name ?? $this->path, PATHINFO_EXTENSION));
 
         return in_array($extension, self::PREVIEWABLE_EXTENSIONS, true);

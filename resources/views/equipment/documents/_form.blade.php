@@ -62,8 +62,10 @@
         <div class="sm:col-span-2">
             <label class="form-label">{{ __('equipment.document_file') }} @if(!$document)<span class="text-rose-500">*</span>@endif</label>
             <input type="file" name="file" class="form-input @error('file') is-invalid @enderror">
-            @if($document)
+            @if($document?->path)
                 <p class="text-xs text-slate-400 mt-1">{{ __('equipment.document_file_replace_hint') }} — <a href="{{ $document->url }}" target="_blank" class="text-indigo-600 hover:underline">{{ $document->original_name }}</a></p>
+            @elseif($document)
+                <p class="text-sm text-amber-700 mt-1">{{ __('maintenance.file_pending_upload') }} · {{ $document->original_name }}</p>
             @endif
             @error('file')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
         </div>
