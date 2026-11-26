@@ -47,6 +47,7 @@ class ContractController extends ModuleController
             'signed_date'  => ['required', 'date'],
             'expiry_date'  => ['required', 'date', 'after_or_equal:signed_date'],
             'notes'        => ['nullable', 'string'],
+            'emergency_visit_limit' => ['nullable', 'integer', 'min:0', 'max:100000'],
         ]);
 
         MaintenanceContract::create([
@@ -57,6 +58,7 @@ class ContractController extends ModuleController
             'expiry_date' => $validated['expiry_date'],
             'notes'       => $validated['notes'] ?? null,
             'created_by'  => $request->user()->id,
+            ...(\App\Support\MaintenanceFeatures::ready() ? ['emergency_visit_limit' => $validated['emergency_visit_limit'] ?? null] : []),
         ]);
 
         return redirect()->route('maintenance-contracts.index')
@@ -163,6 +165,7 @@ class ContractController extends ModuleController
             'signed_date'  => ['required', 'date'],
             'expiry_date'  => ['required', 'date', 'after_or_equal:signed_date'],
             'notes'        => ['nullable', 'string'],
+            'emergency_visit_limit' => ['nullable', 'integer', 'min:0', 'max:100000'],
         ]);
 
         $path = $maintenanceContract->path;
@@ -178,6 +181,7 @@ class ContractController extends ModuleController
             'signed_date' => $validated['signed_date'],
             'expiry_date' => $validated['expiry_date'],
             'notes'       => $validated['notes'] ?? null,
+            ...(\App\Support\MaintenanceFeatures::ready() ? ['emergency_visit_limit' => $validated['emergency_visit_limit'] ?? null] : []),
         ]);
 
         return redirect()->route('maintenance-contracts.show', [$maintenanceContract, 'back' => $request->input('back')])
@@ -186,6 +190,9 @@ class ContractController extends ModuleController
 
     public function destroy(MaintenanceContract $maintenanceContract)
     {
+        if (\App\Support\MaintenanceFeatures::ready() && \App\Models\MaintenanceVisit::where('contract_id', $maintenanceContract->id)->exists()) {
+            return back()->with('error', __('maintenance.contract_has_visits'));
+        }
         FileStorage::delete($maintenanceContract->path);
 
         $maintenanceContract->delete();

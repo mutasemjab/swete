@@ -17,6 +17,8 @@ class MaintenanceReportField extends Model
         'options',
         'order',
         'answer',
+        'field_key',
+        'section',
     ];
 
     protected $casts = [

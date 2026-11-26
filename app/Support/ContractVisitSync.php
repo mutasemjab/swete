@@ -34,10 +34,11 @@ class ContractVisitSync
             return $general;
         }
 
-        // include_new_units=false means only units explicitly covered by this contract when the
-        // schedule was last saved are included — approximated here as "every currently active
-        // contract unit", since there's no separate opt-in list to track for a V1 scope.
-        return $general;
+        if (! \Illuminate\Support\Facades\Schema::hasTable('maintenance_schedule_units')) {
+            return $general;
+        }
+
+        return $general->coveredUnits->contains('id', $unitId) ? $general : null;
     }
 
     public static function sync(MaintenanceContract $contract): void

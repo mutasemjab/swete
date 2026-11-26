@@ -24,11 +24,13 @@ class MaintenanceContract extends Model
         'expiry_date',
         'notes',
         'created_by',
+        'emergency_visit_limit',
     ];
 
     protected $casts = [
         'signed_date' => 'date',
         'expiry_date' => 'date',
+        'emergency_visit_limit' => 'integer',
     ];
 
     public function customer(): BelongsTo
@@ -65,6 +67,17 @@ class MaintenanceContract extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(MaintenanceContractSchedule::class, 'contract_id');
+    }
+
+    public function emergencyVisits(): HasMany
+    {
+        return $this->hasMany(MaintenanceVisit::class, 'contract_id')->where('kind', 'emergency');
+    }
+
+    public function getEmergencyVisitsRemainingAttribute(): ?int
+    {
+        return $this->emergency_visit_limit === null ? null
+            : max(0, $this->emergency_visit_limit - $this->emergencyVisits()->count());
     }
 
     public function isDraft(): bool

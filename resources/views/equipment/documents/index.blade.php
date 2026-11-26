@@ -71,6 +71,7 @@
                         <td class="px-5 py-4 text-sm text-slate-600">{{ $document->type?->localized_name }}</td>
                         <td class="px-5 py-4 text-sm text-slate-600">
                             {{ $document->assignment?->scopeLabel() }}
+                            @if($document->assignments_count > 1)<span class="badge bg-cyan-100 text-cyan-800">{{ __('maintenance.import_assignment_count', ['count' => $document->assignments_count]) }}</span>@endif
                             @if($document->is_archived)<span class="badge bg-slate-100 text-slate-500 ms-1">{{ __('equipment.archived') }}</span>@endif
                         </td>
                         <td class="px-5 py-4">

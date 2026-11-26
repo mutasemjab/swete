@@ -112,4 +112,17 @@
         @endif
     </div>
 </div>
+@if($history)
+<section class="card p-6 mb-5">
+    <h2 class="font-bold text-lg mb-4">{{ __('maintenance.unit_history') }}</h2>
+    <a class="text-indigo-600" href="{{ route('maintenance-imported-visits.index', ['unit' => $equipmentUnit->id]) }}">{{ __('maintenance.imported_visits') }}</a>
+    <div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead><tr class="text-start text-slate-500"><th class="p-3">{{ __('maintenance.report_date') }}</th><th>{{ __('maintenance.report_number') }}</th><th>{{ __('app.status') }}</th><th>{{ __('maintenance.visit_technician') }}</th></tr></thead>
+        <tbody>@forelse($history as $entry)
+        <tr class="border-t"><td class="p-3">{{ $entry->date->format('Y-m-d') }}</td><td><a class="text-indigo-600" href="{{ route('maintenance-reports.show', $entry) }}">{{ $entry->number }}</a></td><td>{{ __('maintenance.content_status_'.$entry->content_status) }}</td><td>{{ $entry->creator?->name }}</td></tr>
+        @empty<tr><td class="p-5" colspan="4">{{ __('maintenance.unit_no_history') }}</td></tr>@endforelse</tbody>
+    </table></div>
+    {{ $history->links() }}
+</section>
+@endif
 @endsection

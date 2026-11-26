@@ -45,11 +45,16 @@ class Document extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    // Kept 1:1 for now (one target per document) — the table itself supports many,
-    // so this can grow into a hasMany later with no schema change.
+    // The legacy single-scope editor uses the first assignment. Inheritance and the
+    // technician portal use all assignments; editing metadata must preserve them.
     public function assignment(): HasOne
     {
         return $this->hasOne(DocumentAssignment::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(DocumentAssignment::class);
     }
 
     public function getLocalizedNameAttribute(): string

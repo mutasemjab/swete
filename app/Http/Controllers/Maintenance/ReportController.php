@@ -12,6 +12,9 @@ use App\Models\MaintenanceReportTemplate;
 use App\Models\MaterialStock;
 use App\Support\BackNavigation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Support\MaintenanceFeatures;
+use App\Support\MaintenanceReportPdf;
 
 class ReportController extends ModuleController
 {
@@ -157,6 +160,8 @@ class ReportController extends ModuleController
 
     public function destroy(MaintenanceReport $maintenanceReport)
     {
+        abort_if($maintenanceReport->isContentApproved(), 403);
+
         $maintenanceReport->delete();
 
         return redirect()->route('maintenance-reports.index')
@@ -199,6 +204,14 @@ class ReportController extends ModuleController
 
         $maintenanceReport->approveContent($request->user());
 
+        if (MaintenanceFeatures::ready()) {
+            $path = 'maintenance-approved/'.$maintenanceReport->id.'.pdf';
+            if (! Storage::disk('maintenance_private')->put($path, app(MaintenanceReportPdf::class)->approved($maintenanceReport))) {
+                throw new \RuntimeException('Could not save approved PDF.');
+            }
+            $maintenanceReport->update(['approved_pdf_path' => $path]);
+        }
+
         return back()->with('success', __('maintenance.report_approved_content'));
     }
 
@@ -210,6 +223,13 @@ class ReportController extends ModuleController
         $maintenanceReport->load(['customer', 'material', 'template', 'creator', 'fields', 'materials.material', 'approver', 'foremanReviewer']);
 
         return view('maintenance.reports.print', ['report' => $maintenanceReport]);
+    }
+
+    public function pdf(MaintenanceReport $maintenanceReport)
+    {
+        abort_unless($maintenanceReport->isContentApproved() && $maintenanceReport->approved_pdf_path, 404);
+
+        return Storage::disk('maintenance_private')->download($maintenanceReport->approved_pdf_path, $maintenanceReport->number.'.pdf');
     }
 
     /** Keyword search across every report's "problem" field, to find how a similar issue was solved before. */

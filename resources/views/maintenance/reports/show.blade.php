@@ -15,6 +15,9 @@
     </div>
     <div class="flex items-center gap-2">
         @if($report->isContentApproved())
+            @if($report->approved_pdf_path)
+            <a href="{{ route('maintenance-reports.pdf', $report) }}" class="btn-primary">{{ __('maintenance.approved_pdf') }}</a>
+            @endif
             <a href="{{ route('maintenance-reports.print', $report) }}" target="_blank" class="btn-secondary">
                 <i class="fa-solid fa-print"></i>
                 {{ __('maintenance.print_report') }}

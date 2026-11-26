@@ -66,6 +66,7 @@ return [
     'settings.purchase_request_approvers.edit' => 'Edit external purchase request approvers',
     'settings.purchase_request_reminder_recipients.edit' => 'Edit purchase request reminder recipients',
     'settings.maintenance_report_material_approvers.edit' => 'Edit maintenance report material approvers',
+    'settings.maintenance_notifications.edit' => 'Edit maintenance notification recipients',
     'settings.quote_discount_limit.edit' => 'Edit quotation discount limit',
     'accounting.view' => 'Open accounting and view its records',
     'accounting.customers.create' => 'Create customers',

@@ -531,6 +531,8 @@ return [
                 'items' => [
                     ['label' => 'maintenance.nav_requests_inbox', 'route' => 'maintenance-requests.index',    'icon' => 'bell',  'permission' => 'maintenance.requests.manage'],
                     ['label' => 'maintenance.nav_calendar',       'route' => 'maintenance-calendar.index',    'icon' => 'calendar-days', 'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.notifications', 'route' => 'maintenance-notifications.index', 'icon' => 'bell', 'permission' => 'maintenance.view'],
+                    ['label' => 'maintenance.imported_visits', 'route' => 'maintenance-imported-visits.index', 'icon' => 'clock-rotate-left', 'permission' => 'maintenance.view'],
                     ['label' => 'maintenance.nav_visits_list',    'route' => 'maintenance-visits.index',      'icon' => 'route', 'permission' => 'maintenance.visits.manage'],
                     ['label' => 'maintenance.nav_visit_types',    'route' => 'maintenance-visit-types.index', 'icon' => 'tags',  'permission' => 'maintenance.view'],
                 ],
@@ -590,6 +592,7 @@ return [
                     ['label' => 'settings.nav_purchase_request_approvers', 'route' => 'settings.purchase-request-approvers.index', 'icon' => 'user-check', 'permission' => 'settings.purchase_request_approvers.edit'],
                     ['label' => 'settings.nav_purchase_request_reminder_recipients', 'route' => 'settings.purchase-request-reminder-recipients.index', 'icon' => 'bell', 'permission' => 'settings.purchase_request_reminder_recipients.edit'],
                     ['label' => 'settings.nav_maintenance_report_material_approvers', 'route' => 'settings.maintenance-report-material-approvers.index', 'icon' => 'user-check', 'permission' => 'settings.maintenance_report_material_approvers.edit'],
+                    ['label' => 'maintenance.notification_settings', 'route' => 'settings.maintenance-notifications.index', 'icon' => 'bell', 'permission' => 'settings.maintenance_notifications.edit'],
                 ],
             ],
         ],

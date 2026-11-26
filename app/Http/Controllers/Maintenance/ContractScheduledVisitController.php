@@ -42,6 +42,9 @@ class ContractScheduledVisitController extends ModuleController
     public function destroy(MaintenanceContract $maintenanceContract, MaintenanceContractScheduledVisit $scheduledVisit)
     {
         abort_unless($scheduledVisit->contract_id === $maintenanceContract->id, 404);
+        if (\App\Support\MaintenanceFeatures::ready() && $scheduledVisit->actualVisit()->exists()) {
+            return back()->with('error', __('maintenance.scheduled_visit_has_work'));
+        }
 
         $scheduledVisit->delete();
 

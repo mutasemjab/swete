@@ -21,7 +21,7 @@ class DocumentController extends ModuleController
 
     public function index(Request $request)
     {
-        $query = Document::with(['type', 'assignment']);
+        $query = Document::with(['type', 'assignment'])->withCount('assignments');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -87,6 +87,13 @@ class DocumentController extends ModuleController
     public function update(Request $request, Document $document)
     {
         $validated = $this->validated($request, $document);
+        if ($document->assignments()->count() > 1) {
+            $primary = $document->assignment;
+            $column = 'equipment_'.$validated['level'].'_id';
+            if ($primary->level !== $validated['level'] || ($primary->level !== 'all' && (int) $primary->{$column} !== (int) ($validated[$column] ?? 0))) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['level' => __('maintenance.import_multiple_scopes')]);
+            }
+        }
 
         $document->update([
             'document_type_id' => $validated['document_type_id'],
@@ -133,6 +140,7 @@ class DocumentController extends ModuleController
 
     private function syncAssignment(Document $document, array $validated, int $userId): DocumentAssignment
     {
+        if ($document->assignments()->count() > 1) return $document->assignment;
         $document->assignment()->delete();
 
         return $document->assignment()->create([

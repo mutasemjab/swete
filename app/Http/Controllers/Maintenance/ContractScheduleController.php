@@ -6,9 +6,11 @@ use App\Http\Controllers\ModuleController;
 use App\Models\MaintenanceContract;
 use App\Models\MaintenanceContractSchedule;
 use App\Models\User;
-use App\Support\BackNavigation;
 use App\Support\ContractVisitSync;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ContractScheduleController extends ModuleController
 {
@@ -26,19 +28,18 @@ class ContractScheduleController extends ModuleController
     {
         $validated = $this->validated($request, $maintenanceContract);
 
-        if ($validated['scope'] === 'general') {
-            MaintenanceContractSchedule::where('contract_id', $maintenanceContract->id)
-                ->where('scope', 'general')->where('is_active', true)
-                ->update(['is_active' => false]);
-        } else {
-            MaintenanceContractSchedule::where('contract_id', $maintenanceContract->id)
-                ->where('scope', 'unit')->where('equipment_unit_id', $validated['equipment_unit_id'])
-                ->where('is_active', true)->update(['is_active' => false]);
-        }
-
-        MaintenanceContractSchedule::create([...$validated, 'contract_id' => $maintenanceContract->id, 'is_active' => true]);
-
-        ContractVisitSync::sync($maintenanceContract);
+        DB::transaction(function () use ($maintenanceContract, $validated) {
+            MaintenanceContract::whereKey($maintenanceContract->id)->lockForUpdate()->firstOrFail();
+            $previous = MaintenanceContractSchedule::where('contract_id', $maintenanceContract->id)
+                ->where('scope', $validated['scope'])->where('is_active', true);
+            if ($validated['scope'] === 'unit') {
+                $previous->where('equipment_unit_id', $validated['equipment_unit_id']);
+            }
+            $previous->update(['is_active' => false]);
+            $schedule = MaintenanceContractSchedule::create([...$validated, 'contract_id' => $maintenanceContract->id, 'is_active' => true]);
+            $this->captureCoverage($schedule, $maintenanceContract);
+            ContractVisitSync::sync($maintenanceContract);
+        });
 
         return redirect()->route('maintenance-contracts.show', $maintenanceContract)
             ->with('success', __('maintenance.schedule_added'));
@@ -46,6 +47,7 @@ class ContractScheduleController extends ModuleController
 
     public function edit(MaintenanceContract $maintenanceContract, MaintenanceContractSchedule $schedule)
     {
+        abort_unless($schedule->contract_id === $maintenanceContract->id, 404);
         return $this->moduleView('maintenance.contracts.schedules.edit', [
             'contract' => $maintenanceContract,
             'schedule' => $schedule,
@@ -54,11 +56,20 @@ class ContractScheduleController extends ModuleController
 
     public function update(Request $request, MaintenanceContract $maintenanceContract, MaintenanceContractSchedule $schedule)
     {
+        abort_unless($schedule->contract_id === $maintenanceContract->id, 404);
         $validated = $this->validated($request, $maintenanceContract, $schedule);
 
-        $schedule->update($validated);
-
-        ContractVisitSync::sync($maintenanceContract);
+        DB::transaction(function () use ($schedule, $maintenanceContract, $validated) {
+            MaintenanceContract::whereKey($maintenanceContract->id)->lockForUpdate()->firstOrFail();
+            $schedule->refresh();
+            $previouslyIncludedNewUnits = $schedule->include_new_units;
+            $previousScope = $schedule->scope;
+            $schedule->update($validated);
+            if (($previouslyIncludedNewUnits || $previousScope !== 'general') && ! $schedule->include_new_units) {
+                $this->captureCoverage($schedule, $maintenanceContract);
+            }
+            ContractVisitSync::sync($maintenanceContract);
+        });
 
         return redirect()->route('maintenance-contracts.show', $maintenanceContract)
             ->with('success', __('maintenance.schedule_updated'));
@@ -66,11 +77,14 @@ class ContractScheduleController extends ModuleController
 
     public function destroy(MaintenanceContract $maintenanceContract, MaintenanceContractSchedule $schedule)
     {
+        abort_unless($schedule->contract_id === $maintenanceContract->id, 404);
         // Deactivate, never hard-delete — generated visits still reference it; re-sync clears
         // its untouched future visits and "history was kept" for anything already notified.
-        $schedule->update(['is_active' => false]);
-
-        ContractVisitSync::sync($maintenanceContract);
+        DB::transaction(function () use ($schedule, $maintenanceContract) {
+            MaintenanceContract::whereKey($maintenanceContract->id)->lockForUpdate()->firstOrFail();
+            $schedule->update(['is_active' => false]);
+            ContractVisitSync::sync($maintenanceContract);
+        });
 
         return redirect()->route('maintenance-contracts.show', $maintenanceContract)
             ->with('success', __('maintenance.schedule_deleted'));
@@ -84,11 +98,18 @@ class ContractScheduleController extends ModuleController
         ];
     }
 
+    private function captureCoverage(MaintenanceContractSchedule $schedule, MaintenanceContract $contract): void
+    {
+        if ($schedule->scope === 'general' && ! $schedule->include_new_units && Schema::hasTable('maintenance_schedule_units')) {
+            $schedule->coveredUnits()->sync($contract->activeUnits()->pluck('equipment_unit_id'));
+        }
+    }
+
     private function validated(Request $request, MaintenanceContract $contract, ?MaintenanceContractSchedule $schedule = null): array
     {
         $rules = [
             'scope'              => ['required', 'in:'.implode(',', MaintenanceContractSchedule::SCOPES)],
-            'equipment_unit_id'  => ['required_if:scope,unit', 'nullable', 'exists:equipment_units,id'],
+            'equipment_unit_id'  => ['required_if:scope,unit', 'nullable', Rule::in($contract->activeUnits()->pluck('equipment_unit_id')->all())],
             'mode'               => ['required', 'in:'.implode(',', MaintenanceContractSchedule::MODES)],
             'interval_value'     => ['required_if:mode,interval', 'nullable', 'integer', 'min:1', 'max:60'],
             'interval_unit'      => ['required_if:mode,interval', 'nullable', 'in:'.implode(',', MaintenanceContractSchedule::INTERVAL_UNITS)],
@@ -108,6 +129,7 @@ class ContractScheduleController extends ModuleController
                 ->map(fn ($d) => trim($d))->filter()->values()->all()
             : null;
         unset($validated['manual_dates_text']);
+        validator(['dates' => $validated['manual_dates']], ['dates.*' => ['date_format:Y-m-d']])->validate();
 
         $validated['include_new_units'] = $request->boolean('include_new_units', true);
 

@@ -26,8 +26,11 @@ class EquipmentUnitController extends ModuleController
         $equipmentUnit->load(['customer', 'category', 'subtype', 'model.manufacturer', 'creator']);
         $documents = DocumentInheritance::forUnit($equipmentUnit);
         $suggestedTemplate = ReportTemplateResolver::forUnit($equipmentUnit);
+        $history = auth()->user()->can('maintenance.view')
+            ? $equipmentUnit->maintenanceReports()->with(['visit', 'creator'])->orderByDesc('date')->orderByDesc('id')->paginate(20, ['*'], 'history_page')
+            : null;
 
-        return $this->moduleView('equipment.units.show', compact('equipmentUnit', 'documents', 'suggestedTemplate'));
+        return $this->moduleView('equipment.units.show', compact('equipmentUnit', 'documents', 'suggestedTemplate', 'history'));
     }
 
     /** The scannable SVG image itself, encoding the URL a phone's camera should open. */

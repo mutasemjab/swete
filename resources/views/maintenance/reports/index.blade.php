@@ -98,15 +98,21 @@
                                    class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="{{ __('app.view') }}">
                                     <i class="fa-solid fa-eye text-sm"></i>
                                 </a>
+                                @if($report->canEditContent(Auth::user()))
                                 <a href="{{ route('maintenance-reports.edit', $report) }}"
                                    class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="{{ __('app.edit') }}">
                                     <i class="fa-solid fa-pen text-sm"></i>
                                 </a>
+                                @endif
+                                @if(! $report->isContentApproved())
+                                @can('maintenance.reports.delete')
                                 <button type="button" title="{{ __('app.delete') }}"
                                         @click="$dispatch('delete-confirm', { action: '{{ route('maintenance-reports.destroy', $report) }}', message: '{{ __('app.delete_confirm_msg') }}' })"
                                         class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
                                     <i class="fa-solid fa-trash text-sm"></i>
                                 </button>
+                                @endcan
+                                @endif
                             </div>
                         </td>
                     </tr>

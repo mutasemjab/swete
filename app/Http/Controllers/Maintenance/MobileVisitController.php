@@ -141,6 +141,7 @@ class MobileVisitController extends Controller
     {
         abort_unless($maintenanceVisit->created_by === $request->user()->id && $maintenanceVisit->isOpen(), 403);
         abort_unless($maintenanceReport->visit_id === $maintenanceVisit->id, 404);
+        abort_if($maintenanceReport->isContentApproved(), 403);
 
         $validated = $request->validate([
             'field_id'    => ['required', 'exists:maintenance_report_fields,id'],
@@ -177,6 +178,7 @@ class MobileVisitController extends Controller
     {
         abort_unless($maintenanceVisit->created_by === $request->user()->id && $maintenanceVisit->isOpen(), 403);
         abort_unless($maintenanceReport->visit_id === $maintenanceVisit->id, 404);
+        abort_if($maintenanceReport->isContentApproved(), 403);
 
         $validated = $request->validate([
             'problem'  => ['nullable', 'string'],
@@ -193,6 +195,7 @@ class MobileVisitController extends Controller
     {
         abort_unless($maintenanceVisit->created_by === $request->user()->id && $maintenanceVisit->isOpen(), 403);
         abort_unless($maintenanceReport->visit_id === $maintenanceVisit->id, 404);
+        abort_if($maintenanceReport->isContentApproved(), 403);
 
         $validated = $request->validate([
             'materials'                => ['nullable', 'array'],

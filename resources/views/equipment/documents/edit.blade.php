@@ -14,6 +14,7 @@
 </div>
 
 <form action="{{ route('documents.update', $document) }}" method="POST" enctype="multipart/form-data">
+    @if($document->assignments()->count() > 1)<p class="card p-4 mb-4">{{ __('maintenance.import_multiple_scopes') }}</p>@endif
     @csrf
     @method('PUT')
     @include('equipment.documents._form', ['document' => $document])

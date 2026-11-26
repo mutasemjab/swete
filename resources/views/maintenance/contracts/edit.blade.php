@@ -54,6 +54,7 @@
                 @error('expiry_date')<p class="form-error"><i class="fa-solid fa-circle-exclamation"></i>{{ $message }}</p>@enderror
             </div>
 
+            @include('maintenance.contracts._emergency-limit')
             <div class="sm:col-span-2">
                 <label class="form-label">{{ __('maintenance.contract_notes') }}</label>
                 <textarea name="notes" rows="2" class="form-input @error('notes') is-invalid @enderror">{{ old('notes', $contract->notes) }}</textarea>

@@ -122,12 +122,15 @@ Route::get('/lang/{locale}', function (string $locale) {
 | section/action must add its permission string to PermissionSeeder AND
 | wire it here + on its config/modules.php nav item, in the same task.
 */
-Route::middleware(['auth', 'approval.gate'])->group(function () {
+Route::middleware(['auth', 'approval.gate', \App\Http\Middleware\LockMaintenanceReportContent::class])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Every signed-in user may edit their own account, without user-management permissions.
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('maintenance-notifications', [\App\Http\Controllers\Settings\MaintenanceNotificationController::class, 'inbox'])->name('maintenance-notifications.index');
+    Route::get('maintenance-imported-visits', [\App\Http\Controllers\Maintenance\ImportedVisitController::class, 'index'])->name('maintenance-imported-visits.index')->middleware('permission:maintenance.view');
+    Route::post('maintenance-notifications/{notification}/read', [\App\Http\Controllers\Settings\MaintenanceNotificationController::class, 'read'])->name('maintenance-notifications.read');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Authorized per-row inside the controller (is this approval assigned to me?),
@@ -139,6 +142,8 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('maintenance-notifications', [\App\Http\Controllers\Settings\MaintenanceNotificationController::class, 'index'])->name('maintenance-notifications.index')->middleware('permission:settings.maintenance_notifications.edit');
+        Route::put('maintenance-notifications', [\App\Http\Controllers\Settings\MaintenanceNotificationController::class, 'update'])->name('maintenance-notifications.update')->middleware('permission:settings.maintenance_notifications.edit');
 
         // NOTE: the 'create' subset is always registered before 'index'+'show' for any resource
         // that has both — otherwise the show route's `{id}` wildcard (same segment count as the
@@ -507,12 +512,20 @@ Route::middleware(['auth', 'approval.gate'])->group(function () {
     Route::post('maintenance-reports/{maintenanceReport}/send-to-engineer', [MaintenanceReportController::class, 'sendToEngineer'])->name('maintenance-reports.send-to-engineer')->middleware('permission:maintenance.reports.review');
     Route::post('maintenance-reports/{maintenanceReport}/approve-content', [MaintenanceReportController::class, 'approveContent'])->name('maintenance-reports.approve-content')->middleware('permission:maintenance.reports.approve');
     Route::get('maintenance-reports/{maintenanceReport}/print', [MaintenanceReportController::class, 'print'])->name('maintenance-reports.print')->middleware('permission:maintenance.view');
+    Route::get('maintenance-reports/{maintenanceReport}/pdf', [MaintenanceReportController::class, 'pdf'])->name('maintenance-reports.pdf')->middleware('permission:maintenance.view');
 
     // Replaces the old m/maintenance-reports one-shot mobile flow — see MobileVisitController.
     Route::prefix('m/visits')->name('maintenance-visits.mobile.')->middleware('permission:maintenance.reports.create')->group(function () {
-        Route::get('create', [MobileVisitController::class, 'create'])->name('create');
+        Route::get('worker.js', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'worker'])->name('worker');
+        Route::get('offline-data', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'data'])->name('data');
+        Route::get('alarms-data', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'alarms'])->name('alarms');
+        Route::post('sync', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'submit'])->name('sync');
+        Route::get('documents/{document}', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'document'])->name('document');
+        Route::get('documents/{document}/text', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'documentText'])->name('document-text');
+        Route::get('signed-pdf/{maintenanceReport}', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'signedPdf'])->name('signed-pdf');
+        Route::get('create', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'index'])->name('create');
         Route::post('/', [MobileVisitController::class, 'store'])->name('store');
-        Route::get('{maintenanceVisit}', [MobileVisitController::class, 'show'])->name('show');
+        Route::get('{maintenanceVisit}', [\App\Http\Controllers\Maintenance\TechnicianController::class, 'index'])->name('show')->whereNumber('maintenanceVisit');
         Route::post('{maintenanceVisit}/reports', [MobileVisitController::class, 'storeReport'])->name('reports.store');
         Route::patch('{maintenanceVisit}/reports/{maintenanceReport}', [MobileVisitController::class, 'updateReport'])->name('reports.update');
         Route::patch('{maintenanceVisit}/reports/{maintenanceReport}/answer', [MobileVisitController::class, 'updateAnswer'])->name('reports.answer');

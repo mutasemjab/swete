@@ -66,6 +66,7 @@ return [
     'settings.purchase_request_approvers.edit' => 'تعديل المسؤولين عن الموافقة على الطلبات الخارجية',
     'settings.purchase_request_reminder_recipients.edit' => 'تعديل مستلمي تذكيرات طلبات الشراء',
     'settings.maintenance_report_material_approvers.edit' => 'تعديل المسؤولين عن اعتماد مواد تقارير الصيانة',
+    'settings.maintenance_notifications.edit' => 'تعديل مستلمي تنبيهات الصيانة',
     'settings.quote_discount_limit.edit' => 'تعديل الحد الأعلى لخصم عروض الأسعار',
     'accounting.view' => 'فتح المحاسبة وعرض سجلاتها',
     'accounting.customers.create' => 'إضافة العملاء',

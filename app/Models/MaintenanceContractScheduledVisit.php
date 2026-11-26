@@ -41,6 +41,11 @@ class MaintenanceContractScheduledVisit extends Model
         return $this->belongsTo(MaintenanceContractSchedule::class, 'schedule_id');
     }
 
+    public function actualVisit()
+    {
+        return $this->hasOne(MaintenanceVisit::class, 'scheduled_visit_id');
+    }
+
     public function isGenerated(): bool
     {
         return $this->schedule_id !== null;
@@ -49,7 +54,8 @@ class MaintenanceContractScheduledVisit extends Model
     /** Safe to replace/delete during a re-sync — not yet notified about. */
     public function isUntouched(): bool
     {
-        return $this->notified_at === null;
+        return $this->notified_at === null
+            && (! \App\Support\MaintenanceFeatures::ready() || ! $this->actualVisit()->exists());
     }
 
     /** Due today or already past — what the contract's visits list highlights. */

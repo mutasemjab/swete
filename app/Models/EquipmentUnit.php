@@ -69,6 +69,11 @@ class EquipmentUnit extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function maintenanceReports()
+    {
+        return $this->hasMany(MaintenanceReport::class, 'equipment_unit_id');
+    }
+
     public function reportTemplate(): BelongsTo
     {
         return $this->belongsTo(MaintenanceReportTemplate::class, 'report_template_id');

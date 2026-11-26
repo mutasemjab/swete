@@ -52,6 +52,11 @@ class MaintenanceContractSchedule extends Model
         return $this->belongsTo(EquipmentUnit::class, 'equipment_unit_id');
     }
 
+    public function coveredUnits()
+    {
+        return $this->belongsToMany(EquipmentUnit::class, 'maintenance_schedule_units', 'schedule_id', 'equipment_unit_id');
+    }
+
     public function engineer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'engineer_id');
@@ -71,6 +76,9 @@ class MaintenanceContractSchedule extends Model
         $contract = $this->contract;
         $windowStart = $contract->signed_date->copy()->max($this->start_date);
         $windowEnd = $this->end_date ? $this->end_date->copy()->min($contract->expiry_date) : $contract->expiry_date;
+        if ($windowEnd->lessThan($windowStart)) {
+            return [];
+        }
 
         if ($this->mode === 'manual') {
             return collect($this->manual_dates ?? [])

@@ -30,6 +30,12 @@ return [
 
     'disks' => [
 
+        'maintenance_private' => [
+            'driver' => 'local',
+            'root' => env('MAINTENANCE_PRIVATE_ROOT', storage_path('app/maintenance-private')),
+            'throw' => false,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

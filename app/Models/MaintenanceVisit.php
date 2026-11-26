@@ -32,6 +32,11 @@ class MaintenanceVisit extends Model
         'signed_at',
         'signature_path',
         'closed_at',
+        'client_uuid',
+        'submission_hash',
+        'contract_id',
+        'scheduled_visit_id',
+        'kind',
     ];
 
     protected $casts = [
@@ -44,6 +49,11 @@ class MaintenanceVisit extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function contract(): BelongsTo
+    {
+        return $this->belongsTo(MaintenanceContract::class, 'contract_id');
     }
 
     public function technician(): BelongsTo

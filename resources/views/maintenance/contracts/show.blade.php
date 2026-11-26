@@ -4,6 +4,16 @@
 @section('breadcrumb', $contract->number)
 
 @section('content')
+@if(\App\Support\MaintenanceFeatures::ready())
+<div class="card p-5 mb-5">
+    <strong>{{ __('maintenance.emergency_visit_limit') }}: {{ $contract->emergency_visit_limit ?? '—' }}</strong>
+    <span class="mx-4">{{ __('maintenance.emergency_used') }}: {{ $contract->emergencyVisits()->count() }}</span>
+    <span>{{ __('maintenance.emergency_remaining') }}: {{ $contract->emergency_visits_remaining ?? '—' }}</span>
+    @if($contract->emergency_visit_limit !== null && $contract->emergencyVisits()->count() >= $contract->emergency_visit_limit)
+    <p class="text-rose-600 mt-2">{{ __('maintenance.emergency_exhausted') }}</p>
+    @endif
+</div>
+@endif
 @php
     $expiringSoon = $contract->isExpiringSoon();
     $expired      = $contract->isExpired();
@@ -23,10 +33,12 @@
         <p class="page-subtitle">{{ $contract->customer?->localized_name }}</p>
     </div>
     <div class="flex items-center gap-2">
+        @if($contract->path)
         <a href="{{ $contract->url }}" target="_blank" rel="noopener" class="btn-secondary">
             <i class="fa-solid fa-file-pdf"></i>
             {{ __('maintenance.view_contract_file') }}
         </a>
+        @endif
         <a href="{{ route('maintenance-contracts.edit', $contract) }}" class="btn-secondary">
             <i class="fa-solid fa-pen"></i>
             {{ __('app.edit') }}

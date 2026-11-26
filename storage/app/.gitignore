@@ -1,3 +1,5 @@
 *
 !public/
+!maintenance-private/
+!maintenance-pdf-temp/
 !.gitignore

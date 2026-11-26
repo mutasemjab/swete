@@ -36,12 +36,17 @@ class MaintenanceReport extends Model
         'foreman_reviewed_at',
         'approved_by',
         'approved_at',
+        'client_uuid',
+        'technician_snapshot',
+        'technician_pdf_path',
+        'approved_pdf_path',
     ];
 
     protected $casts = [
         'date'                => 'date',
         'foreman_reviewed_at' => 'datetime',
         'approved_at'         => 'datetime',
+        'technician_snapshot' => 'array',
     ];
 
     public function template(): BelongsTo
