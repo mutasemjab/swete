@@ -223,7 +223,8 @@ class MaintenanceBackupImport
         foreach ($this->rows('core_alarmcode') as $r) {
             $data = array_intersect_key($r, array_flip(['code', 'key', 'section', 'name_en', 'name_ar', 'causes_en', 'causes_ar', 'checks_en', 'checks_ar', 'effect_en', 'effect_ar', 'action_en', 'action_ar', 'reset_en', 'reset_ar', 'source_page']));
             $data += ['control_system_id' => $this->id('core_controller', $r['controller_id']), 'source_document_id' => $this->id('core_document', $r['source_document_id'])];
-            $this->put('core_alarmcode', $r, 'alarm_codes', $data, array_intersect_key($data, array_flip(['control_system_id', 'key', 'source_document_id', 'name_en'])));
+            // Manuals reuse a code/name for different equipment sections and pages.
+            $this->put('core_alarmcode', $r, 'alarm_codes', $data, array_intersect_key($data, array_flip(['control_system_id', 'key', 'source_document_id', 'name_en', 'section', 'source_page'])));
         }
         $pages = [];
         foreach ($this->rows('core_documentpage') as $r) {

@@ -2,10 +2,16 @@
 
 // Integration rehearsal only: the shared bootstrap enforces a fresh database/storage under TEMP.
 $app = require __DIR__.'/../browser/bootstrap.php';
-$path = config('database.connections.sqlite.database');
-if (file_exists($path)) throw new RuntimeException('Use a new SWETE_BROWSER_TEST_ROOT for each rehearsal.');
-touch($path);
-\Illuminate\Support\Facades\Artisan::call('migrate', ['--database' => 'sqlite', '--force' => true]);
+$connection = 'sqlite';
+if (getenv('MAINTENANCE_REHEARSAL_MYSQL_PORT')) {
+    // Opt-in only: verifies the server's actual datadir is this rehearsal's TEMP directory.
+    require __DIR__.'/mysql-bootstrap.php';
+} else {
+    $path = config('database.connections.sqlite.database');
+    if (file_exists($path)) throw new RuntimeException('Use a new SWETE_BROWSER_TEST_ROOT for each rehearsal.');
+    touch($path);
+}
+\Illuminate\Support\Facades\Artisan::call('migrate', ['--database' => $connection, '--force' => true]);
 $package = getenv('MAINTENANCE_IMPORT_PACKAGE');
 $dataOnly = getenv('MAINTENANCE_REHEARSAL_DATA_ONLY') === '1';
 if (! $package && ! $dataOnly) throw new RuntimeException('MAINTENANCE_IMPORT_PACKAGE is required for full-file rehearsal.');
@@ -41,6 +47,15 @@ $second = $import->apply();
 if (! $second['already_imported']) throw new RuntimeException('Second import was not idempotent.');
 if ($before !== \Illuminate\Support\Facades\DB::table('customers')->whereIn('id', $customerIds)->orderBy('id')->get()->toJson()) throw new RuntimeException('Existing customers changed.');
 $source = json_decode(gzdecode($dataOnly ? base64_decode($bundle['data']) : file_get_contents($package.'/data.json.gz')), true, 512, JSON_THROW_ON_ERROR);
+$alarmIds = \Illuminate\Support\Facades\DB::table('maintenance_import_records')->where('source_table', 'core_alarmcode')->pluck('target_id', 'source_id');
+$alarms = \Illuminate\Support\Facades\DB::table('alarm_codes')->whereIn('id', $alarmIds->values())->get()->keyBy('id');
+if ($alarms->count() !== count($source['tables']['core_alarmcode'])) throw new RuntimeException('Source alarm entries were merged or lost.');
+foreach ($source['tables']['core_alarmcode'] as $row) {
+    $alarm = $alarms->get($alarmIds->get($row['id']));
+    foreach (['code', 'key', 'name_en', 'name_ar', 'section', 'source_page'] as $column) {
+        if (! $alarm || (string) $alarm->$column !== (string) $row[$column]) throw new RuntimeException('Alarm '.$row['id'].' changed its '.$column.'.');
+    }
+}
 foreach (\App\Models\MaintenanceReport::all() as $report) {
     if ($dataOnly) {
         if ($report->technician_pdf_path || $report->approved_pdf_path || ! $report->technician_snapshot['files_deferred']) throw new RuntimeException('Data-only import claimed unavailable report files.');
@@ -67,8 +82,8 @@ $counts = [];
 foreach (['equipment_units', 'equipment_models', 'documents', 'document_assignments', 'alarm_codes', 'maintenance_reports', 'maintenance_import_visits', 'maintenance_contract_scheduled_visits', 'maintenance_notifications'] as $table) {
     $counts[$table] = \Illuminate\Support\Facades\DB::table($table)->count();
 }
-$checks = ['existing customers unchanged', 'same-name customers kept separate', 'idempotent rerun', 'original approval states retained', 'no historical notifications replayed'];
+$checks = ['existing customers unchanged', 'same-name customers kept separate', 'idempotent rerun', 'original approval states retained', 'no historical notifications replayed', 'distinct alarm sections/pages and source text retained'];
 $checks = array_merge($checks, $dataOnly ? ['bundled seeder needs no package/environment paths', 'no binary files read or written', 'document pages retained in database', 'missing files explicitly deferred'] : ['8 original PDF hashes preserved', 'approved PDFs contain original pages']);
-$result = ['ok' => true, 'data_only' => $dataOnly, 'counts' => $counts, 'checks' => $checks, 'first' => $first, 'second' => $second, 'artifacts' => getenv('SWETE_BROWSER_TEST_ROOT')];
+$result = ['ok' => true, 'connection' => $connection, 'data_only' => $dataOnly, 'counts' => $counts, 'checks' => $checks, 'first' => $first, 'second' => $second, 'artifacts' => getenv('SWETE_BROWSER_TEST_ROOT')];
 file_put_contents(getenv('SWETE_BROWSER_TEST_ROOT').'/result.json', json_encode($result, JSON_PRETTY_PRINT));
 echo json_encode($result).PHP_EOL;

@@ -70,7 +70,9 @@ php artisan migrate --force
 php -d memory_limit=512M artisan db:seed --class=MaintenanceBackupSeeder --force
 ```
 
-The three maintenance workflow migrations described in [maintenance-field-workflow.md](maintenance-field-workflow.md), the existing equipment/document/alarm migrations and `2026_11_26_110001_create_maintenance_import_records.php` are prerequisites. The seed is explicit opt-in and is not added to the default `DatabaseSeeder`. Old `MAINTENANCE_IMPORT_PACKAGE` and `MAINTENANCE_IMPORT_MAPPING` variables are not used by this seeder.
+The three maintenance workflow migrations described in [maintenance-field-workflow.md](maintenance-field-workflow.md), the existing equipment/document/alarm migrations, `2026_11_26_110001_create_maintenance_import_records.php` and `2026_11_26_120001_include_manual_location_in_alarm_identity.php` are prerequisites. The seed is explicit opt-in and is not added to the default `DatabaseSeeder`. Old `MAINTENANCE_IMPORT_PACKAGE` and `MAINTENANCE_IMPORT_MAPPING` variables are not used by this seeder.
+
+The alarm-location migration preserves existing records and adds manual section/page to the unique key and import identity. Source alarms 2689 and 2730 both use `P1` with names differing only by letter case, but refer to different equipment capacities on pages 97 and 100. MySQL's case-insensitive collation caused the old identity to confuse them. If an earlier seed stopped with `Review map.alarm_codes.2730; existing section differs`, deploy this fix, migrate and rerun the same seeder. Do not delete alarms or change their source text. A rollback to the narrower index is refused when distinct location variants would conflict.
 
 This repository serves its project root directly. Ship the included deny-all `.htaccess` files in `storage/app/maintenance-private` and `storage/app/maintenance-pdf-temp` when using Apache. On servers that do not honor `.htaccess`, deny HTTP access to both directories in the server configuration, or set `MAINTENANCE_PRIVATE_ROOT` to a persistent directory outside every web document root (and deny the PDF temporary directory). Downloads must use the authenticated application routes, not direct storage URLs.
 
@@ -84,7 +86,7 @@ php -d memory_limit=512M artisan maintenance:import-backup "/private/backup-2026
 
 That command is not a subsequent attachment restoration step: a completed data-only import is deliberately treated as already imported. Document binaries can be uploaded later through the document editor.
 
-Before production execution, verify a restorable database/file backup and test on the production database engine. Automated/rehearsal checks here used SQLite, not the live database or its external file-storage service. No production migration, import or email was executed during development.
+Before production execution, verify a restorable database/file backup and test on the production database engine. Automated/rehearsal checks here used SQLite and a separate temporary MariaDB 10.4 server with `utf8mb4_unicode_ci`, not the live database or its external file-storage service. No production migration, import or email was executed during development.
 
 ## Reproduction and validation
 
@@ -105,6 +107,7 @@ The bundler validates hashes and refuses to overwrite an existing output file.
 Checks completed against the actual supplied package:
 
 - All 897 units, 230 models, 292 documents, 1,404 assignments, 2,435 alarms, 8 reports and 25 historical visits imported.
+- The full bundled import and repeat seeding also pass on MariaDB with case-insensitive comparison; the two `P1` manual variants remain separate. Regression tests cover existing-row preservation during the index migration, refusal of a lossy rollback, duplicate protection and rejection of conflicting instructions at the same manual location.
 - Data-only import needs no external files, writes no files and retains all 6,857 indexed manual pages in the database. Approved reports retain their original state with missing files explicitly deferred.
 - Separate full-file regression coverage preserves original PDFs; changing to the bundled seeder after a completed full import does not erase them.
 - Existing customer rows remain byte-for-byte equal in the rehearsal; the two same-name customers are separate new records.
@@ -120,3 +123,5 @@ python -B tests/maintenance/test_package_parser.py
 ```
 
 `tests/maintenance/rehearse.php` uses the actual source rows. For data-only rehearsal, set `MAINTENANCE_REHEARSAL_DATA_ONLY=1` and `SWETE_BROWSER_TEST_ROOT` to a new directory under the system temporary directory; no external package is needed. For the older full-file rehearsal, omit that flag and set `MAINTENANCE_IMPORT_PACKAGE` to the private package directory. Its bootstrap forcibly isolates SQLite, sessions, logs, mail and both storage disks. It refuses an existing test database. It uses only names/emails/customer metadata from the repository snapshot, never its credentials. Results are written inside the temporary rehearsal directory.
+
+To exercise MySQL/MariaDB, first initialize a disposable local server with its datadir at `SWETE_BROWSER_TEST_ROOT/mysql-data`, listening only on `127.0.0.1` at a dedicated port other than 3306. Set `MAINTENANCE_REHEARSAL_MYSQL_PORT` and `MAINTENANCE_REHEARSAL_MYSQL_PASSWORD` for its temporary root account. The rehearsal checks the server's actual `@@datadir` before any write, creates a new `swete_maintenance_rehearsal` database, and refuses reuse of an existing database. It never connects using application credentials or drops a database. Stop the temporary server after the run.

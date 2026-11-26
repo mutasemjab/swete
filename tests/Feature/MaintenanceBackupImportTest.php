@@ -92,6 +92,82 @@ class MaintenanceBackupImportTest extends TestCase
         return $import;
     }
 
+    private function sourceAlarm(array $overrides = []): array
+    {
+        return $overrides + ['id' => '700', 'controller_id' => '13', 'source_document_id' => '400',
+            'code' => 'P1', 'key' => 'P1', 'section' => '25/30 kW module', 'source_page' => '97',
+            'name_en' => 'Low pressure protection system A', 'name_ar' => '',
+            'causes_en' => '', 'causes_ar' => '', 'checks_en' => '', 'checks_ar' => '',
+            'effect_en' => '', 'effect_ar' => '', 'action_en' => '', 'action_ar' => '', 'reset_en' => '', 'reset_ar' => ''];
+    }
+
+    public function test_same_alarm_code_and_name_are_kept_separate_for_different_manual_sections_or_pages(): void
+    {
+        $this->source['tables']['core_alarmcode'] = [
+            $this->sourceAlarm(),
+            $this->sourceAlarm(['id' => '701', 'section' => '55/60/65 kW module']),
+            $this->sourceAlarm(['id' => '702', 'source_page' => '100']),
+        ];
+        $import = $this->embeddedImporter();
+        $import->apply();
+        $before = DB::table('alarm_codes')->orderBy('id')->get()->toJson();
+        $this->assertTrue($import->apply()['already_imported']);
+        $this->assertSame($before, DB::table('alarm_codes')->orderBy('id')->get()->toJson());
+        $this->assertSame(3, DB::table('alarm_codes')->count());
+        $this->assertSame(3, DB::table('maintenance_import_records')->where('source_table', 'core_alarmcode')->distinct()->count('target_id'));
+        foreach ($this->source['tables']['core_alarmcode'] as $row) {
+            $this->assertDatabaseHas('alarm_codes', ['code' => $row['code'], 'name_en' => $row['name_en'],
+                'section' => $row['section'], 'source_page' => $row['source_page']]);
+        }
+        $duplicate = (array) DB::table('alarm_codes')->first();
+        unset($duplicate['id']);
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::table('alarm_codes')->insert($duplicate);
+    }
+
+    public function test_conflicting_alarm_content_at_the_same_manual_location_still_aborts_the_import(): void
+    {
+        $this->source['tables']['core_alarmcode'] = [
+            $this->sourceAlarm(),
+            $this->sourceAlarm(['id' => '701', 'action_en' => 'Different source instruction']),
+        ];
+        try {
+            $this->embeddedImporter()->apply();
+            $this->fail('Conflicting alarm instructions must not be silently merged or replaced.');
+        } catch (\RuntimeException $error) {
+            $this->assertStringContainsString('existing action_en differs', $error->getMessage());
+        }
+        $this->assertSame(0, DB::table('alarm_codes')->count());
+        $this->assertSame(0, DB::table('maintenance_import_runs')->count());
+        $this->assertSame(0, DB::table('customers')->count());
+    }
+
+    public function test_alarm_location_migration_preserves_existing_entries_and_refuses_lossy_rollback(): void
+    {
+        $migration = require database_path('migrations/2026_11_26_120001_include_manual_location_in_alarm_identity.php');
+        $migration->down(); // Exercise the upgrade of an already populated old schema.
+        $this->source['tables']['core_alarmcode'] = [$this->sourceAlarm()];
+        $this->embeddedImporter()->apply();
+        $before = (array) DB::table('alarm_codes')->first();
+        $migration->up();
+        $this->assertSame($before, (array) DB::table('alarm_codes')->first());
+        $variant = $before;
+        unset($variant['id']);
+        $variant['section'] = '55/60/65 kW module';
+        $variant['source_page'] = 100;
+        DB::table('alarm_codes')->insert($variant);
+        try {
+            $migration->down();
+            $this->fail('Rollback must refuse to remove legitimate manual variants.');
+        } catch (\Illuminate\Database\QueryException $error) {
+            $this->assertSame(2, DB::table('alarm_codes')->count());
+            $this->assertSame($before, (array) DB::table('alarm_codes')->where('id', $before['id'])->first());
+        }
+        // The current index must still reject an identical duplicate after refused rollback.
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::table('alarm_codes')->insert($variant);
+    }
+
     public function test_data_only_import_needs_no_external_files_and_keeps_document_text_in_database(): void
     {
         unlink($this->package.'/files/2026/manual.pdf');
